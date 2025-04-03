@@ -83,13 +83,15 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Create a debounced version of updateServerLocation using ref
+  // to avoid creating new functions on each render
   const updateServerLocation = async (location: { latitude: number; longitude: number }) => {
+    // No need to show success toast every time - it's now handled in the service
+    // with proper throttling
     try {
       await locationService.updateServerLocation(location);
-      toast({
-        title: "Location synced",
-        description: "Your location has been synced with the server.",
-      });
+      // We no longer show toasts here since the service handles it internally
+      // and applies throttling
     } catch (error) {
       console.error("Error updating server location:", error);
       toast({

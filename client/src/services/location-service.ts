@@ -1,5 +1,19 @@
 import { apiRequest } from "@/lib/queryClient";
 
+// Function to debounce function calls
+function debounce(func: Function, wait: number) {
+  let timeout: number | null = null;
+  return function (...args: any[]) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = window.setTimeout(() => {
+      timeout = null;
+      func(...args);
+    }, wait);
+  };
+}
+
 class LocationService {
   private static instance: LocationService;
   private currentLocation: { latitude: number; longitude: number } | null = null;
@@ -8,6 +22,8 @@ class LocationService {
   private errorListeners: Array<(isError: boolean) => void> = [];
   private intervalId: number | null = null;
   private initialLocationRequested: boolean = false;
+  private lastServerUpdateTime: number = 0;
+  private updateDelay: number = 5000; // Minimum time between server updates (5 seconds)
 
   // Private constructor for singleton
   private constructor() {}
@@ -81,8 +97,8 @@ class LocationService {
     }
   }
 
-  // Update location
-  public async updateLocation(): Promise<void> {
+  // Debounced update location private implementation
+  private debouncedLocationUpdate = debounce(async () => {
     if (!navigator.geolocation) {
       this.isError = true;
       this.notifyErrorListeners();
@@ -101,24 +117,24 @@ class LocationService {
       this.notifyLocationListeners();
       this.notifyErrorListeners();
       
+      // Now we can update the server with the new location, which is already throttled
+      if (Date.now() - this.lastServerUpdateTime > this.updateDelay) {
+        this.updateServerLocation(location);
+      }
+      
       console.log("Location updated successfully:", this.currentLocation);
     } catch (error) {
       console.error("Failed to update location:", error);
       
-      // Use a default location for testing purposes
-      // New York City coordinates
-      this.currentLocation = {
-        latitude: 40.7128,
-        longitude: -74.0060
-      };
-      
-      // Still set isError to true so the user knows there was a problem
+      // Handle geocoding error gracefully - don't use fallback location in production
       this.isError = true;
-      this.notifyLocationListeners();
       this.notifyErrorListeners();
-      
-      console.log("Using fallback location for debugging:", this.currentLocation);
     }
+  }, 1000); // Debounce location updates by 1 second
+  
+  // Public update location method that triggers the debounced implementation
+  public async updateLocation(): Promise<void> {
+    this.debouncedLocationUpdate();
   }
 
   // Get current position from browser API
@@ -136,20 +152,32 @@ class LocationService {
     });
   }
 
-  // Update location on server
-  public async updateServerLocation(
-    location: { latitude: number; longitude: number }
-  ): Promise<void> {
+  // Create a debounced server update function in the constructor
+  private debouncedServerUpdate = debounce(async (location: { latitude: number; longitude: number }) => {
     try {
       const response = await apiRequest("POST", "/api/users/location", location);
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }
       console.log("Location updated successfully:", location);
+      this.lastServerUpdateTime = Date.now();
     } catch (error) {
       console.error("Failed to update server location:", error);
       // We'll just log the error but not propagate it upwards
       // This prevents the app from crashing on location update failures
+    }
+  }, 1000); // 1 second debounce
+  
+  // Update location on server with throttling
+  public async updateServerLocation(
+    location: { latitude: number; longitude: number }
+  ): Promise<void> {
+    const now = Date.now();
+    // Check if enough time has passed since the last update
+    if (now - this.lastServerUpdateTime > this.updateDelay) {
+      this.debouncedServerUpdate(location);
+    } else {
+      console.log("Skipping server update - too soon since last update");
     }
   }
 
