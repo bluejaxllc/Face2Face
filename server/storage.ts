@@ -13,7 +13,7 @@ import {
   type Notification,
   type InsertNotification,
 } from "@shared/schema";
-import { eq, or, and, desc, asc, sql } from "drizzle-orm";
+import { eq, or, and, desc, asc, sql, SQL } from "drizzle-orm";
 import { db } from "./db";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -164,13 +164,16 @@ export class DatabaseStorage implements IStorage {
       datingPref = preferences.datingPreference;
     }
     
-    // Always allow "all" preference or matching specific preference
-    conditions.push(
-      or(
-        eq(users.datingPreference, 'all'),
-        eq(users.datingPreference, datingPref)
-      )
+    // Create condition for dating preference
+    const datingPrefCondition = or(
+      eq(users.datingPreference, 'all'),
+      eq(users.datingPreference, datingPref)
     );
+    
+    // Add to conditions
+    if (datingPrefCondition) {
+      conditions.push(datingPrefCondition);
+    }
     
     // Execute the query with all conditions
     // Make sure we have at least one condition

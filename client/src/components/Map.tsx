@@ -324,12 +324,14 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
           zoom={14}
           style={{ height: '100%', width: '100%' }}
           zoomControl={false}
+          className="leaflet-container"
           ref={mapRef}
           whenReady={() => console.log('Map is ready')}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            className="leaflet-tile-pane"
           />
           
           <ZoomControl position="bottomright" />
