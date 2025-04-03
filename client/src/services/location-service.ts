@@ -141,9 +141,15 @@ class LocationService {
     location: { latitude: number; longitude: number }
   ): Promise<void> {
     try {
-      await apiRequest("POST", "/api/users/location", location);
+      const response = await apiRequest("POST", "/api/users/location", location);
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      console.log("Location updated successfully:", location);
     } catch (error) {
       console.error("Failed to update server location:", error);
+      // We'll just log the error but not propagate it upwards
+      // This prevents the app from crashing on location update failures
     }
   }
 

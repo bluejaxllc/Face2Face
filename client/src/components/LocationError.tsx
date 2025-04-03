@@ -58,6 +58,31 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
     }
   ];
   
+  const devices = [
+    {
+      name: "iPhone",
+      instructions: [
+        "Open Settings app",
+        "Scroll down and tap Safari (or your browser)",
+        "Tap 'Location'",
+        "Select 'While Using the App' or 'Ask Next Time'",
+        "Return to the app and refresh"
+      ]
+    },
+    {
+      name: "Android",
+      instructions: [
+        "Open Settings app",
+        "Tap 'Apps' or 'Applications'",
+        "Find and tap your browser",
+        "Tap 'Permissions'",
+        "Tap 'Location'",
+        "Select 'Allow only while using the app'",
+        "Return to the app and refresh"
+      ]
+    }
+  ];
+  
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-2 border-primary/20">
       <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
@@ -86,36 +111,72 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
         <div className="space-y-1">
           <h4 className="text-lg font-semibold flex items-center gap-2">
             <Info className="h-5 w-5 text-primary" /> 
-            Browser instructions
+            Enable location access
           </h4>
           <p className="text-sm text-muted-foreground">
-            Follow these steps for your browser:
+            Select your device type and follow the instructions:
           </p>
         </div>
         
-        <Tabs defaultValue="Chrome" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full">
-            {browsers.map(browser => (
-              <TabsTrigger key={browser.name} value={browser.name}>
-                {browser.name}
-              </TabsTrigger>
-            ))}
+        <Tabs defaultValue="desktop" className="w-full">
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="desktop">Desktop Browser</TabsTrigger>
+            <TabsTrigger value="mobile">Mobile Device</TabsTrigger>
           </TabsList>
           
-          {browsers.map(browser => (
-            <TabsContent key={browser.name} value={browser.name} className="mt-2">
-              <ol className="space-y-2 pl-0">
-                {browser.instructions.map((instruction, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-6 w-6 flex items-center justify-center mt-0.5">
-                      {index + 1}
-                    </div>
-                    <span className="text-sm">{instruction}</span>
-                  </li>
+          <TabsContent value="desktop">
+            <Tabs defaultValue="Chrome" className="w-full mt-2">
+              <TabsList className="grid grid-cols-3 w-full">
+                {browsers.map(browser => (
+                  <TabsTrigger key={browser.name} value={browser.name}>
+                    {browser.name}
+                  </TabsTrigger>
                 ))}
-              </ol>
-            </TabsContent>
-          ))}
+              </TabsList>
+              
+              {browsers.map(browser => (
+                <TabsContent key={browser.name} value={browser.name} className="mt-2">
+                  <ol className="space-y-2 pl-0">
+                    {browser.instructions.map((instruction, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-6 w-6 flex items-center justify-center mt-0.5">
+                          {index + 1}
+                        </div>
+                        <span className="text-sm">{instruction}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </TabsContent>
+          
+          <TabsContent value="mobile">
+            <Tabs defaultValue="iPhone" className="w-full mt-2">
+              <TabsList className="grid grid-cols-2 w-full">
+                {devices.map(device => (
+                  <TabsTrigger key={device.name} value={device.name}>
+                    {device.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              {devices.map(device => (
+                <TabsContent key={device.name} value={device.name} className="mt-2">
+                  <ol className="space-y-2 pl-0">
+                    {device.instructions.map((instruction, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <div className="flex-shrink-0 bg-primary/10 text-primary rounded-full h-6 w-6 flex items-center justify-center mt-0.5">
+                          {index + 1}
+                        </div>
+                        <span className="text-sm">{instruction}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </TabsContent>
         </Tabs>
       </CardContent>
       

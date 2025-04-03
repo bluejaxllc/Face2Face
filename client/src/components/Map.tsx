@@ -344,17 +344,32 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
   
   // Handler for filter changes
   const handleFilterChange = useCallback((options: FilterOptions) => {
-    // Update filter options
-    setFilterOptions(options);
-    
-    // Sync UI with filter options
-    setShowBump(options.showBump);
-    setShowGrind(options.showGrind);
-    setRadius(options.radius);
-    
-    // In a real implementation, we would update the API query with these filters
-    console.log('Filter options updated:', options);
-  }, []);
+    try {
+      // Update filter options
+      setFilterOptions(options);
+      
+      // Sync UI with filter options
+      setShowBump(options.showBump);
+      setShowGrind(options.showGrind);
+      setRadius(options.radius);
+      
+      // Show success toast
+      toast({
+        title: "Filters updated",
+        description: "Your filter settings have been applied",
+      });
+      
+      // In a real implementation, we would update the API query with these filters
+      console.log('Filter options updated:', options);
+    } catch (error) {
+      console.error("Failed to update settings:", error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update filter settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
   
   // Reset the map if it doesn't load within 5 seconds
   useEffect(() => {

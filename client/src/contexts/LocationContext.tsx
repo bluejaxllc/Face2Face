@@ -60,16 +60,52 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   
   // Wrapper functions to use the service
   const updateLocation = async () => {
-    setIsLoading(true);
-    await locationService.updateLocation();
+    try {
+      setIsLoading(true);
+      await locationService.updateLocation();
+      
+      // If we successfully got a location, show success toast
+      if (locationService.getLocation()) {
+        toast({
+          title: "Location updated",
+          description: "Your current location has been updated successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating location:", error);
+      toast({
+        title: "Location update failed",
+        description: "Failed to update your location. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const updateServerLocation = async (location: { latitude: number; longitude: number }) => {
-    await locationService.updateServerLocation(location);
+    try {
+      await locationService.updateServerLocation(location);
+      toast({
+        title: "Location synced",
+        description: "Your location has been synced with the server.",
+      });
+    } catch (error) {
+      console.error("Error updating server location:", error);
+      toast({
+        title: "Server sync failed",
+        description: "Failed to sync your location with the server. Your experience may be limited.",
+        variant: "destructive",
+      });
+    }
   };
   
   const resetError = () => {
     locationService.resetError();
+    toast({
+      title: "Trying again",
+      description: "Attempting to reconnect to location services.",
+    });
   };
 
   const contextValue = {
