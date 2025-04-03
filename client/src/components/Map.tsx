@@ -4,6 +4,7 @@ import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
+import FilterDrawer, { FilterOptions } from "./FilterDrawer";
 import { calculateDistance } from "@/lib/distance";
 import { Locate, Plus, Minus } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -91,6 +92,16 @@ function Map() {
   const [showBump, setShowBump] = useState(true);
   const [showGrind, setShowGrind] = useState(false);
   const [radius, setRadius] = useState(50);
+  
+  // Advanced filter options
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    datingPreference: 'any',
+    showBump,
+    showGrind,
+    ageRange: [18, 50],
+    radius,
+    minRating: 1
+  });
   
   // Get isActive directly from user state
   const isActive = user?.isActive ?? true;
@@ -192,12 +203,19 @@ function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => voi
   return null;
 }
 
-// Filter users based on category
+// Filter users based on advanced filter options
 const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
-  if (showBump && showGrind) return true;
-  if (showBump && nearbyUser.category === "bump") return true;
-  if (showGrind && nearbyUser.category === "grind") return true;
-  return false;
+  // Filter by category
+  if (!filterOptions.showBump && nearbyUser.category === "bump") return false;
+  if (!filterOptions.showGrind && nearbyUser.category === "grind") return false;
+  
+  // Filter by user rating
+  if (nearbyUser.selfRating < filterOptions.minRating) return false;
+  
+  // Additional filters would be applied here in a real implementation
+  // e.g., dating preferences, age range, etc.
+  
+  return true;
 });
 
   // Handle status toggle - memoize to prevent recreation on every render
@@ -313,6 +331,30 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
   
   // Key to force map rerender if tiles don't load properly
   const [mapKey, setMapKey] = useState(Date.now());
+  
+  // Update filter synchronization
+  useEffect(() => {
+    setFilterOptions(prev => ({
+      ...prev,
+      showBump,
+      showGrind,
+      radius
+    }));
+  }, [showBump, showGrind, radius]);
+  
+  // Handler for filter changes
+  const handleFilterChange = useCallback((options: FilterOptions) => {
+    // Update filter options
+    setFilterOptions(options);
+    
+    // Sync UI with filter options
+    setShowBump(options.showBump);
+    setShowGrind(options.showGrind);
+    setRadius(options.radius);
+    
+    // In a real implementation, we would update the API query with these filters
+    console.log('Filter options updated:', options);
+  }, []);
   
   // Reset the map if it doesn't load within 5 seconds
   useEffect(() => {
@@ -502,6 +544,14 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
             ))}
           </MarkerClusterGroup>
         </MapContainer>
+        
+        {/* Filter drawer */}
+        <div className="absolute bottom-24 left-4 z-[1000]">
+          <FilterDrawer
+            options={filterOptions}
+            onChange={handleFilterChange}
+          />
+        </div>
         
         {/* Current location button */}
         <button 
