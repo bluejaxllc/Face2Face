@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import Profile from "@/pages/Profile";
 import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
+import { Loader2 } from "lucide-react";
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -19,30 +21,55 @@ function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
   
   return (
     <Switch>
-      <Route path="/" component={() => (
-        isAuthenticated ? <MapView /> : <Register />
-      )} />
+      <Route path="/">
+        {isAuthenticated ? <MapView /> : <Register />}
+      </Route>
       <Route path="/register" component={Register} />
-      <Route path="/map" component={() => <ProtectedRoute component={MapView} />} />
-      <Route path="/messages" component={() => <ProtectedRoute component={Messages} />} />
-      <Route path="/profile" component={() => <ProtectedRoute component={Profile} />} />
+      <Route path="/map">
+        <ProtectedRoute component={MapView} />
+      </Route>
+      <Route path="/messages">
+        <ProtectedRoute component={Messages} />
+      </Route>
+      <Route path="/profile">
+        <ProtectedRoute component={Profile} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [_, navigate] = useLocation();
+  
+  // Use useEffect to navigate after render
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate("/register");
+    }
+  }, [isLoading, isAuthenticated, navigate]);
 
+  // Show loading spinner or render the component
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
   if (!isAuthenticated) {
-    navigate("/register");
-    return null;
+    return null; // Will be redirected by useEffect
   }
 
   return <Component />;
