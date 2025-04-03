@@ -35,17 +35,9 @@ export default function Map() {
   const [showBump, setShowBump] = useState(true);
   const [showGrind, setShowGrind] = useState(false);
   const [radius, setRadius] = useState(50);
-  // Initialize isActive with a controlled default
-  const [isActive, setIsActive] = useState(() => {
-    return user?.isActive !== undefined ? user.isActive : true;
-  });
   
-  // Update isActive when user changes
-  useEffect(() => {
-    if (user?.isActive !== undefined) {
-      setIsActive(user.isActive);
-    }
-  }, [user?.isActive]);
+  // Get isActive directly from user state without additional local state
+  const isActive = user?.isActive ?? true;
 
   // Fetch nearby users
   const { data: nearbyUsers = [] } = useQuery<User[]>({
@@ -62,12 +54,14 @@ export default function Map() {
     return false;
   });
 
-  // Handle status toggle
-  const handleStatusToggle = async (checked: boolean) => {
-    setIsActive(checked);
-    
+  // Handle status toggle - memoize to prevent recreation on every render
+  const handleStatusToggle = useCallback(async (checked: boolean) => {
     try {
       await updateProfile({ isActive: checked });
+      toast({
+        title: "Status updated",
+        description: `You are now ${checked ? 'active' : 'inactive'}`,
+      });
     } catch (error) {
       console.error("Failed to update status:", error);
       toast({
@@ -76,7 +70,7 @@ export default function Map() {
         variant: "destructive",
       });
     }
-  };
+  }, [updateProfile, toast]);
 
   // Handle bump click (category toggle)
   const handleBumpClick = () => {
@@ -187,14 +181,13 @@ export default function Map() {
         <span className={`text-sm font-medium ${isActive ? "text-status-active" : "text-status-inactive"}`}>
           {isActive ? "Active" : "Inactive"}
         </span>
-        {/* Memoize the Switch component to prevent unnecessary rerenders */}
-        {typeof isActive === 'boolean' && (
-          <Switch 
-            checked={isActive} 
-            onCheckedChange={handleStatusToggle} 
-            aria-label="Active status"
-          />
-        )}
+        {/* Use a key to ensure proper reconciliation */}
+        <Switch 
+          key="active-status-switch"
+          checked={isActive} 
+          onCheckedChange={handleStatusToggle} 
+          aria-label="Active status"
+        />
       </div>
       
       {/* Category toggle */}

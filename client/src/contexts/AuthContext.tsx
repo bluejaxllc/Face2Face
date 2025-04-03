@@ -46,18 +46,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
-  const { isLoading, refetch } = useQuery<User | null>({
+  const { isLoading, refetch, data: userData } = useQuery<User | null>({
     queryKey: ["/api/auth/me"],
-    onSuccess: (data) => {
-      if (data) {
-        setUser(data);
-      }
-    },
-    onError: () => {
-      setUser(null);
-    },
     retry: false,
+    staleTime: 0, // Always fetch from network
   });
+  
+  useEffect(() => {
+    if (userData) {
+      setUser(userData);
+    }
+  }, [userData]);
 
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
@@ -66,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (data) => {
       setUser(data);
+      refetch(); // Force a refetch of the user data
       toast({
         title: "Login successful",
         description: `Welcome back, ${data.firstName}!`,

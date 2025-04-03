@@ -68,7 +68,11 @@ export default function Register() {
       const { confirmPassword, ...registerData } = values;
       
       await register(registerData);
-      navigate("/map");
+      
+      // Give the auth state time to update before navigating
+      setTimeout(() => {
+        navigate("/map");
+      }, 500);
     } catch (error) {
       console.error("Registration error:", error);
       // Error is handled by the context
@@ -78,7 +82,11 @@ export default function Register() {
   const onLoginSubmit = async (values: LoginFormValues) => {
     try {
       await login(values.username, values.password);
-      navigate("/map");
+      
+      // Give the auth state time to update before navigating
+      setTimeout(() => {
+        navigate("/map");
+      }, 500);
     } catch (error) {
       console.error("Login error:", error);
       // Error is handled by the context
