@@ -7,13 +7,28 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Get base API URL for deployment
+function getApiBaseUrl() {
+  // When deployed, use the full domain
+  // In development, use relative URLs
+  return window.location.hostname.includes('.repl.co') 
+    ? `${window.location.protocol}//${window.location.host}`
+    : '';
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
   try {
-    const res = await fetch(url, {
+    // Ensure URL is relative to current domain when deployed
+    const baseUrl = getApiBaseUrl();
+    const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
+    
+    console.log(`Making API request to: ${fullUrl}`);
+    
+    const res = await fetch(fullUrl, {
       method,
       headers: data ? { "Content-Type": "application/json" } : {},
       body: data ? JSON.stringify(data) : undefined,
@@ -23,7 +38,7 @@ export async function apiRequest(
     // Even if response is not ok, we still return it instead of throwing
     // This allows callers to handle different status codes appropriately
     if (!res.ok) {
-      console.warn(`API request failed: ${method} ${url} - Status: ${res.status}`);
+      console.warn(`API request failed: ${method} ${fullUrl} - Status: ${res.status}`);
     }
     
     return res;
@@ -50,7 +65,14 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      const res = await fetch(queryKey[0] as string, {
+      // Use the same URL handling logic as apiRequest
+      const baseUrl = getApiBaseUrl();
+      const url = queryKey[0] as string;
+      const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
+      
+      console.log(`Making query request to: ${fullUrl}`);
+      
+      const res = await fetch(fullUrl, {
         credentials: "include",
       });
 
@@ -62,7 +84,7 @@ export const getQueryFn: <T>(options: {
         const text = await res.text();
         const message = text || res.statusText;
         
-        console.warn(`Query failed for ${queryKey[0]}: ${res.status} - ${message}`);
+        console.warn(`Query failed for ${fullUrl}: ${res.status} - ${message}`);
         
         if (res.status === 500) {
           throw new Error("Server error. Please try again later.");

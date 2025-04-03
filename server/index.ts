@@ -3,6 +3,7 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import cors from "cors";
 
 // Set a secure SESSION_SECRET environment variable
 if (!process.env.SESSION_SECRET) {
@@ -13,6 +14,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Enable CORS for all routes
+app.use(cors({
+  origin: true, // Allow request from any origin in development
+  credentials: true, // Allow cookies
+}));
+
 // Set up session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -20,10 +27,10 @@ app.use(session({
   saveUninitialized: false,
   store: storage.sessionStore,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" ? true : false,
     maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
     httpOnly: true,
-    sameSite: "lax"
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" // More secure for development
   }
 }));
 
