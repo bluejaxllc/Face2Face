@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Settings } from "lucide-react";
 import SettingsModal from "./SettingsModal";
@@ -10,6 +10,7 @@ export default function Header() {
   const { user } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [, navigate] = useLocation();
   
   const getInitials = (firstName?: string, lastName?: string) => {
     if (!firstName || !lastName) return "U";
@@ -47,14 +48,12 @@ export default function Header() {
           </button>
         </div>
         
-        <Link href="/profile">
-          <a className="cursor-pointer">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="" alt={user?.username || "User"} />
-              <AvatarFallback>{getInitials(user?.firstName, user?.lastName)}</AvatarFallback>
-            </Avatar>
-          </a>
-        </Link>
+        <div onClick={() => navigate('/profile')} className="cursor-pointer">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="" alt={user?.username || "User"} />
+            <AvatarFallback>{getInitials(user?.firstName, user?.lastName)}</AvatarFallback>
+          </Avatar>
+        </div>
       </div>
       
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}

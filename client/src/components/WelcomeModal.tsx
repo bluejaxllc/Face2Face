@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MapPin, RotateCw, Heart } from "lucide-react";
 
@@ -11,6 +11,10 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+        <div className="sr-only">
+          <DialogTitle>Welcome to Bump & Grind</DialogTitle>
+          <DialogDescription>Meet people in real life, your way</DialogDescription>
+        </div>
         <div className="bg-gradient-to-r from-secondary to-primary p-6 text-center">
           <h2 className="text-2xl font-bold text-white">Welcome to Bump & Grind</h2>
           <p className="text-white text-opacity-90 mt-2">Meet people in real life, your way</p>

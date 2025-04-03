@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -18,7 +18,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   const [datingPreference, setDatingPreference] = useState(user?.datingPreference || "all");
   const [ageRange, setAgeRange] = useState([18, 35]);
   const [category, setCategory] = useState(user?.category || "bump");
-  const [showOnMap, setShowOnMap] = useState(user?.isActive || true);
+  const [showOnMap, setShowOnMap] = useState(user?.isActive !== false);
   const [receiveNotifications, setReceiveNotifications] = useState(true);
 
   const handleSave = async () => {
@@ -39,6 +39,9 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-gray-800">Preferences</DialogTitle>
+          <DialogDescription>
+            Customize your profile settings and preferences
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-2">

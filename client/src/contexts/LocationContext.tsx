@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -115,10 +115,19 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setIsError(false);
   };
 
+  // Initialize with a ref to prevent effect dependency issues
+  const initialLocationRequested = useRef(false);
+  
+  // Handle initial location request only once
   useEffect(() => {
-    // Initial location request
-    updateLocation();
-    
+    if (!initialLocationRequested.current) {
+      initialLocationRequested.current = true;
+      updateLocation();
+    }
+  }, []);
+  
+  // Set up periodic location updates independent of the initial request
+  useEffect(() => {
     // Set up periodic location updates if no error
     const intervalId = setInterval(() => {
       // Only try to update if there's no existing error
@@ -126,7 +135,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       if (!isError) {
         updateLocation();
       }
-    }, 60000); // Update every minute
+    }, 300000); // Update every 5 minutes to reduce server load
     
     return () => clearInterval(intervalId);
   }, [isError]);

@@ -159,9 +159,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateProfileMutation.mutateAsync(profileData);
   };
 
+  // Run refetch only once when component mounts
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    // No need to refetch on mount as the initial query will handle it
+  }, []);
 
   return (
     <AuthContext.Provider

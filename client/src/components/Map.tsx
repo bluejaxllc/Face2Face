@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,7 +26,60 @@ interface User {
   selfRating: number;
 }
 
-export default function Map() {
+// Create memoized components to prevent unnecessary rerenders
+const StatusToggle = memo(({ 
+  isActive, 
+  onToggle 
+}: { 
+  isActive: boolean; 
+  onToggle: (checked: boolean) => void;
+}) => {
+  return (
+    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white py-2 px-4 rounded-full shadow-lg flex items-center space-x-2">
+      <span className={`text-sm font-medium ${isActive ? "text-green-600" : "text-gray-500"}`}>
+        {isActive ? "Active" : "Inactive"}
+      </span>
+      <Switch 
+        checked={isActive} 
+        onCheckedChange={onToggle} 
+        aria-label="Active status"
+      />
+    </div>
+  );
+});
+
+const CategoryToggle = memo(({
+  showBump,
+  showGrind,
+  onBumpClick,
+  onGrindClick
+}: {
+  showBump: boolean;
+  showGrind: boolean;
+  onBumpClick: () => void;
+  onGrindClick: () => void;
+}) => {
+  return (
+    <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg flex overflow-hidden">
+      <Button
+        variant={showBump ? "default" : "outline"}
+        className={`px-4 py-2 text-sm font-medium ${showBump ? "bg-secondary text-white" : ""}`}
+        onClick={onBumpClick}
+      >
+        Bump
+      </Button>
+      <Button
+        variant={showGrind ? "default" : "outline"}
+        className={`px-4 py-2 text-sm font-medium ${showGrind ? "bg-primary text-white" : ""}`}
+        onClick={onGrindClick}
+      >
+        Grind
+      </Button>
+    </div>
+  );
+});
+
+function Map() {
   const { currentLocation, updateLocation, isError } = useLocationContext();
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
@@ -34,16 +87,17 @@ export default function Map() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showBump, setShowBump] = useState(true);
   const [showGrind, setShowGrind] = useState(false);
-  const [radius, setRadius] = useState(50);
+  const [radius] = useState(50);
   
-  // Get isActive directly from user state without additional local state
+  // Get isActive directly from user state
   const isActive = user?.isActive ?? true;
 
   // Fetch nearby users
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", { radius, category: showBump && showGrind ? "both" : showBump ? "bump" : "grind" }],
     enabled: !!currentLocation && isActive,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 60000, // Refetch every 60 seconds to reduce load
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   // Filter users based on category
@@ -73,32 +127,32 @@ export default function Map() {
   }, [updateProfile, toast]);
 
   // Handle bump click (category toggle)
-  const handleBumpClick = () => {
+  const handleBumpClick = useCallback(() => {
     if (!showBump && !showGrind) {
       // At least one category must be selected
       setShowBump(true);
     } else {
       setShowBump(!showBump);
     }
-  };
+  }, [showBump, showGrind]);
 
   // Handle grind click (category toggle)
-  const handleGrindClick = () => {
+  const handleGrindClick = useCallback(() => {
     if (!showBump && !showGrind) {
       // At least one category must be selected
       setShowGrind(true);
     } else {
       setShowGrind(!showGrind);
     }
-  };
+  }, [showBump, showGrind]);
 
   // Handle user marker click
-  const handleMarkerClick = (user: User) => {
+  const handleMarkerClick = useCallback((user: User) => {
     setSelectedUser(user);
-  };
+  }, []);
 
   // Handle bump with another user
-  const handleBumpUser = async () => {
+  const handleBumpUser = useCallback(async () => {
     if (!selectedUser) return;
     
     try {
@@ -118,17 +172,15 @@ export default function Map() {
         variant: "destructive",
       });
     }
-  };
+  }, [selectedUser, toast]);
 
-  // Calculate user positions on the map (this is a simplified version for the MVP)
-  // Using useMemo to stabilize position calculations and prevent unnecessary rerenders
+  // Calculate user positions on the map
   const calculatePosition = useCallback((user: User, index: number) => {
     if (!currentLocation) return { top: "50%", left: "50%" };
     
-    // For the MVP, we'll use a consistent algorithm to position users
-    // This ensures stable positions using the user ID for consistency
-    const angle = ((user.id + index) * 45) % 360; // Using ID + index for stability
-    const distance = 20 + (user.id % 20); // User ID mod 20 plus base 20 for consistent distance 
+    // Use a consistent algorithm to position users
+    const angle = ((user.id + index) * 45) % 360;
+    const distance = 20 + (user.id % 20);
     
     const top = 50 + Math.sin(angle * Math.PI / 180) * distance;
     const left = 50 + Math.cos(angle * Math.PI / 180) * distance;
@@ -139,7 +191,7 @@ export default function Map() {
     };
   }, [currentLocation]);
 
-  // If there's a location error, show the error component instead of the map
+  // Handle location error
   if (isError) {
     return (
       <div className="location-error-container">
@@ -176,37 +228,19 @@ export default function Map() {
         </div>
       </div>
       
-      {/* Status toggle */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white py-2 px-4 rounded-full shadow-lg flex items-center space-x-2">
-        <span className={`text-sm font-medium ${isActive ? "text-status-active" : "text-status-inactive"}`}>
-          {isActive ? "Active" : "Inactive"}
-        </span>
-        {/* Use a key to ensure proper reconciliation */}
-        <Switch 
-          key="active-status-switch"
-          checked={isActive} 
-          onCheckedChange={handleStatusToggle} 
-          aria-label="Active status"
-        />
-      </div>
+      {/* Status toggle - using memoized component */}
+      <StatusToggle 
+        isActive={isActive}
+        onToggle={handleStatusToggle}
+      />
       
-      {/* Category toggle */}
-      <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg flex overflow-hidden">
-        <Button
-          variant={showBump ? "default" : "outline"}
-          className={`px-4 py-2 text-sm font-medium ${showBump ? "bg-secondary text-white" : ""}`}
-          onClick={handleBumpClick}
-        >
-          Bump
-        </Button>
-        <Button
-          variant={showGrind ? "default" : "outline"}
-          className={`px-4 py-2 text-sm font-medium ${showGrind ? "bg-primary text-white" : ""}`}
-          onClick={handleGrindClick}
-        >
-          Grind
-        </Button>
-      </div>
+      {/* Category toggle - using memoized component */}
+      <CategoryToggle 
+        showBump={showBump}
+        showGrind={showGrind} 
+        onBumpClick={handleBumpClick}
+        onGrindClick={handleGrindClick}
+      />
       
       {/* User profile card */}
       {selectedUser && (
@@ -229,3 +263,6 @@ export default function Map() {
     </div>
   );
 }
+
+// Export memoized Map component to prevent unnecessary rerenders
+export default memo(Map);

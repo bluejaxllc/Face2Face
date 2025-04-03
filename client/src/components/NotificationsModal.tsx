@@ -5,6 +5,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
+  DialogDescription,
   DialogFooter 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,9 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-gray-800">Notifications</DialogTitle>
+          <DialogDescription>
+            Recent activity and interactions with other users
+          </DialogDescription>
         </DialogHeader>
         
         <div className="max-h-96 overflow-y-auto hide-scrollbar">
