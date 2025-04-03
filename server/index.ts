@@ -1,10 +1,31 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
+
+// Set a secure SESSION_SECRET environment variable
+if (!process.env.SESSION_SECRET) {
+  process.env.SESSION_SECRET = "bump-and-grind-dev-secret"; // Not secure, only for development
+}
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Set up session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: storage.sessionStore,
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    httpOnly: true,
+    sameSite: "lax"
+  }
+}));
 
 app.use((req, res, next) => {
   const start = Date.now();

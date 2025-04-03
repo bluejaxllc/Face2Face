@@ -13,6 +13,13 @@ import {
   type Notification,
   type InsertNotification,
 } from "@shared/schema";
+import { eq, or, and, desc, asc, sql } from "drizzle-orm";
+import { db } from "./db";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import memorystore from "memorystore";
+import { log } from "./vite";
+import { calculateDistance } from "../client/src/lib/distance";
 
 export interface IStorage {
   // User operations
@@ -44,19 +51,288 @@ export interface IStorage {
   getUnreadNotifications(userId: number): Promise<Notification[]>;
   markNotificationAsRead(id: number): Promise<void>;
   markAllNotificationsAsRead(userId: number): Promise<void>;
+  
+  // Session store
+  sessionStore: session.Store;
 }
 
+export class DatabaseStorage implements IStorage {
+  public sessionStore: session.Store;
+  
+  constructor() {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is not set");
+    }
+    
+    // Set up session store
+    const PostgresStore = connectPg(session);
+    this.sessionStore = new PostgresStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: true,
+    });
+    
+    log("Database connection established", "storage");
+  }
+  
+  async getUser(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+  
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
+  }
+  
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values({
+      ...insertUser,
+      height: null,
+      weight: null,
+      selfRating: 5,
+      category: "bump",
+      bio: null,
+      datingPreference: "all",
+      isActive: true,
+      latitude: null,
+      longitude: null,
+      lastLocation: new Date(),
+      profileCompleted: false,
+    }).returning();
+    
+    return result[0];
+  }
+  
+  async updateUser(id: number, updates: Partial<UpdateUser>): Promise<User | undefined> {
+    // If updating location, also update the lastLocation timestamp
+    const updateData = {
+      ...updates,
+      ...(updates.latitude !== undefined && updates.longitude !== undefined 
+          ? { lastLocation: new Date() } 
+          : {})
+    };
+    
+    const result = await db.update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    
+    return result[0];
+  }
+  
+  async getNearbyUsers(
+    latitude: number,
+    longitude: number,
+    radius: number,
+    userId: number,
+    preferences: {
+      category?: string;
+      datingPreference?: string;
+      ageRange?: { min: number; max: number };
+    } = {}
+  ): Promise<User[]> {
+    // Build query conditions
+    const conditions = [
+      // Not the current user
+      sql`${users.id} != ${userId}`,
+      // Only active users
+      eq(users.isActive, true),
+      // Must have location
+      sql`${users.latitude} IS NOT NULL`,
+      sql`${users.longitude} IS NOT NULL`
+    ];
+    
+    // Add category filter if specified
+    if (preferences.category && preferences.category !== "both") {
+      conditions.push(eq(users.category, preferences.category));
+    }
+    
+    // Handle dating preferences if specified
+    if (preferences.datingPreference && preferences.datingPreference !== "all") {
+      // Get the current user's preferences and filter compatible matches
+      const currentUser = await this.getUser(userId);
+      if (currentUser) {
+        // We need to find users who either:
+        // 1. Have "all" as their dating preference, OR
+        // 2. Have the specific preference that matches the current user's filter
+        
+        // Create a sub-condition that will be added to the main WHERE clause
+        const preferenceConds = [
+          eq(users.datingPreference, 'all')
+        ];
+        
+        // Add the specific preference if not "all"
+        if (preferences.datingPreference !== 'all') {
+          preferenceConds.push(eq(users.datingPreference, preferences.datingPreference));
+        }
+        
+        // Add the OR condition to the main conditions array
+        conditions.push(or(...preferenceConds));
+      }
+    }
+    
+    // Execute the query with all conditions
+    const allPotentialUsers = await db.select()
+      .from(users)
+      .where(and(...conditions));
+    
+    // Now filter by distance (done in application code since this is more efficient than a DB function for our case)
+    return allPotentialUsers.filter(user => {
+      if (user.latitude === null || user.longitude === null) return false;
+      
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        Number(user.latitude),
+        Number(user.longitude)
+      );
+      
+      return distance <= radius;
+    });
+  }
+  
+  async createBump(insertBump: InsertBump): Promise<Bump> {
+    const result = await db.insert(bumps).values({
+      ...insertBump,
+      timestamp: new Date(),
+      seen: false,
+    }).returning();
+    
+    return result[0];
+  }
+  
+  async getBumpsBetweenUsers(userId: number, bumpedUserId: number): Promise<Bump[]> {
+    return await db.select()
+      .from(bumps)
+      .where(or(
+        and(
+          eq(bumps.userId, userId),
+          eq(bumps.bumpedUserId, bumpedUserId)
+        ),
+        and(
+          eq(bumps.userId, bumpedUserId),
+          eq(bumps.bumpedUserId, userId)
+        )
+      ))
+      .orderBy(desc(bumps.timestamp));
+  }
+  
+  async getBumpsByUser(userId: number): Promise<Bump[]> {
+    return await db.select()
+      .from(bumps)
+      .where(or(
+        eq(bumps.userId, userId),
+        eq(bumps.bumpedUserId, userId)
+      ))
+      .orderBy(desc(bumps.timestamp));
+  }
+  
+  async getRecentBumps(userId: number, limit: number = 10): Promise<Bump[]> {
+    return await db.select()
+      .from(bumps)
+      .where(or(
+        eq(bumps.userId, userId),
+        eq(bumps.bumpedUserId, userId)
+      ))
+      .orderBy(desc(bumps.timestamp))
+      .limit(limit);
+  }
+  
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const result = await db.insert(messages).values({
+      ...insertMessage,
+      timestamp: new Date(),
+      read: false,
+    }).returning();
+    
+    return result[0];
+  }
+  
+  async getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Message[]> {
+    return await db.select()
+      .from(messages)
+      .where(or(
+        and(
+          eq(messages.senderId, userId1),
+          eq(messages.receiverId, userId2)
+        ),
+        and(
+          eq(messages.senderId, userId2),
+          eq(messages.receiverId, userId1)
+        )
+      ))
+      .orderBy(asc(messages.timestamp));
+  }
+  
+  async getUnreadMessageCount(userId: number): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(messages)
+      .where(and(
+        eq(messages.receiverId, userId),
+        eq(messages.read, false)
+      ));
+    
+    return result[0]?.count || 0;
+  }
+  
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const result = await db.insert(notifications).values({
+      ...insertNotification,
+      timestamp: new Date(),
+      read: false,
+    }).returning();
+    
+    return result[0];
+  }
+  
+  async getNotificationsByUser(userId: number): Promise<Notification[]> {
+    return await db.select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.timestamp));
+  }
+  
+  async getUnreadNotifications(userId: number): Promise<Notification[]> {
+    return await db.select()
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.read, false)
+      ))
+      .orderBy(desc(notifications.timestamp));
+  }
+  
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db.update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id));
+  }
+  
+  async markAllNotificationsAsRead(userId: number): Promise<void> {
+    await db.update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.userId, userId));
+  }
+}
+
+// Memory storage implementation for when database is not available
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private bumps: Map<number, Bump>;
   private messages: Map<number, Message>;
   private notifications: Map<number, Notification>;
+  public sessionStore: session.Store;
   
   private userIdCounter: number;
   private bumpIdCounter: number;
   private messageIdCounter: number;
   private notificationIdCounter: number;
-
+  
   constructor() {
     this.users = new Map();
     this.bumps = new Map();
@@ -67,8 +343,14 @@ export class MemStorage implements IStorage {
     this.bumpIdCounter = 1;
     this.messageIdCounter = 1;
     this.notificationIdCounter = 1;
+    
+    // Create memory store for sessions
+    const MemoryStore = memorystore(session);
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    });
   }
-
+  
   // User operations
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
@@ -113,6 +395,12 @@ export class MemStorage implements IStorage {
     if (!user) return undefined;
     
     const updatedUser = { ...user, ...updates };
+    
+    // If we're updating location, also update the last location timestamp
+    if (updates.latitude !== undefined && updates.longitude !== undefined) {
+      updatedUser.lastLocation = new Date();
+    }
+    
     this.users.set(id, updatedUser);
     return updatedUser;
   }
@@ -133,10 +421,6 @@ export class MemStorage implements IStorage {
       user => user.isActive && user.id !== userId && user.latitude && user.longitude
     );
     
-    // For simplicity in this MVP, we're not doing actual distance calculations
-    // or age filtering since we don't store age. In a real app, you would use
-    // a proper distance formula and filter by age if needed.
-    
     let filteredUsers = activeUsers;
     
     // Apply category filter if specified
@@ -152,7 +436,19 @@ export class MemStorage implements IStorage {
       );
     }
     
-    return filteredUsers;
+    // Filter by distance
+    return filteredUsers.filter(user => {
+      if (user.latitude === null || user.longitude === null) return false;
+      
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        Number(user.latitude),
+        Number(user.longitude)
+      );
+      
+      return distance <= radius;
+    });
   }
   
   // Bump operations
@@ -186,7 +482,13 @@ export class MemStorage implements IStorage {
   async getRecentBumps(userId: number, limit: number = 10): Promise<Bump[]> {
     return Array.from(this.bumps.values())
       .filter(bump => bump.userId === userId || bump.bumpedUserId === userId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .sort((a, b) => {
+        // Handle null timestamps safely
+        if (!a.timestamp && !b.timestamp) return 0;
+        if (!a.timestamp) return 1;
+        if (!b.timestamp) return -1;
+        return b.timestamp.getTime() - a.timestamp.getTime();
+      })
       .slice(0, limit);
   }
   
@@ -211,7 +513,13 @@ export class MemStorage implements IStorage {
           (message.senderId === userId1 && message.receiverId === userId2) ||
           (message.senderId === userId2 && message.receiverId === userId1)
       )
-      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+      .sort((a, b) => {
+        // Handle null timestamps safely
+        if (!a.timestamp && !b.timestamp) return 0;
+        if (!a.timestamp) return 1;
+        if (!b.timestamp) return -1;
+        return a.timestamp.getTime() - b.timestamp.getTime();
+      });
   }
   
   async getUnreadMessageCount(userId: number): Promise<number> {
@@ -224,12 +532,18 @@ export class MemStorage implements IStorage {
   async createNotification(insertNotification: InsertNotification): Promise<Notification> {
     const id = this.notificationIdCounter++;
     const now = new Date();
+    
+    // Create a properly typed notification object
     const notification: Notification = {
-      ...insertNotification,
       id,
+      userId: insertNotification.userId,
+      type: insertNotification.type,
+      content: insertNotification.content,
       timestamp: now,
       read: false,
+      relatedId: insertNotification.relatedId || null
     };
+    
     this.notifications.set(id, notification);
     return notification;
   }
@@ -237,13 +551,25 @@ export class MemStorage implements IStorage {
   async getNotificationsByUser(userId: number): Promise<Notification[]> {
     return Array.from(this.notifications.values())
       .filter(notification => notification.userId === userId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      .sort((a, b) => {
+        // Handle null timestamps safely
+        if (!a.timestamp && !b.timestamp) return 0;
+        if (!a.timestamp) return 1;
+        if (!b.timestamp) return -1;
+        return b.timestamp.getTime() - a.timestamp.getTime();
+      });
   }
   
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
     return Array.from(this.notifications.values())
       .filter(notification => notification.userId === userId && !notification.read)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      .sort((a, b) => {
+        // Handle null timestamps safely
+        if (!a.timestamp && !b.timestamp) return 0;
+        if (!a.timestamp) return 1;
+        if (!b.timestamp) return -1;
+        return b.timestamp.getTime() - a.timestamp.getTime();
+      });
   }
   
   async markNotificationAsRead(id: number): Promise<void> {
@@ -264,4 +590,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Choose the appropriate storage implementation based on environment
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage()
+  : new MemStorage();
