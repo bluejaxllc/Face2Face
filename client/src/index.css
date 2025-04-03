@@ -124,4 +124,22 @@
     background-size: cover;
     background-position: center;
   }
+  
+  .text-status-active {
+    @apply text-green-600;
+  }
+  
+  .text-status-inactive {
+    @apply text-red-600;
+  }
+  
+  /* Location error styling */
+  .location-error-container {
+    @apply flex-1 flex items-center justify-center p-6 bg-gray-50;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+      url('https://images.unsplash.com/photo-1536152470836-b943b246224c?auto=format&fit=crop&w=1200&q=80');
+    background-size: cover;
+    background-position: center;
+  }
 }

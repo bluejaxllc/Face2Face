@@ -9,6 +9,7 @@ interface LocationContextType {
   isError: boolean;
   updateLocation: () => Promise<void>;
   updateServerLocation: (location: { latitude: number; longitude: number }) => Promise<void>;
+  resetError: () => void;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -61,19 +62,28 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           setIsError(true);
           
           let errorMessage = "Failed to get your location";
+          let toastVariant: "destructive" | "default" = "destructive";
+          
           if (error.code === 1) {
-            errorMessage = "Location access denied. Please enable location services";
+            // Permission denied
+            errorMessage = "Location access denied. Please enable location services in your browser settings.";
+            // Don't show toast for permission denied as we'll show the special LocationError component
+            toastVariant = "default"; 
           } else if (error.code === 2) {
-            errorMessage = "Location unavailable. Please try again";
+            errorMessage = "Location unavailable. Please try again or check your device settings.";
           } else if (error.code === 3) {
-            errorMessage = "Location request timed out. Please try again";
+            errorMessage = "Location request timed out. Please try again with better network connectivity.";
           }
           
-          toast({
-            title: "Location error",
-            description: errorMessage,
-            variant: "destructive",
-          });
+          // Only show toast for non-permission errors since permission errors will show 
+          // the LocationError component which is more informative
+          if (error.code !== 1) {
+            toast({
+              title: "Location error",
+              description: errorMessage,
+              variant: toastVariant,
+            });
+          }
           
           reject(errorMessage);
         },
@@ -99,17 +109,27 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       console.error("Failed to update server location:", error);
     }
   };
+  
+  // Allow components to manually reset error state (useful for retry in LocationError component)
+  const resetError = () => {
+    setIsError(false);
+  };
 
   useEffect(() => {
+    // Initial location request
     updateLocation();
     
-    // Set up periodic location updates for the browser
+    // Set up periodic location updates if no error
     const intervalId = setInterval(() => {
-      updateLocation();
+      // Only try to update if there's no existing error
+      // This prevents too many permission prompts
+      if (!isError) {
+        updateLocation();
+      }
     }, 60000); // Update every minute
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isError]);
 
   return (
     <LocationContext.Provider
@@ -118,7 +138,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         isLoading,
         isError,
         updateLocation,
-        updateServerLocation
+        updateServerLocation,
+        resetError
       }}
     >
       {children}

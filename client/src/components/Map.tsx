@@ -4,6 +4,7 @@ import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import UserMarker from "./UserMarker";
 import ProfileCard from "./ProfileCard";
+import LocationError from "./LocationError";
 import { calculateDistance } from "@/lib/distance";
 import { Locate } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -26,7 +27,7 @@ interface User {
 }
 
 export default function Map() {
-  const { currentLocation, updateLocation } = useLocationContext();
+  const { currentLocation, updateLocation, isError } = useLocationContext();
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
   
@@ -144,6 +145,15 @@ export default function Map() {
     };
   }, [currentLocation]);
 
+  // If there's a location error, show the error component instead of the map
+  if (isError) {
+    return (
+      <div className="location-error-container">
+        <LocationError onEnableLocation={updateLocation} />
+      </div>
+    );
+  }
+  
   return (
     <div className="flex-1 relative overflow-hidden">
       <div className="map-container">
