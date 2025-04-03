@@ -8,6 +8,7 @@ interface LocationContextType {
   isLoading: boolean;
   isError: boolean;
   updateLocation: () => Promise<void>;
+  updateServerLocation: (location: { latitude: number; longitude: number }) => Promise<void>;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -24,11 +25,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onError: (error: Error) => {
-      toast({
-        title: "Location update failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      // This will fail with 401 if not authenticated - that's expected
+      console.log("Location update failed:", error.message);
     },
   });
 
@@ -84,19 +82,28 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // This function gets the current location but doesn't try to update the server
   const updateLocation = async () => {
     try {
-      const location = await getCurrentLocation();
-      await updateLocationMutation.mutateAsync(location);
+      await getCurrentLocation();
     } catch (error) {
       console.error("Failed to update location:", error);
+    }
+  };
+  
+  // This function can be called from components that know the user is authenticated
+  const updateServerLocation = async (location: { latitude: number; longitude: number }) => {
+    try {
+      await updateLocationMutation.mutateAsync(location);
+    } catch (error) {
+      console.error("Failed to update server location:", error);
     }
   };
 
   useEffect(() => {
     updateLocation();
     
-    // Set up periodic location updates
+    // Set up periodic location updates for the browser
     const intervalId = setInterval(() => {
       updateLocation();
     }, 60000); // Update every minute
@@ -111,6 +118,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         isLoading,
         isError,
         updateLocation,
+        updateServerLocation
       }}
     >
       {children}
