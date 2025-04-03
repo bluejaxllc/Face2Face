@@ -9,106 +9,13 @@ import {
   insertNotificationSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = express.Router();
   
-  // User authentication routes
-  apiRouter.post("/auth/register", async (req: Request, res: Response) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      
-      // Check if username already exists
-      const existingUsername = await storage.getUserByUsername(userData.username);
-      if (existingUsername) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      // Check if email already exists
-      const existingEmail = await storage.getUserByEmail(userData.email);
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already exists" });
-      }
-      
-      const user = await storage.createUser(userData);
-      // Don't return the password in the response
-      const { password, ...userWithoutPassword } = user;
-      
-      // Set session
-      if (req.session) {
-        req.session.userId = user.id;
-      }
-      
-      res.status(201).json(userWithoutPassword);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid input", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to register user" });
-    }
-  });
-  
-  apiRouter.post("/auth/login", async (req: Request, res: Response) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid username or password" });
-      }
-      
-      // Set session
-      if (req.session) {
-        req.session.userId = user.id;
-      }
-      
-      // Don't return the password in the response
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
-  
-  apiRouter.post("/auth/logout", (req: Request, res: Response) => {
-    if (req.session) {
-      req.session.destroy((err) => {
-        if (err) {
-          return res.status(500).json({ message: "Failed to logout" });
-        }
-        res.status(200).json({ message: "Logged out successfully" });
-      });
-    } else {
-      res.status(200).json({ message: "No active session" });
-    }
-  });
-  
-  apiRouter.get("/auth/me", async (req: Request, res: Response) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      
-      const user = await storage.getUser(req.session.userId);
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Don't return the password in the response
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(200).json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get user information" });
-    }
-  });
+  // Setup authentication routes (/api/auth/...)
+  await setupAuth(app);
   
   // User profile routes
   apiRouter.patch("/users/profile", async (req: Request, res: Response) => {
@@ -152,9 +59,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = locationSchema.parse(req.body);
       
       const updatedUser = await storage.updateUser(req.session.userId, {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        lastLocation: new Date(),
+        latitude: String(location.latitude),
+        longitude: String(location.longitude),
       });
       
       if (!updatedUser) {
@@ -192,8 +98,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const datingPreference = req.query.datingPreference as string | undefined;
       
       const nearbyUsers = await storage.getNearbyUsers(
-        user.latitude as unknown as number,
-        user.longitude as unknown as number,
+        Number(user.latitude),
+        Number(user.longitude),
         radius,
         user.id,
         {

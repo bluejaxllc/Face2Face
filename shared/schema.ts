@@ -16,8 +16,8 @@ export const users = pgTable("users", {
   bio: text("bio"),
   datingPreference: text("dating_preference").default("all"), // "men", "women", "all"
   isActive: boolean("is_active").default(true),
-  latitude: numeric("latitude"),
-  longitude: numeric("longitude"),
+  latitude: numeric("latitude").notNull().default("0"),
+  longitude: numeric("longitude").notNull().default("0"),
   lastLocation: timestamp("last_location"),
   profileCompleted: boolean("profile_completed").default(false),
 });
@@ -67,6 +67,7 @@ export const updateUserSchema = createInsertSchema(users).pick({
   isActive: true,
   latitude: true,
   longitude: true,
+  lastLocation: true,
   profileCompleted: true,
 });
 

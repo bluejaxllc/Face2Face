@@ -50,6 +50,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 0, // Always fetch from network
+    queryFn: async ({ queryKey }) => {
+      const res = await fetch(queryKey[0] as string, {
+        credentials: "include",
+      });
+      
+      if (res.status === 401) {
+        return null;
+      }
+      
+      if (!res.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+      
+      return res.json();
+    }
   });
   
   useEffect(() => {
