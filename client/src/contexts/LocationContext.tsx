@@ -128,14 +128,35 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   
   // Set up periodic location updates independent of the initial request
   useEffect(() => {
-    // Set up periodic location updates if no error
-    const intervalId = setInterval(() => {
-      // Only try to update if there's no existing error
-      // This prevents too many permission prompts
+    // Reference the function locally to avoid closure issues with dependencies
+    const update = async () => {
       if (!isError) {
-        updateLocation();
+        try {
+          // Get current location from browser API
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const location = {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                };
+                setCurrentLocation(location);
+                setIsLoading(false);
+                setIsError(false);
+              },
+              (error) => {
+                console.error("Error getting location in interval:", error);
+              }
+            );
+          }
+        } catch (error) {
+          console.error("Error in update interval:", error);
+        }
       }
-    }, 300000); // Update every 5 minutes to reduce server load
+    };
+    
+    // Set up periodic location updates if no error
+    const intervalId = setInterval(update, 300000); // Update every 5 minutes to reduce server load
     
     return () => clearInterval(intervalId);
   }, [isError]);
