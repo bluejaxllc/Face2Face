@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,7 +34,17 @@ export default function Map() {
   const [showBump, setShowBump] = useState(true);
   const [showGrind, setShowGrind] = useState(false);
   const [radius, setRadius] = useState(50);
-  const [isActive, setIsActive] = useState(user?.isActive || true);
+  // Initialize isActive with a controlled default
+  const [isActive, setIsActive] = useState(() => {
+    return user?.isActive !== undefined ? user.isActive : true;
+  });
+  
+  // Update isActive when user changes
+  useEffect(() => {
+    if (user?.isActive !== undefined) {
+      setIsActive(user.isActive);
+    }
+  }, [user?.isActive]);
 
   // Fetch nearby users
   const { data: nearbyUsers = [] } = useQuery<User[]>({
@@ -116,13 +126,14 @@ export default function Map() {
   };
 
   // Calculate user positions on the map (this is a simplified version for the MVP)
-  const calculatePosition = (user: User, index: number) => {
+  // Using useMemo to stabilize position calculations and prevent unnecessary rerenders
+  const calculatePosition = useCallback((user: User, index: number) => {
     if (!currentLocation) return { top: "50%", left: "50%" };
     
-    // For the MVP, we'll just randomly position users around the current location
-    // In a real app, this would be based on actual geocoordinates
-    const angle = (index * 45) % 360;
-    const distance = Math.random() * 30 + 10; // 10-40% from center
+    // For the MVP, we'll use a consistent algorithm to position users
+    // This ensures stable positions using the user ID for consistency
+    const angle = ((user.id + index) * 45) % 360; // Using ID + index for stability
+    const distance = 20 + (user.id % 20); // User ID mod 20 plus base 20 for consistent distance 
     
     const top = 50 + Math.sin(angle * Math.PI / 180) * distance;
     const left = 50 + Math.cos(angle * Math.PI / 180) * distance;
@@ -131,7 +142,7 @@ export default function Map() {
       top: `${top}%`,
       left: `${left}%`
     };
-  };
+  }, [currentLocation]);
 
   return (
     <div className="flex-1 relative overflow-hidden">
@@ -166,11 +177,14 @@ export default function Map() {
         <span className={`text-sm font-medium ${isActive ? "text-status-active" : "text-status-inactive"}`}>
           {isActive ? "Active" : "Inactive"}
         </span>
-        <Switch 
-          checked={isActive} 
-          onCheckedChange={handleStatusToggle} 
-          aria-label="Active status"
-        />
+        {/* Memoize the Switch component to prevent unnecessary rerenders */}
+        {typeof isActive === 'boolean' && (
+          <Switch 
+            checked={isActive} 
+            onCheckedChange={handleStatusToggle} 
+            aria-label="Active status"
+          />
+        )}
       </div>
       
       {/* Category toggle */}

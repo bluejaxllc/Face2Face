@@ -161,22 +161,24 @@ export class DatabaseStorage implements IStorage {
         // 1. Have "all" as their dating preference, OR
         // 2. Have the specific preference that matches the current user's filter
         
-        // Create a sub-condition that will be added to the main WHERE clause
-        const preferenceConds = [
-          eq(users.datingPreference, 'all')
-        ];
-        
-        // Add the specific preference if not "all"
-        if (preferences.datingPreference !== 'all') {
-          preferenceConds.push(eq(users.datingPreference, preferences.datingPreference));
-        }
-        
-        // Add the OR condition to the main conditions array
-        conditions.push(or(...preferenceConds));
+        // Add a condition to find users with compatible dating preferences
+        // Either the user has "all" dating preference or they match our specific preference
+        conditions.push(
+          or(
+            eq(users.datingPreference, 'all'),
+            // If we know the preference for sure, use it; otherwise just use "all"
+            eq(users.datingPreference, preferences.datingPreference || 'all')
+          )
+        );
       }
     }
     
     // Execute the query with all conditions
+    // Make sure we have at least one condition
+    if (conditions.length === 0) {
+      conditions.push(eq(users.id, users.id)); // Always true condition as fallback
+    }
+    
     const allPotentialUsers = await db.select()
       .from(users)
       .where(and(...conditions));
