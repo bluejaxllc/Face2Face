@@ -311,23 +311,57 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
   // Track map loading status
   const [mapLoaded, setMapLoaded] = useState(false);
   
+  // Key to force map rerender if tiles don't load properly
+  const [mapKey, setMapKey] = useState(Date.now());
+  
+  // Reset the map if it doesn't load within 5 seconds
+  useEffect(() => {
+    if (!mapLoaded) {
+      const timer = setTimeout(() => {
+        console.log('Map loading timed out, forcing reinitialization...');
+        setMapKey(Date.now()); // This will cause MapContainer to unmount and remount
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [mapLoaded, mapKey]);
+  
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col">
       {/* Debugging info */}
-      <div className="bg-white p-2 text-xs z-50">
-        <div>Map Status: {mapLoaded ? 'Active' : 'Loading'}</div>
-        <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
-        <div>Nearby Users: {filteredUsers.length}</div>
-        <div>Zoom Level: {zoom}</div>
+      <div className="bg-white p-2 text-xs z-50 flex justify-between items-center">
+        <div>
+          <div>Map Status: {mapLoaded ? 'Active' : 'Loading'}</div>
+          <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
+          <div>Nearby Users: {filteredUsers.length}</div>
+          <div>Zoom Level: {zoom}</div>
+        </div>
+        <button 
+          onClick={() => {
+            setMapLoaded(false);
+            setMapKey(Date.now());
+            console.log('Manual map refresh triggered');
+          }}
+          className="bg-secondary hover:bg-secondary/80 text-white px-2 py-1 rounded text-xs"
+        >
+          Refresh Map
+        </button>
       </div>
       
       <div className="flex-1 relative bg-gray-100">
         {!mapLoaded && (
           <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
-            <p className="text-gray-500">Loading map...</p>
+            <div className="flex flex-col items-center space-y-3">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              <p className="text-gray-700 font-medium">Loading map tiles...</p>
+              <p className="text-xs text-gray-500 max-w-xs text-center">
+                If the map doesn't appear, try clicking the "Refresh Map" button above.
+              </p>
+            </div>
           </div>
         )}
         <MapContainer 
+          key={mapKey} // Force remount when mapKey changes
           center={center}
           zoom={14}
           style={{ 
@@ -341,37 +375,49 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
           className="leaflet-container map-container"
           ref={mapRef}
           whenReady={() => {
-            console.log('Map is ready');
+            console.log('Map is ready with key:', mapKey);
             setMapLoaded(true);
           }}
         >
-          {/* Try multiple tile providers for reliability */}
+          {/* Most reliable tile provider for guaranteed visibility - CartoDB */}
           <TileLayer
-            attribution='&copy; <a href="https://www.jawg.io" target="_blank">&copy; Jawg</a> - <a href="https://www.openstreetmap.org" target="_blank">&copy; OpenStreetMap</a>'
-            url="https://tile.jawg.io/jawg-light/{z}/{x}/{y}.png?access-token=anonymous"
-            maxZoom={22}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             subdomains="abcd"
+            maxZoom={20}
             className="leaflet-tile-pane"
             eventHandlers={{
-              loading: () => console.log('Primary tiles are loading...'),
-              load: () => console.log('Primary tiles have loaded'),
-              error: (e) => {
-                console.error('Primary tile loading error:', e);
-                // If primary tiles fail, fallback will be visible
-              }
+              loading: () => console.log('CartoDB tiles are loading...'),
+              load: () => console.log('CartoDB tiles have loaded'),
+              error: (e) => console.error('CartoDB tile loading error:', e)
             }}
           />
           
-          {/* Fallback tile layer if primary fails */}
+          {/* Second fallback - Stamen TonerLite */}
           <TileLayer
-            attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-            url="https://a.tile.opentopomap.org/{z}/{x}/{y}.png"
-            maxZoom={17}
+            attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png"
+            subdomains="abcd"
+            minZoom={0}
+            maxZoom={20}
             className="leaflet-tile-pane"
             eventHandlers={{
-              loading: () => console.log('Fallback tiles are loading...'),
-              load: () => console.log('Fallback tiles have loaded'),
-              error: (e) => console.error('Fallback tile loading error:', e)
+              loading: () => console.log('Stamen tiles are loading...'),
+              load: () => console.log('Stamen tiles have loaded'),
+              error: (e) => console.error('Stamen tile loading error:', e)
+            }}
+          />
+          
+          {/* Third fallback - OpenStreetMap direct */}
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
+            className="leaflet-tile-pane"
+            eventHandlers={{
+              loading: () => console.log('OSM tiles are loading...'),
+              load: () => console.log('OSM tiles have loaded'),
+              error: (e) => console.error('OSM tile loading error:', e)
             }}
           />
           
