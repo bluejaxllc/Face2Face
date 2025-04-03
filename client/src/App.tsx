@@ -37,6 +37,9 @@ function AppRouter() {
       <Route path="/map">
         <ProtectedRoute component={MapView} />
       </Route>
+      <Route path="/explore">
+        <ProtectedRoute component={MapView} />
+      </Route>
       <Route path="/messages">
         <ProtectedRoute component={Messages} />
       </Route>
