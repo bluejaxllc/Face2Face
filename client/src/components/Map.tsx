@@ -369,7 +369,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
   }, [mapLoaded, mapKey]);
   
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col">
+    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-screen">
       {/* Debugging info */}
       <div className="bg-white p-2 text-xs z-50 flex justify-between items-center">
         <div>
@@ -390,7 +390,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
         </button>
       </div>
       
-      <div className="flex-1 relative bg-gray-100">
+      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '500px', height: 'calc(100vh - 100px)' }}>
         {!mapLoaded && (
           <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
             <div className="flex flex-col items-center space-y-3">
@@ -411,9 +411,16 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
             width: '100%',
             background: '#f8f9fa',
             display: 'block',
-            zIndex: 20
+            zIndex: 20,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
           }}
           zoomControl={false}
+          preferCanvas={true}
+          attributionControl={false}
           className="leaflet-container map-container"
           ref={mapRef}
           whenReady={() => {

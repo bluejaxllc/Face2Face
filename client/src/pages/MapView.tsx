@@ -39,9 +39,9 @@ export default function MapView() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen w-full flex flex-col overflow-hidden">
       <Header />
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 relative w-full" style={{ height: 'calc(100vh - 120px)' }}>
         <Map />
       </div>
       <BottomNavigation />
