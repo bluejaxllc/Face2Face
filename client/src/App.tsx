@@ -75,17 +75,24 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   return <Component />;
 }
 
+// Separate the providers to avoid dependency issues
+function AppWithProviders() {
+  return (
+    <AuthProvider>
+      <LocationProvider>
+        <div className="h-screen flex flex-col bg-white">
+          <AppRouter />
+          <Toaster />
+        </div>
+      </LocationProvider>
+    </AuthProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <LocationProvider>
-          <div className="h-screen flex flex-col bg-white">
-            <AppRouter />
-            <Toaster />
-          </div>
-        </LocationProvider>
-      </AuthProvider>
+      <AppWithProviders />
     </QueryClientProvider>
   );
 }
