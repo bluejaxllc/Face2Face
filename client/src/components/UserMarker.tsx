@@ -17,6 +17,7 @@ export default function UserMarker({ user, position, onClick }: UserMarkerProps)
   const style: CSSProperties = {
     top: position.top,
     left: position.left,
+    zIndex: 40, // Ensure markers are above the map background
   };
 
   const getInitials = (firstName: string, lastName: string) => {

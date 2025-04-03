@@ -100,10 +100,24 @@ class LocationService {
       this.isError = false;
       this.notifyLocationListeners();
       this.notifyErrorListeners();
+      
+      console.log("Location updated successfully:", this.currentLocation);
     } catch (error) {
       console.error("Failed to update location:", error);
+      
+      // Use a default location for testing purposes
+      // New York City coordinates
+      this.currentLocation = {
+        latitude: 40.7128,
+        longitude: -74.0060
+      };
+      
+      // Still set isError to true so the user knows there was a problem
       this.isError = true;
+      this.notifyLocationListeners();
       this.notifyErrorListeners();
+      
+      console.log("Using fallback location for debugging:", this.currentLocation);
     }
   }
 

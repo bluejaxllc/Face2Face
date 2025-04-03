@@ -39,11 +39,13 @@ export default function MapView() {
   };
 
   return (
-    <>
+    <div className="h-screen flex flex-col">
       <Header />
-      <Map />
+      <div className="flex-1 overflow-hidden">
+        <Map />
+      </div>
       <BottomNavigation />
       <WelcomeModal isOpen={showWelcome} onClose={handleCloseWelcome} />
-    </>
+    </div>
   );
 }

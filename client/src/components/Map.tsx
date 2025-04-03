@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -100,8 +100,55 @@ function Map() {
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
+  // Create mock users for debugging
+  const mockUsers = useMemo(() => {
+    if (nearbyUsers.length > 0) return [];
+    
+    return currentLocation ? [
+      {
+        id: 101,
+        username: "mockuser1",
+        firstName: "John",
+        lastName: "B",
+        category: "bump",
+        isActive: true,
+        latitude: currentLocation.latitude + 0.01,
+        longitude: currentLocation.longitude + 0.01,
+        height: "6'0\"", 
+        weight: "180 lbs",
+        selfRating: 4
+      },
+      {
+        id: 102,
+        username: "mockuser2",
+        firstName: "Sarah",
+        lastName: "G",
+        category: "grind",
+        isActive: true,
+        latitude: currentLocation.latitude - 0.01,
+        longitude: currentLocation.longitude - 0.01,
+        height: "5'6\"",
+        weight: "140 lbs",
+        selfRating: 5
+      },
+      {
+        id: 103,
+        username: "mockuser3",
+        firstName: "Alex",
+        lastName: "B",
+        category: "bump",
+        isActive: true,
+        latitude: currentLocation.latitude + 0.005,
+        longitude: currentLocation.longitude - 0.007,
+        height: "5'10\"",
+        weight: "165 lbs",
+        selfRating: 3
+      }
+    ] : [];
+  }, [nearbyUsers, currentLocation]);
+
   // Filter users based on category
-  const filteredUsers = nearbyUsers.filter(nearbyUser => {
+  const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
     if (showBump && showGrind) return true;
     if (showBump && nearbyUser.category === "bump") return true;
     if (showGrind && nearbyUser.category === "grind") return true;
@@ -201,8 +248,26 @@ function Map() {
   }
   
   return (
-    <div className="flex-1 relative overflow-hidden">
-      <div className="map-container">
+    <div className="flex-1 relative overflow-hidden flex flex-col">
+      {/* Debugging info */}
+      <div className="bg-white p-2 text-xs z-50">
+        <div>Map Status: Active</div>
+        <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
+        <div>Nearby Users: {filteredUsers.length}</div>
+      </div>
+      
+      <div className="map-container flex-1 border-4 border-red-500">
+        <div className="absolute inset-0 bg-blue-100 opacity-50 z-10 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg z-20 text-center max-w-xs">
+            <h3 className="text-2xl font-bold mb-2">Map Area</h3>
+            <p className="mb-2">Currently showing mock user markers for demonstration</p>
+            <div className="flex justify-center space-x-3 mt-3">
+              <div className="bg-secondary text-white px-3 py-1 rounded-full">Bump</div>
+              <div className="bg-primary text-white px-3 py-1 rounded-full">Grind</div>
+            </div>
+          </div>
+        </div>
+        
         {/* User markers */}
         {filteredUsers.map((user, index) => (
           <UserMarker
@@ -215,7 +280,7 @@ function Map() {
         
         {/* Current location button */}
         <button 
-          className="absolute bottom-24 right-4 bg-white p-2 rounded-full shadow-lg"
+          className="absolute bottom-24 right-4 bg-white p-2 rounded-full shadow-lg z-30"
           onClick={updateLocation}
           aria-label="Get current location"
         >
@@ -223,7 +288,7 @@ function Map() {
         </button>
         
         {/* Radius indicator */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700 z-30">
           Radius: {radius} miles
         </div>
       </div>
