@@ -28,6 +28,8 @@ export const bumps = pgTable("bumps", {
   bumpedUserId: integer("bumped_user_id").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   seen: boolean("seen").default(false),
+  status: text("status").default("pending"), // "pending", "initiated", "completed" or "rejected"
+  message: text("message"), // Optional message sent with the bump
 });
 
 export const messages = pgTable("messages", {
@@ -74,6 +76,8 @@ export const updateUserSchema = createInsertSchema(users).pick({
 export const insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,
   bumpedUserId: true,
+  status: true,
+  message: true,
 });
 
 export const insertMessageSchema = createInsertSchema(messages).pick({
