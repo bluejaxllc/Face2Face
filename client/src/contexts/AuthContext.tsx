@@ -1,0 +1,189 @@
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+interface User {
+  id: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  height: string | null;
+  weight: string | null;
+  selfRating: number;
+  category: string;
+  bio: string | null;
+  datingPreference: string;
+  isActive: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  lastLocation: Date;
+  profileCompleted: boolean;
+}
+
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (profileData: Partial<User>) => Promise<void>;
+}
+
+interface RegisterData {
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const { toast } = useToast();
+
+  const { isLoading, refetch } = useQuery<User | null>({
+    queryKey: ["/api/auth/me"],
+    onSuccess: (data) => {
+      if (data) {
+        setUser(data);
+      }
+    },
+    onError: () => {
+      setUser(null);
+    },
+    retry: false,
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/auth/login", { username, password });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setUser(data);
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${data.firstName}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: async (userData: RegisterData) => {
+      const res = await apiRequest("POST", "/api/auth/register", userData);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setUser(data);
+      toast({
+        title: "Registration successful",
+        description: `Welcome, ${data.firstName}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/auth/logout", {});
+      return res.json();
+    },
+    onSuccess: () => {
+      setUser(null);
+      toast({
+        title: "Logout successful",
+        description: "You have been logged out",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: Partial<User>) => {
+      const res = await apiRequest("PATCH", "/api/users/profile", profileData);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setUser(data);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Profile update failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const login = async (username: string, password: string) => {
+    await loginMutation.mutateAsync({ username, password });
+  };
+
+  const register = async (userData: RegisterData) => {
+    await registerMutation.mutateAsync(userData);
+  };
+
+  const logout = async () => {
+    await logoutMutation.mutateAsync();
+  };
+
+  const updateProfile = async (profileData: Partial<User>) => {
+    await updateProfileMutation.mutateAsync(profileData);
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        register,
+        logout,
+        updateProfile,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
