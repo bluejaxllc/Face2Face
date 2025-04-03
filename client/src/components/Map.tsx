@@ -308,30 +308,71 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
     setZoom(newZoom);
   }, []);
   
+  // Track map loading status
+  const [mapLoaded, setMapLoaded] = useState(false);
+  
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col">
       {/* Debugging info */}
       <div className="bg-white p-2 text-xs z-50">
-        <div>Map Status: Active</div>
+        <div>Map Status: {mapLoaded ? 'Active' : 'Loading'}</div>
         <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
         <div>Nearby Users: {filteredUsers.length}</div>
         <div>Zoom Level: {zoom}</div>
       </div>
       
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-gray-100">
+        {!mapLoaded && (
+          <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
+            <p className="text-gray-500">Loading map...</p>
+          </div>
+        )}
         <MapContainer 
           center={center}
           zoom={14}
-          style={{ height: '100%', width: '100%' }}
+          style={{ 
+            height: '100%', 
+            width: '100%',
+            background: '#f8f9fa',
+            display: 'block',
+            zIndex: 20
+          }}
           zoomControl={false}
-          className="leaflet-container"
+          className="leaflet-container map-container"
           ref={mapRef}
-          whenReady={() => console.log('Map is ready')}
+          whenReady={() => {
+            console.log('Map is ready');
+            setMapLoaded(true);
+          }}
         >
+          {/* Try multiple tile providers for reliability */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.jawg.io" target="_blank">&copy; Jawg</a> - <a href="https://www.openstreetmap.org" target="_blank">&copy; OpenStreetMap</a>'
+            url="https://tile.jawg.io/jawg-light/{z}/{x}/{y}.png?access-token=anonymous"
+            maxZoom={22}
+            subdomains="abcd"
             className="leaflet-tile-pane"
+            eventHandlers={{
+              loading: () => console.log('Primary tiles are loading...'),
+              load: () => console.log('Primary tiles have loaded'),
+              error: (e) => {
+                console.error('Primary tile loading error:', e);
+                // If primary tiles fail, fallback will be visible
+              }
+            }}
+          />
+          
+          {/* Fallback tile layer if primary fails */}
+          <TileLayer
+            attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+            url="https://a.tile.opentopomap.org/{z}/{x}/{y}.png"
+            maxZoom={17}
+            className="leaflet-tile-pane"
+            eventHandlers={{
+              loading: () => console.log('Fallback tiles are loading...'),
+              load: () => console.log('Fallback tiles have loaded'),
+              error: (e) => console.error('Fallback tile loading error:', e)
+            }}
           />
           
           <ZoomControl position="bottomright" />
