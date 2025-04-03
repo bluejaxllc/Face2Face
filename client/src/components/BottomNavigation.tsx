@@ -14,8 +14,8 @@ export default function BottomNavigation() {
   };
 
   return (
-    <nav className="bg-white border-t border-gray-200 py-2 px-6 z-10">
-      <div className="flex justify-between items-center">
+    <nav className="bg-white border-t border-gray-200 py-2 px-6 fixed bottom-0 left-0 right-0 z-50 shadow-lg">
+      <div className="flex justify-between items-center max-w-screen-lg mx-auto">
         <div 
           onClick={navigateTo("/explore")} 
           className="flex flex-col items-center cursor-pointer"

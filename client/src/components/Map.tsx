@@ -369,7 +369,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
   }, [mapLoaded, mapKey]);
   
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-screen">
+    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full">
       {/* Debugging info */}
       <div className="bg-white p-2 text-xs z-50 flex justify-between items-center">
         <div>
@@ -390,7 +390,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
         </button>
       </div>
       
-      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '500px', height: 'calc(100vh - 100px)' }}>
+      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '300px', height: 'calc(100% - 40px)' }}>
         {!mapLoaded && (
           <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
             <div className="flex flex-col items-center space-y-3">
@@ -553,7 +553,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
         </MapContainer>
         
         {/* Filter drawer */}
-        <div className="absolute bottom-24 left-4 z-[1000]">
+        <div className="absolute bottom-16 left-4 z-[1000]">
           <FilterDrawer
             options={filterOptions}
             onChange={handleFilterChange}
@@ -562,7 +562,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
         
         {/* Current location button */}
         <button 
-          className="absolute bottom-24 right-4 bg-white p-2 rounded-full shadow-lg z-[1000]"
+          className="absolute bottom-16 right-4 bg-white p-2 rounded-full shadow-lg z-[1000]"
           onClick={updateLocation}
           aria-label="Get current location"
         >
@@ -570,7 +570,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
         </button>
         
         {/* Radius control */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700 z-[1000] flex items-center space-x-2">
+        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700 z-[1000] flex items-center space-x-2">
           <button 
             className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full"
             onClick={() => setRadius((prev: number) => Math.max(1, prev - 1))}
