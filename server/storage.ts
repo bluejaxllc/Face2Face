@@ -152,26 +152,25 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(users.category, preferences.category));
     }
     
-    // Handle dating preferences if specified
+    // Handle dating preferences
+    // We need to find users who either:
+    // 1. Have "all" as their dating preference, OR
+    // 2. Have the specific preference that matches the current user's filter
+    
+    // Default to "all"
+    let datingPref = 'all';
+    // Update if preference is specified and not "all"
     if (preferences.datingPreference && preferences.datingPreference !== "all") {
-      // Get the current user's preferences and filter compatible matches
-      const currentUser = await this.getUser(userId);
-      if (currentUser) {
-        // We need to find users who either:
-        // 1. Have "all" as their dating preference, OR
-        // 2. Have the specific preference that matches the current user's filter
-        
-        // Add a condition to find users with compatible dating preferences
-        // Either the user has "all" dating preference or they match our specific preference
-        conditions.push(
-          or(
-            eq(users.datingPreference, 'all'),
-            // If we know the preference for sure, use it; otherwise just use "all"
-            eq(users.datingPreference, preferences.datingPreference || 'all')
-          )
-        );
-      }
+      datingPref = preferences.datingPreference;
     }
+    
+    // Always allow "all" preference or matching specific preference
+    conditions.push(
+      or(
+        eq(users.datingPreference, 'all'),
+        eq(users.datingPreference, datingPref)
+      )
+    );
     
     // Execute the query with all conditions
     // Make sure we have at least one condition

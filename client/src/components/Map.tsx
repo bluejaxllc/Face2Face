@@ -1,16 +1,19 @@
-import { useState, useCallback, memo, useMemo } from "react";
+import { useState, useCallback, memo, useMemo, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation as useLocationContext } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
-import UserMarker from "./UserMarker";
 import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import { calculateDistance } from "@/lib/distance";
-import { Locate } from "lucide-react";
+import { Locate, Plus, Minus } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Circle, useMapEvents } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface User {
   id: number;
@@ -87,7 +90,7 @@ function Map() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showBump, setShowBump] = useState(true);
   const [showGrind, setShowGrind] = useState(false);
-  const [radius] = useState(50);
+  const [radius, setRadius] = useState(50);
   
   // Get isActive directly from user state
   const isActive = user?.isActive ?? true;
@@ -147,13 +150,55 @@ function Map() {
     ] : [];
   }, [nearbyUsers, currentLocation]);
 
-  // Filter users based on category
-  const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
-    if (showBump && showGrind) return true;
-    if (showBump && nearbyUser.category === "bump") return true;
-    if (showGrind && nearbyUser.category === "grind") return true;
-    return false;
+  // Fix Leaflet default icon issues
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+// Custom marker icons
+const createCustomIcon = (category: string) => {
+  return L.divIcon({
+    className: `custom-div-icon ${category}`,
+    html: `<div class="marker-pin ${category === 'bump' ? 'bump-marker' : 'grind-marker'}">
+             <span class="marker-initials text-white font-bold"></span>
+           </div>`,
+    iconSize: [30, 42],
+    iconAnchor: [15, 42]
   });
+};
+
+// Component to update map center when location changes
+function MapCenterUpdater({ position }: { position: [number, number] }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(position, map.getZoom());
+  }, [position, map]);
+  
+  return null;
+}
+
+// Component to handle map events
+function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+  
+  return null;
+}
+
+// Filter users based on category
+const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
+  if (showBump && showGrind) return true;
+  if (showBump && nearbyUser.category === "bump") return true;
+  if (showGrind && nearbyUser.category === "grind") return true;
+  return false;
+});
 
   // Handle status toggle - memoize to prevent recreation on every render
   const handleStatusToggle = useCallback(async (checked: boolean) => {
@@ -247,6 +292,22 @@ function Map() {
     );
   }
   
+  // Add state for zoom level
+  const [zoom, setZoom] = useState(14);
+  const mapRef = useRef<L.Map | null>(null);
+
+  // Get center position for the map
+  const center: [number, number] = useMemo(() => {
+    return currentLocation
+      ? [currentLocation.latitude, currentLocation.longitude]
+      : [32.8728576, -96.5312512]; // Default position if location not available
+  }, [currentLocation]);
+
+  // Handle zoom change
+  const handleZoomChange = useCallback((newZoom: number) => {
+    setZoom(newZoom);
+  }, []);
+  
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col">
       {/* Debugging info */}
@@ -254,42 +315,129 @@ function Map() {
         <div>Map Status: Active</div>
         <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
         <div>Nearby Users: {filteredUsers.length}</div>
+        <div>Zoom Level: {zoom}</div>
       </div>
       
-      <div className="map-container flex-1 border-4 border-red-500">
-        <div className="absolute inset-0 bg-blue-100 opacity-50 z-10 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg z-20 text-center max-w-xs">
-            <h3 className="text-2xl font-bold mb-2">Map Area</h3>
-            <p className="mb-2">Currently showing mock user markers for demonstration</p>
-            <div className="flex justify-center space-x-3 mt-3">
-              <div className="bg-secondary text-white px-3 py-1 rounded-full">Bump</div>
-              <div className="bg-primary text-white px-3 py-1 rounded-full">Grind</div>
-            </div>
-          </div>
-        </div>
-        
-        {/* User markers */}
-        {filteredUsers.map((user, index) => (
-          <UserMarker
-            key={user.id}
-            user={user}
-            position={calculatePosition(user, index)}
-            onClick={() => handleMarkerClick(user)}
+      <div className="flex-1 relative">
+        <MapContainer 
+          center={center}
+          zoom={14}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}
+          ref={mapRef}
+          whenReady={() => console.log('Map is ready')}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-        ))}
+          
+          <ZoomControl position="bottomright" />
+          
+          {/* Update center when location changes */}
+          <MapCenterUpdater position={center} />
+          
+          {/* Handle map events */}
+          <MapEventHandler onZoomChange={handleZoomChange} />
+          
+          {/* Current user position and radius */}
+          {currentLocation && (
+            <>
+              <Marker 
+                position={[currentLocation.latitude, currentLocation.longitude]}
+                icon={L.divIcon({
+                  className: 'current-location-marker',
+                  html: '<div class="pulse"></div>',
+                  iconSize: [20, 20],
+                  iconAnchor: [10, 10]
+                })}
+              >
+                <Popup>Your location</Popup>
+              </Marker>
+              
+              <Circle 
+                center={[currentLocation.latitude, currentLocation.longitude]}
+                radius={radius * 1609.34} // Convert miles to meters
+                pathOptions={{ color: 'blue', fillColor: 'blue', fillOpacity: 0.1, weight: 1 }}
+              />
+            </>
+          )}
+          
+          {/* User markers with clustering */}
+          <MarkerClusterGroup 
+            chunkedLoading
+            spiderfyOnMaxZoom={true}
+            showCoverageOnHover={false}
+            maxClusterRadius={40}
+            iconCreateFunction={(cluster: any) => {
+              const count = cluster.getChildCount();
+              
+              return L.divIcon({
+                html: `
+                  <div class="cluster-marker bg-white rounded-full flex items-center justify-center border-2 border-primary text-primary font-bold">
+                    ${count}
+                  </div>
+                `,
+                className: 'custom-cluster-icon',
+                iconSize: L.point(40, 40),
+                iconAnchor: L.point(20, 20)
+              });
+            }}
+          >
+            {filteredUsers.map((user) => (
+              <Marker
+                key={user.id}
+                position={[user.latitude, user.longitude]}
+                icon={createCustomIcon(user.category)}
+                eventHandlers={{
+                  click: () => handleMarkerClick(user)
+                }}
+              >
+                <Popup>
+                  <div className="text-center">
+                    <div className="font-bold">{user.firstName} {user.lastName}</div>
+                    <div className="text-sm capitalize">{user.category}</div>
+                    {currentLocation && (
+                      <div className="text-xs mt-1">
+                        {calculateDistance(
+                          currentLocation.latitude,
+                          currentLocation.longitude,
+                          user.latitude,
+                          user.longitude
+                        ).toFixed(1)} miles away
+                      </div>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        </MapContainer>
         
         {/* Current location button */}
         <button 
-          className="absolute bottom-24 right-4 bg-white p-2 rounded-full shadow-lg z-30"
+          className="absolute bottom-24 right-4 bg-white p-2 rounded-full shadow-lg z-[1000]"
           onClick={updateLocation}
           aria-label="Get current location"
         >
           <Locate className="h-5 w-5 text-secondary" />
         </button>
         
-        {/* Radius indicator */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700 z-30">
-          Radius: {radius} miles
+        {/* Radius control */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700 z-[1000] flex items-center space-x-2">
+          <button 
+            className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full"
+            onClick={() => setRadius((prev: number) => Math.max(1, prev - 1))}
+          >
+            <Minus className="h-3 w-3" />
+          </button>
+          <span>Radius: {radius} miles</span>
+          <button 
+            className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full"
+            onClick={() => setRadius((prev: number) => Math.min(50, prev + 1))}
+          >
+            <Plus className="h-3 w-3" />
+          </button>
         </div>
       </div>
       
