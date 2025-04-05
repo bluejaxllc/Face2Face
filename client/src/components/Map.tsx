@@ -39,13 +39,14 @@ const StatusToggle = memo(({
   onToggle: (checked: boolean) => void;
 }) => {
   return (
-    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white py-2 px-4 rounded-full shadow-lg flex items-center space-x-2">
-      <span className={`text-sm font-medium ${isActive ? "text-green-600" : "text-gray-500"}`}>
+    <div className="absolute top-4 right-4 bg-white py-1.5 px-3 rounded-full shadow-lg flex items-center space-x-2 z-[1000]">
+      <span className={`text-xs font-medium ${isActive ? "text-green-600" : "text-gray-500"}`}>
         {isActive ? "Active" : "Inactive"}
       </span>
       <Switch 
         checked={isActive} 
         onCheckedChange={onToggle} 
+        className="scale-75"
         aria-label="Active status"
       />
     </div>
@@ -64,17 +65,17 @@ const CategoryToggle = memo(({
   onGrindClick: () => void;
 }) => {
   return (
-    <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg flex overflow-hidden">
+    <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg flex overflow-hidden z-[1000]">
       <Button
         variant={showBump ? "default" : "outline"}
-        className={`px-4 py-2 text-sm font-medium ${showBump ? "bg-secondary text-white" : ""}`}
+        className={`px-3 py-1 text-xs font-medium ${showBump ? "bg-secondary text-white" : ""}`}
         onClick={onBumpClick}
       >
         Bump
       </Button>
       <Button
         variant={showGrind ? "default" : "outline"}
-        className={`px-4 py-2 text-sm font-medium ${showGrind ? "bg-primary text-white" : ""}`}
+        className={`px-3 py-1 text-xs font-medium ${showGrind ? "bg-primary text-white" : ""}`}
         onClick={onGrindClick}
       >
         Grind
@@ -567,25 +568,25 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
           </MarkerClusterGroup>
         </MapContainer>
         
-        {/* Filter drawer */}
-        <div className="absolute bottom-16 left-4 z-[1000]">
+        {/* Filter drawer - moved to top left */}
+        <div className="absolute top-4 left-4 z-[1000]">
           <FilterDrawer
             options={filterOptions}
             onChange={handleFilterChange}
           />
         </div>
         
-        {/* Current location button */}
+        {/* Current location button - moved to bottom right with more spacing */}
         <button 
-          className="absolute bottom-16 right-4 bg-white p-2 rounded-full shadow-lg z-[1000]"
+          className="absolute bottom-24 right-4 bg-white p-2 rounded-full shadow-lg z-[1000]"
           onClick={updateLocation}
           aria-label="Get current location"
         >
           <Locate className="h-5 w-5 text-secondary" />
         </button>
         
-        {/* Radius control */}
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white py-1 px-3 rounded-full shadow-lg text-sm font-medium text-gray-700 z-[1000] flex items-center space-x-2">
+        {/* Radius control - moved up from bottom with improved styling */}
+        <div className="absolute bottom-24 left-4 right-4 mx-auto max-w-[200px] bg-white py-1.5 px-3 rounded-full shadow-lg text-xs font-medium text-gray-700 z-[1000] flex items-center justify-between">
           <button 
             className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full"
             onClick={() => setRadius((prev: number) => Math.max(1, prev - 1))}
