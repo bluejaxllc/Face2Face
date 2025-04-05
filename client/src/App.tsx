@@ -34,6 +34,7 @@ function AppRouter() {
         {isAuthenticated ? <MapView /> : <Register />}
       </Route>
       <Route path="/register" component={Register} />
+      <Route path="/auth" component={Register} />
       <Route path="/map">
         <ProtectedRoute component={MapView} />
       </Route>
@@ -58,7 +59,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   // Use useEffect to navigate after render
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate("/register");
+      navigate("/auth");
     }
   }, [isLoading, isAuthenticated, navigate]);
 
