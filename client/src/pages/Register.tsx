@@ -94,8 +94,8 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 p-4 pb-32" style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-      <div className="text-3xl font-bold mt-4 mb-4 logo-text text-center" style={{ paddingTop: '10px' }}>
+    <div className="bg-gray-50 px-4 pb-32 pt-4">
+      <div className="text-3xl font-bold mb-8 logo-text text-center">
         <span className="bump">Bump</span>
         <span className="and">&</span>
         <span className="grind">Grind</span>
@@ -160,35 +160,33 @@ export default function Register() {
             <TabsContent value="register">
               <Form {...registerForm}>
                 <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={registerForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="First name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={registerForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Last name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={registerForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="First name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Last name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   
                   <FormField
                     control={registerForm.control}
@@ -246,13 +244,15 @@ export default function Register() {
                     )}
                   />
                   
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-secondary hover:bg-secondary/90"
-                    disabled={registerForm.formState.isSubmitting}
-                  >
-                    {registerForm.formState.isSubmitting ? "Creating account..." : "Register"}
-                  </Button>
+                  <div className="pb-12 pt-4">
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-secondary hover:bg-secondary/90 py-6 text-lg"
+                      disabled={registerForm.formState.isSubmitting}
+                    >
+                      {registerForm.formState.isSubmitting ? "Creating account..." : "Register"}
+                    </Button>
+                  </div>
                 </form>
               </Form>
             </TabsContent>

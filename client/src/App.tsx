@@ -83,16 +83,7 @@ function AppWithProviders() {
   return (
     <AuthProvider>
       <LocationProvider>
-        <div 
-          className="min-h-screen w-full"
-          style={{ 
-            height: '100%',
-            overflow: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none'
-          }}
-        >
+        <div className="app-container">
           <AppRouter />
           <Toaster />
         </div>

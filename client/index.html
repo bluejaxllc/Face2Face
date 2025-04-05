@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -11,16 +11,45 @@
          crossorigin=""/>
     <title>Bump and Grind</title>
     <style>
+      /* Critical styles in head to avoid FOUC */
       html, body {
         height: 100%;
         margin: 0;
         padding: 0;
         overflow: hidden;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
       }
+      
       #root {
-        height: 100%;
-        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
+      }
+      
+      /* Basic scroll bar visibility */
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 10px;
+      }
+      
+      /* For Firefox */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0,0,0,0.2) transparent;
       }
     </style>
   </head>
