@@ -22,7 +22,7 @@ function AppRouter() {
   
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex items-center justify-center h-full min-h-screen full-height">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -65,7 +65,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   // Show loading spinner or render the component
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex items-center justify-center h-full min-h-screen full-height">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -83,7 +83,7 @@ function AppWithProviders() {
   return (
     <AuthProvider>
       <LocationProvider>
-        <div className="min-h-screen w-full overflow-x-hidden">
+        <div className="min-h-screen h-full w-full overflow-x-hidden full-height">
           <AppRouter />
           <Toaster />
         </div>
