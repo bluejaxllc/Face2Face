@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ApiRequest, apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { Send, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Separator } from "@/components/ui/separator";
@@ -76,7 +76,7 @@ export default function Messages() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
       
       <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
@@ -94,7 +94,7 @@ export default function Messages() {
             </div>
           </div>
           
-          <div className="overflow-y-auto h-[calc(100vh-13rem)]">
+          <div className="overflow-y-auto pb-24 md:pb-4 h-[calc(100vh-13rem)]">
             {filteredUsers.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 No conversations yet
@@ -150,7 +150,7 @@ export default function Messages() {
               </div>
               
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+              <div className="flex-1 overflow-y-auto p-4 pb-24 md:pb-4 bg-gray-50">
                 {messages.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-gray-500">
                     <p>No messages yet. Start a conversation!</p>

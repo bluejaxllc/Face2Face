@@ -83,7 +83,7 @@ function AppWithProviders() {
   return (
     <AuthProvider>
       <LocationProvider>
-        <div className="h-screen w-screen overflow-hidden">
+        <div className="h-screen w-screen">
           <AppRouter />
           <Toaster />
         </div>

@@ -96,10 +96,10 @@ export default function Profile() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white">
       <Header />
       
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-4">
+      <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-24">
         <div className="max-w-lg mx-auto">
           {/* Profile header */}
           <Card className="mb-4">

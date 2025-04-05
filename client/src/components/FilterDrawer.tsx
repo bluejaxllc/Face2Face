@@ -44,7 +44,7 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
           <Sliders className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+      <SheetContent side="right" className="w-[300px] sm:w-[400px] overflow-y-auto">
         <SheetHeader className="mb-5">
           <SheetTitle className="flex items-center">
             <Filter className="mr-2 h-5 w-5" />
@@ -52,7 +52,7 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
           </SheetTitle>
         </SheetHeader>
         
-        <div className="space-y-6">
+        <div className="space-y-6 pb-20">
           {/* Dating Preference */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Dating Preference</Label>

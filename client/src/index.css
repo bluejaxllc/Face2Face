@@ -406,4 +406,9 @@
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   }
+  
+  /* Bottom safe area for mobile devices */
+  .safe-area-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+  }
 }
