@@ -590,50 +590,21 @@ nav.safe-area-bottom span {
   bottom: 46px !important;
 }
 
-/* Enhanced controls for better visibility */
-.leaflet-control-container .leaflet-top.leaflet-right {
-  top: 100px !important;
-  right: 10px !important;
+/* Position zoom controls */
+.leaflet-control-container .leaflet-bottom.leaflet-right {
+  bottom: 60px !important;
 }
 
 .leaflet-control-zoom {
-  margin-top: 0 !important;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
-  border: none !important;
+  margin-bottom: 0 !important;
 }
 
-.leaflet-control-zoom a {
-  width: 30px !important;
-  height: 30px !important;
-  line-height: 30px !important;
-  font-size: 18px !important;
-}
-
-/* Make radius control and location button more prominent */
-button[aria-label="Get current location"] {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
-}
-
-div.absolute.text-xs {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
-}
-
-/* Mobile optimizations */
+/* Fix for the bottom navigation on mobile */
 @media (max-width: 640px) {
-  /* Ensure elements don't overlap and are large enough to tap easily */
-  .leaflet-control-zoom a {
-    width: 36px !important;
-    height: 36px !important;
-    line-height: 36px !important;
-    font-size: 22px !important;
+  .leaflet-control-container .leaflet-bottom.leaflet-right {
+    bottom: 60px !important;
   }
   
-  div.absolute.text-xs span {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-  }
-  
-  /* Fix for the bottom navigation on mobile */
   .bottom-nav {
     position: fixed !important;
     bottom: 0 !important;
