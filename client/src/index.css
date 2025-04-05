@@ -178,12 +178,17 @@
     @apply border-border;
   }
   
-  body {
+  html, body {
     @apply font-sans antialiased bg-background text-foreground;
-    min-height: 100vh;
+    height: 100%;
     overflow-x: hidden;
-    position: relative;
     -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
   }
   
   /* Improve mobile form styles */
@@ -427,6 +432,28 @@
   .full-height {
     height: 100%;
     height: -webkit-fill-available;
+  }
+  
+  /* Mobile scrolling fixes */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+    overflow-y: auto;
+    max-height: 100vh;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* For Firefox */
+  }
+  
+  .scroll-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
   }
   
   /* Enhanced mobile styles */
