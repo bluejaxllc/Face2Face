@@ -101,7 +101,7 @@ export default function Register() {
         <span className="grind">Grind</span>
       </div>
       
-      <Card className="w-full max-w-md mx-auto shadow-sm">
+      <Card className="w-full max-w-md mx-auto shadow-sm overflow-y-auto max-h-[90vh]">
         <CardHeader className="pb-4">
           <CardTitle className="text-center text-xl">Welcome</CardTitle>
           <CardDescription className="text-center">
@@ -157,7 +157,7 @@ export default function Register() {
               </Form>
             </TabsContent>
             
-            <TabsContent value="register" className="overflow-auto max-h-[450px] pb-2">
+            <TabsContent value="register">
               <Form {...registerForm}>
                 <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
