@@ -491,7 +491,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
             }}
           />
           
-          <ZoomControl position="bottomright" />
+          <ZoomControl position="topright" />
           
           {/* Update center when location changes */}
           <MapCenterUpdater position={center} />
@@ -586,28 +586,28 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
           className="absolute bg-white rounded-full shadow-lg z-[1000]"
           onClick={updateLocation}
           aria-label="Get current location"
-          style={{bottom: "100px", right: "8px", padding: "4px", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center"}}
+          style={{top: "46px", right: "10px", padding: "6px", width: "34px", height: "34px", display: "flex", alignItems: "center", justifyContent: "center"}}
         >
-          <Locate style={{width: "14px", height: "14px"}} className="text-secondary" />
+          <Locate style={{width: "18px", height: "18px"}} className="text-secondary" />
         </button>
         
         {/* Radius control */}
-        <div className="absolute bg-white rounded-full shadow-lg text-[8px] font-medium text-gray-700 z-[1000] flex items-center justify-between"
-             style={{bottom: "46px", left: "50%", transform: "translateX(-50%)", width: "120px", padding: "2px 6px"}}>
+        <div className="absolute bg-white rounded-full shadow-lg text-xs font-medium text-gray-700 z-[1000] flex items-center justify-between"
+             style={{top: "46px", left: "50%", transform: "translateX(-50%)", width: "140px", padding: "4px 8px"}}>
           <button 
             className="flex items-center justify-center bg-gray-200 rounded-full"
             onClick={() => setRadius((prev: number) => Math.max(1, prev - 1))}
-            style={{width: "16px", height: "16px"}}
+            style={{width: "22px", height: "22px"}}
           >
-            <Minus style={{width: "10px", height: "10px"}} />
+            <Minus style={{width: "14px", height: "14px"}} />
           </button>
-          <span style={{fontSize: "10px"}}>Radius: {radius} mi</span>
+          <span style={{fontSize: "12px", fontWeight: "500"}}>Radius: {radius} mi</span>
           <button 
             className="flex items-center justify-center bg-gray-200 rounded-full"
             onClick={() => setRadius((prev: number) => Math.min(50, prev + 1))}
-            style={{width: "16px", height: "16px"}}
+            style={{width: "22px", height: "22px"}}
           >
-            <Plus style={{width: "10px", height: "10px"}} />
+            <Plus style={{width: "14px", height: "14px"}} />
           </button>
         </div>
       </div>
