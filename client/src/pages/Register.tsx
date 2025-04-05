@@ -94,8 +94,8 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 p-4 pb-32 scroll-container">
-      <div className="text-3xl font-bold mt-4 mb-4 logo-text text-center">
+    <div className="flex flex-col min-h-screen bg-gray-50 p-4 pb-32" style={{ overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div className="text-3xl font-bold mt-4 mb-4 logo-text text-center" style={{ paddingTop: '10px' }}>
         <span className="bump">Bump</span>
         <span className="and">&</span>
         <span className="grind">Grind</span>

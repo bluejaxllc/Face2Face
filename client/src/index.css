@@ -441,6 +441,17 @@
     max-height: 100vh;
     scrollbar-width: thin; /* For Firefox */
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* For Firefox */
+    overscroll-behavior-y: contain; /* Prevent overscroll on Android */
+    overflow-scrolling: touch; /* Android fallback */
+  }
+  
+  /* Android specific scrolling fixes */
+  @supports (-webkit-touch-callout: none) and (not (-webkit-overflow-scrolling: touch)) {
+    html, body, #root, .scroll-container, [style*="overflow"] {
+      -webkit-overflow-scrolling: auto;
+      overflow-y: scroll !important;
+      overscroll-behavior-y: none;
+    }
   }
   
   .scroll-container::-webkit-scrollbar {
@@ -477,6 +488,34 @@
     .form-container {
       @apply px-4;
     }
+    
+    /* Add extra spacing for inputs on mobile to make them more tappable */
+    input, 
+    textarea, 
+    select, 
+    button {
+      @apply py-3;
+    }
+    
+    /* Ensure buttons are visible and accessible */
+    button[type="submit"] {
+      @apply mt-6 py-4 text-base;
+    }
+  }
+  
+  /* Android specific fixes */
+  .android-device .scroll-container {
+    position: relative;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: auto;
+  }
+  
+  .android-device input:focus,
+  .android-device textarea:focus,
+  .android-device select:focus {
+    font-size: 16px !important;
   }
   
   /* Bottom navigation enhancements */
