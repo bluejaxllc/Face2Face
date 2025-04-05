@@ -94,14 +94,14 @@ export default function Register() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen justify-center items-center bg-gray-50 p-4">
-      <div className="text-3xl font-bold mb-8 logo-text">
+    <div className="flex flex-col min-h-screen bg-gray-50 p-4 overflow-y-auto pb-8">
+      <div className="text-3xl font-bold my-8 logo-text text-center">
         <span className="bump">Bump</span>
         <span className="and">&</span>
         <span className="grind">Grind</span>
       </div>
       
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="text-center text-xl">Welcome</CardTitle>
           <CardDescription className="text-center">
