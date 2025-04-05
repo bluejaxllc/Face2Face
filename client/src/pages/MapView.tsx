@@ -39,7 +39,7 @@ export default function MapView() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col pb-[45px] map-view">
+    <div className="min-h-screen w-full flex flex-col pb-[40px] map-view" style={{paddingBottom: "40px"}}>
       <Header />
       <div className="flex-1 relative w-full">
         <Map />
