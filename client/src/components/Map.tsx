@@ -586,7 +586,7 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
           className="absolute bg-white rounded-full shadow-lg z-[1000]"
           onClick={updateLocation}
           aria-label="Get current location"
-          style={{bottom: "46px", right: "8px", padding: "4px", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center"}}
+          style={{bottom: "100px", right: "8px", padding: "4px", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center"}}
         >
           <Locate style={{width: "14px", height: "14px"}} className="text-secondary" />
         </button>

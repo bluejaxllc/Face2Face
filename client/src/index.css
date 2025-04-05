@@ -589,3 +589,29 @@ nav.safe-area-bottom span {
 .absolute.bottom-\[50px\] {
   bottom: 46px !important;
 }
+
+/* Position zoom controls on desktop and mobile */
+.leaflet-control-container .leaflet-bottom.leaflet-right {
+  bottom: 80px !important;
+}
+
+.leaflet-control-zoom {
+  margin-bottom: 0 !important;
+}
+
+/* Additional spacing for mobile */
+@media (max-width: 640px) {
+  .leaflet-control-container .leaflet-bottom.leaflet-right {
+    bottom: 100px !important;
+  }
+  
+  /* Fix for the bottom navigation on mobile */
+  .bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+    width: 100% !important;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+}

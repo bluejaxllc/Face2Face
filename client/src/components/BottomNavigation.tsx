@@ -14,7 +14,7 @@ export default function BottomNavigation() {
   };
 
   return (
-    <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-[9999] shadow-md safe-area-bottom bottom-nav" style={{height: "40px", padding: "2px 4px"}}>
+    <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-[9999] shadow-md safe-area-bottom bottom-nav" style={{height: "40px", padding: "2px 4px", position: "fixed", willChange: "transform"}}>
       <div className="flex justify-between items-center max-w-screen-lg mx-auto h-full">
         <div 
           onClick={navigateTo("/explore")} 
