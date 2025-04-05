@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,20 +41,6 @@ export default function Register() {
   const [activeTab, setActiveTab] = useState("login");
   const [_, navigate] = useLocation();
   const { login, register } = useAuth();
-  const [isMobile, setIsMobile] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  
-  // Detect mobile devices
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || 
-                  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -106,177 +92,17 @@ export default function Register() {
       // Error is handled by the context
     }
   };
-  
-  // Navigation for the step forms
-  const nextStep = () => {
-    setCurrentStep(prev => prev + 1);
-  };
-  
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(1, prev - 1));
-  };
-  
-  // Function to render the appropriate step based on currentStep
-  const renderMobileRegisterStep = () => {
-    switch(currentStep) {
-      case 1:
-        return (
-          <>
-            <FormField
-              control={registerForm.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="First name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={registerForm.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Last name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-end mt-4">
-              <Button 
-                type="button" 
-                onClick={nextStep}
-                className="bg-secondary hover:bg-secondary/90"
-              >
-                Next
-              </Button>
-            </div>
-          </>
-        );
-      
-      case 2:
-        return (
-          <>
-            <FormField
-              control={registerForm.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Choose a username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={registerForm.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Enter your email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-between mt-4">
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={prevStep}
-              >
-                Back
-              </Button>
-              <Button 
-                type="button" 
-                onClick={nextStep}
-                className="bg-secondary hover:bg-secondary/90"
-              >
-                Next
-              </Button>
-            </div>
-          </>
-        );
-      
-      case 3:
-        return (
-          <>
-            <FormField
-              control={registerForm.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Create a password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={registerForm.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Confirm your password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-between mt-4">
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={prevStep}
-              >
-                Back
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-secondary hover:bg-secondary/90"
-                disabled={registerForm.formState.isSubmitting}
-              >
-                {registerForm.formState.isSubmitting ? "Creating..." : "Register"}
-              </Button>
-            </div>
-          </>
-        );
-      
-      default:
-        return null;
-    }
-  };
 
   return (
-    <div className="bg-gray-50 px-4 py-8 min-h-screen flex flex-col items-center">
-      <div className="text-3xl font-bold mb-8 logo-text text-center">
+    <div className="bg-gray-50 min-h-screen flex flex-col items-center px-4 py-6 overflow-y-auto auth-page">
+      <div className="text-3xl font-bold mb-6 logo-text text-center">
         <span className="bump">Bump</span>
         <span className="and">&</span>
         <span className="grind">Grind</span>
       </div>
       
       <Card className="w-full max-w-md mx-auto shadow-sm">
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardTitle className="text-center text-xl">Welcome</CardTitle>
           <CardDescription className="text-center">
             Join Bump & Grind to meet new people in real life
@@ -284,20 +110,20 @@ export default function Register() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 mb-6">
+            <TabsList className="grid grid-cols-2 mb-4">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-3">
                   <FormField
                     control={loginForm.control}
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel className="text-sm">Username</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter your username" {...field} />
                         </FormControl>
@@ -311,7 +137,7 @@ export default function Register() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel className="text-sm">Password</FormLabel>
                         <FormControl>
                           <Input type="password" placeholder="Enter your password" {...field} />
                         </FormControl>
@@ -322,7 +148,7 @@ export default function Register() {
                   
                   <Button 
                     type="submit" 
-                    className="w-full bg-secondary hover:bg-secondary/90 py-3 mt-4"
+                    className="w-full bg-secondary hover:bg-secondary/90 py-2 mt-3"
                     disabled={loginForm.formState.isSubmitting}
                   >
                     {loginForm.formState.isSubmitting ? "Logging in..." : "Login"}
@@ -331,114 +157,108 @@ export default function Register() {
               </Form>
             </TabsContent>
             
-            <TabsContent value="register">
+            <TabsContent value="register" className="overflow-auto max-h-[450px] pb-2">
               <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  {isMobile ? (
-                    // Multi-step form for mobile
-                    renderMobileRegisterStep()
-                  ) : (
-                    // Full form for desktop
-                    <>
-                      <FormField
-                        control={registerForm.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="First name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={registerForm.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Last name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={registerForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Choose a username" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={registerForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="Enter your email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="Create a password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={registerForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="Confirm your password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-secondary hover:bg-secondary/90 py-3 mt-4"
-                        disabled={registerForm.formState.isSubmitting}
-                      >
-                        {registerForm.formState.isSubmitting ? "Creating account..." : "Register"}
-                      </Button>
-                    </>
-                  )}
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField
+                      control={registerForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm">First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="First name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={registerForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm">Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Last name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Choose a username" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="Enter your email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Create a password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm">Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Confirm your password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-secondary hover:bg-secondary/90 py-2 mt-3"
+                    disabled={registerForm.formState.isSubmitting}
+                  >
+                    {registerForm.formState.isSubmitting ? "Creating account..." : "Register"}
+                  </Button>
                 </form>
               </Form>
             </TabsContent>
           </Tabs>
         </CardContent>
-        <CardFooter className="text-xs text-center text-gray-500 flex justify-center">
+        <CardFooter className="text-xs text-center text-gray-500 flex justify-center pt-2 pb-4">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </CardFooter>
       </Card>
