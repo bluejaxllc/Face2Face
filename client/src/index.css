@@ -536,3 +536,56 @@
     box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
   }
 }
+
+/* Mobile layout fixes - these are !important to ensure they override other styles */
+header {
+  height: 40px !important;
+  padding: 0 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+header .logo-text {
+  font-size: 16px !important;
+}
+
+header button {
+  padding: 4px !important;
+}
+
+header svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+nav.safe-area-bottom {
+  height: 40px !important;
+  padding: 2px 4px !important;
+  z-index: 9999 !important;
+}
+
+nav.safe-area-bottom svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+nav.safe-area-bottom span {
+  font-size: 8px !important;
+  margin-top: 0 !important;
+}
+
+.absolute.top-2.left-2.z-\[1000\] {
+  top: 46px !important;
+}
+
+.absolute.top-2.right-2 {
+  top: 46px !important;
+}
+
+.absolute.top-12.left-1\/2 {
+  top: 46px !important;
+}
+
+.absolute.bottom-\[50px\] {
+  bottom: 46px !important;
+}

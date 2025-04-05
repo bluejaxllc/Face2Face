@@ -39,14 +39,15 @@ const StatusToggle = memo(({
   onToggle: (checked: boolean) => void;
 }) => {
   return (
-    <div className="absolute top-2 right-2 bg-white py-1 px-2 rounded-full shadow-lg flex items-center space-x-1 z-[1000]">
-      <span className={`text-[10px] font-medium ${isActive ? "text-green-600" : "text-gray-500"}`}>
+    <div className="absolute bg-white rounded-full shadow-lg flex items-center space-x-1 z-[1000]" 
+         style={{top: "6px", right: "8px", padding: "0px 6px", height: "20px"}}>
+      <span className={`font-medium ${isActive ? "text-green-600" : "text-gray-500"}`} style={{fontSize: "8px"}}>
         {isActive ? "Active" : "Inactive"}
       </span>
       <Switch 
         checked={isActive} 
         onCheckedChange={onToggle} 
-        className="scale-[0.6]"
+        style={{transform: "scale(0.5)", margin: "-4px 0"}}
         aria-label="Active status"
       />
     </div>
@@ -65,20 +66,21 @@ const CategoryToggle = memo(({
   onGrindClick: () => void;
 }) => {
   return (
-    <div className="absolute top-12 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg flex overflow-hidden z-[1000]" style={{ maxWidth: '140px' }}>
+    <div className="absolute transform -translate-x-1/2 bg-white rounded-full shadow-lg flex overflow-hidden z-[1000]" 
+         style={{top: "6px", left: "50%", maxWidth: "110px", height: "20px"}}>
       <Button
         variant={showBump ? "default" : "outline"}
-        className={`px-2 py-0.5 text-[10px] font-medium ${showBump ? "bg-secondary text-white" : ""}`}
+        className={`${showBump ? "bg-secondary text-white" : ""}`}
         onClick={onBumpClick}
-        style={{ minHeight: '24px', height: '24px' }}
+        style={{minHeight: "20px", height: "20px", padding: "0 6px", fontSize: "8px", fontWeight: "500"}}
       >
         Bump
       </Button>
       <Button
         variant={showGrind ? "default" : "outline"}
-        className={`px-2 py-0.5 text-[10px] font-medium ${showGrind ? "bg-primary text-white" : ""}`}
+        className={`${showGrind ? "bg-primary text-white" : ""}`}
         onClick={onGrindClick}
-        style={{ minHeight: '24px', height: '24px' }}
+        style={{minHeight: "20px", height: "20px", padding: "0 6px", fontSize: "8px", fontWeight: "500"}}
       >
         Grind
       </Button>
@@ -387,9 +389,9 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
   }, [mapLoaded, mapKey]);
   
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full">
+    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full" style={{ paddingBottom: "45px" }}>
       {/* Debugging info */}
-      <div className="bg-white p-2 text-xs z-50 flex justify-between items-center">
+      <div className="bg-white p-1 text-[8px] z-50 flex justify-between items-center" style={{height: "30px", maxHeight: "30px", overflow: "hidden"}}>
         <div>
           <div>Map Status: {mapLoaded ? 'Active' : 'Loading'}</div>
           <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
@@ -402,13 +404,14 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
             setMapKey(Date.now());
             console.log('Manual map refresh triggered');
           }}
-          className="bg-secondary hover:bg-secondary/80 text-white px-2 py-1 rounded text-xs"
+          className="bg-secondary hover:bg-secondary/80 text-white px-1 py-0.5 rounded text-[8px]"
+          style={{maxHeight: "20px"}}
         >
           Refresh Map
         </button>
       </div>
       
-      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '300px', height: 'calc(100% - 40px)' }}>
+      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '300px', height: 'calc(100% - 30px)', marginBottom: "45px" }}>
         {!mapLoaded && (
           <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
             <div className="flex flex-col items-center space-y-3">
@@ -570,38 +573,41 @@ const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
           </MarkerClusterGroup>
         </MapContainer>
         
-        {/* Filter drawer - moved to top left corner with clear styles */}
-        <div className="absolute top-2 left-2 z-[1000]">
+        {/* Filter drawer */}
+        <div className="absolute top-2 left-2 z-[1000]" style={{top: "6px"}}>
           <FilterDrawer
             options={filterOptions}
             onChange={handleFilterChange}
           />
         </div>
         
-        {/* Current location button - positioned in bottom right corner with greater margin */}
+        {/* Current location button */}
         <button 
-          className="absolute bottom-[50px] right-2 bg-white p-1.5 rounded-full shadow-lg z-[1000]"
+          className="absolute bg-white rounded-full shadow-lg z-[1000]"
           onClick={updateLocation}
           aria-label="Get current location"
-          style={{marginBottom: "5px"}}
+          style={{bottom: "46px", right: "8px", padding: "4px", width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center"}}
         >
-          <Locate className="h-4 w-4 text-secondary" />
+          <Locate style={{width: "14px", height: "14px"}} className="text-secondary" />
         </button>
         
-        {/* Radius control - positioned at bottom with better spacing */}
-        <div className="absolute bottom-[50px] left-0 right-0 mx-auto max-w-[140px] bg-white py-0.5 px-2 rounded-full shadow-lg text-[8px] font-medium text-gray-700 z-[1000] flex items-center justify-between" style={{marginBottom: "5px"}}>
+        {/* Radius control */}
+        <div className="absolute bg-white rounded-full shadow-lg text-[8px] font-medium text-gray-700 z-[1000] flex items-center justify-between"
+             style={{bottom: "46px", left: "50%", transform: "translateX(-50%)", width: "120px", padding: "2px 6px"}}>
           <button 
-            className="w-4 h-4 flex items-center justify-center bg-gray-200 rounded-full"
+            className="flex items-center justify-center bg-gray-200 rounded-full"
             onClick={() => setRadius((prev: number) => Math.max(1, prev - 1))}
+            style={{width: "16px", height: "16px"}}
           >
-            <Minus className="h-2 w-2" />
+            <Minus style={{width: "10px", height: "10px"}} />
           </button>
-          <span>Radius: {radius} mi</span>
+          <span style={{fontSize: "10px"}}>Radius: {radius} mi</span>
           <button 
-            className="w-4 h-4 flex items-center justify-center bg-gray-200 rounded-full"
+            className="flex items-center justify-center bg-gray-200 rounded-full"
             onClick={() => setRadius((prev: number) => Math.min(50, prev + 1))}
+            style={{width: "16px", height: "16px"}}
           >
-            <Plus className="h-2 w-2" />
+            <Plus style={{width: "10px", height: "10px"}} />
           </button>
         </div>
       </div>
