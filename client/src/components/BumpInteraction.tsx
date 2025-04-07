@@ -37,7 +37,8 @@ interface BumpInteractionProps {
 
 export function BumpInteraction({ open, user, distance, onClose, onSuccess }: BumpInteractionProps) {
   const { toast } = useToast();
-  const [stage, setStage] = useState<"initializing" | "moving" | "message" | "complete">("initializing");
+  // Added "direct_message" stage to allow direct messaging without motion
+  const [stage, setStage] = useState<"initializing" | "moving" | "message" | "direct_message" | "complete">("initializing");
   const [motionProgress, setMotionProgress] = useState(0);
   const [message, setMessage] = useState("");
   const [motionPermissionError, setMotionPermissionError] = useState(false);
@@ -58,8 +59,15 @@ export function BumpInteraction({ open, user, distance, onClose, onSuccess }: Bu
     };
   }, [open, user]);
 
-  // Initialize motion detection
+  // Initialize the interaction - determine if we should use motion detection or direct messaging
   const initializeMotionDetection = async () => {
+    // If this is a direct message (user has bumped before), skip motion detection
+    if (distance && distance <= 3) {
+      // Skip motion detection and go straight to message
+      setStage("direct_message");
+      return;
+    }
+
     if (!window.DeviceMotionEvent) {
       toast({
         title: "Device not supported",
@@ -220,6 +228,52 @@ export function BumpInteraction({ open, user, distance, onClose, onSuccess }: Bu
             
             <DialogFooter>
               <Button variant="outline" onClick={onClose}>Cancel</Button>
+            </DialogFooter>
+          </>
+        );
+      
+      case "direct_message":
+        return (
+          <>
+            <DialogHeader>
+              <DialogTitle>Send a Message</DialogTitle>
+              <DialogDescription>
+                Since you're within range of {user?.firstName}, you can send a message directly!
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="my-4 space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-10 w-10 bg-secondary">
+                  <AvatarFallback>
+                    {user ? getInitials(user.firstName, user.lastName) : "??"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-sm text-gray-500">{user?.category === "bump" ? "Looking to hang out" : "Looking for more"}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="bump-message">Your message</Label>
+                <Textarea 
+                  id="bump-message"
+                  placeholder="Hey, want to meet up?" 
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="min-h-[100px]"
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={sendBump}>
+                <Send className="h-4 w-4 mr-2" />
+                Send Message
+              </Button>
             </DialogFooter>
           </>
         );

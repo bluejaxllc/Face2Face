@@ -118,7 +118,7 @@ export default function ProfileCard({ user, onClose, onBump, distance }: Profile
               onClick={onBump}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
-              Message
+              Send Message
             </Button>
           ) : (
             <Button
@@ -126,7 +126,7 @@ export default function ProfileCard({ user, onClose, onBump, distance }: Profile
               onClick={onBump}
               disabled={distance && distance > 3}
             >
-              Bump
+              Bump & Message
             </Button>
           )}
         </div>
