@@ -65,7 +65,8 @@ var users = pgTable("users", {
   profilePhoto: text("profile_photo"),
   // base64 encoded photo string
   phoneNumber: text("phone_number").unique(),
-  isPhoneVerified: boolean("is_phone_verified").default(false)
+  isPhoneVerified: boolean("is_phone_verified").default(false),
+  safetyAcknowledged: boolean("safety_acknowledged").default(false)
 });
 var bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
@@ -138,7 +139,8 @@ var updateUserSchema = createInsertSchema(users).pick({
   profileCompleted: true,
   profilePhoto: true,
   phoneNumber: true,
-  isPhoneVerified: true
+  isPhoneVerified: true,
+  safetyAcknowledged: true
 });
 var insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,

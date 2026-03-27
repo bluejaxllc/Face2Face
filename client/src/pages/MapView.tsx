@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation as useRouteLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/contexts/LocationContext";
 import Header from "@/components/Header";
@@ -10,6 +11,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { useToast } from "@/hooks/use-toast";
 
 export default function MapView() {
+  const [, setLocation] = useRouteLocation();
   const { user, updateProfile } = useAuth();
   const { currentLocation, updateServerLocation } = useLocation();
   const { toast } = useToast();
@@ -49,6 +51,8 @@ export default function MapView() {
     // If they close the welcome modal and haven't accepted safety, show it next
     if (user && !user.safetyAcknowledged) {
       setShowSafety(true);
+    } else {
+      setLocation("/profile");
     }
   };
 
@@ -57,7 +61,8 @@ export default function MapView() {
     try {
       await updateProfile({ safetyAcknowledged: true });
       setShowSafety(false);
-      toast({ title: "Safety Guidelines Accepted", description: "You are ready to start connecting!" });
+      toast({ title: "Safety Guidelines Accepted", description: "Let's set up your profile!" });
+      setLocation("/profile");
     } catch (error) {
       toast({ title: "Update failed", description: "Failed to save safety acknowledgment.", variant: "destructive" });
     } finally {
