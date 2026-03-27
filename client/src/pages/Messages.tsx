@@ -50,6 +50,17 @@ export default function Messages() {
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Auto-select user from URL query param (e.g. /messages?userId=5)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("userId");
+    if (userId) {
+      setSelectedUserId(parseInt(userId));
+      // Clean up the URL without reloading
+      window.history.replaceState({}, "", "/messages");
+    }
+  }, []);
+
   const { data: bumpedUsers = [] } = useQuery<ConnectedUser[]>({
     queryKey: ["/api/bumps/users"],
     enabled: !!user,
