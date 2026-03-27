@@ -138,24 +138,24 @@ export default function Messages() {
                 <p className="text-slate-500 text-sm mt-1 max-w-[200px] mx-auto">Connect with people on the map to start chatting</p>
               </div>
             ) : (
-              filteredUsers.map((bumpedUser) => (
+              filteredUsers.map((connectedUser) => (
                 <motion.div
                   variants={itemVariants}
-                  key={bumpedUser.id}
-                  className={`p-3 cursor-pointer transition-all duration-200 hover:bg-slate-800/50 group ${selectedUserId === bumpedUser.id
+                  key={connectedUser.id}
+                  className={`p-3 cursor-pointer transition-all duration-200 hover:bg-slate-800/50 group ${selectedUserId === connectedUser.id
                     ? "bg-slate-800/70 border-l-2 border-blue-500"
                     : "border-l-2 border-transparent hover:border-slate-600"
                     }`}
-                  onClick={() => setSelectedUserId(bumpedUser.id)}
+                  onClick={() => setSelectedUserId(connectedUser.id)}
                 >
                   <div className="flex items-center">
                     <div className="relative mr-3">
                       <Avatar className="h-11 w-11">
-                        {bumpedUser.profilePhoto && (
-                          <AvatarImage src={bumpedUser.profilePhoto} alt={bumpedUser.firstName} />
+                        {connectedUser.profilePhoto && (
+                          <AvatarImage src={connectedUser.profilePhoto} alt={connectedUser.firstName} />
                         )}
                         <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 text-sm font-bold">
-                          {getInitials(bumpedUser.firstName, bumpedUser.lastName)}
+                          {getInitials(connectedUser.firstName, connectedUser.lastName)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
@@ -163,23 +163,23 @@ export default function Messages() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="font-semibold text-slate-200 text-sm group-hover:text-white transition-colors">
-                          {bumpedUser.firstName} {bumpedUser.lastName}
+                          {connectedUser.firstName} {connectedUser.lastName}
                         </p>
-                        {bumpedUser.lastMessage && (
+                        {connectedUser.lastMessage && (
                           <span className="text-[10px] text-slate-500 ml-2 flex-shrink-0">
-                            {formatDistanceToNow(new Date(bumpedUser.lastMessage.timestamp), { addSuffix: false })}
+                            {formatDistanceToNow(new Date(connectedUser.lastMessage.timestamp), { addSuffix: false })}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center justify-between">
                         <p className="text-xs text-slate-500 truncate">
-                          {bumpedUser.lastMessage
-                            ? (bumpedUser.lastMessage.senderId === user?.id ? 'You: ' : '') + bumpedUser.lastMessage.content
+                          {connectedUser.lastMessage
+                            ? (connectedUser.lastMessage.senderId === user?.id ? 'You: ' : '') + connectedUser.lastMessage.content
                             : 'Tap to start chatting'}
                         </p>
-                        {(bumpedUser.unreadCount ?? 0) > 0 && (
+                        {(connectedUser.unreadCount ?? 0) > 0 && (
                           <span className="ml-2 flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
-                            {bumpedUser.unreadCount}
+                            {connectedUser.unreadCount}
                           </span>
                         )}
                       </div>
