@@ -6,7 +6,7 @@ import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
 import { calculateDistance } from "@/lib/distance";
-import { Locate, Plus, Minus, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
+import { Locate, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
@@ -479,25 +479,33 @@ function Map() {
           </div>
         </div>
 
-        {/* ═══════ BOTTOM LEFT: Radius control ═══════ */}
+        {/* ═══════ BOTTOM LEFT: Radius presets ═══════ */}
         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
-            style={{ padding: "4px 6px", height: "36px" }}>
-            <button
-              className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors border border-slate-700/50 active:scale-90"
-              onClick={() => setRadius((prev: number) => Math.max(1, prev - 10))}
-            >
-              <Minus style={{ width: "12px", height: "12px" }} className="text-slate-300" />
-            </button>
-            <span className="text-slate-300 font-bold px-1" style={{ fontSize: "11px", letterSpacing: "0.3px", minWidth: "60px", textAlign: "center" }}>
-              {radius >= 25000 ? '∞ mi' : `${radius} mi`}
-            </span>
-            <button
-              className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors border border-slate-700/50 active:scale-90"
-              onClick={() => setRadius((prev: number) => Math.min(25000, prev + 10))}
-            >
-              <Plus style={{ width: "12px", height: "12px" }} className="text-slate-300" />
-            </button>
+          <div className="flex items-center gap-1 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+            style={{ padding: "3px", height: "34px" }}>
+            {[
+              { label: "5", value: 5 },
+              { label: "25", value: 25 },
+              { label: "50", value: 50 },
+              { label: "100", value: 100 },
+              { label: "∞", value: 25000 },
+            ].map((preset) => {
+              const isActive = radius === preset.value;
+              return (
+                <button
+                  key={preset.value}
+                  onClick={() => setRadius(preset.value)}
+                  className={`rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${isActive
+                    ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-blue-500/25"
+                    : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                    }`}
+                  style={{ height: "28px", minWidth: "36px", padding: "0 8px", fontSize: "11px" }}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+            <span className="text-slate-500 font-medium pl-1 pr-2" style={{ fontSize: "9px", letterSpacing: "0.5px" }}>MI</span>
           </div>
         </div>
       </div>

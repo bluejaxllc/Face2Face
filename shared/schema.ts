@@ -30,6 +30,8 @@ export const users = pgTable("users", {
   lastLocation: timestamp("last_location"),
   profileCompleted: boolean("profile_completed").default(false),
   profilePhoto: text("profile_photo"), // base64 encoded photo string
+  phoneNumber: text("phone_number").unique(),
+  isPhoneVerified: boolean("is_phone_verified").default(false),
 });
 
 export const bumps = pgTable("bumps", {
@@ -61,6 +63,15 @@ export const notifications = pgTable("notifications", {
   read: boolean("read").default(false),
 });
 
+export const verificationCodes = pgTable("verification_codes", {
+  id: serial("id").primaryKey(),
+  phoneNumber: text("phone_number").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -71,6 +82,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   age: true,
   selfRating: true,
   datingPreference: true,
+  phoneNumber: true,
 });
 
 export const updateUserSchema = createInsertSchema(users).pick({
@@ -93,6 +105,8 @@ export const updateUserSchema = createInsertSchema(users).pick({
   lastLocation: true,
   profileCompleted: true,
   profilePhoto: true,
+  phoneNumber: true,
+  isPhoneVerified: true,
 });
 
 export const insertBumpSchema = createInsertSchema(bumps).pick({
@@ -127,3 +141,5 @@ export type Message = typeof messages.$inferSelect;
 
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+export type VerificationCode = typeof verificationCodes.$inferSelect;

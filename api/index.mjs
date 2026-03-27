@@ -23,7 +23,8 @@ __export(schema_exports, {
   messages: () => messages,
   notifications: () => notifications,
   updateUserSchema: () => updateUserSchema,
-  users: () => users
+  users: () => users,
+  verificationCodes: () => verificationCodes
 });
 import { pgTable, text, serial, integer, boolean, numeric, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -61,8 +62,10 @@ var users = pgTable("users", {
   longitude: numeric("longitude").notNull().default("0"),
   lastLocation: timestamp("last_location"),
   profileCompleted: boolean("profile_completed").default(false),
-  profilePhoto: text("profile_photo")
+  profilePhoto: text("profile_photo"),
   // base64 encoded photo string
+  phoneNumber: text("phone_number").unique(),
+  isPhoneVerified: boolean("is_phone_verified").default(false)
 });
 var bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
@@ -94,6 +97,14 @@ var notifications = pgTable("notifications", {
   timestamp: timestamp("timestamp").defaultNow(),
   read: boolean("read").default(false)
 });
+var verificationCodes = pgTable("verification_codes", {
+  id: serial("id").primaryKey(),
+  phoneNumber: text("phone_number").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow()
+});
 var insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -103,7 +114,8 @@ var insertUserSchema = createInsertSchema(users).pick({
   gender: true,
   age: true,
   selfRating: true,
-  datingPreference: true
+  datingPreference: true,
+  phoneNumber: true
 });
 var updateUserSchema = createInsertSchema(users).pick({
   height: true,
@@ -124,7 +136,9 @@ var updateUserSchema = createInsertSchema(users).pick({
   longitude: true,
   lastLocation: true,
   profileCompleted: true,
-  profilePhoto: true
+  profilePhoto: true,
+  phoneNumber: true,
+  isPhoneVerified: true
 });
 var insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,

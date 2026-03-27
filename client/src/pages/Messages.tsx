@@ -245,8 +245,8 @@ export default function Messages() {
                         className={`flex ${message.senderId === user?.id ? "justify-end" : "justify-start"}`}
                       >
                         <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${message.senderId === user?.id
-                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md shadow-lg shadow-blue-500/15"
-                          : "bg-slate-800 border border-slate-700/50 text-slate-200 rounded-bl-md"
+                          ? "bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white rounded-br-md shadow-lg shadow-blue-500/20"
+                          : "bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-bl-md backdrop-blur-sm"
                           }`}>
                           <p className="text-sm leading-relaxed">{message.content}</p>
                           <p className={`text-[10px] mt-1.5 ${message.senderId === user?.id ? "text-blue-200/70" : "text-slate-500"
