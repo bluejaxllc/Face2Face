@@ -29,11 +29,15 @@ interface User {
   gender: string;
   age: number;
   selfRating: number;
+  height?: string | null;
+  weight?: string | null;
   favoriteColor?: string | null;
   favoriteSong?: string | null;
   fieldOfStudy?: string | null;
   interests?: string | null;
+  seeking?: string | null;
   bumpMessage?: string | null;
+  profilePhoto?: string | null;
 }
 
 // Create memoized components to prevent unnecessary rerenders
@@ -133,52 +137,8 @@ function Map() {
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
-  // Create mock users for debugging
-  const mockUsers = useMemo(() => {
-    if (nearbyUsers.length > 0) return [];
-
-    return currentLocation ? [
-      {
-        id: 101,
-        username: "mockuser1",
-        firstName: "John",
-        lastName: "B",
-        category: "casual",
-        isActive: true,
-        latitude: currentLocation.latitude + 0.01,
-        longitude: currentLocation.longitude + 0.01,
-        gender: "male",
-        age: 25,
-        selfRating: 4
-      },
-      {
-        id: 102,
-        username: "mockuser2",
-        firstName: "Sarah",
-        lastName: "G",
-        category: "intimate",
-        isActive: true,
-        latitude: currentLocation.latitude - 0.01,
-        longitude: currentLocation.longitude - 0.01,
-        gender: "female",
-        age: 22,
-        selfRating: 5
-      },
-      {
-        id: 103,
-        username: "mockuser3",
-        firstName: "Alex",
-        lastName: "B",
-        category: "casual",
-        isActive: true,
-        latitude: currentLocation.latitude + 0.005,
-        longitude: currentLocation.longitude - 0.007,
-        gender: "male",
-        age: 28,
-        selfRating: 3
-      }
-    ] : [];
-  }, [nearbyUsers, currentLocation]);
+  // No mock users in production
+  const mockUsers: User[] = [];
 
   // Fix Leaflet default icon issues
   delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -407,28 +367,7 @@ function Map() {
 
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full" style={{ paddingBottom: "45px" }}>
-      {/* Debugging info */}
-      <div className="bg-slate-900/80 backdrop-blur-md p-1 border-b border-slate-700/50 text-slate-300 text-[8px] z-50 flex justify-between items-center shadow-sm" style={{ height: "30px", maxHeight: "30px", overflow: "hidden" }}>
-        <div>
-          <div>Map Status: {mapLoaded ? 'Active' : 'Loading'}</div>
-          <div>Location: {currentLocation ? `${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}` : 'Unknown'}</div>
-          <div>Nearby Users: {filteredUsers.length}</div>
-          <div>Zoom Level: {zoom}</div>
-        </div>
-        <button
-          onClick={() => {
-            setMapLoaded(false);
-            setMapKey(Date.now());
-            console.log('Manual map refresh triggered');
-          }}
-          className="bg-secondary/80 hover:bg-secondary text-white px-2 py-0.5 rounded text-[9px]"
-          style={{ height: "18px", fontWeight: "bold", minWidth: "70px" }}
-        >
-          Refresh Map
-        </button>
-      </div>
-
-      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '300px', height: 'calc(100% - 30px)', marginBottom: "50px" }}>
+      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '300px', height: 'calc(100%)', marginBottom: "50px" }}>
         {!mapLoaded && (
           <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
             <div className="flex flex-col items-center space-y-3">
@@ -586,18 +525,34 @@ function Map() {
                 }}
               >
                 <Popup>
-                  <div className="text-center font-sans">
-                    <div className="font-bold text-lg mb-1">{user.firstName}</div>
-                    <div className="text-sm text-slate-500">Age: {user.age}</div>
-                    <div className="text-sm">Self Rating: {user.selfRating}/10</div>
+                  <div className="text-center font-sans min-w-[140px]">
+                    <div className="font-bold text-base mb-0.5">
+                      {user.firstName}, {user.age}
+                      <span className={`ml-1 text-sm ${user.gender === 'male' ? 'text-blue-500' : user.gender === 'female' ? 'text-pink-500' : 'text-purple-500'}`}>
+                        {user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500">Rating: {user.selfRating}/10</div>
+                    {(user.height || user.weight) && (
+                      <div className="text-xs text-slate-500">
+                        {user.height && <span>{user.height}</span>}
+                        {user.height && user.weight && <span> · </span>}
+                        {user.weight && <span>{user.weight}</span>}
+                      </div>
+                    )}
+                    {user.seeking && (
+                      <div className="text-[10px] text-pink-500 mt-1 italic truncate max-w-[150px]">
+                        Seeking: {user.seeking.split(',').slice(0, 2).join(', ')}
+                      </div>
+                    )}
                     {currentLocation && (
-                      <div className="text-xs mt-2 bg-slate-100 rounded-full py-1 px-2 text-slate-600 inline-block font-medium">
+                      <div className="text-xs mt-1.5 bg-slate-100 rounded-full py-0.5 px-2 text-slate-600 inline-block font-medium">
                         {calculateDistance(
                           currentLocation.latitude,
                           currentLocation.longitude,
                           user.latitude,
                           user.longitude
-                        ).toFixed(1)} miles away
+                        ).toFixed(1)} mi
                       </div>
                     )}
                   </div>
