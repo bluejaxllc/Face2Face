@@ -147,7 +147,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-slate-900 border border-slate-700/50 text-white">
+      <DialogContent className="sm:max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 text-white">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-white font-heading flex items-center gap-2">
             <Bell className="w-5 h-5 text-blue-400" />

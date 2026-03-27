@@ -6,7 +6,7 @@ import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
 import { calculateDistance } from "@/lib/distance";
-import { Locate, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
+import { Locate, Plus, Minus, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
@@ -395,31 +395,8 @@ function Map() {
           </div>
         </div>
 
-        {/* ═══════ TOP CENTER: Category toggle ═══════ */}
-        <div className="absolute left-1/2 -translate-x-1/2 z-[1000]" style={{ top: "12px" }}>
-          <div className="flex bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full p-0.5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
-            <button
-              className={`rounded-full font-semibold transition-all duration-300 ${showCasual
-                ? "bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)]"
-                : "text-slate-400 hover:text-white"
-                }`}
-              onClick={handleCasualClick}
-              style={{ height: "28px", padding: "0 14px", fontSize: "10px", letterSpacing: "0.5px", textTransform: "uppercase" }}
-            >
-              Connect
-            </button>
-            <button
-              className={`rounded-full font-semibold transition-all duration-300 ${showIntimate
-                ? "bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.4)]"
-                : "text-slate-400 hover:text-white"
-                }`}
-              onClick={handleIntimateClick}
-              style={{ height: "28px", padding: "0 14px", fontSize: "10px", letterSpacing: "0.5px", textTransform: "uppercase" }}
-            >
-              Grind
-            </button>
-          </div>
-        </div>
+
+
 
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
