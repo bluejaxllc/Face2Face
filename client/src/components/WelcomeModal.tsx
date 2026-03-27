@@ -36,7 +36,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
         <div className="p-6 space-y-5">
           {[
             { icon: MapPin, color: "text-blue-400", bg: "from-blue-500/20 to-blue-500/5", title: "Location-Based Discovery", desc: "Find people near you on the live map" },
-            { icon: RotateCw, color: "text-pink-400", bg: "from-pink-500/20 to-pink-500/5", title: "Real-Life Connects", desc: "Come within 3 miles to \"connect\" and start talking" },
+            { icon: RotateCw, color: "text-pink-400", bg: "from-pink-500/20 to-pink-500/5", title: "Connect with Real People", desc: "Spam-free, bot-free — only genuine connections nearby" },
             { icon: Heart, color: "text-rose-400", bg: "from-rose-500/20 to-rose-500/5", title: "Choose Your Style", desc: "Select \"Casual\" for hanging out or \"Intimate\" for more" },
             { icon: ShieldCheck, color: "text-emerald-400", bg: "from-emerald-500/20 to-emerald-500/5", title: "100% Real People", desc: "No bots, no fake accounts, no inactive profiles — ever" },
           ].map((step, i) => (
