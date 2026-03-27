@@ -291,7 +291,6 @@ function Map() {
             />
           )}
 
-          <MapCenterUpdater position={center} />
           <MapEventHandler onZoomChange={handleZoomChange} />
 
           {currentLocation && (
@@ -434,7 +433,16 @@ function Map() {
           {/* Current location */}
           <button
             className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 shadow-[0_4px_24px_rgba(0,0,0,0.4)] flex items-center justify-center hover:bg-slate-800/90 hover:border-blue-500/30 active:scale-95 transition-all duration-200"
-            onClick={updateLocation}
+            onClick={async () => {
+              await updateLocation();
+              if (mapRef.current && currentLocation) {
+                mapRef.current.flyTo(
+                  [currentLocation.latitude, currentLocation.longitude],
+                  mapRef.current.getZoom(),
+                  { duration: 1.5 }
+                );
+              }
+            }}
             aria-label="Get current location"
           >
             <Locate style={{ width: "16px", height: "16px" }} className="text-blue-400" />
