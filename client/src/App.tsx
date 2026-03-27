@@ -28,8 +28,7 @@ function AppRouter() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-screen full-height">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-full min-h-screen bg-slate-950">
       </div>
     );
   }
@@ -74,8 +73,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   // Show loading spinner or render the component
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full min-h-screen full-height">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-full min-h-screen bg-slate-950">
       </div>
     );
   }

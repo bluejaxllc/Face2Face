@@ -39,6 +39,13 @@ interface User {
   profilePhoto?: string | null;
 }
 
+function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+  const map = useMapEvents({
+    zoomend: () => { onZoomChange(map.getZoom()); },
+  });
+  return null;
+}
+
 function Map() {
   const { currentLocation, updateLocation, isError } = useLocationContext();
   const { user, updateProfile } = useAuth();
@@ -64,6 +71,7 @@ function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapKey, setMapKey] = useState(Date.now());
+  const hasCenteredInitially = useRef(false);
 
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", { radius, category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate" }],
@@ -100,21 +108,6 @@ function Map() {
       iconAnchor: [18, 18]
     });
   };
-
-  function MapCenterUpdater({ position }: { position: [number, number] }) {
-    const map = useMap();
-    useEffect(() => {
-      map.setView(position, map.getZoom());
-    }, [position, map]);
-    return null;
-  }
-
-  function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
-    const map = useMapEvents({
-      zoomend: () => { onZoomChange(map.getZoom()); },
-    });
-    return null;
-  }
 
   const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
     if (!filterOptions.showCasual && nearbyUser.category === "casual") return false;
@@ -198,6 +191,14 @@ function Map() {
     setZoom(newZoom);
   }, []);
 
+  // Effect to automatically center the map once after actual location is acquired
+  useEffect(() => {
+    if (mapLoaded && currentLocation && mapRef.current && !hasCenteredInitially.current) {
+      mapRef.current.setView([currentLocation.latitude, currentLocation.longitude], 14);
+      hasCenteredInitially.current = true;
+    }
+  }, [mapLoaded, currentLocation]);
+
   useEffect(() => {
     setFilterOptions(prev => ({
       ...prev,
@@ -247,14 +248,7 @@ function Map() {
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full" style={{ paddingBottom: "45px" }}>
       <div className="flex-1 relative" style={{ minHeight: '300px', height: 'calc(100%)', marginBottom: "50px" }}>
-        {!mapLoaded && (
-          <div className="absolute inset-0 z-30 bg-slate-900 grid place-items-center">
-            <div className="flex flex-col items-center space-y-3">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="text-slate-300 font-medium">Loading map...</p>
-            </div>
-          </div>
-        )}
+
         <MapContainer
           key={mapKey}
           center={center}
