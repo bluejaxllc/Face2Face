@@ -22,11 +22,13 @@ export default function MapView() {
 
   useEffect(() => {
     // Show welcome modal to new users or if profile is not completed
-    if (user && !user.profileCompleted) {
+    if (user && !user.profileCompleted && !sessionStorage.getItem('welcomeShown')) {
       setShowWelcome(true);
-    } else if (user && user.profileCompleted && !user.safetyAcknowledged) {
-      // If profile is completed but safety wasn't acknowledged, show safety modal
+      sessionStorage.setItem('welcomeShown', 'true');
+    } else if (user && !user.safetyAcknowledged && !sessionStorage.getItem('safetyShown')) {
+      // If safety wasn't acknowledged, show safety modal
       setShowSafety(true);
+      sessionStorage.setItem('safetyShown', 'true');
     }
   }, [user]);
 
@@ -51,7 +53,8 @@ export default function MapView() {
     // If they close the welcome modal and haven't accepted safety, show it next
     if (user && !user.safetyAcknowledged) {
       setShowSafety(true);
-    } else {
+      sessionStorage.setItem('safetyShown', 'true');
+    } else if (!user?.profileCompleted) {
       setLocation("/profile");
     }
   };
@@ -62,7 +65,9 @@ export default function MapView() {
       await updateProfile({ safetyAcknowledged: true });
       setShowSafety(false);
       toast({ title: "Safety Guidelines Accepted", description: "Let's set up your profile!" });
-      setLocation("/profile");
+      if (!user?.profileCompleted) {
+        setLocation("/profile");
+      }
     } catch (error) {
       toast({ title: "Update failed", description: "Failed to save safety acknowledgment.", variant: "destructive" });
     } finally {
