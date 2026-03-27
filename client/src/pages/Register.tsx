@@ -122,7 +122,7 @@ export default function Register() {
           <h1 className="text-5xl font-black tracking-tight mb-2">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 title-shimmer">Face2Face</span>
           </h1>
-          <p className="text-slate-400 text-sm tracking-wide">Meet people. In real life.</p>
+          <p className="text-slate-400 text-sm tracking-wide">Meet Someone.</p>
         </motion.div>
 
         <motion.div

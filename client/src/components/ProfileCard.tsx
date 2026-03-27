@@ -177,7 +177,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
               className="flex-1 h-14 rounded-xl font-bold tracking-wide shadow-lg shadow-blue-500/25 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border border-blue-400/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
               onClick={() => {
                 onClose();
-                setLocation("/messages");
+                setLocation(`/messages?userId=${user.id}`);
               }}
             >
               <MessageSquare className="w-5 h-5 mr-2 fill-current" />

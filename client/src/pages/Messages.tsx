@@ -5,7 +5,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { Send, Search, ArrowLeft, MessageSquare, Smile, Sparkles } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -39,6 +39,7 @@ interface ConnectedUser {
   id: number;
   firstName: string;
   lastName: string;
+  profilePhoto?: string | null;
 }
 
 export default function Messages() {
@@ -129,14 +130,17 @@ export default function Messages() {
                   variants={itemVariants}
                   key={bumpedUser.id}
                   className={`p-3 cursor-pointer transition-all duration-200 hover:bg-slate-800/50 group ${selectedUserId === bumpedUser.id
-                      ? "bg-slate-800/70 border-l-2 border-blue-500"
-                      : "border-l-2 border-transparent hover:border-slate-600"
+                    ? "bg-slate-800/70 border-l-2 border-blue-500"
+                    : "border-l-2 border-transparent hover:border-slate-600"
                     }`}
                   onClick={() => setSelectedUserId(bumpedUser.id)}
                 >
                   <div className="flex items-center">
                     <div className="relative mr-3">
                       <Avatar className="h-11 w-11">
+                        {bumpedUser.profilePhoto && (
+                          <AvatarImage src={bumpedUser.profilePhoto} alt={bumpedUser.firstName} />
+                        )}
                         <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 text-sm font-bold">
                           {getInitials(bumpedUser.firstName, bumpedUser.lastName)}
                         </AvatarFallback>
@@ -170,6 +174,9 @@ export default function Messages() {
                 </button>
                 <div className="relative">
                   <Avatar className="h-9 w-9">
+                    {selectedUser.profilePhoto && (
+                      <AvatarImage src={selectedUser.profilePhoto} alt={selectedUser.firstName} />
+                    )}
                     <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 text-xs font-bold">
                       {getInitials(selectedUser.firstName, selectedUser.lastName)}
                     </AvatarFallback>
@@ -207,8 +214,8 @@ export default function Messages() {
                         className={`flex ${message.senderId === user?.id ? "justify-end" : "justify-start"}`}
                       >
                         <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${message.senderId === user?.id
-                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md shadow-lg shadow-blue-500/15"
-                            : "bg-slate-800 border border-slate-700/50 text-slate-200 rounded-bl-md"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md shadow-lg shadow-blue-500/15"
+                          : "bg-slate-800 border border-slate-700/50 text-slate-200 rounded-bl-md"
                           }`}>
                           <p className="text-sm leading-relaxed">{message.content}</p>
                           <p className={`text-[10px] mt-1.5 ${message.senderId === user?.id ? "text-blue-200/70" : "text-slate-500"
