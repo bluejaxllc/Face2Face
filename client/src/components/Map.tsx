@@ -474,15 +474,15 @@ function Map() {
                   setRadius(Math.min(25000, Math.max(1, parseInt(val) || 1)));
                 }
               }}
-              className="bg-transparent text-white font-bold text-center outline-none border-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-              style={{ width: "48px", fontSize: "13px" }}
+              className="bg-transparent text-white font-bold text-center outline-none border-none"
+              style={{ width: "48px", fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
             />
             <span className="text-slate-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
             <button
               onClick={() => setRadius(25000)}
               className={`ml-0.5 rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${radius >= 25000
-                  ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-blue-500/25"
-                  : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-blue-500/25"
+                : "text-slate-400 hover:text-white hover:bg-slate-700/50"
                 }`}
               style={{ height: "26px", width: "26px", fontSize: "13px" }}
               title="Unlimited radius"
