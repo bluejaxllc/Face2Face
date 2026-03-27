@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Send, Search, ArrowLeft, MessageSquare, Smile, Sparkles } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import { PageTransition } from "@/components/PageTransition";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -103,7 +104,7 @@ export default function Messages() {
   const showChat = selectedUserId !== null;
 
   return (
-    <div className="h-screen page-dark">
+    <PageTransition className="h-screen page-dark">
       <Header />
 
       <div className="fixed left-0 right-0 flex overflow-hidden" style={{ top: "48px", bottom: "52px" }}>
@@ -317,6 +318,6 @@ export default function Messages() {
       </div>
 
       <BottomNavigation />
-    </div>
+    </PageTransition>
   );
 }

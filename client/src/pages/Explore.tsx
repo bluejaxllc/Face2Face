@@ -5,12 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
 import { calculateDistance } from "@/lib/distance";
-import { Loader2, Search, Ruler, Weight, ShieldCheck } from "lucide-react";
+import { Loader2, Search, Ruler, Weight, ShieldCheck, Star } from "lucide-react";
 import ProfileCard from "@/components/ProfileCard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
+import { PageTransition } from "@/components/PageTransition";
 
 export default function Explore() {
     const { currentLocation } = useLocation();
@@ -52,7 +53,7 @@ export default function Explore() {
     };
 
     return (
-        <div className="h-screen w-full page-dark">
+        <PageTransition className="h-screen w-full page-dark">
             <Header />
             <div className="fixed left-0 right-0 overflow-y-auto px-4" style={{ top: "48px", bottom: "52px" }}>
                 <div className="w-full max-w-md mx-auto">
@@ -92,9 +93,9 @@ export default function Explore() {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i * 0.05 }}
                                         key={nearbyUser.id}
-                                        className={`bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden cursor-pointer active:scale-95 transition-all duration-300 ${isCasual
-                                            ? "hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5"
-                                            : "hover:border-pink-500/30 hover:shadow-lg hover:shadow-pink-500/5"
+                                        className={`glass-card overflow-hidden cursor-pointer active:scale-95 transition-all duration-300 ${isCasual
+                                            ? "hover:border-blue-500/30"
+                                            : "hover:border-pink-500/30"
                                             }`}
                                         onClick={() => setSelectedUser(nearbyUser)}
                                     >
@@ -111,12 +112,19 @@ export default function Explore() {
                                                     {nearbyUser.firstName[0]}{(nearbyUser.lastName || '')[0] || ''}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <span className={`absolute top-2 right-2 text-lg ${genderInfo.color}`}>{genderInfo.icon}</span>
+                                            <span className={`absolute top-2 right-2 text-lg drop-shadow-md ${genderInfo.color}`}>{genderInfo.icon}</span>
                                         </div>
                                         <div className="p-3">
-                                            <h3 className="font-bold text-white truncate text-sm">
-                                                {nearbyUser.firstName}, {nearbyUser.age}
-                                            </h3>
+                                            <div className="flex justify-between items-start mb-0.5">
+                                                <h3 className="font-bold text-white truncate text-sm flex-1">
+                                                    {nearbyUser.firstName}, {nearbyUser.age}
+                                                </h3>
+                                                <div className="flex items-center gap-0.5 bg-slate-900/50 rounded-full px-1.5 py-0.5 border border-slate-700/50">
+                                                    <Star className="w-2.5 h-2.5 text-yellow-500" />
+                                                    <span className="text-[10px] font-bold text-amber-400">{nearbyUser.selfRating || 5}</span>
+                                                </div>
+                                            </div>
+
                                             <div className="flex items-center gap-1 mt-1 flex-wrap">
                                                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${isCasual
                                                     ? "bg-blue-500/15 text-blue-400 border border-blue-500/20"
@@ -130,13 +138,14 @@ export default function Explore() {
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-[10px] text-slate-500 mt-1">
-                                                {currentLocation && calculateDistance(currentLocation.latitude, currentLocation.longitude, nearbyUser.latitude, nearbyUser.longitude).toFixed(1)} mi
+                                            <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                {currentLocation && calculateDistance(currentLocation.latitude, currentLocation.longitude, nearbyUser.latitude, nearbyUser.longitude).toFixed(1)} mi away
                                             </p>
                                             {nearbyUser.seeking && (
-                                                <div className="flex flex-wrap gap-0.5 mt-1">
+                                                <div className="flex flex-wrap gap-0.5 mt-1.5">
                                                     {nearbyUser.seeking.split(",").slice(0, 2).map((item: string, idx: number) => (
-                                                        <span key={idx} className="text-[9px] bg-pink-950/50 border border-pink-800/30 rounded-full px-1.5 py-0.5 text-pink-300 truncate max-w-[80px]">
+                                                        <span key={idx} className="text-[9px] bg-slate-800 border border-slate-700/50 rounded-full px-1.5 py-0.5 text-slate-300 truncate max-w-[80px]">
                                                             {item.trim()}
                                                         </span>
                                                     ))}
@@ -174,6 +183,6 @@ export default function Explore() {
             )}
 
             <BottomNavigation />
-        </div>
+        </PageTransition>
     );
 }

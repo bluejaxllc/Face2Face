@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react";
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { AnimatePresence } from "framer-motion";
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -23,6 +24,7 @@ import { useAuth } from "./contexts/AuthContext";
 // Create a separate AppRouter component that uses the auth context
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [location] = useLocation();
 
   if (isLoading) {
     return (
@@ -33,26 +35,28 @@ function AppRouter() {
   }
 
   return (
-    <Switch>
-      <Route path="/">
-        {isAuthenticated ? <MapView /> : <Register />}
-      </Route>
-      <Route path="/register" component={Register} />
-      <Route path="/auth" component={Register} />
-      <Route path="/map">
-        <MapView />
-      </Route>
-      <Route path="/explore">
-        <ProtectedRoute component={Explore} />
-      </Route>
-      <Route path="/messages">
-        <ProtectedRoute component={Messages} />
-      </Route>
-      <Route path="/profile">
-        <ProtectedRoute component={Profile} />
-      </Route>
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <Switch location={location} key={location}>
+        <Route path="/">
+          {isAuthenticated ? <MapView /> : <Register />}
+        </Route>
+        <Route path="/register" component={Register} />
+        <Route path="/auth" component={Register} />
+        <Route path="/map">
+          <MapView />
+        </Route>
+        <Route path="/explore">
+          <ProtectedRoute component={Explore} />
+        </Route>
+        <Route path="/messages">
+          <ProtectedRoute component={Messages} />
+        </Route>
+        <Route path="/profile">
+          <ProtectedRoute component={Profile} />
+        </Route>
+        <Route component={NotFound} />
+      </Switch>
+    </AnimatePresence>
   );
 }
 

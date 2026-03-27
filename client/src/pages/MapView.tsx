@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Map from "@/components/Map";
 import BottomNavigation from "@/components/BottomNavigation";
 import WelcomeModal from "@/components/WelcomeModal";
+import { PageTransition } from "@/components/PageTransition";
 
 export default function MapView() {
   const { user } = useAuth();
@@ -39,13 +40,13 @@ export default function MapView() {
   };
 
   return (
-    <div className="h-screen w-full page-dark map-view">
+    <PageTransition className="h-screen w-full page-dark map-view">
       <Header />
       <div className="fixed left-0 right-0" style={{ top: "48px", bottom: "52px" }}>
         <Map />
       </div>
       <BottomNavigation />
       <WelcomeModal isOpen={showWelcome} onClose={handleCloseWelcome} />
-    </div>
+    </PageTransition>
   );
 }

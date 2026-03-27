@@ -16,6 +16,7 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2, Camera, LogOut, Star, Heart, MapPin, Music, Palette, BookOpen, MessageCircle, Ruler, Weight, Search, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { PageTransition } from "@/components/PageTransition";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -152,7 +153,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="h-screen page-dark">
+    <PageTransition className="h-screen page-dark">
       <Header />
 
       <motion.div
@@ -604,6 +605,6 @@ export default function Profile() {
       </motion.div >
 
       <BottomNavigation />
-    </div >
+    </PageTransition>
   );
 }
