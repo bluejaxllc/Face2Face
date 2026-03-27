@@ -38,8 +38,8 @@ interface ProfileCardProps {
 export default function ProfileCard({ user, onClose, onConnect, distance }: ProfileCardProps) {
   const [, setLocation] = useLocation();
 
-  // Get bump count to determine profile reveal level
-  const { data: bumps = [] } = useQuery<any[]>({
+  // Get connection count to determine profile reveal level
+  const { data: connections = [] } = useQuery<any[]>({
     queryKey: ["/api/bumps", user.id],
     refetchOnWindowFocus: false,
   });
@@ -48,8 +48,8 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
     return `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
   };
 
-  const hasConnected = bumps.length > 0;
-  const isRevealed = bumps.length >= 2;
+  const hasConnected = connections.length > 0;
+  const isRevealed = connections.length >= 2;
 
   const genderBadge = user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥';
   const genderColor = user.gender === 'male' ? 'text-blue-400' : user.gender === 'female' ? 'text-pink-400' : 'text-purple-400';

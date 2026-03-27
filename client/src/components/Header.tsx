@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +13,13 @@ export default function Header() {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [, navigate] = useLocation();
+
+  const { data: notifications = [] } = useQuery<any[]>({
+    queryKey: ["/api/notifications"],
+    enabled: !!user,
+    refetchInterval: 15000,
+  });
+  const unreadCount = notifications.filter((n: any) => !n.isRead).length;
 
   const getInitials = (firstName?: string, lastName?: string) => {
     if (!firstName || !lastName) return "U";
@@ -46,8 +54,10 @@ export default function Header() {
             aria-label="Notifications"
             style={{ padding: "6px" }}
           >
-            <Bell style={{ width: "16px", height: "16px" }} className="text-slate-400" />
-            <span className="absolute bg-blue-500 rounded-full" style={{ width: "6px", height: "6px", top: "4px", right: "4px" }}></span>
+            <Bell style={{ width: "16px", height: "16px" }} className={unreadCount > 0 ? "text-blue-400" : "text-slate-400"} />
+            {unreadCount > 0 && (
+              <span className="absolute bg-pink-500 rounded-full animate-pulse shadow-lg shadow-pink-500/50" style={{ width: "8px", height: "8px", top: "3px", right: "3px" }}></span>
+            )}
           </button>
         </div>
 

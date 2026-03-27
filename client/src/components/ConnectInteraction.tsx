@@ -143,7 +143,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
       });
 
       if (!res.ok) {
-        throw new Error("Failed to send bump request");
+        throw new Error("Failed to send connect request");
       }
 
       toast({
@@ -159,10 +159,10 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
       }, 2000);
 
     } catch (error) {
-      console.error("Failed to send bump:", error);
+      console.error("Failed to send connect:", error);
       toast({
         title: "Connect failed",
-        description: "Unable to send bump request. Please try again.",
+        description: "Unable to send connect request. Please try again.",
         variant: "destructive",
       });
     }
@@ -259,9 +259,9 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bump-message" className="text-slate-300 text-sm font-medium">Your message</Label>
+                <Label htmlFor="connect-message" className="text-slate-300 text-sm font-medium">Your message</Label>
                 <Textarea
-                  id="bump-message"
+                  id="connect-message"
                   placeholder="Hey, want to meet up?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -312,9 +312,9 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bump-message" className="text-slate-300 text-sm font-medium">Your message</Label>
+                <Label htmlFor="connect-message" className="text-slate-300 text-sm font-medium">Your message</Label>
                 <Textarea
-                  id="bump-message"
+                  id="connect-message"
                   placeholder="Hey, want to meet up?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

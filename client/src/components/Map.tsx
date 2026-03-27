@@ -35,7 +35,7 @@ interface User {
   fieldOfStudy?: string | null;
   interests?: string | null;
   seeking?: string | null;
-  bumpMessage?: string | null;
+  connectMessage?: string | null;
   profilePhoto?: string | null;
 }
 
@@ -424,8 +424,8 @@ function Map() {
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
           <div className={`flex items-center gap-2 backdrop-blur-xl border rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)] transition-all duration-300 ${isActive
-              ? "bg-emerald-500/15 border-emerald-500/30 map-live-active"
-              : "bg-slate-900/80 border-slate-700/40"
+            ? "bg-emerald-500/15 border-emerald-500/30 map-live-active"
+            : "bg-slate-900/80 border-slate-700/40"
             }`} style={{ padding: "4px 12px", height: "32px" }}>
             <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-emerald-400 animate-pulse" : "text-slate-500"}`} />
             <span className={`font-bold tracking-wider ${isActive ? "text-emerald-300" : "text-slate-400"}`} style={{ fontSize: "10px" }}>

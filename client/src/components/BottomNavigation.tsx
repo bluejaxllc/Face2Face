@@ -8,12 +8,12 @@ export default function BottomNavigation() {
   const { user } = useAuth();
 
   // Fetch connected users to get total unread count
-  const { data: bumpedUsers = [] } = useQuery<any[]>({
+  const { data: connectedUsers = [] } = useQuery<any[]>({
     queryKey: ["/api/bumps/users"],
     enabled: !!user,
     refetchInterval: 15000, // poll every 15s for new messages
   });
-  const unreadCount = bumpedUsers.reduce((sum, u) => sum + (u.unreadCount || 0), 0);
+  const unreadCount = connectedUsers.reduce((sum, u) => sum + (u.unreadCount || 0), 0);
   // Fetch unread notifications
   const { data: notifications = [] } = useQuery<any[]>({
     queryKey: ["/api/notifications"],
