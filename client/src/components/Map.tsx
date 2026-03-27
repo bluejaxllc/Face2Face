@@ -306,9 +306,18 @@ function Map() {
                 position={[currentLocation.latitude, currentLocation.longitude]}
                 icon={L.divIcon({
                   className: 'current-location-marker',
-                  html: '<div class="pulse"></div>',
-                  iconSize: [20, 20],
-                  iconAnchor: [10, 10]
+                  html: `
+                    <div class="radar-container">
+                      <div class="radar-grid"></div>
+                      <div class="radar-ring radar-ring-1"></div>
+                      <div class="radar-ring radar-ring-2"></div>
+                      <div class="radar-ring radar-ring-3"></div>
+                      <div class="radar-sweep"></div>
+                      <div class="pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;"></div>
+                    </div>
+                  `,
+                  iconSize: [280, 280],
+                  iconAnchor: [140, 140]
                 })}
               >
                 <Popup>Your location</Popup>

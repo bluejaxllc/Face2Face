@@ -13,7 +13,7 @@ const registerSchema = z.object({
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50),
   phoneNumber: z.string().min(10).max(15).optional(),
-  gender: z.string().optional().default("other"),
+  gender: z.string().optional().default("female"),
   age: z.coerce.number().min(18).optional().default(18),
   selfRating: z.coerce.number().min(1).max(10).optional().default(5),
 });

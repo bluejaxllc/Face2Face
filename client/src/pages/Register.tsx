@@ -484,7 +484,6 @@ export default function Register() {
                             <SelectContent>
                               <SelectItem value="male">Male</SelectItem>
                               <SelectItem value="female">Female</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -535,7 +534,6 @@ export default function Register() {
                           <SelectContent>
                             <SelectItem value="men">Men</SelectItem>
                             <SelectItem value="women">Women</SelectItem>
-                            <SelectItem value="all">Everyone</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

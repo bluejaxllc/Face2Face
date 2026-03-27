@@ -482,7 +482,6 @@ export default function Profile() {
                           <SelectContent>
                             <SelectItem value="men">Men</SelectItem>
                             <SelectItem value="women">Women</SelectItem>
-                            <SelectItem value="all">Everyone</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -21,7 +21,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   const [age, setAge] = useState(user?.age || 18);
   const [height, setHeight] = useState(user?.height || "");
   const [weight, setWeight] = useState(user?.weight || "");
-  const [datingPreference, setDatingPreference] = useState(user?.datingPreference || "all");
+  const [datingPreference, setDatingPreference] = useState(user?.datingPreference || "women");
   const [category, setCategory] = useState(user?.category || "casual");
   const [seeking, setSeeking] = useState(user?.seeking || "");
   const [showOnMap, setShowOnMap] = useState(user?.isActive !== false);

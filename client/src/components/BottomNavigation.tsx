@@ -34,45 +34,47 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <nav className="bg-slate-900/90 backdrop-blur-xl border-t border-slate-800/50 fixed bottom-0 left-0 right-0 z-[9999]" style={{ height: "calc(52px + env(safe-area-inset-bottom, 0px))", paddingBottom: "env(safe-area-inset-bottom, 0px)", padding: "4px 8px", borderImage: "linear-gradient(90deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15), rgba(236,72,153,0.2)) 1" }}>
-      <div className="flex justify-around items-center max-w-screen-lg mx-auto h-full">
-        {navItems.map(({ path, icon: Icon, label, badge }) => {
-          const isActive = location === path;
-          return (
-            <div
-              key={path}
-              onClick={navigateTo(path)}
-              className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
-              style={{ minWidth: "56px", padding: "4px 8px" }}
-            >
-              <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : 'hover:scale-105'}`}>
-                <Icon
-                  className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
-                  style={{ width: "20px", height: "20px" }}
-                  strokeWidth={isActive ? 2.5 : 1.5}
-                />
+    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <nav className="bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+        <div className="flex justify-around items-center h-full relative">
+          {navItems.map(({ path, icon: Icon, label, badge }) => {
+            const isActive = location === path;
+            return (
+              <div
+                key={path}
+                onClick={navigateTo(path)}
+                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
+                style={{ minWidth: "56px", padding: "4px 8px" }}
+              >
+                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : 'hover:scale-105'}`}>
+                  <Icon
+                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
+                    style={{ width: "22px", height: "22px" }}
+                    strokeWidth={isActive ? 2.5 : 1.5}
+                  />
+                  {isActive && (
+                    <div className="absolute -inset-2 bg-blue-500/20 rounded-full blur-md -z-10" />
+                  )}
+                  {badge && badge > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400" : "text-transparent opacity-0 absolute"}`}
+                  style={{ fontSize: "10px", marginTop: "4px" }}
+                >
+                  {label}
+                </span>
                 {isActive && (
-                  <div className="absolute -inset-1.5 bg-blue-500/10 rounded-full blur-sm -z-10" />
-                )}
-                {badge && badge > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "7px", height: "14px", width: "14px" }}>
-                    {badge > 9 ? "9+" : badge}
-                  </span>
+                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
                 )}
               </div>
-              <span
-                className={`font-medium transition-all duration-300 ${isActive ? "text-blue-400" : "text-slate-500"}`}
-                style={{ fontSize: "9px", marginTop: "2px" }}
-              >
-                {label}
-              </span>
-              {isActive && (
-                <div className="absolute -top-0.5 w-8 h-0.5 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </nav>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
   );
 }

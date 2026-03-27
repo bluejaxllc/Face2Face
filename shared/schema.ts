@@ -9,14 +9,14 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
-  gender: text("gender").notNull().default("other"), // 'male', 'female', 'other'
+  gender: text("gender").notNull().default("female"), // 'male', 'female'
   age: integer("age").notNull().default(18),
   height: text("height"),
   weight: text("weight"),
   selfRating: integer("self_rating").default(5),
   category: text("category").default("casual"), // "casual" or "intimate"
   bio: text("bio"),
-  datingPreference: text("dating_preference").default("all"), // "men", "women", "all"
+  datingPreference: text("dating_preference").default("women"), // "men", "women"
   favoriteColor: text("favorite_color"),
   favoriteSong: text("favorite_song"),
   fieldOfStudy: text("field_of_study"),

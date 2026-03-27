@@ -35,8 +35,8 @@ var users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
-  gender: text("gender").notNull().default("other"),
-  // 'male', 'female', 'other'
+  gender: text("gender").notNull().default("female"),
+  // 'male', 'female'
   age: integer("age").notNull().default(18),
   height: text("height"),
   weight: text("weight"),
@@ -44,8 +44,8 @@ var users = pgTable("users", {
   category: text("category").default("casual"),
   // "casual" or "intimate"
   bio: text("bio"),
-  datingPreference: text("dating_preference").default("all"),
-  // "men", "women", "all"
+  datingPreference: text("dating_preference").default("women"),
+  // "men", "women"
   favoriteColor: text("favorite_color"),
   favoriteSong: text("favorite_song"),
   fieldOfStudy: text("field_of_study"),
@@ -397,7 +397,7 @@ var registerSchema = z.object({
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50),
   phoneNumber: z.string().min(10).max(15).optional(),
-  gender: z.string().optional().default("other"),
+  gender: z.string().optional().default("female"),
   age: z.coerce.number().min(18).optional().default(18),
   selfRating: z.coerce.number().min(1).max(10).optional().default(5)
 });
