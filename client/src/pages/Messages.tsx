@@ -244,15 +244,22 @@ export default function Messages() {
                         key={message.id}
                         className={`flex ${message.senderId === user?.id ? "justify-end" : "justify-start"}`}
                       >
-                        <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${message.senderId === user?.id
-                          ? "bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 text-white rounded-br-md shadow-lg shadow-blue-500/20"
-                          : "bg-slate-800/80 border border-slate-700/50 text-slate-200 rounded-bl-md backdrop-blur-sm"
+                        <div className={`max-w-[75%] px-4 py-2.5 rounded-[20px] shadow-sm relative group ${message.senderId === user?.id
+                          ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white rounded-br-[4px] shadow-pink-500/20"
+                          : "bg-slate-800/90 border border-slate-700/60 text-slate-100 rounded-bl-[4px] backdrop-blur-md shadow-black/20"
                           }`}>
-                          <p className="text-sm leading-relaxed">{message.content}</p>
-                          <p className={`text-[10px] mt-1.5 ${message.senderId === user?.id ? "text-blue-200/70" : "text-slate-500"
+                          <p className="text-[15px] leading-relaxed tracking-wide">{message.content}</p>
+                          <div className={`flex items-center gap-1.5 mt-1.5 justify-end ${message.senderId === user?.id ? "text-white/70" : "text-slate-400"
                             }`}>
-                            {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
-                          </p>
+                            <p className="text-[10px] uppercase font-semibold tracking-wider">
+                              {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+                            </p>
+                            {message.senderId === user?.id && (
+                              <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 opacity-80" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     ))}
