@@ -106,7 +106,7 @@ export default function Messages() {
     <div className="min-h-screen flex flex-col page-dark">
       <Header />
 
-      <div className="flex-1 overflow-hidden flex" style={{ marginTop: "44px", marginBottom: "48px" }}>
+      <div className="flex-1 overflow-hidden flex" style={{ marginTop: "48px", marginBottom: "52px" }}>
         {/* Contacts sidebar */}
         <motion.div
           className={`w-full md:w-80 lg:w-96 md:border-r border-slate-800 flex flex-col ${showChat ? 'hidden md:flex' : 'flex'}`}

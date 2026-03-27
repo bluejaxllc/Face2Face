@@ -157,7 +157,7 @@ export default function Profile() {
 
       <motion.div
         className="flex-1 overflow-y-auto pb-24 page-enter"
-        style={{ marginTop: "44px" }}
+        style={{ marginTop: "48px" }}
         variants={containerVariants}
         initial="hidden"
         animate="show"

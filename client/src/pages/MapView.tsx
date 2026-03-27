@@ -41,7 +41,7 @@ export default function MapView() {
   return (
     <div className="min-h-screen w-full flex flex-col page-dark map-view">
       <Header />
-      <div className="flex-1 relative w-full" style={{ marginTop: "44px", marginBottom: "48px", height: "calc(100vh - 92px)" }}>
+      <div className="flex-1 relative w-full" style={{ marginTop: "48px", marginBottom: "52px", height: "calc(100vh - 100px)" }}>
         <Map />
       </div>
       <BottomNavigation />

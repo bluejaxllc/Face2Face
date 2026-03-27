@@ -276,19 +276,69 @@
   }
 
   .user-marker {
-    @apply w-10 h-10 rounded-full border-2 border-slate-700 flex justify-center items-center shadow-lg shadow-black/30 cursor-pointer absolute transition-transform;
+    @apply w-10 h-10 rounded-full border-2 flex justify-center items-center cursor-pointer absolute;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   }
 
   .user-marker:hover {
-    @apply transform scale-110;
+    @apply transform scale-125;
   }
 
   .casual-marker {
-    @apply bg-secondary text-white;
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    border-color: rgba(96, 165, 250, 0.5);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+  }
+
+  .casual-marker:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .casual-marker::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    animation: markerPulse 2s ease-out infinite;
   }
 
   .intimate-marker {
-    @apply bg-primary text-white;
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    border-color: rgba(244, 114, 182, 0.5);
+    box-shadow: 0 0 12px rgba(236, 72, 153, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+  }
+
+  .intimate-marker:hover {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .intimate-marker::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(236, 72, 153, 0.3);
+    animation: markerPulse 2s ease-out infinite;
+  }
+
+  @keyframes markerPulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+
+    70% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
   }
 
   .settings-overlay {
@@ -306,7 +356,6 @@
 
   .map-container {
     @apply w-full h-full min-h-[300px] relative bg-slate-900;
-    /* More visible pattern for debugging */
     background-image:
       linear-gradient(to right,
         rgba(124, 58, 237, 0.1) 1px,
@@ -375,7 +424,7 @@
     background: #0f172a;
   }
 
-  /* Leaflet Map Marker Styles */
+  /* Leaflet Map Marker Pin Styles */
   .marker-pin {
     width: 30px;
     height: 30px;
@@ -385,18 +434,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     margin: -15px 0 0 -15px;
   }
 
   .marker-pin.casual-marker {
-    background-color: hsl(210 100% 65%);
-    /* Same as secondary */
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
   }
 
   .marker-pin.intimate-marker {
-    background-color: hsl(329 100% 53%);
-    /* Same as primary */
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
   }
 
   .marker-pin::after {

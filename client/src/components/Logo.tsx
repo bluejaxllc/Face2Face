@@ -9,6 +9,35 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
             className={className}
             {...props}
         >
+            <defs>
+                {/* Male gradient: cool blue */}
+                <linearGradient id="maleGrad" x1="10" y1="5" x2="60" y2="88" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#60a5fa" />
+                    <stop offset="0.5" stopColor="#3b82f6" />
+                    <stop offset="1" stopColor="#2563eb" />
+                </linearGradient>
+                {/* Female gradient: warm pink */}
+                <linearGradient id="femaleGrad" x1="60" y1="5" x2="110" y2="88" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#f472b6" />
+                    <stop offset="0.5" stopColor="#ec4899" />
+                    <stop offset="1" stopColor="#db2777" />
+                </linearGradient>
+                {/* Heart gradient: blend of both */}
+                <linearGradient id="heartGrad" x1="48" y1="68" x2="72" y2="86" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#60a5fa" />
+                    <stop offset="0.3" stopColor="#a78bfa" />
+                    <stop offset="1" stopColor="#ec4899" />
+                </linearGradient>
+                {/* Glow filter */}
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+
             {/* Male side profile (left, facing RIGHT) */}
             <path
                 d="M 10 88
@@ -42,7 +71,7 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
                    C 58 64 60 68 60 72
                    L 60 88
                    Z"
-                fill="var(--primary, hsl(222, 60%, 45%))"
+                fill="url(#maleGrad)"
                 opacity="0.95"
             />
 
@@ -79,17 +108,23 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
                    C 62 64 60 68 60 72
                    L 60 88
                    Z"
-                fill="var(--secondary, hsl(330, 81%, 60%))"
+                fill="url(#femaleGrad)"
                 opacity="0.95"
             />
 
-            {/* Gradient defs */}
-            <defs>
-                <linearGradient id="faceGrad" x1="10" y1="5" x2="110" y2="88" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="var(--primary, hsl(222, 60%, 45%))" />
-                    <stop offset="1" stopColor="var(--secondary, hsl(330, 81%, 60%))" />
-                </linearGradient>
-            </defs>
+            {/* Small heart between the faces */}
+            <path
+                d="M 60 76
+                   C 60 74 58 72 56 72
+                   C 54 72 52 74 52 76
+                   C 52 80 56 83 60 86
+                   C 64 83 68 80 68 76
+                   C 68 74 66 72 64 72
+                   C 62 72 60 74 60 76 Z"
+                fill="url(#heartGrad)"
+                opacity="0.7"
+                filter="url(#glow)"
+            />
         </svg>
     );
 }
