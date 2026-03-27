@@ -138,11 +138,11 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
                 <SelectValue placeholder="Select minimum rating" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
-                <SelectItem value="1">1 star</SelectItem>
-                <SelectItem value="2">2 stars</SelectItem>
-                <SelectItem value="3">3 stars</SelectItem>
-                <SelectItem value="4">4 stars</SelectItem>
-                <SelectItem value="5">5 stars</SelectItem>
+                <SelectItem value="1">⭐ (Any)</SelectItem>
+                <SelectItem value="2">⭐⭐</SelectItem>
+                <SelectItem value="3">⭐⭐⭐</SelectItem>
+                <SelectItem value="4">⭐⭐⭐⭐</SelectItem>
+                <SelectItem value="5">⭐⭐⭐⭐⭐</SelectItem>
               </SelectContent>
             </Select>
           </div>

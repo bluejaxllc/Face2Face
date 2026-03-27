@@ -206,7 +206,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
             type="button"
             variant="outline"
             onClick={handleMarkAllAsRead}
-            className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+            className="w-full rounded-xl border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white transition-all"
             disabled={notifications.length === 0 || !notifications.some(n => !n.read)}
           >
             Mark All as Read
