@@ -1,169 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-         crossorigin=""/>
-    <title>Bump and Grind</title>
-    <style>
-      /* Critical styles in head to avoid FOUC */
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        width: 100%;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap"
+    rel="stylesheet">
+  <title>Face2Face</title>
+  <style>
+    /* Critical styles in head to avoid FOUC */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+
+    /* Special handling for auth page - allow normal scrolling */
+    .auth-page {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+      height: auto;
+      min-height: 100vh;
+    }
+
+    /* Map view needs fixed positioning */
+    .map-view {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    /* Root container adapts to content type */
+    #root {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Root inherits fixed positioning for map view */
+    .map-view #root {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+
+    /* Root allows scrolling for auth pages */
+    .auth-page #root {
+      position: relative;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Basic scroll bar visibility */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    /* For Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+
+    /* Prevent content from being hidden under keyboard on mobile */
+    @media (max-width: 640px) {
+      html {
+        height: -webkit-fill-available;
       }
-      
-      /* Special handling for auth page - allow normal scrolling */
-      .auth-page {
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        position: relative;
-        height: auto;
-        min-height: 100vh;
-      }
-      
-      /* Map view needs fixed positioning */
-      .map-view {
-        overflow: hidden;
+
+      body {
         position: fixed;
         width: 100%;
         height: 100%;
+        min-height: -webkit-fill-available;
+        overflow: hidden;
+      }
+
+      body.ios-device #root,
+      body.android-device #root {
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-      }
-      
-      /* Root container adapts to content type */
-      #root {
-        width: 100%;
-        height: 100%;
-      }
-      
-      /* Root inherits fixed positioning for map view */
-      .map-view #root {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
         overflow: hidden;
       }
-      
-      /* Root allows scrolling for auth pages */
-      .auth-page #root {
-        position: relative;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      
-      /* Basic scroll bar visibility */
-      ::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
-      }
-      
-      ::-webkit-scrollbar-thumb {
-        background: rgba(0,0,0,0.2);
-        border-radius: 10px;
-      }
-      
-      /* For Firefox */
-      * {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(0,0,0,0.2) transparent;
-      }
-      
-      /* Prevent content from being hidden under keyboard on mobile */
-      @media (max-width: 640px) {
-        html {
-          height: -webkit-fill-available;
-        }
-        
-        body {
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          min-height: -webkit-fill-available;
-          overflow: hidden;
-        }
-        
-        body.ios-device #root, body.android-device #root {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          overflow: hidden;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <!-- This script injects a replit badge into the page, please feel free to remove this line -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-badge-v3.js"></script>
-    <script>
-      // Mobile device optimizations
-      document.addEventListener('DOMContentLoaded', function() {
-        // Detect mobile devices
-        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Add specific classes for different platforms
-        if (isMobile) {
-          document.body.classList.add('mobile-device');
-          
-          // Special handling for Android
-          if (/Android/.test(navigator.userAgent)) {
-            document.body.classList.add('android-device');
-            
-            // Add the scroll-container class to scrollable elements on auth page
-            document.querySelectorAll('.auth-page').forEach(function(el) {
-              el.classList.add('scroll-container');
-            });
-            
-            // Force repaints on scroll to fix rendering issues on Android
-            document.addEventListener('scroll', function(e) {
-              // Check if the element or any of its parents has the scroll-container class
-              let target = e.target;
-              let isScrollContainer = false;
-              
-              while (target && target.classList) {
-                if (target.classList.contains('scroll-container') || 
-                    target.classList.contains('auth-page')) {
-                  isScrollContainer = true;
-                  break;
-                }
-                target = target.parentElement;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    // Mobile device optimizations
+    document.addEventListener('DOMContentLoaded', function () {
+      // Detect mobile devices
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      // Add specific classes for different platforms
+      if (isMobile) {
+        document.body.classList.add('mobile-device');
+
+        // Special handling for Android
+        if (/Android/.test(navigator.userAgent)) {
+          document.body.classList.add('android-device');
+
+          // Add the scroll-container class to scrollable elements on auth page
+          document.querySelectorAll('.auth-page').forEach(function (el) {
+            el.classList.add('scroll-container');
+          });
+
+          // Force repaints on scroll to fix rendering issues on Android
+          document.addEventListener('scroll', function (e) {
+            // Check if the element or any of its parents has the scroll-container class
+            let target = e.target;
+            let isScrollContainer = false;
+
+            while (target && target.classList) {
+              if (target.classList.contains('scroll-container') ||
+                target.classList.contains('auth-page')) {
+                isScrollContainer = true;
+                break;
               }
-              
-              if (isScrollContainer) {
-                target.style.transform = 'translateZ(0)';
-                setTimeout(function() {
-                  target.style.transform = '';
-                }, 0);
-              }
-            }, true);
-          }
-          
-          // Special handling for iOS
-          if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-            document.body.classList.add('ios-device');
-            
-            // Add momentum scrolling to scrollable elements
-            document.querySelectorAll('.auth-page, .scroll-container').forEach(function(el) {
-              el.style.WebkitOverflowScrolling = 'touch';
-            });
-          }
+              target = target.parentElement;
+            }
+
+            if (isScrollContainer) {
+              target.style.transform = 'translateZ(0)';
+              setTimeout(function () {
+                target.style.transform = '';
+              }, 0);
+            }
+          }, true);
         }
-      });
-    </script>
-  </body>
+
+        // Special handling for iOS
+        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+          document.body.classList.add('ios-device');
+
+          // Add momentum scrolling to scrollable elements
+          document.querySelectorAll('.auth-page, .scroll-container').forEach(function (el) {
+            el.style.WebkitOverflowScrolling = 'touch';
+          });
+        }
+      }
+    });
+  </script>
+</body>
+
 </html>

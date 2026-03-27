@@ -13,11 +13,11 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ onClose }: SettingsModalProps) {
   const { user, updateProfile } = useAuth();
-  
-  const [radius, setRadius] = useState(50);
+
+  const [radius, setRadius] = useState(25000);
   const [datingPreference, setDatingPreference] = useState(user?.datingPreference || "all");
   const [ageRange, setAgeRange] = useState([18, 35]);
-  const [category, setCategory] = useState(user?.category || "bump");
+  const [category, setCategory] = useState(user?.category || "casual");
   const [showOnMap, setShowOnMap] = useState(user?.isActive !== false);
   const [receiveNotifications, setReceiveNotifications] = useState(true);
 
@@ -43,7 +43,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             Customize your profile settings and preferences
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6 py-2">
           <div>
             <Label className="block text-sm font-medium text-gray-700 mb-2">Distance Radius</Label>
@@ -51,14 +51,14 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               <Slider
                 value={[radius]}
                 onValueChange={(values) => setRadius(values[0])}
-                max={100}
+                max={25000}
                 min={1}
-                step={1}
+                step={100}
               />
-              <span className="text-sm font-medium text-gray-700 w-16">{radius} miles</span>
+              <span className="text-sm font-medium text-gray-700 w-20">{radius >= 25000 ? 'Unlimited' : `${radius} mi`}</span>
             </div>
           </div>
-          
+
           <div>
             <Label className="block text-sm font-medium text-gray-700 mb-2">Interested In</Label>
             <div className="flex space-x-2">
@@ -88,7 +88,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               </Button>
             </div>
           </div>
-          
+
           <div>
             <Label className="block text-sm font-medium text-gray-700 mb-2">Age Range</Label>
             <div className="flex items-center space-x-4">
@@ -102,23 +102,23 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               <span className="text-sm font-medium text-gray-700 w-16">{ageRange[0]}-{ageRange[1]}</span>
             </div>
           </div>
-          
+
           <div>
             <Label className="block text-sm font-medium text-gray-700 mb-2">Preferred Category</Label>
             <div className="flex space-x-2">
               <Button
                 type="button"
-                variant={category === "bump" ? "default" : "outline"}
-                className={category === "bump" ? "bg-secondary text-white" : ""}
-                onClick={() => setCategory("bump")}
+                variant={category === "casual" ? "default" : "outline"}
+                className={category === "casual" ? "bg-secondary text-white" : ""}
+                onClick={() => setCategory("casual")}
               >
-                Bump
+                Connect
               </Button>
               <Button
                 type="button"
-                variant={category === "grind" ? "default" : "outline"}
-                className={category === "grind" ? "bg-primary text-white" : ""}
-                onClick={() => setCategory("grind")}
+                variant={category === "intimate" ? "default" : "outline"}
+                className={category === "intimate" ? "bg-primary text-white" : ""}
+                onClick={() => setCategory("intimate")}
               >
                 Grind
               </Button>
@@ -132,7 +132,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               </Button>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">Show my profile on map</span>
             <Switch
@@ -140,16 +140,16 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               onCheckedChange={setShowOnMap}
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Receive bump notifications</span>
+            <span className="text-sm font-medium text-gray-700">Receive connection notifications</span>
             <Switch
               checked={receiveNotifications}
               onCheckedChange={setReceiveNotifications}
             />
           </div>
         </div>
-        
+
         <DialogFooter>
           <Button type="button" onClick={handleSave} className="w-full bg-secondary hover:bg-secondary/90">
             Save Preferences

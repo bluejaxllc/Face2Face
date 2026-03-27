@@ -1,0 +1,53 @@
+﻿
+> rest-express@1.0.0 dev
+> tsx server/index.ts
+
+node.exe : C:\Users\edg
+ar\OneDrive\Desktop\Fac
+e 2 Face\Bump-and-Grind
+\server\db.ts:6
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (C:\Users\edga   
+ r\...\server\db.ts    
+:6:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  throw new Error(
+        ^
+
+Error: DATABASE_URL 
+must be set. Did you 
+forget to provision a 
+database?
+    at <anonymous> (C:\
+Users\edgar\OneDrive\De
+sktop\Face 2 Face\Bump-
+and-Grind\server\db.ts:
+6:9)
+    at ModuleJob.run (n
+ode:internal/modules/es
+m/module_job:413:25)
+    at async onImport.t
+racePromise.__proto__ (
+node:internal/modules/e
+sm/loader:660:26)
+    at async asyncRunEn
+tryPointWithESMLoader (
+node:internal/modules/r
+un_main:101:5)
+
+Node.js v24.13.0

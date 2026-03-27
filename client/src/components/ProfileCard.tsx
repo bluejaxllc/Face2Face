@@ -4,7 +4,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistance } from "@/lib/distance";
-import { MessageSquare, Lock, X } from "lucide-react";
+import { MessageSquare, Lock, X, Play, Music, Palette, BookOpen, UserCheck } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface User {
   id: number;
@@ -12,123 +13,138 @@ interface User {
   firstName: string;
   lastName: string;
   category: string;
-  height: string | null;
-  weight: string | null;
+  gender: string;
+  age: number;
   selfRating: number;
   isActive: boolean;
+  favoriteColor?: string | null;
+  favoriteSong?: string | null;
+  fieldOfStudy?: string | null;
+  interests?: string | null;
+  bumpMessage?: string | null;
 }
 
 interface ProfileCardProps {
   user: User;
   onClose: () => void;
-  onBump: () => void;
+  onConnect: () => void;
   distance: number | null;
 }
 
-export default function ProfileCard({ user, onClose, onBump, distance }: ProfileCardProps) {
-  // State for bump count to determine profile reveal level
-  const [profileRevealLevel, setProfileRevealLevel] = useState(1);
-  
+export default function ProfileCard({ user, onClose, onConnect, distance }: ProfileCardProps) {
+  const [, setLocation] = useLocation();
+
   // Get bump count to determine profile reveal level
-  const { data: bumps = [] } = useQuery({
+  const { data: bumps = [] } = useQuery<any[]>({
     queryKey: ["/api/bumps", user.id],
-    onSuccess: (data) => {
-      // Set profile reveal level based on bump count
-      setProfileRevealLevel(Math.min(3, data.length + 1));
-    },
+    refetchOnWindowFocus: false,
   });
-  
+
   const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName[0]}${lastName[0]}`;
-  };
-  
-  const getAge = () => {
-    // For MVP, we'll just use a random age between 20-40
-    // In a real app, this would come from the user's profile
-    return Math.floor(Math.random() * 20) + 20;
+    return `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
   };
 
+  const hasConnected = bumps.length > 0;
+  const isRevealed = bumps.length >= 2; // Arbitrary logic for "revealed"
+
   return (
-    <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-white rounded-lg shadow-lg overflow-hidden z-20">
-      <div className="relative">
-        <div className="h-40 bg-gray-200"></div>
-        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-gray-100">
-          <Avatar className="h-full w-full">
-            <AvatarFallback className="text-4xl">
-              {getInitials(user.firstName, user.lastName)}
-            </AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
-      
-      <div className="pt-20 pb-4 px-4">
-        <div className="text-center">
-          <h3 className="text-xl font-bold text-gray-800">
-            {user.firstName} {user.lastName.charAt(0)}, {getAge()}
+    <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden z-[2000] p-0">
+      <div className="relative pt-8 pb-4 px-6 flex flex-col items-center">
+        {/* Abstract shape background instead of photos */}
+        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-pink-500/20 to-blue-500/20" />
+
+        <Avatar className="h-24 w-24 border-4 border-slate-900 shadow-xl z-10 bg-slate-800">
+          <AvatarFallback className="text-3xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
+            {getInitials(user.firstName, user.lastName)}
+          </AvatarFallback>
+        </Avatar>
+
+        <button className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1" onClick={onClose}>
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="text-center mt-4 z-10 w-full">
+          <h3 className="text-2xl font-black text-white tracking-tight">
+            {user.firstName}, <span className="text-pink-400">{user.age || 20}</span>
           </h3>
-          <div className="flex justify-center items-center mt-1">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              user.category === "bump" ? "bg-secondary" : "bg-primary"
-            } text-white`}>
-              {user.category === "bump" ? "Bump" : "Grind"}
-            </span>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-active text-white ml-2">
-              {user.isActive ? "Active now" : "Inactive"}
+
+          <div className="flex items-center justify-center mt-2 space-x-2">
+            <span className="inline-flex items-center justify-center bg-slate-800 border border-slate-700 rounded-full px-3 py-1">
+              <span className="text-xs font-bold text-slate-300">Rating: </span>
+              <span className="text-sm font-black text-white ml-1">{user.selfRating}/10</span>
             </span>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="text-center">
-            <p className="text-xs text-gray-500">Height</p>
-            <p className="font-medium">{user.height || (profileRevealLevel > 1 ? "5'9\"" : "??")}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500">Rating</p>
-            <p className="font-medium">{user.selfRating}/10</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-gray-500">Distance</p>
-            <p className="font-medium">{distance ? formatDistance(distance) : "Unknown"}</p>
-          </div>
-        </div>
-        
-        {profileRevealLevel < 3 && (
-          <div className="mt-4 border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-500 text-center">
-              <Lock className="inline h-4 w-4 mr-1" />
-              Bump into {user.firstName} {3 - profileRevealLevel} more times to see full profile
-            </p>
-          </div>
-        )}
-        
-        <div className="mt-4 flex space-x-2">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4 mr-1" />
-            Close
-          </Button>
-          
-          {distance && distance <= 3 ? (
-            <Button
-              className="flex-1 bg-secondary hover:bg-secondary/90"
-              onClick={onBump}
-            >
-              <MessageSquare className="h-4 w-4 mr-1" />
-              Send Message
-            </Button>
-          ) : (
-            <Button
-              className="flex-1 bg-secondary hover:bg-secondary/90"
-              onClick={onBump}
-              disabled={distance && distance > 3}
-            >
-              Bump & Message
-            </Button>
+
+          {!isRevealed && (
+            <div className="mt-6 mb-2 grid grid-cols-2 gap-3 text-left">
+              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                <Music className="w-4 h-4 text-blue-400 mb-1" />
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Song</p>
+                <p className="text-sm text-slate-200 font-semibold truncate">{user.favoriteSong || "Top 40 Hits"}</p>
+              </div>
+              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                <Palette className="w-4 h-4 text-pink-400 mb-1" />
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Color</p>
+                <p className="text-sm text-slate-200 font-semibold truncate">{user.favoriteColor || "Midnight Blue"}</p>
+              </div>
+              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 col-span-2">
+                <BookOpen className="w-4 h-4 text-purple-400 mb-1" />
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Field of Study/Work</p>
+                <p className="text-sm text-slate-200 font-semibold truncate">{user.fieldOfStudy || "Creative Direction"}</p>
+              </div>
+            </div>
           )}
+
+          {user.bumpMessage && !isRevealed && (
+            <p className="mt-4 text-sm italic text-slate-400 bg-slate-800/50 py-2 px-4 rounded-xl">
+              "{user.bumpMessage}"
+            </p>
+          )}
+
+          {isRevealed && (
+            <div className="mt-4 mb-2 p-4 bg-slate-800/80 rounded-xl border border-pink-500/30">
+              <div className="flex items-center text-pink-400 mb-2">
+                <UserCheck className="w-5 h-5 mr-2" />
+                <h4 className="font-bold">Mutual Connect Achieved!</h4>
+              </div>
+              <p className="text-sm text-slate-300 text-left">
+                You've both connected with each other. The full profile is now revealed and direct messaging is enabled.
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-left">
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase">Interests</p>
+                  <p className="text-xs text-white">{user.interests || "Movies, Traveling"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase">Category</p>
+                  <p className="text-xs text-white capitalize">{user.category}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 flex gap-2">
+            <Button
+              className="flex-1 h-14 rounded-xl font-bold tracking-wide shadow-lg shadow-pink-500/25 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 border border-pink-400/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              onClick={onConnect}
+            >
+              <Play className="w-5 h-5 mr-2 fill-current" />
+              {hasConnected ? "BUMP" : "CONNECT"}
+            </Button>
+            <Button
+              className="flex-1 h-14 rounded-xl font-bold tracking-wide shadow-lg shadow-blue-500/25 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border border-blue-400/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              onClick={() => {
+                onClose();
+                setLocation("/messages");
+              }}
+            >
+              <MessageSquare className="w-5 h-5 mr-2 fill-current" />
+              MESSAGE
+            </Button>
+          </div>
+          <p className="text-[10px] text-slate-500 font-medium tracking-wide mt-3 text-center uppercase">
+            Distance: {distance ? formatDistance(distance) : "Unknown"}
+          </p>
         </div>
       </div>
     </Card>

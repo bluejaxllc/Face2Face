@@ -7,26 +7,45 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Camera, LogOut } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Loader2, Camera, LogOut, Star, Heart, MapPin, Music, Palette, BookOpen, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  height: z.string().optional(),
-  weight: z.string().optional(),
   selfRating: z.coerce.number().min(1).max(10).default(5),
-  category: z.string().default("bump"),
+  category: z.string().default("casual"),
   bio: z.string().max(250, "Bio must be less than 250 characters").optional(),
   datingPreference: z.string().default("all"),
+  favoriteColor: z.string().optional(),
+  favoriteSong: z.string().optional(),
+  fieldOfStudy: z.string().optional(),
+  interests: z.string().optional(),
+  bumpMessage: z.string().max(100, "Connect message must be under 100 characters").optional(),
   isActive: z.boolean().default(true),
+  inactiveTimeout: z.coerce.number().min(5).max(120).default(30),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -41,44 +60,33 @@ export default function Profile() {
     defaultValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      height: user?.height || "",
-      weight: user?.weight || "",
       selfRating: user?.selfRating || 5,
-      category: user?.category || "bump",
+      category: user?.category || "casual",
       bio: user?.bio || "",
       datingPreference: user?.datingPreference || "all",
+      favoriteColor: user?.favoriteColor || "",
+      favoriteSong: user?.favoriteSong || "",
+      fieldOfStudy: user?.fieldOfStudy || "",
+      interests: user?.interests || "",
+      bumpMessage: user?.bumpMessage || "",
       isActive: user?.isActive ?? true,
+      inactiveTimeout: user?.inactiveTimeout || 30,
     },
   });
 
   const onSubmit = async (values: ProfileFormValues) => {
     try {
-      await updateProfile({
-        ...values,
-        profileCompleted: true,
-      });
-      
+      await updateProfile({ ...values, profileCompleted: true });
       setIsEditing(false);
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
+      toast({ title: "Profile updated", description: "Your profile has been successfully updated." });
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast({
-        title: "Update failed",
-        description: "There was a problem updating your profile.",
-        variant: "destructive",
-      });
+      toast({ title: "Update failed", description: "There was a problem updating your profile.", variant: "destructive" });
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    try { await logout(); } catch (error) { console.error("Logout error:", error); }
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -88,341 +96,347 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        <p className="mt-2 text-gray-500">Loading profile...</p>
+      <div className="h-screen flex flex-col items-center justify-center page-dark">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+        <p className="mt-2 text-slate-400">Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col page-dark">
       <Header />
-      
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-4 pb-24">
-        <div className="max-w-lg mx-auto">
-          {/* Profile header */}
-          <Card className="mb-4">
-            <CardContent className="pt-6 text-center">
-              <div className="relative inline-block">
-                <Avatar className="h-24 w-24 mx-auto">
-                  <AvatarFallback className="text-2xl">
+
+      <motion.div
+        className="flex-1 overflow-y-auto pb-24 page-enter"
+        style={{ marginTop: "44px" }}
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
+        {/* Profile hero section */}
+        <motion.div variants={itemVariants} className="profile-hero px-4 pt-8 pb-6 text-center relative">
+          <div className="relative z-10">
+            <div className="relative inline-block">
+              <div className="avatar-ring shadow-[0_0_30px_rgba(59,130,246,0.5)] rounded-full">
+                <Avatar className="h-24 w-24 border-2 border-white/10 ring-4 ring-slate-900 shadow-2xl">
+                  <AvatarFallback className="text-2xl bg-gradient-to-br from-slate-700 to-slate-900 text-white font-heading">
                     {getInitials(user.firstName, user.lastName)}
                   </AvatarFallback>
                 </Avatar>
-                <button className="absolute bottom-0 right-0 bg-gray-800 text-white rounded-full p-1.5">
-                  <Camera className="h-4 w-4" />
-                </button>
               </div>
-              
-              <h2 className="mt-4 text-xl font-bold">
-                {user.firstName} {user.lastName}
-              </h2>
-              <p className="text-gray-500 text-sm">@{user.username}</p>
-              
-              <div className="flex justify-center mt-3 space-x-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  user.category === "bump" ? "bg-secondary text-white" : "bg-primary text-white"
-                }`}>
-                  {user.category === "bump" ? "Bump" : "Grind"}
-                </span>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  user.isActive ? "bg-status-active text-white" : "bg-status-inactive text-white"
-                }`}>
-                  {user.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-              
-              <div className="mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? "Cancel" : "Edit Profile"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Profile form */}
-          {isEditing ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Edit Profile</CardTitle>
-                <CardDescription>
-                  Update your profile information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="height"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Height</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. 5'10&quot;" {...field} value={field.value || ""} />
-                            </FormControl>
-                            <FormDescription>
-                              Optional
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="weight"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Weight</FormLabel>
-                            <FormControl>
-                              <Input placeholder="e.g. 160 lbs" {...field} value={field.value || ""} />
-                            </FormControl>
-                            <FormDescription>
-                              Optional
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <FormField
-                      control={form.control}
-                      name="selfRating"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Self Rating (1-10)</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="number" 
-                              min="1" 
-                              max="10" 
-                              {...field} 
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            How would you rate yourself on a scale of 1-10?
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="bump">Bump (Casual Hanging Out)</SelectItem>
-                              <SelectItem value="grind">Grind (Intimate Connections)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>
-                            What kind of connections are you looking for?
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="datingPreference"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Dating Preference</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select preference" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="men">Men</SelectItem>
-                              <SelectItem value="women">Women</SelectItem>
-                              <SelectItem value="all">Everyone</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="bio"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Bio</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Tell us about yourself" 
-                              {...field} 
-                              value={field.value || ""}
-                              className="min-h-24"
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Max 250 characters
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="isActive"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>Active Status</FormLabel>
-                            <FormDescription>
-                              Show your profile on the map
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-secondary hover:bg-secondary/90"
-                      disabled={form.formState.isSubmitting}
-                    >
-                      {form.formState.isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save Changes"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {user.bio && (
+              <button className="absolute bottom-0 right-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full p-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all">
+                <Camera className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <h2 className="mt-4 text-2xl font-bold text-white font-heading">
+              {user.firstName} {user.lastName}
+            </h2>
+            <p className="text-slate-400 text-sm">@{user.username} · {user.gender || "other"} · {user.age || 18}</p>
+
+            <div className="flex justify-center mt-3 gap-2">
+              <span className={user.category === "casual" ? "badge-casual" : "badge-intimate"}>
+                {user.category === "casual" ? "Connect" : "Grind"}
+              </span>
+              <span className={user.isActive ? "badge-active" : "badge-inactive"}>
+                {user.isActive ? "Active" : "Inactive"}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Stats row */}
+        <motion.div variants={itemVariants} className="px-4 -mt-2 relative z-20">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="stat-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl py-3 px-2 text-center text-white relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Star className="w-5 h-5 text-yellow-500 mx-auto mb-1 drop-shadow-md" />
+              <p className="text-xl font-bold text-white font-heading">{user.selfRating}/10</p>
+              <p className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">Rating</p>
+            </div>
+            <div className="stat-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl py-3 px-2 text-center text-white relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Heart className="w-5 h-5 text-pink-500 mx-auto mb-1 drop-shadow-md" />
+              <p className="text-xl font-bold text-white font-heading capitalize">
+                {user.datingPreference === "all" ? "All" : user.datingPreference}
+              </p>
+              <p className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">Looking for</p>
+            </div>
+            <div className="stat-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer bg-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl py-3 px-2 text-center text-white relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <MapPin className="w-5 h-5 text-blue-500 mx-auto mb-1 drop-shadow-md" />
+              <p className="text-xl font-bold text-white font-heading">{user.inactiveTimeout || 30}m</p>
+              <p className="text-[11px] text-slate-400 font-medium tracking-wide uppercase">Timeout</p>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="max-w-lg mx-auto px-4 mt-6 space-y-4">
+          {/* Favorites view (when not editing) */}
+          {!isEditing && (
+            <motion.div variants={itemVariants} className="glass-card p-5 relative overflow-hidden group hover:border-slate-600/50 transition-colors">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-colors" />
+              <h3 className="text-sm font-semibold text-slate-300 mb-4 tracking-wide uppercase">Favorites & Info</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-start gap-2">
+                  <Music className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Bio</h3>
-                    <p className="mt-1">{user.bio}</p>
-                    <Separator className="my-4" />
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Height</h3>
-                    <p className="mt-1">{user.height || "Not specified"}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Weight</h3>
-                    <p className="mt-1">{user.weight || "Not specified"}</p>
+                    <p className="text-xs text-slate-500">Favorite Song</p>
+                    <p className="text-sm text-slate-200">{user.favoriteSong || "Not set"}</p>
                   </div>
                 </div>
-                
-                <Separator className="my-2" />
-                
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-start gap-2">
+                  <Palette className="w-4 h-4 text-pink-400 mt-0.5 shrink-0" />
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Self Rating</h3>
-                    <p className="mt-1">{user.selfRating}/10</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500">Looking for</h3>
-                    <p className="mt-1">
-                      {user.datingPreference === "men" ? "Men" : 
-                       user.datingPreference === "women" ? "Women" : "Everyone"}
-                    </p>
+                    <p className="text-xs text-slate-500">Favorite Color</p>
+                    <p className="text-sm text-slate-200">{user.favoriteColor || "Not set"}</p>
                   </div>
                 </div>
-                
-                <Separator className="my-2" />
-                
+                <div className="flex items-start gap-2">
+                  <BookOpen className="w-4 h-4 text-purple-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-slate-500">Field of Study/Work</p>
+                    <p className="text-sm text-slate-200">{user.fieldOfStudy || "Not set"}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MessageCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-slate-500">Connect Message</p>
+                    <p className="text-sm text-slate-200 italic">{user.bumpMessage || "Not set"}</p>
+                  </div>
+                </div>
+              </div>
+              {user.interests && (
+                <div className="mt-2 pt-2 border-t border-slate-700/50">
+                  <p className="text-xs text-slate-500 mb-1">Interests</p>
+                  <div className="flex flex-wrap gap-1">
+                    {user.interests.split(",").map((interest: string, i: number) => (
+                      <span key={i} className="text-xs bg-slate-800 border border-slate-700 rounded-full px-2 py-0.5 text-slate-300">
+                        {interest.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Bio card */}
+          {user.bio && !isEditing && (
+            <motion.div variants={itemVariants} className="glass-card p-5 relative overflow-hidden">
+              <h3 className="text-sm font-semibold text-slate-300 mb-3 tracking-wide uppercase">About</h3>
+              <p className="text-slate-200">{user.bio}</p>
+            </motion.div>
+          )}
+
+          {/* Edit button */}
+          <motion.div variants={itemVariants} className="flex gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditing(!isEditing)}
+              className="flex-1 h-11 rounded-xl border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all"
+            >
+              {isEditing ? "Cancel" : "Edit Profile"}
+            </Button>
+            {!isEditing && (
+              <Button
+                variant="outline"
+                className="h-11 rounded-xl border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-950/50 hover:text-red-300 transition-all"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            )}
+          </motion.div>
+
+          {/* Edit form */}
+          {isEditing && (
+            <motion.div variants={itemVariants} initial="hidden" animate="show" exit="hidden" className="glass-card p-6 mt-4 shadow-2xl shadow-blue-900/20 border-blue-500/20 ring-1 ring-blue-500/10">
+              <h3 className="text-xl font-bold text-white mb-6 font-heading flex items-center gap-2">
+                <span className="bg-gradient-to-r from-blue-400 to-pink-500 w-2 h-6 rounded-full inline-block" />
+                Edit Profile
+              </h3>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField control={form.control} name="firstName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">First Name</FormLabel>
+                        <FormControl><Input {...field} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="lastName" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Last Name</FormLabel>
+                        <FormControl><Input {...field} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <FormField control={form.control} name="selfRating" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-300 text-sm">Self Rating (1-10)</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="1" max="10" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} className="auth-input" />
+                      </FormControl>
+                      <FormDescription className="text-slate-500 text-xs">How would you rate yourself?</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField control={form.control} name="category" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="auth-input"><SelectValue placeholder="Select" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="casual">Casual</SelectItem>
+                            <SelectItem value="intimate">Intimate</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <FormField control={form.control} name="datingPreference" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Preference</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="auth-input"><SelectValue placeholder="Select" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="men">Men</SelectItem>
+                            <SelectItem value="women">Women</SelectItem>
+                            <SelectItem value="all">Everyone</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  {/* Face2Face Favorites Section */}
+                  <div className="border-t border-slate-700/50 pt-4">
+                    <h4 className="text-sm font-semibold text-pink-400 mb-3">✨ Face2Face Profile</h4>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField control={form.control} name="favoriteSong" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-300 text-sm">Favorite Song</FormLabel>
+                          <FormControl><Input placeholder="e.g. Blinding Lights" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="favoriteColor" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-300 text-sm">Favorite Color</FormLabel>
+                          <FormControl><Input placeholder="e.g. Midnight Blue" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <FormField control={form.control} name="fieldOfStudy" render={({ field }) => (
+                      <FormItem className="mt-3">
+                        <FormLabel className="text-slate-300 text-sm">Field of Study/Work</FormLabel>
+                        <FormControl><Input placeholder="e.g. Computer Science" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <FormField control={form.control} name="interests" render={({ field }) => (
+                      <FormItem className="mt-3">
+                        <FormLabel className="text-slate-300 text-sm">Interests</FormLabel>
+                        <FormControl><Input placeholder="e.g. Music, Travel, Coffee" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                        <FormDescription className="text-slate-500 text-xs">Comma-separated list</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <FormField control={form.control} name="bumpMessage" render={({ field }) => (
+                      <FormItem className="mt-3">
+                        <FormLabel className="text-slate-300 text-sm">Connect Message</FormLabel>
+                        <FormControl><Input placeholder="Hey! Let's meet up" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                        <FormDescription className="text-slate-500 text-xs">Shown when someone views your profile</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <FormField control={form.control} name="bio" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-300 text-sm">Bio</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Tell us about yourself" {...field} value={field.value || ""} className="auth-input min-h-20" />
+                      </FormControl>
+                      <FormDescription className="text-slate-500 text-xs">Max 250 characters</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField control={form.control} name="isActive" render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between glass-card p-3">
+                        <div>
+                          <FormLabel className="text-slate-300 text-sm">Active</FormLabel>
+                          <FormDescription className="text-slate-500 text-xs">Show on map</FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                      </FormItem>
+                    )} />
+
+                    <FormField control={form.control} name="inactiveTimeout" render={({ field }) => (
+                      <FormItem className="glass-card p-3">
+                        <FormLabel className="text-slate-300 text-sm">Timeout ({field.value}m)</FormLabel>
+                        <FormControl>
+                          <Input type="number" min="5" max="120" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} className="auth-input" />
+                        </FormControl>
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+                    ) : "Save Changes"}
+                  </Button>
+                </form>
+              </Form>
+            </motion.div>
+          )}
+
+          {/* Details card (view mode) */}
+          {!isEditing && (
+            <motion.div variants={itemVariants} className="glass-card p-5 border-t-0 border-x-0 rounded-t-none bg-transparent shadow-none border-b border-slate-800">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="mt-1">{user.email}</p>
+                  <p className="text-xs text-slate-500">Email</p>
+                  <p className="text-sm text-slate-200 truncate">{user.email}</p>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  variant="outline" 
-                  className="w-full text-destructive border-destructive hover:bg-destructive/10"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-              </CardFooter>
-            </Card>
+                <div>
+                  <p className="text-xs text-slate-500">Username</p>
+                  <p className="text-sm text-slate-300 font-medium">@{user.username}</p>
+                </div>
+              </div>
+            </motion.div>
           )}
         </div>
-      </div>
-      
+      </motion.div>
+
       <BottomNavigation />
     </div>
   );

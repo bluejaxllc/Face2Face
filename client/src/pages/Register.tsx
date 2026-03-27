@@ -4,18 +4,22 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
+import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage 
+  FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CardTitle, CardDescription, Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Smartphone, MapPin, MessageSquare } from "lucide-react";
+import { Logo } from "@/components/Logo";
+import { motion } from "framer-motion";
 
 const registerSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -24,6 +28,9 @@ const registerSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
+  gender: z.string().default("other"),
+  age: z.coerce.number().min(18, "Must be at least 18").max(99),
+  selfRating: z.coerce.number().min(1).max(10).default(5),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -51,6 +58,9 @@ export default function Register() {
       email: "",
       password: "",
       confirmPassword: "",
+      gender: "other",
+      age: 18,
+      selfRating: 5,
     },
   });
 
@@ -64,204 +74,287 @@ export default function Register() {
 
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     try {
-      // Remove confirmPassword before sending to API
       const { confirmPassword, ...registerData } = values;
-      
       await register(registerData);
-      
-      // Give the auth state time to update before navigating
-      setTimeout(() => {
-        navigate("/map");
-      }, 500);
+      setTimeout(() => navigate("/map"), 500);
     } catch (error) {
       console.error("Registration error:", error);
-      // Error is handled by the context
     }
   };
 
   const onLoginSubmit = async (values: LoginFormValues) => {
     try {
       await login(values.username, values.password);
-      
-      // Give the auth state time to update before navigating
-      setTimeout(() => {
-        navigate("/map");
-      }, 500);
+      setTimeout(() => navigate("/map"), 500);
     } catch (error) {
       console.error("Login error:", error);
-      // Error is handled by the context
     }
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col items-center px-4 py-6 overflow-y-auto auth-page">
-      <div className="text-3xl font-bold mb-6 logo-text text-center">
-        <span className="bump">Bump</span>
-        <span className="and">&</span>
-        <span className="grind">Grind</span>
-      </div>
-      
-      <Card className="w-full max-w-md mx-auto shadow-sm overflow-y-auto max-h-[90vh]">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-center text-xl">Welcome</CardTitle>
-          <CardDescription className="text-center">
-            Join Bump & Grind to meet new people in real life
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
+      <div className="auth-bg" />
+      <div className="auth-glow auth-glow-1" />
+      <div className="auth-glow auth-glow-2" />
+
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 text-center flex flex-col items-center"
+        >
+          <Logo className="w-24 h-24 mb-4" />
+          <h1 className="text-5xl font-black tracking-tight mb-2">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-pink-500">Face2Face</span>
+          </h1>
+          <p className="text-slate-400 text-sm tracking-wide">Meet people. In real life.</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex gap-3 mb-8 flex-wrap justify-center"
+        >
+          <div className="feature-pill">
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Connect instantly</span>
+          </div>
+          <div className="feature-pill">
+            <MapPin className="w-3.5 h-3.5" />
+            <span>Find nearby</span>
+          </div>
+          <div className="feature-pill">
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Chat instantly</span>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="auth-card w-full max-w-md"
+        >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsList className="grid grid-cols-2 mb-6 bg-slate-800/50 border border-slate-700/50 rounded-xl p-1">
+              <TabsTrigger
+                value="login"
+                className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 text-slate-400 transition-all duration-300"
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger
+                value="register"
+                className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/25 text-slate-400 transition-all duration-300"
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="login">
+
+            <TabsContent value="login" className="mt-0">
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-3">
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <FormField
                     control={loginForm.control}
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Username</FormLabel>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your username" {...field} />
+                          <Input placeholder="Enter your username" {...field} className="auth-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
                   <FormField
                     control={loginForm.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Password</FormLabel>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Enter your password" {...field} />
+                          <Input type="password" placeholder="Enter your password" {...field} className="auth-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-secondary hover:bg-secondary/90 py-2 mt-3"
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98]"
                     disabled={loginForm.formState.isSubmitting}
                   >
-                    {loginForm.formState.isSubmitting ? "Logging in..." : "Login"}
+                    {loginForm.formState.isSubmitting ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in...</>
+                    ) : "Sign In"}
                   </Button>
                 </form>
               </Form>
             </TabsContent>
-            
-            <TabsContent value="register">
+
+            <TabsContent value="register" className="mt-0">
               <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-3">
+                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <FormField
                       control={registerForm.control}
                       name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">First Name</FormLabel>
+                          <FormLabel className="text-slate-300 text-sm font-medium">First Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="First name" {...field} />
+                            <Input placeholder="First name" {...field} className="auth-input" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
                     <FormField
                       control={registerForm.control}
                       name="lastName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm">Last Name</FormLabel>
+                          <FormLabel className="text-slate-300 text-sm font-medium">Last Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Last name" {...field} />
+                            <Input placeholder="Last name" {...field} className="auth-input" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  
+
                   <FormField
                     control={registerForm.control}
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Username</FormLabel>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Username</FormLabel>
                         <FormControl>
-                          <Input placeholder="Choose a username" {...field} />
+                          <Input placeholder="Choose a username" {...field} className="auth-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={registerForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Email</FormLabel>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="Enter your email" {...field} />
+                          <Input type="email" placeholder="Enter your email" {...field} className="auth-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
+                  {/* Face2Face-specific fields */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormField
+                      control={registerForm.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-300 text-sm font-medium">Gender</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="auth-input">
+                                <SelectValue placeholder="Gender" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="male">Male</SelectItem>
+                              <SelectItem value="female">Female</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="age"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-300 text-sm font-medium">Age</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="18" max="99" {...field} className="auth-input" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="selfRating"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-slate-300 text-sm font-medium">Rating</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="1" max="10" {...field} className="auth-input" />
+                          </FormControl>
+                          <FormDescription className="text-slate-500 text-[10px]">1-10</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={registerForm.control}
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Password</FormLabel>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Create a password" {...field} />
+                          <Input type="password" placeholder="Create a password" {...field} className="auth-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={registerForm.control}
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm">Confirm Password</FormLabel>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Confirm Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Confirm your password" {...field} />
+                          <Input type="password" placeholder="Confirm your password" {...field} className="auth-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-secondary hover:bg-secondary/90 py-2 mt-3"
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg shadow-pink-500/25 transition-all duration-300 hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
                     disabled={registerForm.formState.isSubmitting}
                   >
-                    {registerForm.formState.isSubmitting ? "Creating account..." : "Register"}
+                    {registerForm.formState.isSubmitting ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</>
+                    ) : "Create Account"}
                   </Button>
                 </form>
               </Form>
             </TabsContent>
           </Tabs>
-        </CardContent>
-        <CardFooter className="text-xs text-center text-gray-500 flex justify-center pt-2 pb-4">
-          By continuing, you agree to our Terms of Service and Privacy Policy
-        </CardFooter>
-      </Card>
+
+          <p className="text-center text-xs text-slate-500 mt-6">
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
+        </motion.div>
+      </div>
     </div>
   );
 }

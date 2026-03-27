@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import MapView from "@/pages/MapView";
+import Explore from "@/pages/Explore";
 import Register from "@/pages/Register";
 import Messages from "@/pages/Messages";
 import Profile from "@/pages/Profile";
@@ -12,6 +13,9 @@ import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
 import { Loader2 } from "lucide-react";
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -19,7 +23,7 @@ import { useAuth } from "./contexts/AuthContext";
 // Create a separate AppRouter component that uses the auth context
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-screen full-height">
@@ -27,7 +31,7 @@ function AppRouter() {
       </div>
     );
   }
-  
+
   return (
     <Switch>
       <Route path="/">
@@ -39,7 +43,7 @@ function AppRouter() {
         <ProtectedRoute component={MapView} />
       </Route>
       <Route path="/explore">
-        <ProtectedRoute component={MapView} />
+        <ProtectedRoute component={Explore} />
       </Route>
       <Route path="/messages">
         <ProtectedRoute component={Messages} />
@@ -55,7 +59,7 @@ function AppRouter() {
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
   const [_, navigate] = useLocation();
-  
+
   // Use useEffect to navigate after render
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -71,7 +75,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     return null; // Will be redirected by useEffect
   }
@@ -94,6 +98,28 @@ function AppWithProviders() {
 }
 
 function App() {
+  // Initialize Capacitor plugins on native platforms
+  useEffect(() => {
+    const initCapacitor = async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          // Configure status bar
+          await StatusBar.setStyle({ style: Style.Dark });
+          await StatusBar.setBackgroundColor({ color: '#1e293b' });
+
+          // Hide splash screen after app is ready
+          await SplashScreen.hide();
+
+          // Add native platform class for CSS targeting
+          document.body.classList.add('capacitor-native');
+        } catch (error) {
+          console.warn('[App] Capacitor plugin init error:', error);
+        }
+      }
+    };
+    initCapacitor();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppWithProviders />

@@ -1,24 +1,68 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, serveStatic } from "./vite";
+import { log } from "./log";
 import { storage } from "./storage";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 
-// Set a secure SESSION_SECRET environment variable
 if (!process.env.SESSION_SECRET) {
-  process.env.SESSION_SECRET = "bump-and-grind-dev-secret"; // Not secure, only for development
+  process.env.SESSION_SECRET = "face2face-dev-secret";
 }
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Enable CORS for all routes
+// CORS — locked to known origins
+const allowedOrigins = [
+  "https://bump.bluejax.ai",
+  "https://face2face-production-11ee.up.railway.app",
+  "http://localhost:5000",
+  "http://localhost:5173",
+  "capacitor://localhost",
+  "http://localhost",
+];
+
 app.use(cors({
-  origin: true, // Allow request from any origin in development
-  credentials: true, // Allow cookies
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else if (process.env.NODE_ENV !== "production") {
+      // In dev, allow any origin
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
+
+// Global rate limiter: only in production
+if (process.env.NODE_ENV === "production") {
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { message: "Too many requests, please try again later" },
+    standardHeaders: true,
+    legacyHeaders: false,
+  }));
+}
+
+// Strict auth rate limiter: 10 attempts per 15 minutes (production only)
+if (process.env.NODE_ENV === "production") {
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { message: "Too many login attempts, please try again later" },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use("/api/auth/login", authLimiter);
+  app.use("/api/auth/register", authLimiter);
+}
 
 // Set up session middleware
 app.use(session({
@@ -84,14 +128,13 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
+  // ALWAYS serve the app on port 5000 in production
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 5000;
+  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });

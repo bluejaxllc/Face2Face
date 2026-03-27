@@ -1,7 +1,11 @@
 /**
  * Motion Service
  * Handles device motion detection for the "bump" feature
+ * Uses @capacitor/motion on native platforms, falls back to browser DeviceMotionEvent on web
  */
+
+import { Capacitor } from '@capacitor/core';
+import { Motion } from '@capacitor/motion';
 
 // Type for motion detection callback
 type MotionCallback = (direction: MotionDirection, intensity: number) => void;
@@ -31,6 +35,7 @@ class MotionService {
   private movementThreshold: number = 10; // Acceleration threshold to detect movement
   private debounceTimeout: number | null = null;
   private debounceDelay: number = 300; // Milliseconds to wait between motion events
+  private nativeListenerHandle: any = null;
 
   constructor() {
     this.handleDeviceMotion = this.handleDeviceMotion.bind(this);
@@ -38,15 +43,44 @@ class MotionService {
 
   /**
    * Start listening for device motion events
+   * Uses Capacitor Motion plugin on native, falls back to browser API on web
    */
-  public startListening(): Promise<boolean> {
+  public async startListening(): Promise<boolean> {
     if (this.isListening) {
-      return Promise.resolve(true);
+      return true;
     }
 
-    // Check if the DeviceMotionEvent is available
+    if (Capacitor.isNativePlatform()) {
+      return this.startNativeListening();
+    } else {
+      return this.startWebListening();
+    }
+  }
+
+  /**
+   * Start listening using Capacitor Motion plugin (native)
+   */
+  private async startNativeListening(): Promise<boolean> {
+    try {
+      this.nativeListenerHandle = await Motion.addListener('accel', (event) => {
+        const { x, y, z } = event.acceleration;
+        this.processAcceleration(x, y, z);
+      });
+      this.isListening = true;
+      console.log('[MotionService] Native accelerometer listener started');
+      return true;
+    } catch (error) {
+      console.error('[MotionService] Failed to start native motion:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Start listening using browser DeviceMotionEvent (web fallback)
+   */
+  private startWebListening(): Promise<boolean> {
     if (!window.DeviceMotionEvent) {
-      console.error('Device motion not supported');
+      console.error('[MotionService] Device motion not supported in browser');
       return Promise.reject('Device motion not supported');
     }
 
@@ -57,7 +91,7 @@ class MotionService {
           (DeviceMotionEvent as any).requestPermission()
             .then((permissionState: string) => {
               if (permissionState === 'granted') {
-                this.addEventListeners();
+                this.addWebEventListeners();
                 resolve(true);
               } else {
                 reject('Permission denied');
@@ -65,12 +99,11 @@ class MotionService {
             })
             .catch(reject);
         } else {
-          // For other browsers
-          this.addEventListeners();
+          this.addWebEventListeners();
           resolve(true);
         }
       } catch (error) {
-        console.error('Error starting motion detection:', error);
+        console.error('[MotionService] Error starting web motion detection:', error);
         reject(error);
       }
     });
@@ -84,10 +117,16 @@ class MotionService {
       return;
     }
 
-    window.removeEventListener('devicemotion', this.handleDeviceMotion);
+    if (Capacitor.isNativePlatform() && this.nativeListenerHandle) {
+      this.nativeListenerHandle.remove();
+      this.nativeListenerHandle = null;
+    } else {
+      window.removeEventListener('devicemotion', this.handleDeviceMotion);
+    }
+
     this.isListening = false;
     this.lastReading = null;
-    
+
     if (this.debounceTimeout) {
       window.clearTimeout(this.debounceTimeout);
       this.debounceTimeout = null;
@@ -120,19 +159,22 @@ class MotionService {
    * Check if the device supports motion detection
    */
   public static isSupported(): boolean {
+    if (Capacitor.isNativePlatform()) {
+      return true; // Native always has accelerometer
+    }
     return !!window.DeviceMotionEvent;
   }
 
   /**
-   * Add event listeners for device motion
+   * Add web event listeners for device motion (browser fallback)
    */
-  private addEventListeners(): void {
+  private addWebEventListeners(): void {
     window.addEventListener('devicemotion', this.handleDeviceMotion);
     this.isListening = true;
   }
 
   /**
-   * Handle device motion events
+   * Handle web device motion events (browser fallback)
    */
   private handleDeviceMotion(event: DeviceMotionEvent): void {
     if (!event.accelerationIncludingGravity) {
@@ -144,7 +186,13 @@ class MotionService {
       return;
     }
 
-    // Check if we have a previous reading to compare against
+    this.processAcceleration(x, y, z);
+  }
+
+  /**
+   * Process acceleration data from either native or web source
+   */
+  private processAcceleration(x: number, y: number, z: number): void {
     if (this.lastReading) {
       const deltaX = x - this.lastReading.x!;
       const deltaY = y - this.lastReading.y!;
@@ -158,7 +206,7 @@ class MotionService {
         // Debounce the motion event to prevent rapid firing
         if (this.debounceTimeout === null) {
           const direction = this.determineDirection(deltaX, deltaY, deltaZ);
-          
+
           // Notify all callbacks
           this.callbacks.forEach(callback => {
             callback(direction, magnitude);
@@ -180,12 +228,10 @@ class MotionService {
    * Determine the direction of motion based on acceleration changes
    */
   private determineDirection(deltaX: number, deltaY: number, deltaZ: number): MotionDirection {
-    // Find the axis with the largest change
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
     const absZ = Math.abs(deltaZ);
 
-    // Determine which axis had the most significant change
     if (absX > absY && absX > absZ) {
       return deltaX > 0 ? MotionDirection.RIGHT : MotionDirection.LEFT;
     } else if (absY > absX && absY > absZ) {

@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Define our filter options and types
 export interface FilterOptions {
   datingPreference: 'any' | 'men' | 'women' | 'everyone';
-  showBump: boolean;
-  showGrind: boolean;
+  showCasual: boolean;
+  showIntimate: boolean;
   ageRange: [number, number];
   radius: number;
   minRating: number;
@@ -26,17 +26,17 @@ interface FilterDrawerProps {
 export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
   // Create a local state to manage changes before applying them
   const [localOptions, setLocalOptions] = useState<FilterOptions>(options);
-  
+
   // Helper to update specific field in the options
   const updateOption = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K]) => {
     setLocalOptions(prev => ({ ...prev, [key]: value }));
   };
-  
+
   // Apply all changes at once
   const applyFilters = () => {
     onChange(localOptions);
   };
-  
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -51,13 +51,13 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
             Filter Options
           </SheetTitle>
         </SheetHeader>
-        
+
         <div className="space-y-6 pb-20">
           {/* Dating Preference */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Dating Preference</Label>
-            <RadioGroup 
-              value={localOptions.datingPreference} 
+            <RadioGroup
+              value={localOptions.datingPreference}
               onValueChange={(value) => updateOption('datingPreference', value as FilterOptions['datingPreference'])}
               className="flex flex-col space-y-1"
             >
@@ -79,28 +79,28 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
               </div>
             </RadioGroup>
           </div>
-          
+
           {/* User Types */}
           <div className="space-y-4">
             <Label className="text-sm font-medium">User Types</Label>
             <div className="flex items-center justify-between">
-              <Label htmlFor="show-bump" className="cursor-pointer">Show Bump users</Label>
-              <Switch 
-                id="show-bump" 
-                checked={localOptions.showBump} 
-                onCheckedChange={(checked) => updateOption('showBump', checked)}
+              <Label htmlFor="show-casual" className="cursor-pointer">Show Casual users</Label>
+              <Switch
+                id="show-casual"
+                checked={localOptions.showCasual}
+                onCheckedChange={(checked) => updateOption('showCasual', checked)}
               />
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="show-grind" className="cursor-pointer">Show Grind users</Label>
-              <Switch 
-                id="show-grind" 
-                checked={localOptions.showGrind} 
-                onCheckedChange={(checked) => updateOption('showGrind', checked)}
+              <Label htmlFor="show-intimate" className="cursor-pointer">Show Intimate users</Label>
+              <Switch
+                id="show-intimate"
+                checked={localOptions.showIntimate}
+                onCheckedChange={(checked) => updateOption('showIntimate', checked)}
               />
             </div>
           </div>
-          
+
           {/* Age Range Slider */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -117,27 +117,27 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
               onValueChange={(value) => updateOption('ageRange', value as [number, number])}
             />
           </div>
-          
+
           {/* Distance Radius */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">Search Radius</Label>
-              <span className="text-xs text-gray-500">{localOptions.radius} miles</span>
+              <span className="text-xs text-gray-500">{localOptions.radius >= 25000 ? 'Unlimited' : `${localOptions.radius} miles`}</span>
             </div>
             <Slider
               defaultValue={[localOptions.radius]}
               min={1}
-              max={50}
-              step={1}
+              max={25000}
+              step={100}
               onValueChange={(value) => updateOption('radius', value[0])}
             />
           </div>
-          
+
           {/* Minimum Rating */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Minimum Rating</Label>
-            <Select 
-              value={localOptions.minRating.toString()} 
+            <Select
+              value={localOptions.minRating.toString()}
               onValueChange={(value) => updateOption('minRating', parseInt(value))}
             >
               <SelectTrigger>
@@ -152,18 +152,18 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
               </SelectContent>
             </Select>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex justify-between pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setLocalOptions(options)}
               className="flex-1 mr-2"
             >
               Reset
             </Button>
             <SheetClose asChild>
-              <Button 
+              <Button
                 onClick={applyFilters}
                 className="flex-1 ml-2"
               >

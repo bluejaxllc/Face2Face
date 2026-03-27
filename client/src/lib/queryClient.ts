@@ -1,19 +1,11 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { getApiBaseUrl } from "./api-config";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
-}
-
-// Get base API URL for deployment
-function getApiBaseUrl() {
-  // When deployed, use the full domain
-  // In development, use relative URLs
-  return window.location.hostname.includes('.repl.co') 
-    ? `${window.location.protocol}//${window.location.host}`
-    : '';
 }
 
 export async function apiRequest(
@@ -25,9 +17,9 @@ export async function apiRequest(
     // Ensure URL is relative to current domain when deployed
     const baseUrl = getApiBaseUrl();
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
-    
+
     console.log(`Making API request to: ${fullUrl}`);
-    
+
     const res = await fetch(fullUrl, {
       method,
       headers: data ? { "Content-Type": "application/json" } : {},
@@ -40,20 +32,20 @@ export async function apiRequest(
     if (!res.ok) {
       console.warn(`API request failed: ${method} ${fullUrl} - Status: ${res.status}`);
     }
-    
+
     return res;
   } catch (error) {
     // Handle network errors (offline, CORS, etc.)
     console.error(`Network error during API request: ${method} ${url}`, error);
     // Create a synthetic Response object to represent the network error
-    const errorResponse = new Response(JSON.stringify({ 
-      message: "Network error, please check your connection" 
+    const errorResponse = new Response(JSON.stringify({
+      message: "Network error, please check your connection"
     }), {
       status: 0,
       statusText: "Network Error",
       headers: { 'Content-Type': 'application/json' }
     });
-    
+
     return errorResponse;
   }
 }
@@ -63,47 +55,47 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    try {
-      // Use the same URL handling logic as apiRequest
-      const baseUrl = getApiBaseUrl();
-      const url = queryKey[0] as string;
-      const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
-      
-      console.log(`Making query request to: ${fullUrl}`);
-      
-      const res = await fetch(fullUrl, {
-        credentials: "include",
-      });
+    async ({ queryKey }) => {
+      try {
+        // Use the same URL handling logic as apiRequest
+        const baseUrl = getApiBaseUrl();
+        const url = queryKey[0] as string;
+        const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
 
-      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        return null;
-      }
+        console.log(`Making query request to: ${fullUrl}`);
 
-      if (!res.ok) {
-        const text = await res.text();
-        const message = text || res.statusText;
-        
-        console.warn(`Query failed for ${fullUrl}: ${res.status} - ${message}`);
-        
-        if (res.status === 500) {
-          throw new Error("Server error. Please try again later.");
-        } else {
-          throw new Error(`Request failed: ${message}`);
+        const res = await fetch(fullUrl, {
+          credentials: "include",
+        });
+
+        if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+          return null;
         }
+
+        if (!res.ok) {
+          const text = await res.text();
+          const message = text || res.statusText;
+
+          console.warn(`Query failed for ${fullUrl}: ${res.status} - ${message}`);
+
+          if (res.status === 500) {
+            throw new Error("Server error. Please try again later.");
+          } else {
+            throw new Error(`Request failed: ${message}`);
+          }
+        }
+
+        return await res.json();
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`Query error for ${queryKey[0]}:`, error.message);
+          throw error;
+        }
+
+        console.error(`Unknown query error for ${queryKey[0]}:`, error);
+        throw new Error("An unexpected error occurred. Please try again.");
       }
-      
-      return await res.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Query error for ${queryKey[0]}:`, error.message);
-        throw error;
-      }
-      
-      console.error(`Unknown query error for ${queryKey[0]}:`, error);
-      throw new Error("An unexpected error occurred. Please try again.");
-    }
-  };
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {

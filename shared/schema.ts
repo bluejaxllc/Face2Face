@@ -9,13 +9,22 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
+  gender: text("gender").notNull().default("other"), // 'male', 'female', 'other'
+  age: integer("age").notNull().default(18),
   height: text("height"),
   weight: text("weight"),
   selfRating: integer("self_rating").default(5),
-  category: text("category").default("bump"), // "bump" or "grind"
+  category: text("category").default("casual"), // "casual" or "intimate"
   bio: text("bio"),
   datingPreference: text("dating_preference").default("all"), // "men", "women", "all"
+  favoriteColor: text("favorite_color"),
+  favoriteSong: text("favorite_song"),
+  fieldOfStudy: text("field_of_study"),
+  interests: text("interests"), // Comma-separated or JSON string
+  seeking: text("seeking"), // Comma-separated or JSON string
+  bumpMessage: text("bump_message"), // Default message when bumping
   isActive: boolean("is_active").default(true),
+  inactiveTimeout: integer("inactive_timeout").default(30), // minutes
   latitude: numeric("latitude").notNull().default("0"),
   longitude: numeric("longitude").notNull().default("0"),
   lastLocation: timestamp("last_location"),
@@ -28,7 +37,7 @@ export const bumps = pgTable("bumps", {
   bumpedUserId: integer("bumped_user_id").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   seen: boolean("seen").default(false),
-  status: text("status").default("pending"), // "pending", "initiated", "completed" or "rejected"
+  status: text("status").default("pending"), // "pending", "initiated", "completed" or "rejected", "bumping_back", "revealed"
   message: text("message"), // Optional message sent with the bump
 });
 
@@ -57,6 +66,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   firstName: true,
   lastName: true,
   email: true,
+  gender: true,
+  age: true,
 });
 
 export const updateUserSchema = createInsertSchema(users).pick({
@@ -66,7 +77,14 @@ export const updateUserSchema = createInsertSchema(users).pick({
   category: true,
   bio: true,
   datingPreference: true,
+  favoriteColor: true,
+  favoriteSong: true,
+  fieldOfStudy: true,
+  interests: true,
+  seeking: true,
+  bumpMessage: true,
   isActive: true,
+  inactiveTimeout: true,
   latitude: true,
   longitude: true,
   lastLocation: true,

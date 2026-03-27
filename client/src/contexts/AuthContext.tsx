@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { buildApiUrl } from "@/lib/api-config";
 
 interface User {
   id: number;
@@ -9,13 +10,22 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  gender: string;
+  age: number;
   height: string | null;
   weight: string | null;
   selfRating: number;
   category: string;
   bio: string | null;
   datingPreference: string;
+  favoriteColor: string | null;
+  favoriteSong: string | null;
+  fieldOfStudy: string | null;
+  interests: string | null;
+  seeking: string | null;
+  bumpMessage: string | null;
   isActive: boolean;
+  inactiveTimeout: number;
   latitude: number | null;
   longitude: number | null;
   lastLocation: Date;
@@ -38,6 +48,9 @@ interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
+  gender?: string;
+  age?: number;
+  selfRating?: number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -51,22 +64,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: false,
     staleTime: 0, // Always fetch from network
     queryFn: async ({ queryKey }) => {
-      const res = await fetch(queryKey[0] as string, {
+      const fullUrl = buildApiUrl(queryKey[0] as string);
+      const res = await fetch(fullUrl, {
         credentials: "include",
       });
-      
+
       if (res.status === 401) {
         return null;
       }
-      
+
       if (!res.ok) {
         throw new Error("Failed to fetch user data");
       }
-      
+
       return res.json();
     }
   });
-  
+
   useEffect(() => {
     if (userData) {
       setUser(userData);

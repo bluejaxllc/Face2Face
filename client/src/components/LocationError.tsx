@@ -13,7 +13,7 @@ interface LocationErrorProps {
 export default function LocationError({ onEnableLocation }: LocationErrorProps) {
   const [isAttempting, setIsAttempting] = useState(false);
   const { resetError } = useLocation();
-  
+
   const handleEnableLocation = async () => {
     setIsAttempting(true);
     try {
@@ -27,7 +27,7 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
       setIsAttempting(false);
     }
   };
-  
+
   const browsers = [
     {
       name: "Chrome",
@@ -57,7 +57,7 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
       ]
     }
   ];
-  
+
   const devices = [
     {
       name: "iPhone",
@@ -82,23 +82,23 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
       ]
     }
   ];
-  
+
   return (
     <Card className="w-full max-w-md mx-auto shadow-lg border-2 border-primary/20">
       <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
         <CardTitle className="flex items-center gap-2 text-2xl">
           <MapPin className="h-6 w-6 text-primary" />
           <span className="logo-text">
-            <span className="bump">Bump</span>
-            <span className="and">&</span>
-            <span className="grind">Grind</span>
+            <span className="bump">Casual</span>
+            <span className="casual">Casual</span> and
+            <span className="intimate">Intimate</span> connections.
           </span>
         </CardTitle>
         <CardDescription className="text-lg">
           We need your location to connect you with people nearby
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-5 pt-6">
         <Alert variant="destructive" className="border-destructive/50">
           <AlertCircle className="h-4 w-4" />
@@ -107,23 +107,23 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
             To find matches near you, we need permission to access your location.
           </AlertDescription>
         </Alert>
-        
+
         <div className="space-y-1">
           <h4 className="text-lg font-semibold flex items-center gap-2">
-            <Info className="h-5 w-5 text-primary" /> 
+            <Info className="h-5 w-5 text-primary" />
             Enable location access
           </h4>
           <p className="text-sm text-muted-foreground">
             Select your device type and follow the instructions:
           </p>
         </div>
-        
+
         <Tabs defaultValue="desktop" className="w-full">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="desktop">Desktop Browser</TabsTrigger>
             <TabsTrigger value="mobile">Mobile Device</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="desktop">
             <Tabs defaultValue="Chrome" className="w-full mt-2">
               <TabsList className="grid grid-cols-3 w-full">
@@ -133,7 +133,7 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
                   </TabsTrigger>
                 ))}
               </TabsList>
-              
+
               {browsers.map(browser => (
                 <TabsContent key={browser.name} value={browser.name} className="mt-2">
                   <ol className="space-y-2 pl-0">
@@ -150,7 +150,7 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
               ))}
             </Tabs>
           </TabsContent>
-          
+
           <TabsContent value="mobile">
             <Tabs defaultValue="iPhone" className="w-full mt-2">
               <TabsList className="grid grid-cols-2 w-full">
@@ -160,7 +160,7 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
                   </TabsTrigger>
                 ))}
               </TabsList>
-              
+
               {devices.map(device => (
                 <TabsContent key={device.name} value={device.name} className="mt-2">
                   <ol className="space-y-2 pl-0">
@@ -179,10 +179,10 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
           </TabsContent>
         </Tabs>
       </CardContent>
-      
+
       <CardFooter className="flex-col gap-2">
-        <Button 
-          className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90" 
+        <Button
+          className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
           onClick={handleEnableLocation}
           disabled={isAttempting}
           size="lg"
