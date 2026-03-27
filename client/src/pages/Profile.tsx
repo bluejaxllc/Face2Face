@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Camera, LogOut, Star, Heart, MapPin, Music, Palette, BookOpen, MessageCircle } from "lucide-react";
+import { Loader2, Camera, LogOut, Star, Heart, MapPin, Music, Palette, BookOpen, MessageCircle, Ruler, Weight, Search, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
@@ -35,15 +35,19 @@ const itemVariants = {
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  gender: z.string().default("other"),
+  age: z.coerce.number().min(18).max(99).default(18),
+  height: z.string().optional(),
+  weight: z.string().optional(),
   selfRating: z.coerce.number().min(1).max(10).default(5),
   category: z.string().default("casual"),
   bio: z.string().max(250, "Bio must be less than 250 characters").optional(),
   datingPreference: z.string().default("all"),
+  seeking: z.string().optional(),
   favoriteColor: z.string().optional(),
   favoriteSong: z.string().optional(),
   fieldOfStudy: z.string().optional(),
   interests: z.string().optional(),
-  bumpMessage: z.string().max(100, "Connect message must be under 100 characters").optional(),
   isActive: z.boolean().default(true),
   inactiveTimeout: z.coerce.number().min(5).max(120).default(30),
 });
@@ -100,15 +104,19 @@ export default function Profile() {
     defaultValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
+      gender: user?.gender || "other",
+      age: user?.age || 18,
+      height: user?.height || "",
+      weight: user?.weight || "",
       selfRating: user?.selfRating || 5,
       category: user?.category || "casual",
       bio: user?.bio || "",
       datingPreference: user?.datingPreference || "all",
+      seeking: user?.seeking || "",
       favoriteColor: user?.favoriteColor || "",
       favoriteSong: user?.favoriteSong || "",
       fieldOfStudy: user?.fieldOfStudy || "",
       interests: user?.interests || "",
-      bumpMessage: user?.bumpMessage || "",
       isActive: user?.isActive ?? true,
       inactiveTimeout: user?.inactiveTimeout || 30,
     },
@@ -238,9 +246,23 @@ export default function Profile() {
               <h3 className="text-sm font-semibold text-slate-300 mb-4 tracking-wide uppercase">Favorites & Info</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-start gap-2">
+                  <Ruler className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-slate-500">Height</p>
+                    <p className="text-sm text-slate-200">{user.height || "Not set"}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Weight className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-slate-500">Weight</p>
+                    <p className="text-sm text-slate-200">{user.weight || "Not set"}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
                   <Music className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-slate-500">Favorite Song</p>
+                    <p className="text-xs text-slate-500">Music</p>
                     <p className="text-sm text-slate-200">{user.favoriteSong || "Not set"}</p>
                   </div>
                 </div>
@@ -258,14 +280,19 @@ export default function Profile() {
                     <p className="text-sm text-slate-200">{user.fieldOfStudy || "Not set"}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <MessageCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs text-slate-500">Connect Message</p>
-                    <p className="text-sm text-slate-200 italic">{user.bumpMessage || "Not set"}</p>
+              </div>
+              {user.seeking && (
+                <div className="mt-2 pt-2 border-t border-slate-700/50">
+                  <p className="text-xs text-slate-500 mb-1">Seeking</p>
+                  <div className="flex flex-wrap gap-1">
+                    {user.seeking.split(",").map((item: string, i: number) => (
+                      <span key={i} className="text-xs bg-pink-950/50 border border-pink-800/50 rounded-full px-2 py-0.5 text-pink-300">
+                        {item.trim()}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </div>
+              )}
               {user.interests && (
                 <div className="mt-2 pt-2 border-t border-slate-700/50">
                   <p className="text-xs text-slate-500 mb-1">Interests</p>
@@ -318,6 +345,7 @@ export default function Profile() {
               </h3>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Personal Info</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField control={form.control} name="firstName" render={({ field }) => (
                       <FormItem>
@@ -335,16 +363,59 @@ export default function Profile() {
                     )} />
                   </div>
 
-                  <FormField control={form.control} name="selfRating" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300 text-sm">Self Rating (1-10)</FormLabel>
-                      <FormControl>
-                        <Input type="number" min="1" max="10" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} className="auth-input" />
-                      </FormControl>
-                      <FormDescription className="text-slate-500 text-xs">How would you rate yourself?</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormField control={form.control} name="gender" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Gender</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="auth-input"><SelectValue placeholder="Select" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="age" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Age</FormLabel>
+                        <FormControl><Input type="number" min="18" max="99" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="selfRating" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Rating</FormLabel>
+                        <FormControl><Input type="number" min="1" max="10" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormField control={form.control} name="height" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Height</FormLabel>
+                        <FormControl><Input placeholder="e.g. 5ft 10in" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="weight" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm">Weight</FormLabel>
+                        <FormControl><Input placeholder="e.g. 165 lbs" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <div className="border-t border-slate-700/50 pt-4 mt-2">
+                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Preferences</h4>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <FormField control={form.control} name="category" render={({ field }) => (
@@ -381,6 +452,15 @@ export default function Profile() {
                     )} />
                   </div>
 
+                  <FormField control={form.control} name="seeking" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-300 text-sm">Seeking</FormLabel>
+                      <FormControl><Input placeholder="e.g. Friendship, Dating, Networking" {...field} value={field.value || ""} className="auth-input" /></FormControl>
+                      <FormDescription className="text-slate-500 text-xs">Comma-separated list of what you're looking for</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
                   {/* Face2Face Favorites Section */}
                   <div className="border-t border-slate-700/50 pt-4">
                     <h4 className="text-sm font-semibold text-pink-400 mb-3">✨ Face2Face Profile</h4>
@@ -388,7 +468,7 @@ export default function Profile() {
                     <div className="grid grid-cols-2 gap-3">
                       <FormField control={form.control} name="favoriteSong" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-slate-300 text-sm">Favorite Song</FormLabel>
+                          <FormLabel className="text-slate-300 text-sm">Music</FormLabel>
                           <FormControl><Input placeholder="e.g. Blinding Lights" {...field} value={field.value || ""} className="auth-input" /></FormControl>
                           <FormMessage />
                         </FormItem>
@@ -415,15 +495,6 @@ export default function Profile() {
                         <FormLabel className="text-slate-300 text-sm">Interests</FormLabel>
                         <FormControl><Input placeholder="e.g. Music, Travel, Coffee" {...field} value={field.value || ""} className="auth-input" /></FormControl>
                         <FormDescription className="text-slate-500 text-xs">Comma-separated list</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                    <FormField control={form.control} name="bumpMessage" render={({ field }) => (
-                      <FormItem className="mt-3">
-                        <FormLabel className="text-slate-300 text-sm">Connect Message</FormLabel>
-                        <FormControl><Input placeholder="Hey! Let's meet up" {...field} value={field.value || ""} className="auth-input" /></FormControl>
-                        <FormDescription className="text-slate-500 text-xs">Shown when someone views your profile</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )} />
@@ -493,9 +564,9 @@ export default function Profile() {
             </motion.div>
           )}
         </div>
-      </motion.div>
+      </motion.div >
 
       <BottomNavigation />
-    </div>
+    </div >
   );
 }

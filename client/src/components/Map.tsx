@@ -94,7 +94,12 @@ const CategoryToggle = memo(({
 });
 
 function Map() {
-  const { currentLocation, updateLocation, isError } = useLocationContext();
+  // Get context
+  const { currentLocation: actualLocation, updateLocation, isError: actualIsError } = useLocationContext();
+
+  // MOCK FOR UI TESTING
+  const currentLocation = { latitude: 32.8728576, longitude: -96.5312512, accuracy: 10 };
+  const isError = false;
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 

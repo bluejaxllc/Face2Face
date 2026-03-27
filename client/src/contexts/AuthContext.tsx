@@ -30,6 +30,7 @@ interface User {
   longitude: number | null;
   lastLocation: Date;
   profileCompleted: boolean;
+  profilePhoto: string | null;
 }
 
 interface AuthContextType {
@@ -70,21 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (res.status === 401) {
-        // Return a mock user locally for testing UI
-        return {
-          id: 1, username: 'testuser3', firstName: 'Test', lastName: 'User', email: 'test3@example.com',
-          gender: 'male', age: 20, height: null, weight: null, selfRating: 5, category: 'bump',
-          bio: null, datingPreference: 'all', favoriteColor: null, favoriteSong: null, fieldOfStudy: null, interests: null, seeking: null, bumpMessage: null, isActive: true, inactiveTimeout: 30, latitude: 32.8728576, longitude: -96.5312512, lastLocation: new Date(), profileCompleted: true
-        } as unknown as User;
+        return null;
       }
 
       if (!res.ok) {
-        // Return a mock user locally for testing UI
-        return {
-          id: 1, username: 'testuser3', firstName: 'Test', lastName: 'User', email: 'test3@example.com',
-          gender: 'male', age: 20, height: null, weight: null, selfRating: 5, category: 'bump',
-          bio: null, datingPreference: 'all', favoriteColor: null, favoriteSong: null, fieldOfStudy: null, interests: null, seeking: null, bumpMessage: null, isActive: true, inactiveTimeout: 30, latitude: 32.8728576, longitude: -96.5312512, lastLocation: new Date(), profileCompleted: true
-        } as unknown as User;
+        throw new Error("Failed to fetch user data");
       }
 
       return res.json();

@@ -52,7 +52,7 @@ export default function Header() {
         <div onClick={() => navigate('/profile')} className="cursor-pointer">
           <div className="avatar-ring">
             <Avatar style={{ width: "24px", height: "24px", fontSize: "9px" }}>
-              <AvatarImage src="" alt={user?.username || "User"} />
+              {user?.profilePhoto && <AvatarImage src={user.profilePhoto} alt={user?.username || "User"} />}
               <AvatarFallback className="bg-slate-700 text-slate-300">{getInitials(user?.firstName, user?.lastName)}</AvatarFallback>
             </Avatar>
           </div>

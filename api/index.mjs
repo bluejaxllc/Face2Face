@@ -60,7 +60,9 @@ var users = pgTable("users", {
   latitude: numeric("latitude").notNull().default("0"),
   longitude: numeric("longitude").notNull().default("0"),
   lastLocation: timestamp("last_location"),
-  profileCompleted: boolean("profile_completed").default(false)
+  profileCompleted: boolean("profile_completed").default(false),
+  profilePhoto: text("profile_photo")
+  // base64 encoded photo string
 });
 var bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
@@ -119,7 +121,8 @@ var updateUserSchema = createInsertSchema(users).pick({
   latitude: true,
   longitude: true,
   lastLocation: true,
-  profileCompleted: true
+  profileCompleted: true,
+  profilePhoto: true
 });
 var insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,
