@@ -108,7 +108,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
             <div className="mt-4 mb-2 grid grid-cols-2 gap-3 text-left">
               <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
                 <Music className="w-4 h-4 text-blue-400 mb-1" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Song</p>
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Music</p>
                 <p className="text-sm text-slate-200 font-semibold truncate">{user.favoriteSong || "Not set"}</p>
               </div>
               <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
