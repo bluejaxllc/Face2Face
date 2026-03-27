@@ -231,18 +231,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Fetch user info for each bumped user
+      // Fetch user info + last message for each bumped user
       const bumpedUsers = await Promise.all(
         Array.from(uniqueUserIds).map(async (id) => {
           const user = await storage.getUser(id);
           if (user) {
-            return { id: user.id, firstName: user.firstName, lastName: user.lastName, profilePhoto: user.profilePhoto };
+            const messages = await storage.getMessagesBetweenUsers(userId, id);
+            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+            const unreadCount = messages.filter(m => m.receiverId === userId && !m.read).length;
+            return {
+              id: user.id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              profilePhoto: user.profilePhoto,
+              lastMessage: lastMessage ? { content: lastMessage.content, timestamp: lastMessage.timestamp, senderId: lastMessage.senderId } : null,
+              unreadCount,
+            };
           }
           return null;
         })
       );
 
-      res.status(200).json(bumpedUsers.filter(Boolean));
+      // Sort by most recent message first
+      const sorted = bumpedUsers.filter(Boolean).sort((a: any, b: any) => {
+        if (!a.lastMessage && !b.lastMessage) return 0;
+        if (!a.lastMessage) return 1;
+        if (!b.lastMessage) return -1;
+        return new Date(b.lastMessage.timestamp).getTime() - new Date(a.lastMessage.timestamp).getTime();
+      });
+
+      res.status(200).json(sorted);
     } catch (error) {
       res.status(500).json({ message: "Failed to get bumped users" });
     }

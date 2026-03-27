@@ -40,6 +40,8 @@ interface ConnectedUser {
   firstName: string;
   lastName: string;
   profilePhoto?: string | null;
+  lastMessage?: { content: string; timestamp: string; senderId: number } | null;
+  unreadCount?: number;
 }
 
 export default function Messages() {
@@ -159,10 +161,28 @@ export default function Messages() {
                       <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-200 text-sm group-hover:text-white transition-colors">
-                        {bumpedUser.firstName} {bumpedUser.lastName}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">Tap to chat</p>
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold text-slate-200 text-sm group-hover:text-white transition-colors">
+                          {bumpedUser.firstName} {bumpedUser.lastName}
+                        </p>
+                        {bumpedUser.lastMessage && (
+                          <span className="text-[10px] text-slate-500 ml-2 flex-shrink-0">
+                            {formatDistanceToNow(new Date(bumpedUser.lastMessage.timestamp), { addSuffix: false })}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-slate-500 truncate">
+                          {bumpedUser.lastMessage
+                            ? (bumpedUser.lastMessage.senderId === user?.id ? 'You: ' : '') + bumpedUser.lastMessage.content
+                            : 'Tap to start chatting'}
+                        </p>
+                        {(bumpedUser.unreadCount ?? 0) > 0 && (
+                          <span className="ml-2 flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+                            {bumpedUser.unreadCount}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>

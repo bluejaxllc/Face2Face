@@ -6,7 +6,7 @@ import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
 import { calculateDistance } from "@/lib/distance";
-import { Locate, Plus, Minus, Layers } from "lucide-react";
+import { Locate, Plus, Minus, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
@@ -39,65 +39,7 @@ interface User {
   profilePhoto?: string | null;
 }
 
-// Create memoized components to prevent unnecessary rerenders
-const StatusToggle = memo(({
-  isActive,
-  onToggle
-}: {
-  isActive: boolean;
-  onToggle: (checked: boolean) => void;
-}) => {
-  return (
-    <div className="absolute bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center space-x-2 z-[1000]"
-      style={{ top: "12px", right: "12px", padding: "4px 10px", height: "30px" }}>
-      <span className={`font-semibold tracking-wide ${isActive ? "text-pink-500" : "text-slate-400"}`} style={{ fontSize: "12px" }}>
-        {isActive ? "GO LIVE" : "LEAVE MAP"}
-      </span>
-      <Switch
-        checked={isActive}
-        onCheckedChange={onToggle}
-        aria-label="Active status"
-      />
-    </div>
-  );
-});
-
-const CategoryToggle = memo(({
-  showCasual,
-  showIntimate,
-  onCasualClick,
-  onIntimateClick
-}: {
-  showCasual: boolean;
-  showIntimate: boolean;
-  onCasualClick: () => void;
-  onIntimateClick: () => void;
-}) => {
-  return (
-    <div className="absolute transform -translate-x-1/2 p-0.5 bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex overflow-hidden z-[1000]"
-      style={{ top: "6px", left: "50%", maxWidth: "120px", height: "24px" }}>
-      <Button
-        variant={showCasual ? "default" : "ghost"}
-        className={`${showCasual ? "bg-secondary text-white rounded-full" : "text-slate-400 hover:text-white hover:bg-transparent"}`}
-        onClick={onCasualClick}
-        style={{ minHeight: "20px", height: "20px", padding: "0 10px", fontSize: "9px", fontWeight: "600", letterSpacing: "0.5px", textTransform: "uppercase" }}
-      >
-        Connect
-      </Button>
-      <Button
-        variant={showIntimate ? "default" : "ghost"}
-        className={`${showIntimate ? "bg-primary text-white rounded-full" : "text-slate-400 hover:text-white hover:bg-transparent"}`}
-        onClick={onIntimateClick}
-        style={{ minHeight: "20px", height: "20px", padding: "0 10px", fontSize: "9px", fontWeight: "600", letterSpacing: "0.5px", textTransform: "uppercase" }}
-      >
-        Grind
-      </Button>
-    </div>
-  );
-});
-
 function Map() {
-  // Get context
   const { currentLocation, updateLocation, isError } = useLocationContext();
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
@@ -108,7 +50,6 @@ function Map() {
   const [radius, setRadius] = useState(25000);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
 
-  // Advanced filter options
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     datingPreference: 'any',
     showCasual,
@@ -118,27 +59,21 @@ function Map() {
     minRating: 1
   });
 
-  // Get isActive directly from user state
   const isActive = user?.isActive ?? true;
-
-  // ALL hooks must be before any conditional returns (React Rules of Hooks)
   const [zoom, setZoom] = useState(14);
   const mapRef = useRef<L.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapKey, setMapKey] = useState(Date.now());
 
-  // Fetch nearby users
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", { radius, category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate" }],
     enabled: !!currentLocation && isActive,
-    refetchInterval: 60000, // Refetch every 60 seconds to reduce load
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchInterval: 60000,
+    staleTime: 30000,
   });
 
-  // No mock users in production
   const mockUsers: User[] = [];
 
-  // Fix Leaflet default icon issues
   delete (L.Icon.Default.prototype as any)._getIconUrl;
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -146,17 +81,16 @@ function Map() {
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
   });
 
-  // Custom marker icons (Triangle for male, Circle for female)
   const createCustomIcon = (gender: string) => {
     const isMale = gender === 'male';
     const color = isMale ? '#3b82f6' : '#ec4899';
     const glow = isMale ? 'rgba(59,130,246,0.6)' : 'rgba(236,72,153,0.6)';
     const svgHtml = isMale
       ? `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 8px ${glow}) drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
-           <polygon points="50,8 94,92 6,92" fill="${color}" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+           <polygon points="50,8 94,92 6,92" fill="${color}" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-linejoin="round"/>
          </svg>`
       : `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 8px ${glow}) drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
-           <circle cx="50" cy="50" r="38" fill="${color}" stroke="#fff" stroke-width="4"/>
+           <circle cx="50" cy="50" r="38" fill="${color}" stroke="rgba(255,255,255,0.5)" stroke-width="3"/>
          </svg>`;
 
     return L.divIcon({
@@ -167,44 +101,28 @@ function Map() {
     });
   };
 
-  // Component to update map center when location changes
   function MapCenterUpdater({ position }: { position: [number, number] }) {
     const map = useMap();
-
     useEffect(() => {
       map.setView(position, map.getZoom());
     }, [position, map]);
-
     return null;
   }
 
-  // Component to handle map events
   function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
     const map = useMapEvents({
-      zoomend: () => {
-        onZoomChange(map.getZoom());
-      },
+      zoomend: () => { onZoomChange(map.getZoom()); },
     });
-
     return null;
   }
 
-  // Filter users based on advanced filter options
   const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
-    // Filter by category
     if (!filterOptions.showCasual && nearbyUser.category === "casual") return false;
     if (!filterOptions.showIntimate && nearbyUser.category === "intimate") return false;
-
-    // Filter by user rating
     if (nearbyUser.selfRating < filterOptions.minRating) return false;
-
-    // Additional filters would be applied here in a real implementation
-    // e.g., dating preferences, age range, etc.
-
     return true;
   });
 
-  // Handle status toggle - memoize to prevent recreation on every render
   const handleStatusToggle = useCallback(async (checked: boolean) => {
     try {
       await updateProfile({ isActive: checked });
@@ -222,40 +140,30 @@ function Map() {
     }
   }, [updateProfile, toast]);
 
-  // Handle bump click (category toggle)
   const handleCasualClick = useCallback(() => {
     if (!showCasual && !showIntimate) {
-      // At least one category must be selected
       setShowConnect(true);
     } else {
       setShowConnect(!showCasual);
     }
   }, [showCasual, showIntimate]);
 
-  // Handle grind click (category toggle)
   const handleIntimateClick = useCallback(() => {
     if (!showCasual && !showIntimate) {
-      // At least one category must be selected
       setShowGrind(true);
     } else {
       setShowGrind(!showIntimate);
     }
   }, [showCasual, showIntimate]);
 
-  // Handle user marker click
   const handleMarkerClick = useCallback((user: User) => {
     setSelectedUser(user);
   }, []);
 
-  // Handle connect — instant, no overlay
   const handleOpenConnect = useCallback(async () => {
     if (!selectedUser) return;
-
     try {
-      await apiRequest("POST", "/api/bumps", {
-        bumpedUserId: selectedUser.id,
-      });
-
+      await apiRequest("POST", "/api/bumps", { bumpedUserId: selectedUser.id });
       toast({
         title: "Connection sent!",
         description: `You connected with ${selectedUser.firstName}! They will be notified.`,
@@ -271,38 +179,25 @@ function Map() {
     }
   }, [selectedUser, toast]);
 
-  // Calculate user positions on the map
   const calculatePosition = useCallback((user: User, index: number) => {
     if (!currentLocation) return { top: "50%", left: "50%" };
-
-    // Use a consistent algorithm to position users
     const angle = ((user.id + index) * 45) % 360;
     const distance = 20 + (user.id % 20);
-
     const top = 50 + Math.sin(angle * Math.PI / 180) * distance;
     const left = 50 + Math.cos(angle * Math.PI / 180) * distance;
-
-    return {
-      top: `${top}%`,
-      left: `${left}%`
-    };
+    return { top: `${top}%`, left: `${left}%` };
   }, [currentLocation]);
 
-  // (Location error return moved to bottom)
-
-  // Get center position for the map
   const center: [number, number] = useMemo(() => {
     return currentLocation
       ? [currentLocation.latitude, currentLocation.longitude]
-      : [32.8728576, -96.5312512]; // Default position if location not available
+      : [32.8728576, -96.5312512];
   }, [currentLocation]);
 
-  // Handle zoom change
   const handleZoomChange = useCallback((newZoom: number) => {
     setZoom(newZoom);
   }, []);
 
-  // Update filter synchronization
   useEffect(() => {
     setFilterOptions(prev => ({
       ...prev,
@@ -312,25 +207,16 @@ function Map() {
     }));
   }, [showCasual, showIntimate, radius]);
 
-  // Handler for filter changes
   const handleFilterChange = useCallback((options: FilterOptions) => {
     try {
-      // Update filter options
       setFilterOptions(options);
-
-      // Sync UI with filter options
       setShowConnect(options.showCasual);
       setShowGrind(options.showIntimate);
       setRadius(options.radius);
-
-      // Show success toast
       toast({
         title: "Filters updated",
         description: "Your filter settings have been applied",
       });
-
-      // In a real implementation, we would update the API query with these filters
-      console.log('Filter options updated:', options);
     } catch (error) {
       console.error("Failed to update settings:", error);
       toast({
@@ -341,19 +227,16 @@ function Map() {
     }
   }, [toast]);
 
-  // Reset the map if it doesn't load within 5 seconds
   useEffect(() => {
     if (!mapLoaded) {
       const timer = setTimeout(() => {
         console.log('Map loading timed out, forcing reinitialization...');
-        setMapKey(Date.now()); // This will cause MapContainer to unmount and remount
+        setMapKey(Date.now());
       }, 5000);
-
       return () => clearTimeout(timer);
     }
   }, [mapLoaded, mapKey]);
 
-  // Handle location error
   if (isError) {
     return (
       <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full page-dark" style={{ paddingBottom: "45px" }}>
@@ -369,21 +252,18 @@ function Map() {
           <div className="absolute inset-0 z-30 bg-slate-900 grid place-items-center">
             <div className="flex flex-col items-center space-y-3">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="text-slate-300 font-medium">Loading map tiles...</p>
-              <p className="text-xs text-slate-500 max-w-xs text-center">
-                If the map doesn't appear, try clicking "↻ Refresh" in the status bar.
-              </p>
+              <p className="text-slate-300 font-medium">Loading map...</p>
             </div>
           </div>
         )}
         <MapContainer
-          key={mapKey} // Force remount when mapKey changes
+          key={mapKey}
           center={center}
           zoom={14}
           style={{
             height: '100%',
             width: '100%',
-            background: '#1a1b26',
+            background: '#0f172a',
             display: 'block',
             zIndex: 20,
             position: 'absolute',
@@ -404,38 +284,24 @@ function Map() {
         >
           {mapStyle === 'satellite' ? (
             <TileLayer
-              attribution='&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+              attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               maxZoom={19}
               className="leaflet-tile-pane"
-              eventHandlers={{
-                loading: () => console.log('Esri Satellite tiles are loading...'),
-                load: () => console.log('Esri Satellite tiles have loaded'),
-                error: (e) => console.error('Esri Satellite tile loading error:', e)
-              }}
             />
           ) : (
-            <>
-              {/* Dark-themed CartoDB tiles matching app aesthetic */}
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                subdomains="abcd"
-                maxZoom={20}
-                className="leaflet-tile-pane"
-              />
-            </>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              subdomains="abcd"
+              maxZoom={20}
+              className="leaflet-tile-pane"
+            />
           )}
 
-          <ZoomControl position="topright" />
-
-          {/* Update center when location changes */}
           <MapCenterUpdater position={center} />
-
-          {/* Handle map events */}
           <MapEventHandler onZoomChange={handleZoomChange} />
 
-          {/* Current user position and radius */}
           {currentLocation && (
             <>
               <Marker
@@ -452,13 +318,12 @@ function Map() {
 
               <Circle
                 center={[currentLocation.latitude, currentLocation.longitude]}
-                radius={radius * 1609.34} // Convert miles to meters
-                pathOptions={{ color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.08, weight: 1.5, dashArray: '6 4' }}
+                radius={radius * 1609.34}
+                pathOptions={{ color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.06, weight: 1, dashArray: '8 6' }}
               />
             </>
           )}
 
-          {/* User markers with clustering */}
           <MarkerClusterGroup
             chunkedLoading
             spiderfyOnMaxZoom={true}
@@ -468,7 +333,7 @@ function Map() {
               const count = cluster.getChildCount();
               return L.divIcon({
                 html: `
-                  <div style="width:40px;height:40px;border-radius:50%;background:rgba(15,23,42,0.85);backdrop-filter:blur(8px);border:2px solid rgba(99,102,241,0.6);display:flex;align-items:center;justify-content:center;color:#c7d2fe;font-weight:700;font-size:14px;box-shadow:0 0 12px rgba(99,102,241,0.3);">
+                  <div style="width:40px;height:40px;border-radius:50%;background:rgba(15,23,42,0.9);backdrop-filter:blur(12px);border:2px solid rgba(99,102,241,0.5);display:flex;align-items:center;justify-content:center;color:#c7d2fe;font-weight:700;font-size:14px;box-shadow:0 0 20px rgba(99,102,241,0.25);">
                     ${count}
                   </div>
                 `,
@@ -488,7 +353,7 @@ function Map() {
                 }}
               >
                 <Popup>
-                  <div style={{ fontFamily: 'system-ui', textAlign: 'center', padding: '4px 2px', minWidth: '130px' }}>
+                  <div style={{ fontFamily: "'Inter', system-ui", textAlign: 'center', padding: '4px 2px', minWidth: '130px' }}>
                     <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '2px' }}>
                       {user.firstName}, {user.age}
                       <span style={{ marginLeft: '4px', fontSize: '14px', color: user.gender === 'male' ? '#3b82f6' : user.gender === 'female' ? '#ec4899' : '#a855f7' }}>
@@ -515,90 +380,129 @@ function Map() {
           </MarkerClusterGroup>
         </MapContainer>
 
-        {/* Compact status bar */}
-        <div className="absolute top-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-700/30 text-slate-400 z-50 flex justify-between items-center px-3" style={{ height: "28px" }}>
-          <div className="flex items-center gap-3" style={{ fontSize: "10px", letterSpacing: "0.3px" }}>
-            <span className="flex items-center gap-1">
-              <span className={`inline-block w-1.5 h-1.5 rounded-full ${mapLoaded ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
-              {mapLoaded ? 'Live' : 'Loading'}
-            </span>
-            <span>{filteredUsers.length} nearby</span>
-            {currentLocation && <span>{currentLocation.latitude.toFixed(3)}, {currentLocation.longitude.toFixed(3)}</span>}
-          </div>
-          <button
-            onClick={() => { setMapLoaded(false); setMapKey(Date.now()); }}
-            className="text-slate-500 hover:text-white transition-colors"
-            style={{ fontSize: "10px", fontWeight: "600" }}
-          >
-            ↻ Refresh
-          </button>
-        </div>
-
-        {/* Filter drawer */}
-        <div className="absolute top-2 left-2 z-[1000]" style={{ top: "8px", left: "8px" }}>
+        {/* ═══════ TOP LEFT: Filter + Status info ═══════ */}
+        <div className="absolute z-[1000] flex items-center gap-2" style={{ top: "12px", left: "12px" }}>
           <FilterDrawer
             options={filterOptions}
             onChange={handleFilterChange}
           />
+          {/* Mini status pill */}
+          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full px-3"
+            style={{ height: "32px" }}>
+            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]' : 'bg-amber-400 animate-pulse'}`} />
+            <span className="text-slate-300 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+              {filteredUsers.length}
+            </span>
+            <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
+          </div>
         </div>
 
-        {/* Map Style toggle button */}
-        <button
-          className="absolute bg-slate-900/85 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] z-[1000] hover:bg-slate-800 transition-all duration-200 flex items-center gap-1.5"
-          onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
-          aria-label="Toggle map style"
-          style={{ bottom: "170px", right: "10px", padding: "5px 10px", height: "32px" }}
-        >
-          <Layers style={{ width: "14px", height: "14px" }} className={mapStyle === 'satellite' ? "text-emerald-400" : "text-slate-400"} />
-          <span className="text-slate-300" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.3px" }}>
-            {mapStyle === 'satellite' ? 'SAT' : 'MAP'}
-          </span>
-        </button>
+        {/* ═══════ TOP CENTER: Category toggle ═══════ */}
+        <div className="absolute left-1/2 -translate-x-1/2 z-[1000]" style={{ top: "12px" }}>
+          <div className="flex bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full p-0.5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+            <button
+              className={`rounded-full font-semibold transition-all duration-300 ${showCasual
+                  ? "bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)]"
+                  : "text-slate-400 hover:text-white"
+                }`}
+              onClick={handleCasualClick}
+              style={{ height: "28px", padding: "0 14px", fontSize: "10px", letterSpacing: "0.5px", textTransform: "uppercase" }}
+            >
+              Connect
+            </button>
+            <button
+              className={`rounded-full font-semibold transition-all duration-300 ${showIntimate
+                  ? "bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.4)]"
+                  : "text-slate-400 hover:text-white"
+                }`}
+              onClick={handleIntimateClick}
+              style={{ height: "28px", padding: "0 14px", fontSize: "10px", letterSpacing: "0.5px", textTransform: "uppercase" }}
+            >
+              Grind
+            </button>
+          </div>
+        </div>
 
-        {/* Current location button */}
-        <button
-          className="absolute bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] z-[1000] hover:bg-slate-800 transition-colors"
-          onClick={updateLocation}
-          aria-label="Get current location"
-          style={{ bottom: "120px", right: "10px", padding: "6px", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <Locate style={{ width: "16px", height: "16px" }} className="text-secondary" />
-        </button>
+        {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
+        <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
+          <div className={`flex items-center gap-2 backdrop-blur-xl border rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)] transition-all duration-300 ${isActive
+              ? "bg-emerald-500/15 border-emerald-500/30"
+              : "bg-slate-900/80 border-slate-700/40"
+            }`} style={{ padding: "4px 12px", height: "32px" }}>
+            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-emerald-400 animate-pulse" : "text-slate-500"}`} />
+            <span className={`font-bold tracking-wider ${isActive ? "text-emerald-300" : "text-slate-400"}`} style={{ fontSize: "10px" }}>
+              {isActive ? "LIVE" : "OFF"}
+            </span>
+            <Switch
+              checked={isActive}
+              onCheckedChange={handleStatusToggle}
+              aria-label="Active status"
+              className="scale-75"
+            />
+          </div>
+        </div>
 
-        {/* Radius control */}
-        <div className="absolute bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] z-[1000] flex items-center justify-between text-slate-200"
-          style={{ bottom: "70px", right: "10px", width: "130px", padding: "4px 8px" }}>
+        {/* ═══════ RIGHT SIDE: Vertical tool strip ═══════ */}
+        <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
+          {/* Map style toggle */}
           <button
-            className="flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded transition-colors border border-slate-700"
-            onClick={() => setRadius((prev: number) => Math.max(1, prev - 10))}
-            style={{ width: "24px", height: "24px" }}
+            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 shadow-[0_4px_24px_rgba(0,0,0,0.4)] flex items-center justify-center hover:bg-slate-800/90 hover:border-slate-600/50 active:scale-95 transition-all duration-200"
+            onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
+            aria-label="Toggle map style"
           >
-            <Minus style={{ width: "12px", height: "12px" }} />
+            <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-emerald-400" : "text-slate-400"} />
           </button>
-          <span style={{ fontSize: "11px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>Rad: {radius >= 25000 ? '∞' : radius} mi</span>
+
+          {/* Current location */}
           <button
-            className="flex items-center justify-center bg-slate-800 hover:bg-slate-700 rounded transition-colors border border-slate-700"
-            onClick={() => setRadius((prev: number) => Math.min(25000, prev + 10))}
-            style={{ width: "24px", height: "24px" }}
+            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 shadow-[0_4px_24px_rgba(0,0,0,0.4)] flex items-center justify-center hover:bg-slate-800/90 hover:border-blue-500/30 active:scale-95 transition-all duration-200"
+            onClick={updateLocation}
+            aria-label="Get current location"
           >
-            <Plus style={{ width: "12px", height: "12px" }} />
+            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-400" />
           </button>
+
+          {/* Zoom controls */}
+          <div className="flex flex-col bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.4)] overflow-hidden">
+            <button
+              className="w-10 h-8 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-300 border-b border-slate-700/30"
+              onClick={() => mapRef.current?.zoomIn()}
+              aria-label="Zoom in"
+            >
+              <Plus style={{ width: "14px", height: "14px" }} />
+            </button>
+            <button
+              className="w-10 h-8 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-300"
+              onClick={() => mapRef.current?.zoomOut()}
+              aria-label="Zoom out"
+            >
+              <Minus style={{ width: "14px", height: "14px" }} />
+            </button>
+          </div>
+        </div>
+
+        {/* ═══════ BOTTOM LEFT: Radius control ═══════ */}
+        <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
+          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+            style={{ padding: "4px 6px", height: "36px" }}>
+            <button
+              className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors border border-slate-700/50 active:scale-90"
+              onClick={() => setRadius((prev: number) => Math.max(1, prev - 10))}
+            >
+              <Minus style={{ width: "12px", height: "12px" }} className="text-slate-300" />
+            </button>
+            <span className="text-slate-300 font-bold px-1" style={{ fontSize: "11px", letterSpacing: "0.3px", minWidth: "60px", textAlign: "center" }}>
+              {radius >= 25000 ? '∞ mi' : `${radius} mi`}
+            </span>
+            <button
+              className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors border border-slate-700/50 active:scale-90"
+              onClick={() => setRadius((prev: number) => Math.min(25000, prev + 10))}
+            >
+              <Plus style={{ width: "12px", height: "12px" }} className="text-slate-300" />
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Status toggle - using memoized component */}
-      <StatusToggle
-        isActive={isActive}
-        onToggle={handleStatusToggle}
-      />
-
-      {/* Category toggle - using memoized component */}
-      <CategoryToggle
-        showCasual={showCasual}
-        showIntimate={showIntimate}
-        onCasualClick={handleCasualClick}
-        onIntimateClick={handleIntimateClick}
-      />
 
       {/* User profile card */}
       {selectedUser && (
@@ -618,10 +522,8 @@ function Map() {
           }
         />
       )}
-
     </div>
   );
 }
 
-// Export memoized Map component to prevent unnecessary rerenders
 export default memo(Map);

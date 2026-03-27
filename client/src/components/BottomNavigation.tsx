@@ -1,9 +1,19 @@
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import { Map, MessageSquare, User, Compass } from "lucide-react";
 
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
-  const unreadCount = 0;
+  const { user } = useAuth();
+
+  // Fetch connected users to get total unread count
+  const { data: bumpedUsers = [] } = useQuery<any[]>({
+    queryKey: ["/api/bumps/users"],
+    enabled: !!user,
+    refetchInterval: 15000, // poll every 15s for new messages
+  });
+  const unreadCount = bumpedUsers.reduce((sum, u) => sum + (u.unreadCount || 0), 0);
 
   const navigateTo = (path: string) => () => {
     navigate(path);
