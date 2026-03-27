@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Smartphone, MapPin, MessageSquare } from "lucide-react";
+import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 
@@ -123,6 +123,10 @@ export default function Register() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 title-shimmer">Face2Face</span>
           </h1>
           <p className="text-slate-400 text-sm tracking-wide">Meet Someone.</p>
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-emerald-400 text-[11px] font-semibold tracking-wide">No bots. No inactive profiles. Real people only.</span>
+          </div>
         </motion.div>
 
         <motion.div
@@ -135,6 +139,7 @@ export default function Register() {
             { icon: Smartphone, text: "Connect instantly" },
             { icon: MapPin, text: "Find nearby" },
             { icon: MessageSquare, text: "Chat instantly" },
+            { icon: ShieldCheck, text: "100% real people" },
           ].map((item, i) => (
             <motion.div
               key={item.text}

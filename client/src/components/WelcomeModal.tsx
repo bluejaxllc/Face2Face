@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MapPin, RotateCw, Heart } from "lucide-react";
+import { MapPin, RotateCw, Heart, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface WelcomeModalProps {
@@ -38,6 +38,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             { icon: MapPin, color: "text-blue-400", bg: "from-blue-500/20 to-blue-500/5", title: "Location-Based Discovery", desc: "Find people near you on the live map" },
             { icon: RotateCw, color: "text-pink-400", bg: "from-pink-500/20 to-pink-500/5", title: "Real-Life Connects", desc: "Come within 3 miles to \"connect\" and start talking" },
             { icon: Heart, color: "text-rose-400", bg: "from-rose-500/20 to-rose-500/5", title: "Choose Your Style", desc: "Select \"Casual\" for hanging out or \"Intimate\" for more" },
+            { icon: ShieldCheck, color: "text-emerald-400", bg: "from-emerald-500/20 to-emerald-500/5", title: "100% Real People", desc: "No bots, no fake accounts, no inactive profiles — ever" },
           ].map((step, i) => (
             <motion.div
               key={step.title}
@@ -59,7 +60,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
           <div className="border border-slate-700/50 rounded-xl p-4 bg-slate-800/30">
             <p className="text-sm text-slate-300 text-center italic">
-              "We prioritize real connections that start with real-life proximity"
+              "Every profile is a real person nearby — no bots, no ghost accounts"
             </p>
           </div>
 

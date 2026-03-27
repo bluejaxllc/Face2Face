@@ -7,7 +7,6 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { calculateDistance } from "@/lib/distance";
 import { Loader2, Search, Ruler, Weight } from "lucide-react";
 import ProfileCard from "@/components/ProfileCard";
-import ConnectOverlay from "@/components/ConnectOverlay";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,7 +18,6 @@ export default function Explore() {
     const { toast } = useToast();
 
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
-    const [isConnectingOverlayActive, setIsConnectingOverlayActive] = useState(false);
     const isActive = user?.isActive ?? true;
 
     const { data: nearbyUsers = [], isLoading } = useQuery<any[]>({
@@ -27,29 +25,21 @@ export default function Explore() {
         enabled: !!currentLocation && isActive,
     });
 
-    const handleOpenConnect = (currentUser: any) => {
-        setSelectedUser(currentUser);
-        setIsConnectingOverlayActive(true);
-    };
-
-    const handlePhysicalConnectSuccess = async () => {
-        if (!selectedUser) return;
-        setIsConnectingOverlayActive(false);
-
+    const handleConnect = async (targetUser: any) => {
         try {
             await apiRequest("POST", "/api/bumps", {
-                bumpedUserId: selectedUser.id,
+                bumpedUserId: targetUser.id,
             });
 
             toast({
-                title: "Connection successful!",
-                description: `You connected with ${selectedUser.firstName}! They will be notified.`,
+                title: "Connection sent!",
+                description: `You connected with ${targetUser.firstName}! They will be notified.`,
             });
             setSelectedUser(null);
         } catch (error) {
             toast({
                 title: "Connect failed",
-                description: "Failed to connect with this user",
+                description: "Failed to send connection",
                 variant: "destructive",
             });
         }
@@ -135,13 +125,13 @@ export default function Explore() {
                 )}
             </div>
 
-            {selectedUser && !isConnectingOverlayActive && (
+            {selectedUser && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedUser(null)}>
                     <div onClick={(e) => e.stopPropagation()} className="w-full relative z-[200]">
                         <ProfileCard
                             user={selectedUser}
                             onClose={() => setSelectedUser(null)}
-                            onConnect={() => handleOpenConnect(selectedUser)}
+                            onConnect={() => handleConnect(selectedUser)}
                             distance={
                                 currentLocation
                                     ? calculateDistance(
@@ -155,15 +145,6 @@ export default function Explore() {
                         />
                     </div>
                 </div>
-            )}
-
-            {isConnectingOverlayActive && selectedUser && currentLocation && (
-                <ConnectOverlay
-                    onSuccess={handlePhysicalConnectSuccess}
-                    onCancel={() => setIsConnectingOverlayActive(false)}
-                    targetUser={selectedUser}
-                    currentLocation={currentLocation}
-                />
             )}
 
             <BottomNavigation />

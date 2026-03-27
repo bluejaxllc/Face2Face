@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
-import ConnectOverlay from "./ConnectOverlay";
 import { calculateDistance } from "@/lib/distance";
 import { Locate, Plus, Minus, Layers } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -107,7 +106,6 @@ function Map() {
   const [showCasual, setShowConnect] = useState(true);
   const [showIntimate, setShowGrind] = useState(false);
   const [radius, setRadius] = useState(25000);
-  const [isConnectingOverlayActive, setIsConnectingOverlayActive] = useState(false);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
 
   // Advanced filter options
@@ -249,16 +247,9 @@ function Map() {
     setSelectedUser(user);
   }, []);
 
-  // Open Connect Overlay instead of immediate API request
-  const handleOpenConnect = useCallback(() => {
+  // Handle connect — instant, no overlay
+  const handleOpenConnect = useCallback(async () => {
     if (!selectedUser) return;
-    setIsConnectingOverlayActive(true);
-  }, [selectedUser]);
-
-  // Handle final successful physical bump
-  const handlePhysicalConnectSuccess = useCallback(async () => {
-    if (!selectedUser) return;
-    setIsConnectingOverlayActive(false);
 
     try {
       await apiRequest("POST", "/api/bumps", {
@@ -266,15 +257,15 @@ function Map() {
       });
 
       toast({
-        title: "Connection successful!",
+        title: "Connection sent!",
         description: `You connected with ${selectedUser.firstName}! They will be notified.`,
       });
       setSelectedUser(null);
     } catch (error) {
-      console.error("Failed to connect user:", error);
+      console.error("Failed to connect:", error);
       toast({
         title: "Connect failed",
-        description: "Failed to connect into this user",
+        description: "Failed to send connection",
         variant: "destructive",
       });
     }
@@ -610,7 +601,7 @@ function Map() {
       />
 
       {/* User profile card */}
-      {selectedUser && !isConnectingOverlayActive && (
+      {selectedUser && (
         <ProfileCard
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
@@ -628,14 +619,6 @@ function Map() {
         />
       )}
 
-      {isConnectingOverlayActive && selectedUser && currentLocation && (
-        <ConnectOverlay
-          onSuccess={handlePhysicalConnectSuccess}
-          onCancel={() => setIsConnectingOverlayActive(false)}
-          targetUser={selectedUser}
-          currentLocation={currentLocation}
-        />
-      )}
     </div>
   );
 }
