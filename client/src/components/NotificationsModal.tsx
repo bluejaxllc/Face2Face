@@ -14,7 +14,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Clock, Bell } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ProfileCard from "./ProfileCard";
-import ConnectOverlay from "./ConnectOverlay";
 import { useLocation } from "@/contexts/LocationContext";
 import { motion } from "framer-motion";
 
@@ -59,7 +58,6 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
   const queryClient = useQueryClient();
   const { currentLocation } = useLocation();
   const [selectedConnectNotification, setSelectedConnectNotification] = useState<Notification | null>(null);
-  const [isConnectingBack, setIsConnectingBack] = useState(false);
 
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
@@ -104,9 +102,8 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
     markAllAsReadMutation.mutate();
   };
 
-  const handleConnectBackSuccess = async () => {
+  const handleConnectBack = async () => {
     if (!senderUser) return;
-    setIsConnectingBack(false);
     setSelectedConnectNotification(null);
 
     try {
@@ -135,24 +132,13 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
     }
   };
 
-  if (isConnectingBack && senderUser && currentLocation) {
-    return (
-      <ConnectOverlay
-        onSuccess={handleConnectBackSuccess}
-        onCancel={() => setIsConnectingBack(false)}
-        targetUser={{ ...senderUser, latitude: senderUser.latitude || 0, longitude: senderUser.longitude || 0 }}
-        currentLocation={currentLocation}
-      />
-    );
-  }
-
   if (selectedConnectNotification && senderUser) {
     return (
       <div className="fixed inset-0 z-[2500] bg-black/60 backdrop-blur-sm flex justify-center items-center">
         <ProfileCard
           user={senderUser}
           onClose={() => setSelectedConnectNotification(null)}
-          onConnect={() => setIsConnectingBack(true)}
+          onConnect={handleConnectBack}
           distance={null}
         />
       </div>

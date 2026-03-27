@@ -24,7 +24,7 @@ interface User {
   fieldOfStudy?: string | null;
   interests?: string | null;
   seeking?: string | null;
-  bumpMessage?: string | null;
+  connectMessage?: string | null;
   profilePhoto?: string | null;
 }
 
@@ -171,7 +171,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
               onClick={onConnect}
             >
               <Play className="w-5 h-5 mr-2 fill-current" />
-              {hasConnected ? "BUMP" : "CONNECT"}
+              {hasConnected ? "CONNECT AGAIN" : "CONNECT"}
             </Button>
             <Button
               className="flex-1 h-14 rounded-xl font-bold tracking-wide shadow-lg shadow-blue-500/25 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border border-blue-400/50 hover:scale-[1.02] active:scale-[0.98] transition-all"

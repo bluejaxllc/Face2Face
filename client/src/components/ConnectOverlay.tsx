@@ -12,7 +12,7 @@ interface ConnectOverlayProps {
 
 export default function ConnectOverlay({ onSuccess, onCancel, targetUser, currentLocation }: ConnectOverlayProps) {
     const [rotation, setRotation] = useState(0);
-    const [instruction, setInstruction] = useState("Point phone towards them and thrust forward 1-2 feet");
+    const [instruction, setInstruction] = useState("Hold your phone up and move towards them");
     const isConnectingRef = useRef(false);
 
     // Calculate bearing to target
@@ -60,7 +60,7 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
             } catch (err) {
                 console.warn("Motion detection not supported or permission denied", err);
                 // Fallback for desktop/web testing
-                setInstruction("Motion not detected. Click arrow to simulate connection.");
+                setInstruction("Motion not available. Tap the circle below to connect.");
             }
         };
 
@@ -72,7 +72,7 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
     }, []);
 
     const handlePhysicalConnectDetected = async () => {
-        setInstruction("Connect Detected!");
+        setInstruction("Connection Sent! ✨");
         try {
             // Sender: 1x 2-second continuous vibration.
             // Capacitor Haptics doesn't support custom duration easily on all platforms,
@@ -96,14 +96,14 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
             </button>
 
             <div className="mb-12">
-                <h2 className="text-3xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-500">
+                <h2 className="text-3xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500">
                     Ready to Connect?
                 </h2>
                 <p className="text-slate-300 font-medium">{instruction}</p>
             </div>
 
             <div
-                className="w-48 h-48 rounded-full bg-slate-800/80 border-4 border-pink-500/50 flex items-center justify-center shadow-[0_0_50px_rgba(236,72,153,0.3)] cursor-pointer hover:bg-slate-800 transition-colors"
+                className="w-48 h-48 rounded-full bg-slate-800/80 border-4 border-blue-500/30 flex items-center justify-center shadow-[0_0_60px_rgba(59,130,246,0.2),0_0_30px_rgba(236,72,153,0.15)] cursor-pointer hover:bg-slate-800 hover:border-pink-500/40 transition-all duration-500"
                 style={{ transform: `rotate(${rotation}deg)` }}
                 onClick={() => {
                     // Allow click to simulate connection for desktop testing
@@ -113,11 +113,11 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
                     }
                 }}
             >
-                <ArrowUp className="w-24 h-24 text-pink-500 animate-pulse" />
+                <ArrowUp className="w-24 h-24 text-blue-400 animate-pulse" />
             </div>
 
             <p className="mt-12 text-slate-400 text-sm max-w-xs">
-                Connecting sends a connection request to {targetUser.firstName}. They will feel your request instantly.
+                Connecting sends a face-to-face request to {targetUser.firstName}. They'll feel your presence instantly.
             </p>
         </div>
     );

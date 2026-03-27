@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Settings } from "lucide-react";
+import { Logo } from "./Logo";
 import SettingsModal from "./SettingsModal";
 import NotificationsModal from "./NotificationsModal";
 
@@ -18,12 +19,13 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/80 flex justify-between items-center z-[9999] fixed top-0 left-0 right-0" style={{ height: "44px", padding: "0 12px" }}>
-      <div className="flex items-center">
+    <header className="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/50 flex justify-between items-center z-[9999] fixed top-0 left-0 right-0" style={{ height: "48px", padding: "0 14px", borderImage: "linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.2), rgba(236,72,153,0.3)) 1" }}>
+      <div className="flex items-center gap-2">
+        <Logo className="w-6 h-5" />
         <span className="font-black tracking-tight" style={{ fontSize: "16px" }}>
-          <span className="text-white">Face</span>
-          <span className="text-pink-500">2</span>
-          <span className="text-white">Face</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-300">Face</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">2</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-pink-300">Face</span>
         </span>
       </div>
 
