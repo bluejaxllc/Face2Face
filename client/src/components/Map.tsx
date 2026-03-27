@@ -52,19 +52,27 @@ function Map() {
   const { toast } = useToast();
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showCasual, setShowConnect] = useState(true);
-  const [showIntimate, setShowGrind] = useState(false);
-  const [radius, setRadius] = useState(25000);
-  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
-
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    datingPreference: 'any',
-    showCasual,
-    showIntimate,
-    ageRange: [18, 50],
-    radius,
-    minRating: 1
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
+    const saved = localStorage.getItem('face2face_filterOptions');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) { }
+    }
+    return {
+      datingPreference: 'any',
+      showCasual: true,
+      showIntimate: false,
+      ageRange: [18, 50],
+      radius: 25000,
+      minRating: 1
+    };
   });
+
+  const [showCasual, setShowConnect] = useState(filterOptions.showCasual);
+  const [showIntimate, setShowGrind] = useState(filterOptions.showIntimate);
+  const [radius, setRadius] = useState(filterOptions.radius);
+  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
 
   const isActive = user?.isActive ?? true;
   const [zoom, setZoom] = useState(14);
@@ -200,12 +208,16 @@ function Map() {
   }, [mapLoaded, currentLocation]);
 
   useEffect(() => {
-    setFilterOptions(prev => ({
-      ...prev,
-      showCasual,
-      showIntimate,
-      radius
-    }));
+    setFilterOptions(prev => {
+      const updated = {
+        ...prev,
+        showCasual,
+        showIntimate,
+        radius
+      };
+      localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
+      return updated;
+    });
   }, [showCasual, showIntimate, radius]);
 
   const handleFilterChange = useCallback((options: FilterOptions) => {
@@ -214,6 +226,7 @@ function Map() {
       setShowConnect(options.showCasual);
       setShowGrind(options.showIntimate);
       setRadius(options.radius);
+      localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
       toast({
         title: "Filters updated",
         description: "Your filter settings have been applied",
@@ -385,6 +398,26 @@ function Map() {
               {filteredUsers.length}
             </span>
             <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
+          </div>
+        </div>
+
+        {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
+        <div className="absolute z-[1000] left-1/2 -translate-x-1/2" style={{ top: "12px" }}>
+          <div className="flex bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 p-[3px] rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+            <button
+              onClick={handleCasualClick}
+              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showCasual ? 'bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.6)]' : 'text-slate-400 hover:text-white'
+                }`}
+            >
+              Connect
+            </button>
+            <button
+              onClick={handleIntimateClick}
+              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showIntimate ? 'bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.6)]' : 'text-slate-400 hover:text-white'
+                }`}
+            >
+              Grind
+            </button>
           </div>
         </div>
 
