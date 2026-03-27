@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
 import { calculateDistance } from "@/lib/distance";
-import { Loader2, Search, Ruler, Weight } from "lucide-react";
+import { Loader2, Search, Ruler, Weight, ShieldCheck } from "lucide-react";
 import ProfileCard from "@/components/ProfileCard";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -64,8 +64,12 @@ export default function Explore() {
                 ) : nearbyUsers.length === 0 ? (
                     <div className="text-center mt-10 p-6 bg-slate-800/50 rounded-xl border border-slate-700/50">
                         <Search className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                        <h3 className="font-bold text-slate-300">No users found</h3>
-                        <p className="text-sm text-slate-500 mt-1">Make sure you are active to see nearby users.</p>
+                        <h3 className="font-bold text-slate-300">No one nearby yet</h3>
+                        <p className="text-sm text-slate-500 mt-1">Make sure you are active and have location enabled.</p>
+                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                            <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                            <span className="text-emerald-400 text-[10px] font-semibold">Every profile here is a real person</span>
+                        </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-3">
@@ -77,7 +81,7 @@ export default function Explore() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.05 }}
                                     key={nearbyUser.id}
-                                    className="bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden cursor-pointer active:scale-95 transition-all duration-200 hover:border-pink-500/30"
+                                    className="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden cursor-pointer active:scale-95 transition-all duration-200 hover:border-pink-500/30 hover:shadow-lg hover:shadow-pink-500/5"
                                     onClick={() => setSelectedUser(nearbyUser)}
                                 >
                                     <div className="h-28 bg-gradient-to-br from-pink-500/10 to-blue-500/10 flex items-center justify-center relative">

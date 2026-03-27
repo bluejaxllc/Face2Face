@@ -63,7 +63,7 @@ export default function Messages() {
     }
   }, []);
 
-  const { data: bumpedUsers = [] } = useQuery<ConnectedUser[]>({
+  const { data: connectedUsers = [] } = useQuery<ConnectedUser[]>({
     queryKey: ["/api/bumps/users"],
     enabled: !!user,
   });
@@ -93,7 +93,7 @@ export default function Messages() {
     sendMessageMutation.mutate({ receiverId: selectedUserId, content: messageText.trim() });
   };
 
-  const filteredUsers = bumpedUsers.filter(u =>
+  const filteredUsers = connectedUsers.filter(u =>
     `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

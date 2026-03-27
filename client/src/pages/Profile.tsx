@@ -203,7 +203,7 @@ export default function Profile() {
 
             <div className="flex justify-center mt-3 gap-2">
               <span className={user.category === "casual" ? "badge-casual" : "badge-intimate"}>
-                {user.category === "casual" ? "Connect" : "Grind"}
+                {user.category === "casual" ? "Casual" : "Intimate"}
               </span>
               <span className={user.isActive ? "badge-active" : "badge-inactive"}>
                 {user.isActive ? "Active" : "Inactive"}

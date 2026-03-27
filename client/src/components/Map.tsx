@@ -230,7 +230,6 @@ function Map() {
   useEffect(() => {
     if (!mapLoaded) {
       const timer = setTimeout(() => {
-        console.log('Map loading timed out, forcing reinitialization...');
         setMapKey(Date.now());
       }, 5000);
       return () => clearTimeout(timer);
@@ -278,7 +277,6 @@ function Map() {
           className="leaflet-container map-container"
           ref={mapRef}
           whenReady={() => {
-            console.log('Map is ready with key:', mapKey);
             setMapLoaded(true);
           }}
         >
@@ -402,8 +400,8 @@ function Map() {
           <div className="flex bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full p-0.5 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
             <button
               className={`rounded-full font-semibold transition-all duration-300 ${showCasual
-                  ? "bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)]"
-                  : "text-slate-400 hover:text-white"
+                ? "bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)]"
+                : "text-slate-400 hover:text-white"
                 }`}
               onClick={handleCasualClick}
               style={{ height: "28px", padding: "0 14px", fontSize: "10px", letterSpacing: "0.5px", textTransform: "uppercase" }}
@@ -412,8 +410,8 @@ function Map() {
             </button>
             <button
               className={`rounded-full font-semibold transition-all duration-300 ${showIntimate
-                  ? "bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.4)]"
-                  : "text-slate-400 hover:text-white"
+                ? "bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.4)]"
+                : "text-slate-400 hover:text-white"
                 }`}
               onClick={handleIntimateClick}
               style={{ height: "28px", padding: "0 14px", fontSize: "10px", letterSpacing: "0.5px", textTransform: "uppercase" }}
@@ -426,8 +424,8 @@ function Map() {
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
           <div className={`flex items-center gap-2 backdrop-blur-xl border rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)] transition-all duration-300 ${isActive
-              ? "bg-emerald-500/15 border-emerald-500/30"
-              : "bg-slate-900/80 border-slate-700/40"
+            ? "bg-emerald-500/15 border-emerald-500/30"
+            : "bg-slate-900/80 border-slate-700/40"
             }`} style={{ padding: "4px 12px", height: "32px" }}>
             <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-emerald-400 animate-pulse" : "text-slate-500"}`} />
             <span className={`font-bold tracking-wider ${isActive ? "text-emerald-300" : "text-slate-400"}`} style={{ fontSize: "10px" }}>

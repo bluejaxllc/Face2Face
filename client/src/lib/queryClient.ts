@@ -18,7 +18,7 @@ export async function apiRequest(
     const baseUrl = getApiBaseUrl();
     const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
 
-    console.log(`Making API request to: ${fullUrl}`);
+
 
     const res = await fetch(fullUrl, {
       method,
@@ -62,7 +62,7 @@ export const getQueryFn: <T>(options: {
         const url = queryKey[0] as string;
         const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
 
-        console.log(`Making query request to: ${fullUrl}`);
+
 
         const res = await fetch(fullUrl, {
           credentials: "include",

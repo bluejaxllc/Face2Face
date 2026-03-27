@@ -55,12 +55,12 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
   const genderColor = user.gender === 'male' ? 'text-blue-400' : user.gender === 'female' ? 'text-pink-400' : 'text-purple-400';
 
   return (
-    <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
+    <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.6)] overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
       <div className="relative pt-8 pb-4 px-6 flex flex-col items-center">
         {/* Abstract shape background */}
-        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-pink-500/20 to-blue-500/20" />
+        <div className="absolute top-0 left-0 w-full h-28 bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-blue-500/20" />
 
-        <Avatar className="h-24 w-24 border-4 border-slate-900 shadow-xl z-10 bg-slate-800">
+        <Avatar className="h-24 w-24 border-4 border-slate-900 shadow-[0_0_20px_rgba(236,72,153,0.2)] z-10 bg-slate-800">
           {user.profilePhoto && (
             <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
           )}
@@ -82,8 +82,8 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
           {/* Stats row */}
           <div className="flex items-center justify-center mt-2 space-x-2 flex-wrap gap-1">
             <span className="inline-flex items-center justify-center bg-slate-800 border border-slate-700 rounded-full px-3 py-1">
-              <span className="text-xs font-bold text-slate-300">Rating: </span>
-              <span className="text-sm font-black text-white ml-1">{user.selfRating}/10</span>
+              <span className="text-xs font-bold text-slate-400 mr-1">Rating</span>
+              <span className="text-sm text-amber-400">{'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}</span>
             </span>
             {user.height && (
               <span className="inline-flex items-center bg-slate-800 border border-slate-700 rounded-full px-2 py-1">
