@@ -225,14 +225,15 @@ export default function Messages() {
               {/* Messages area */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center mx-auto mb-3">
-                        <Smile className="w-7 h-7 text-slate-600" />
+                  <div className="h-full flex flex-col items-center justify-center animate-in fade-in duration-700">
+                    <div className="relative mb-5">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-pink-500 rounded-full blur-xl opacity-20 animate-pulse" />
+                      <div className="w-16 h-16 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center relative shadow-xl backdrop-blur-sm">
+                        <Smile className="w-8 h-8 text-blue-400" />
                       </div>
-                      <p className="text-slate-300 font-medium text-sm">Say something!</p>
-                      <p className="text-xs text-slate-500 mt-1">Break the ice with {selectedUser.firstName}</p>
                     </div>
+                    <p className="text-white font-medium text-lg tracking-wide">Say something!</p>
+                    <p className="text-sm text-slate-400 mt-1.5 font-medium">Break the ice with {selectedUser.firstName}</p>
                   </div>
                 ) : (
                   <AnimatePresence>
@@ -269,38 +270,46 @@ export default function Messages() {
               </div>
 
               {/* Compose bar */}
-              <div className="p-3 border-t border-slate-800 bg-slate-900/80 backdrop-blur-md">
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Type a message..."
-                    className="flex-1 bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 rounded-xl h-11 focus:border-blue-500/50"
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
+              <div className="p-3 border-t border-slate-800/60 bg-slate-900/95 backdrop-blur-xl">
+                <div className="flex items-center gap-2.5 max-w-4xl mx-auto">
+                  <div className="flex-1 relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-pink-500/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                    <Input
+                      placeholder="Type a message..."
+                      className="relative bg-slate-800/80 border-slate-700 text-white placeholder:text-slate-400 rounded-full h-12 px-5 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 shadow-inner"
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                  </div>
                   <Button
                     onClick={handleSendMessage}
                     disabled={!messageText.trim() || sendMessageMutation.isPending}
-                    className="h-11 w-11 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-500/25 p-0 flex-shrink-0 disabled:opacity-30"
+                    className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 hover:opacity-90 shadow-lg shadow-indigo-500/25 p-0 flex-shrink-0 disabled:opacity-30 disabled:shadow-none transition-all duration-300 transform active:scale-95"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5 translate-x-px -translate-y-px" />
                   </Button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-slate-600" />
+            <div className="h-full flex items-center justify-center bg-slate-900/40">
+              <div className="text-center animate-in fade-in zoom-in-95 duration-500">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl animate-pulse" />
+                  <div className="w-20 h-20 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mx-auto relative shadow-2xl backdrop-blur-sm">
+                    <MessageSquare className="w-10 h-10 text-slate-500" />
+                  </div>
                 </div>
-                <p className="text-slate-300 font-semibold">Select a conversation</p>
-                <p className="text-sm text-slate-500 mt-1">Choose someone to start messaging</p>
+                <h3 className="text-xl font-bold text-white tracking-wide">Your Messages</h3>
+                <p className="text-sm text-slate-400 mt-2 max-w-[240px] mx-auto leading-relaxed">
+                  Select a connected user from the left to start chatting
+                </p>
               </div>
             </div>
           )}
