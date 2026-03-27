@@ -82,7 +82,7 @@ export default function Explore() {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3 pb-4">
                             {nearbyUsers.map((nearbyUser, i) => {
                                 const genderInfo = getGenderBadge(nearbyUser.gender);
                                 const isCasual = nearbyUser.category === "casual";
@@ -149,31 +149,31 @@ export default function Explore() {
                         </div>
                     )}
                 </div>
-
-                {selectedUser && (
-                    <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedUser(null)}>
-                        <div onClick={(e) => e.stopPropagation()} className="w-full relative z-[200]">
-                            <ProfileCard
-                                user={selectedUser}
-                                onClose={() => setSelectedUser(null)}
-                                onConnect={() => handleConnect(selectedUser)}
-                                distance={
-                                    currentLocation
-                                        ? calculateDistance(
-                                            currentLocation.latitude,
-                                            currentLocation.longitude,
-                                            selectedUser.latitude,
-                                            selectedUser.longitude
-                                        )
-                                        : null
-                                }
-                            />
-                        </div>
-                    </div>
-                )}
-
-                <BottomNavigation />
             </div>
+
+            {selectedUser && (
+                <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedUser(null)}>
+                    <div onClick={(e) => e.stopPropagation()} className="w-full relative z-[200]">
+                        <ProfileCard
+                            user={selectedUser}
+                            onClose={() => setSelectedUser(null)}
+                            onConnect={() => handleConnect(selectedUser)}
+                            distance={
+                                currentLocation
+                                    ? calculateDistance(
+                                        currentLocation.latitude,
+                                        currentLocation.longitude,
+                                        selectedUser.latitude,
+                                        selectedUser.longitude
+                                    )
+                                    : null
+                            }
+                        />
+                    </div>
+                </div>
+            )}
+
+            <BottomNavigation />
         </div>
     );
 }
