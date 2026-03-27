@@ -82,9 +82,13 @@ function Map() {
   const hasCenteredInitially = useRef(false);
 
   const { data: nearbyUsers = [] } = useQuery<User[]>({
-    queryKey: ["/api/users/nearby", { radius, category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate" }],
+    queryKey: ["/api/users/nearby", {
+      radius,
+      category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate",
+      datingPreference: filterOptions.datingPreference
+    }],
     enabled: !!currentLocation && isActive,
-    refetchInterval: 5000,
+    refetchInterval: 1000,
     staleTime: 2000,
   });
 
@@ -141,21 +145,36 @@ function Map() {
     }
   }, [updateProfile, toast]);
 
-  const handleCasualClick = useCallback(() => {
-    if (!showCasual && !showIntimate) {
-      setShowConnect(true);
-    } else {
-      setShowConnect(!showCasual);
-    }
-  }, [showCasual, showIntimate]);
+  const showMen = ['men', 'any', 'everyone', 'both'].includes(filterOptions.datingPreference || 'any');
+  const showWomen = ['women', 'any', 'everyone', 'both'].includes(filterOptions.datingPreference || 'any');
 
-  const handleIntimateClick = useCallback(() => {
-    if (!showCasual && !showIntimate) {
-      setShowGrind(true);
-    } else {
-      setShowGrind(!showIntimate);
-    }
-  }, [showCasual, showIntimate]);
+  const handleMenClick = useCallback(() => {
+    setFilterOptions(prev => {
+      const currentlyShowsWomen = ['women', 'any', 'everyone', 'both'].includes(prev.datingPreference);
+      let newPref: FilterOptions['datingPreference'] = 'men';
+      if (showMen && currentlyShowsWomen) newPref = 'women';
+      else if (!showMen && currentlyShowsWomen) newPref = 'any';
+      else if (showMen && !currentlyShowsWomen) return prev; // Cannot turn both off
+
+      const updated = { ...prev, datingPreference: newPref };
+      localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
+      return updated;
+    });
+  }, [showMen]);
+
+  const handleWomenClick = useCallback(() => {
+    setFilterOptions(prev => {
+      const currentlyShowsMen = ['men', 'any', 'everyone', 'both'].includes(prev.datingPreference);
+      let newPref: FilterOptions['datingPreference'] = 'women';
+      if (showWomen && currentlyShowsMen) newPref = 'men';
+      else if (!showWomen && currentlyShowsMen) newPref = 'any';
+      else if (showWomen && !currentlyShowsMen) return prev; // Cannot turn both off
+
+      const updated = { ...prev, datingPreference: newPref };
+      localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
+      return updated;
+    });
+  }, [showWomen]);
 
   const handleMarkerClick = useCallback((user: User) => {
     setSelectedUser(user);
@@ -405,18 +424,18 @@ function Map() {
         <div className="absolute z-[1000] left-1/2 -translate-x-1/2" style={{ top: "12px" }}>
           <div className="flex bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 p-[3px] rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
             <button
-              onClick={handleCasualClick}
-              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showCasual ? 'bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.6)]' : 'text-slate-400 hover:text-white'
+              onClick={handleMenClick}
+              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showMen ? 'bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.6)]' : 'text-slate-400 hover:text-white'
                 }`}
             >
-              Connect
+              Men
             </button>
             <button
-              onClick={handleIntimateClick}
-              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showIntimate ? 'bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.6)]' : 'text-slate-400 hover:text-white'
+              onClick={handleWomenClick}
+              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showWomen ? 'bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.6)]' : 'text-slate-400 hover:text-white'
                 }`}
             >
-              Grind
+              Women
             </button>
           </div>
         </div>

@@ -24,6 +24,7 @@ export default function Explore() {
     const { data: nearbyUsers = [], isLoading } = useQuery<any[]>({
         queryKey: ["/api/users/nearby", { radius: 25000, category: "both" }],
         enabled: !!currentLocation && isActive,
+        refetchInterval: 1000,
     });
 
     const handleConnect = async (targetUser: any) => {

@@ -31,7 +31,7 @@ class LocationService {
   private intervalId: number | null = null;
   private initialLocationRequested: boolean = false;
   private lastServerUpdateTime: number = 0;
-  private updateDelay: number = 5000; // Minimum time between server updates (5 seconds)
+  private updateDelay: number = 1000; // Minimum time between server updates (1 second)
   private watchId: string | null = null; // For native watch position
 
   // Private constructor for singleton
@@ -95,7 +95,7 @@ class LocationService {
         if (!this.isError) {
           this.updateLocation();
         }
-      }, 300000); // 5 minutes
+      }, 1000); // 1 second
     }
 
     // On native, start watching position for continuous updates

@@ -157,7 +157,7 @@ export default function Profile() {
       <Header />
 
       <motion.div
-        className="fixed left-0 right-0 overflow-y-auto pb-6 page-enter"
+        className="fixed left-0 right-0 overflow-y-auto pb-32 md:pb-6 page-enter"
         style={{ top: "48px", bottom: "52px" }}
         variants={containerVariants}
         initial="hidden"

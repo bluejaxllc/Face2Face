@@ -271,15 +271,15 @@ export default function Register() {
         <div className="auth-particle" />
       </div>
 
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-4 md:py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8 text-center flex flex-col items-center"
+          className="mb-6 md:mb-8 text-center flex flex-col items-center"
         >
-          <Logo className="w-24 h-24 mb-4 logo-breathe" />
-          <h1 className="text-5xl font-black tracking-tight mb-2">
+          <Logo className="w-16 h-16 md:w-24 md:h-24 mb-3 md:mb-4 logo-breathe" />
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 title-shimmer">Face2Face</span>
           </h1>
           <p className="text-slate-400 text-sm tracking-wide">Meet Someone.</p>
@@ -293,7 +293,7 @@ export default function Register() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="flex gap-3 mb-8 flex-wrap justify-center"
+          className="hidden md:flex gap-3 mb-8 flex-wrap justify-center"
         >
           {[
             { icon: Smartphone, text: "Connect instantly" },
