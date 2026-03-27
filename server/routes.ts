@@ -236,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Array.from(uniqueUserIds).map(async (id) => {
           const user = await storage.getUser(id);
           if (user) {
-            return { id: user.id, firstName: user.firstName, lastName: user.lastName };
+            return { id: user.id, firstName: user.firstName, lastName: user.lastName, profilePhoto: user.profilePhoto };
           }
           return null;
         })

@@ -99,6 +99,18 @@ export default function Register() {
       <div className="auth-glow auth-glow-1" />
       <div className="auth-glow auth-glow-2" />
 
+      {/* Floating particles */}
+      <div className="auth-particles">
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+        <div className="auth-particle" />
+      </div>
+
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -106,9 +118,9 @@ export default function Register() {
           transition={{ duration: 0.5 }}
           className="mb-8 text-center flex flex-col items-center"
         >
-          <Logo className="w-24 h-24 mb-4" />
+          <Logo className="w-24 h-24 mb-4 logo-breathe" />
           <h1 className="text-5xl font-black tracking-tight mb-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-pink-500">Face2Face</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500 title-shimmer">Face2Face</span>
           </h1>
           <p className="text-slate-400 text-sm tracking-wide">Meet people. In real life.</p>
         </motion.div>
@@ -116,21 +128,25 @@ export default function Register() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
           className="flex gap-3 mb-8 flex-wrap justify-center"
         >
-          <div className="feature-pill">
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>Connect instantly</span>
-          </div>
-          <div className="feature-pill">
-            <MapPin className="w-3.5 h-3.5" />
-            <span>Find nearby</span>
-          </div>
-          <div className="feature-pill">
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Chat instantly</span>
-          </div>
+          {[
+            { icon: Smartphone, text: "Connect instantly" },
+            { icon: MapPin, text: "Find nearby" },
+            { icon: MessageSquare, text: "Chat instantly" },
+          ].map((item, i) => (
+            <motion.div
+              key={item.text}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
+              className="feature-pill"
+            >
+              <item.icon className="w-3.5 h-3.5" />
+              <span>{item.text}</span>
+            </motion.div>
+          ))}
         </motion.div>
 
         <motion.div

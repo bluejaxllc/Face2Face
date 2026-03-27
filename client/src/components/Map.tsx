@@ -497,30 +497,27 @@ function Map() {
                 }}
               >
                 <Popup>
-                  <div className="text-center font-sans min-w-[140px]">
-                    <div className="font-bold text-base mb-0.5">
+                  <div style={{ fontFamily: 'system-ui', textAlign: 'center', padding: '4px 2px', minWidth: '130px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '2px' }}>
                       {user.firstName}, {user.age}
-                      <span className={`ml-1 text-sm ${user.gender === 'male' ? 'text-blue-500' : user.gender === 'female' ? 'text-pink-500' : 'text-purple-500'}`}>
+                      <span style={{ marginLeft: '4px', fontSize: '14px', color: user.gender === 'male' ? '#3b82f6' : user.gender === 'female' ? '#ec4899' : '#a855f7' }}>
                         {user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥'}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500">Rating: {user.selfRating}/10</div>
-                    {(user.height || user.weight) && (
-                      <div style="font-family:system-ui;text-align:center;padding:4px 2px;min-width:120px;">
-                        <div style="font-weight:700;font-size:16px;margin-bottom:4px;">{user.firstName}</div>
-                        <div style="font-size:12px;color:#94a3b8;">Age: {user.age}</div>
-                        <div style="font-size:12px;color:#cbd5e1;">Rating: {'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}</div>
-                        {currentLocation && (
-                          <div style="margin-top:6px;background:#1e293b;border-radius:12px;padding:3px 8px;display:inline-block;font-size:11px;font-weight:500;color:#a5b4fc;">
-                            {calculateDistance(
-                              currentLocation.latitude,
-                              currentLocation.longitude,
-                              user.latitude,
-                              user.longitude
-                            ).toFixed(1)} mi
-                          </div>
-                        )}
+                    <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
+                      {'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}
+                    </div>
+                    {currentLocation && (
+                      <div style={{ marginTop: '6px', background: '#1e293b', borderRadius: '12px', padding: '3px 8px', display: 'inline-block', fontSize: '11px', fontWeight: 500, color: '#a5b4fc' }}>
+                        {calculateDistance(
+                          currentLocation.latitude,
+                          currentLocation.longitude,
+                          user.latitude,
+                          user.longitude
+                        ).toFixed(1)} mi
                       </div>
+                    )}
+                  </div>
                 </Popup>
               </Marker>
             ))}
