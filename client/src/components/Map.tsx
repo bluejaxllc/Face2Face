@@ -330,14 +330,7 @@ function Map() {
     };
   }, [currentLocation]);
 
-  // Handle location error
-  if (isError) {
-    return (
-      <div className="location-error-container">
-        <LocationError onEnableLocation={updateLocation} />
-      </div>
-    );
-  }
+  // (Location error return moved to bottom)
 
   // Get center position for the map
   const center: [number, number] = useMemo(() => {
@@ -401,6 +394,15 @@ function Map() {
       return () => clearTimeout(timer);
     }
   }, [mapLoaded, mapKey]);
+
+  // Handle location error
+  if (isError) {
+    return (
+      <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full page-dark" style={{ paddingBottom: "45px" }}>
+        <LocationError onEnableLocation={updateLocation} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full" style={{ paddingBottom: "45px" }}>

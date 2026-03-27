@@ -34,19 +34,45 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     }
   };
 
+  const prefBtn = (val: string, label: string) => (
+    <Button
+      type="button"
+      variant={datingPreference === val ? "default" : "outline"}
+      className={datingPreference === val
+        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-md shadow-blue-500/20"
+        : "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"}
+      onClick={() => setDatingPreference(val)}
+    >
+      {label}
+    </Button>
+  );
+
+  const catBtn = (val: string, label: string, gradient: string) => (
+    <Button
+      type="button"
+      variant={category === val ? "default" : "outline"}
+      className={category === val
+        ? `${gradient} text-white border-0 shadow-md`
+        : "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"}
+      onClick={() => setCategory(val)}
+    >
+      {label}
+    </Button>
+  );
+
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-slate-900 border border-slate-700/50 text-white">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-gray-800">Preferences</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg font-bold text-white font-heading">Preferences</DialogTitle>
+          <DialogDescription className="text-slate-400">
             Customize your profile settings and preferences
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-2">
           <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-2">Distance Radius</Label>
+            <Label className="block text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Distance Radius</Label>
             <div className="flex items-center space-x-4">
               <Slider
                 value={[radius]}
@@ -55,42 +81,21 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 min={1}
                 step={100}
               />
-              <span className="text-sm font-medium text-gray-700 w-20">{radius >= 25000 ? 'Unlimited' : `${radius} mi`}</span>
+              <span className="text-sm font-semibold text-slate-300 w-20">{radius >= 25000 ? 'Unlimited' : `${radius} mi`}</span>
             </div>
           </div>
 
           <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-2">Interested In</Label>
+            <Label className="block text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Interested In</Label>
             <div className="flex space-x-2">
-              <Button
-                type="button"
-                variant={datingPreference === "men" ? "default" : "outline"}
-                className={datingPreference === "men" ? "bg-secondary text-white" : ""}
-                onClick={() => setDatingPreference("men")}
-              >
-                Men
-              </Button>
-              <Button
-                type="button"
-                variant={datingPreference === "women" ? "default" : "outline"}
-                className={datingPreference === "women" ? "bg-secondary text-white" : ""}
-                onClick={() => setDatingPreference("women")}
-              >
-                Women
-              </Button>
-              <Button
-                type="button"
-                variant={datingPreference === "all" ? "default" : "outline"}
-                className={datingPreference === "all" ? "bg-secondary text-white" : ""}
-                onClick={() => setDatingPreference("all")}
-              >
-                All
-              </Button>
+              {prefBtn("men", "Men")}
+              {prefBtn("women", "Women")}
+              {prefBtn("all", "All")}
             </div>
           </div>
 
           <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-2">Age Range</Label>
+            <Label className="block text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Age Range</Label>
             <div className="flex items-center space-x-4">
               <Slider
                 value={ageRange}
@@ -99,50 +104,29 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 min={18}
                 step={1}
               />
-              <span className="text-sm font-medium text-gray-700 w-16">{ageRange[0]}-{ageRange[1]}</span>
+              <span className="text-sm font-semibold text-slate-300 w-16">{ageRange[0]}-{ageRange[1]}</span>
             </div>
           </div>
 
           <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-2">Preferred Category</Label>
+            <Label className="block text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Preferred Category</Label>
             <div className="flex space-x-2">
-              <Button
-                type="button"
-                variant={category === "casual" ? "default" : "outline"}
-                className={category === "casual" ? "bg-secondary text-white" : ""}
-                onClick={() => setCategory("casual")}
-              >
-                Connect
-              </Button>
-              <Button
-                type="button"
-                variant={category === "intimate" ? "default" : "outline"}
-                className={category === "intimate" ? "bg-primary text-white" : ""}
-                onClick={() => setCategory("intimate")}
-              >
-                Grind
-              </Button>
-              <Button
-                type="button"
-                variant={category === "both" ? "default" : "outline"}
-                className={category === "both" ? "bg-secondary text-white" : ""}
-                onClick={() => setCategory("both")}
-              >
-                Both
-              </Button>
+              {catBtn("casual", "Connect", "bg-gradient-to-r from-blue-500 to-blue-600")}
+              {catBtn("intimate", "Grind", "bg-gradient-to-r from-pink-500 to-rose-500")}
+              {catBtn("both", "Both", "bg-gradient-to-r from-blue-500 to-pink-500")}
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Show my profile on map</span>
+          <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+            <span className="text-sm font-medium text-slate-300">Show my profile on map</span>
             <Switch
               checked={showOnMap}
               onCheckedChange={setShowOnMap}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Receive connection notifications</span>
+          <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+            <span className="text-sm font-medium text-slate-300">Receive connection notifications</span>
             <Switch
               checked={receiveNotifications}
               onCheckedChange={setReceiveNotifications}
@@ -151,7 +135,11 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         </div>
 
         <DialogFooter>
-          <Button type="button" onClick={handleSave} className="w-full bg-secondary hover:bg-secondary/90">
+          <Button
+            type="button"
+            onClick={handleSave}
+            className="w-full bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-blue-500/25 rounded-xl h-12"
+          >
             Save Preferences
           </Button>
         </DialogFooter>

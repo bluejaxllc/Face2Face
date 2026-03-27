@@ -9,77 +9,83 @@ export function Logo({ className, ...props }: SVGProps<SVGSVGElement>) {
             className={className}
             {...props}
         >
-            {/* Male profile silhouette (left, facing right) */}
+            {/* Male side profile (left, facing RIGHT) */}
             <path
-                d="M 8 90
-                   L 8 72
-                   C 8 65 12 60 18 58
-                   L 25 55
-                   C 22 52 20 48 20 44
-                   L 20 42
-                   C 19 40 18 37 18 34
-                   C 18 30 19 27 21 25
-                   C 21 24 21 23 21 22
-                   C 21 14 27 8 35 8
-                   C 43 8 49 14 49 22
-                   C 49 23 49 24 48 25
-                   C 49 26 50 27 50 28
-                   L 52 32
-                   C 53 34 53 36 52 38
-                   L 50 42
-                   C 50 43 50 44 50 44
-                   C 50 48 48 52 45 55
-                   L 52 58
-                   C 56 60 58 63 58 68
-                   L 58 90
+                d="M 10 88
+                   L 10 74
+                   C 10 68 14 64 20 62
+                   L 28 59
+                   C 24 56 22 52 22 47
+                   L 22 45
+                   C 22 44 22 43 22 42
+                   L 22 40
+                   C 20 38 19 35 19 32
+                   C 19 28 21 24 24 22
+                   C 24 18 24 14 26 12
+                   C 29 7 34 5 40 5
+                   C 46 5 50 8 50 14
+                   C 50 16 49 18 48 20
+                   L 48 22
+                   C 50 24 51 27 51 30
+                   L 51 32
+                   C 52 34 52 35 53 36
+                   L 55 38
+                   C 56 39 56 40 56 41
+                   L 56 42
+                   L 54 44
+                   L 53 46
+                   L 56 48
+                   C 57 49 57 50 56 51
+                   L 53 54
+                   C 51 56 50 58 50 60
+                   L 55 62
+                   C 58 64 60 68 60 72
+                   L 60 88
                    Z"
                 fill="var(--primary, hsl(222, 60%, 45%))"
                 opacity="0.95"
             />
 
-            {/* Female profile silhouette (right, facing left) - mirrored */}
+            {/* Female side profile (right, facing LEFT) — mirrored */}
             <path
-                d="M 112 90
-                   L 112 72
-                   C 112 65 108 60 102 58
-                   L 95 55
-                   C 98 52 100 48 100 44
-                   L 100 42
-                   C 101 40 102 37 102 34
-                   C 102 30 101 27 99 25
-                   C 99 24 99 23 99 22
-                   C 99 14 93 8 85 8
-                   C 77 8 71 14 71 22
-                   C 71 23 71 24 72 25
-                   C 71 26 70 27 70 28
-                   L 68 32
-                   C 67 34 67 36 68 38
-                   L 70 42
-                   C 70 43 70 44 70 44
-                   C 70 48 72 52 75 55
-                   L 68 58
-                   C 64 60 62 63 62 68
-                   L 62 90
+                d="M 110 88
+                   L 110 74
+                   C 110 68 106 64 100 62
+                   L 92 59
+                   C 96 56 98 52 98 47
+                   L 98 45
+                   C 98 44 98 43 98 42
+                   L 98 40
+                   C 100 38 101 35 101 32
+                   C 101 28 99 24 96 22
+                   C 96 18 96 14 94 12
+                   C 91 7 86 5 80 5
+                   C 74 5 70 8 70 14
+                   C 70 16 71 18 72 20
+                   L 72 22
+                   C 70 24 69 27 69 30
+                   L 69 32
+                   C 68 34 68 35 67 36
+                   L 65 38
+                   C 64 39 64 40 64 41
+                   L 64 42
+                   L 66 44
+                   L 67 46
+                   L 64 48
+                   C 63 49 63 50 64 51
+                   L 67 54
+                   C 69 56 70 58 70 60
+                   L 65 62
+                   C 62 64 60 68 60 72
+                   L 60 88
                    Z"
                 fill="var(--secondary, hsl(330, 81%, 60%))"
                 opacity="0.95"
             />
 
-            {/* Subtle heart/spark between the two faces */}
-            <path
-                d="M 60 42
-                   C 57 38 53 38 53 42
-                   C 53 46 60 52 60 52
-                   C 60 52 67 46 67 42
-                   C 67 38 63 38 60 42
-                   Z"
-                fill="url(#heartGradient)"
-                opacity="0.7"
-            />
-
-            {/* Gradient definitions */}
+            {/* Gradient defs */}
             <defs>
-                <linearGradient id="heartGradient" x1="53" y1="38" x2="67" y2="52" gradientUnits="userSpaceOnUse">
+                <linearGradient id="faceGrad" x1="10" y1="5" x2="110" y2="88" gradientUnits="userSpaceOnUse">
                     <stop stopColor="var(--primary, hsl(222, 60%, 45%))" />
                     <stop offset="1" stopColor="var(--secondary, hsl(330, 81%, 60%))" />
                 </linearGradient>

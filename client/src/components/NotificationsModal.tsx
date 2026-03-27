@@ -11,11 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
-import { Clock } from "lucide-react";
+import { Clock, Bell } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ProfileCard from "./ProfileCard";
 import ConnectOverlay from "./ConnectOverlay";
 import { useLocation } from "@/contexts/LocationContext";
+import { motion } from "framer-motion";
 
 interface User {
   id: number;
@@ -56,12 +57,10 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
   const [selectedConnectNotification, setSelectedConnectNotification] = useState<Notification | null>(null);
   const [isConnectingBack, setIsConnectingBack] = useState(false);
 
-  // Fetch notifications
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
   });
 
-  // Mark notification as read
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: number) => {
       const res = await apiRequest("POST", `/api/notifications/read/${notificationId}`, {});
@@ -72,7 +71,6 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
     },
   });
 
-  // Mark all notifications as read
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/notifications/read-all", {});
@@ -83,7 +81,6 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
     },
   });
 
-  // Fetch the sender user if a bump notification is selected
   const { data: senderUser } = useQuery<User>({
     queryKey: ["/api/users", selectedConnectNotification?.relatedId],
     enabled: !!selectedConnectNotification?.relatedId,
@@ -96,9 +93,6 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
 
     if (notification.type === "bump") {
       setSelectedConnectNotification(notification);
-    } else if (notification.type === "message") {
-      // In a real app, you would navigate to the relevant section based on notification type
-      // navigate('/messages')
     }
   };
 
@@ -116,13 +110,11 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
         bumpedUserId: senderUser.id,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      // Would navigate to messages or show a match screen here
     } catch (error) {
       console.error("Failed to connect back:", error);
     }
   };
 
-  // Helper function to get initials from notification content
   const getInitialsFromContent = (content: string) => {
     const matches = content.match(/by ([A-Za-z]+)/);
     if (matches && matches[1]) {
@@ -131,7 +123,6 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
     return "U";
   };
 
-  // Format timestamp
   const formatTime = (timestamp: string) => {
     try {
       return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
@@ -158,7 +149,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
           user={senderUser}
           onClose={() => setSelectedConnectNotification(null)}
           onConnect={() => setIsConnectingBack(true)}
-          distance={null} // distance logic optional here
+          distance={null}
         />
       </div>
     );
@@ -166,36 +157,44 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent className="sm:max-w-md bg-slate-900 border border-slate-700/50 text-white">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-slate-800">Notifications</DialogTitle>
-          <DialogDescription>
-            Recent activity and interactions with other users
+          <DialogTitle className="text-lg font-bold text-white font-heading flex items-center gap-2">
+            <Bell className="w-5 h-5 text-blue-400" />
+            Notifications
+          </DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Recent activity and interactions
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-96 overflow-y-auto hide-scrollbar">
           {notifications.length === 0 ? (
-            <div className="p-4 text-center text-slate-500">
-              No notifications yet
+            <div className="p-8 text-center">
+              <Bell className="w-10 h-10 text-slate-700 mx-auto mb-3" />
+              <p className="text-slate-400 font-medium">No notifications yet</p>
+              <p className="text-slate-500 text-sm mt-1">Connect with someone to get started!</p>
             </div>
           ) : (
-            notifications.map((notification) => (
-              <div
+            notifications.map((notification, i) => (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
                 key={notification.id}
-                className={`p-4 border-b border-slate-100 cursor-pointer transition-colors ${!notification.read ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                className={`p-4 border-b border-slate-800 cursor-pointer transition-all duration-200 ${!notification.read ? 'bg-blue-500/10 hover:bg-blue-500/15' : 'hover:bg-slate-800/50'}`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-center">
-                  <div className="h-10 w-10 rounded-full bg-slate-200 mr-3 overflow-hidden flex-shrink-0">
+                  <div className="h-10 w-10 rounded-full mr-3 overflow-hidden flex-shrink-0">
                     <Avatar>
-                      <AvatarFallback className="text-slate-600 bg-slate-200 font-bold">
+                      <AvatarFallback className="text-slate-200 bg-gradient-to-br from-slate-700 to-slate-800 font-bold">
                         {getInitialsFromContent(notification.content)}
                       </AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="flex-1">
-                    <p className={`text-sm ${!notification.read ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
+                    <p className={`text-sm ${!notification.read ? 'font-semibold text-white' : 'text-slate-300'}`}>
                       {notification.content}
                     </p>
                     <p className="text-xs text-slate-500 mt-1 flex items-center">
@@ -204,10 +203,10 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
                     </p>
                   </div>
                   {!notification.read && (
-                    <div className="ml-2 w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div className="ml-2 w-2 h-2 rounded-full bg-blue-500 shadow-md shadow-blue-500/50"></div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))
           )}
         </div>
@@ -217,7 +216,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
             type="button"
             variant="outline"
             onClick={handleMarkAllAsRead}
-            className="w-full"
+            className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
             disabled={notifications.length === 0 || !notifications.some(n => !n.read)}
           >
             Mark All as Read

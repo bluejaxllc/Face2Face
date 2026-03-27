@@ -24,15 +24,12 @@ interface FilterDrawerProps {
 }
 
 export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
-  // Create a local state to manage changes before applying them
   const [localOptions, setLocalOptions] = useState<FilterOptions>(options);
 
-  // Helper to update specific field in the options
   const updateOption = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K]) => {
     setLocalOptions(prev => ({ ...prev, [key]: value }));
   };
 
-  // Apply all changes at once
   const applyFilters = () => {
     onChange(localOptions);
   };
@@ -40,14 +37,19 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="h-9 w-9 rounded-full" aria-label="Filter">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+          aria-label="Filter"
+        >
           <Sliders className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px] overflow-y-auto">
+      <SheetContent side="right" className="w-[300px] sm:w-[400px] overflow-y-auto bg-slate-900 border-l border-slate-700/50 text-white">
         <SheetHeader className="mb-5">
-          <SheetTitle className="flex items-center">
-            <Filter className="mr-2 h-5 w-5" />
+          <SheetTitle className="flex items-center text-white font-heading">
+            <Filter className="mr-2 h-5 w-5 text-blue-400" />
             Filter Options
           </SheetTitle>
         </SheetHeader>
@@ -55,44 +57,34 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
         <div className="space-y-6 pb-20">
           {/* Dating Preference */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Dating Preference</Label>
+            <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Dating Preference</Label>
             <RadioGroup
               value={localOptions.datingPreference}
               onValueChange={(value) => updateOption('datingPreference', value as FilterOptions['datingPreference'])}
               className="flex flex-col space-y-1"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="any" id="pref-any" />
-                <Label htmlFor="pref-any">Any</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="men" id="pref-men" />
-                <Label htmlFor="pref-men">Men</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="women" id="pref-women" />
-                <Label htmlFor="pref-women">Women</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="everyone" id="pref-everyone" />
-                <Label htmlFor="pref-everyone">Everyone</Label>
-              </div>
+              {["any", "men", "women", "everyone"].map(val => (
+                <div key={val} className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2 border border-slate-700/30 hover:border-slate-600/50 transition-colors">
+                  <RadioGroupItem value={val} id={`pref-${val}`} />
+                  <Label htmlFor={`pref-${val}`} className="text-slate-300 capitalize cursor-pointer">{val}</Label>
+                </div>
+              ))}
             </RadioGroup>
           </div>
 
           {/* User Types */}
-          <div className="space-y-4">
-            <Label className="text-sm font-medium">User Types</Label>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="show-casual" className="cursor-pointer">Show Casual users</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">User Types</Label>
+            <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+              <Label htmlFor="show-casual" className="cursor-pointer text-slate-300">Show Casual users</Label>
               <Switch
                 id="show-casual"
                 checked={localOptions.showCasual}
                 onCheckedChange={(checked) => updateOption('showCasual', checked)}
               />
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="show-intimate" className="cursor-pointer">Show Intimate users</Label>
+            <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+              <Label htmlFor="show-intimate" className="cursor-pointer text-slate-300">Show Intimate users</Label>
               <Switch
                 id="show-intimate"
                 checked={localOptions.showIntimate}
@@ -102,10 +94,10 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
           </div>
 
           {/* Age Range Slider */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Age Range</Label>
-              <span className="text-xs text-gray-500">
+              <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Age Range</Label>
+              <span className="text-xs text-slate-400 font-semibold bg-slate-800 px-2 py-1 rounded-full">
                 {localOptions.ageRange[0]} - {localOptions.ageRange[1]} years
               </span>
             </div>
@@ -119,10 +111,12 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
           </div>
 
           {/* Distance Radius */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Search Radius</Label>
-              <span className="text-xs text-gray-500">{localOptions.radius >= 25000 ? 'Unlimited' : `${localOptions.radius} miles`}</span>
+              <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Search Radius</Label>
+              <span className="text-xs text-slate-400 font-semibold bg-slate-800 px-2 py-1 rounded-full">
+                {localOptions.radius >= 25000 ? 'Unlimited' : `${localOptions.radius} miles`}
+              </span>
             </div>
             <Slider
               defaultValue={[localOptions.radius]}
@@ -135,15 +129,15 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
 
           {/* Minimum Rating */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Minimum Rating</Label>
+            <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Minimum Rating</Label>
             <Select
               value={localOptions.minRating.toString()}
               onValueChange={(value) => updateOption('minRating', parseInt(value))}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-slate-800/50 border-slate-700/50 text-slate-200">
                 <SelectValue placeholder="Select minimum rating" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
                 <SelectItem value="1">1 star</SelectItem>
                 <SelectItem value="2">2 stars</SelectItem>
                 <SelectItem value="3">3 stars</SelectItem>
@@ -154,18 +148,18 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between pt-4">
+          <div className="flex justify-between pt-4 gap-3">
             <Button
               variant="outline"
               onClick={() => setLocalOptions(options)}
-              className="flex-1 mr-2"
+              className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
             >
               Reset
             </Button>
             <SheetClose asChild>
               <Button
                 onClick={applyFilters}
-                className="flex-1 ml-2"
+                className="flex-1 bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-blue-500/25"
               >
                 Apply Filters
               </Button>

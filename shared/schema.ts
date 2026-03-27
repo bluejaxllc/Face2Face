@@ -29,6 +29,7 @@ export const users = pgTable("users", {
   longitude: numeric("longitude").notNull().default("0"),
   lastLocation: timestamp("last_location"),
   profileCompleted: boolean("profile_completed").default(false),
+  profilePhoto: text("profile_photo"), // base64 encoded photo string
 });
 
 export const bumps = pgTable("bumps", {
@@ -89,6 +90,7 @@ export const updateUserSchema = createInsertSchema(users).pick({
   longitude: true,
   lastLocation: true,
   profileCompleted: true,
+  profilePhoto: true,
 });
 
 export const insertBumpSchema = createInsertSchema(bumps).pick({

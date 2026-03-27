@@ -1,70 +1,76 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { MapPin, RotateCw, Heart } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface WelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const stepVariants = {
+  hidden: { opacity: 0, x: -20 },
+  show: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: 0.15 * i, type: "spring", stiffness: 300, damping: 24 }
+  })
+};
+
 export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-slate-900 border border-slate-700/50">
         <div className="sr-only">
           <DialogTitle>Welcome to Face2Face</DialogTitle>
           <DialogDescription>Meet people in real life, your way</DialogDescription>
         </div>
-        <div className="bg-gradient-to-r from-secondary to-primary p-6 text-center">
-          <h2 className="text-2xl font-bold text-white">Welcome to Face2Face</h2>
-          <p className="text-white text-opacity-90 mt-2">Meet people in real life, your way</p>
+        <div className="bg-gradient-to-br from-blue-600/30 via-pink-500/20 to-slate-900 p-8 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.15),transparent_70%)]" />
+          <h2 className="text-3xl font-black text-white font-heading tracking-tight relative z-10">
+            Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-pink-500">Face2Face</span>
+          </h2>
+          <p className="text-slate-300 mt-2 text-sm tracking-wide relative z-10">Meet people in real life, your way</p>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="flex items-center">
-            <div className="rounded-full bg-secondary bg-opacity-10 p-3 mr-4">
-              <MapPin className="h-5 w-5 text-secondary" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-800">Location-Based Discovery</h3>
-              <p className="text-sm text-gray-500 mt-1">Find people near you on the live map</p>
-            </div>
-          </div>
+        <div className="p-6 space-y-5">
+          {[
+            { icon: MapPin, color: "text-blue-400", bg: "from-blue-500/20 to-blue-500/5", title: "Location-Based Discovery", desc: "Find people near you on the live map" },
+            { icon: RotateCw, color: "text-pink-400", bg: "from-pink-500/20 to-pink-500/5", title: "Real-Life Connects", desc: "Come within 3 miles to \"connect\" and start talking" },
+            { icon: Heart, color: "text-rose-400", bg: "from-rose-500/20 to-rose-500/5", title: "Choose Your Style", desc: "Select \"Casual\" for hanging out or \"Intimate\" for more" },
+          ].map((step, i) => (
+            <motion.div
+              key={step.title}
+              custom={i}
+              variants={stepVariants}
+              initial="hidden"
+              animate="show"
+              className="flex items-center"
+            >
+              <div className={`rounded-xl bg-gradient-to-br ${step.bg} p-3 mr-4 border border-slate-700/50`}>
+                <step.icon className={`h-5 w-5 ${step.color}`} />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-200 text-sm">{step.title}</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{step.desc}</p>
+              </div>
+            </motion.div>
+          ))}
 
-          <div className="flex items-center">
-            <div className="rounded-full bg-primary bg-opacity-10 p-3 mr-4">
-              <RotateCw className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-800">Real-Life Connects</h3>
-              <p className="text-sm text-gray-500 mt-1">Come within 3 miles to "connect" and start talking</p>
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <div className="rounded-full bg-secondary bg-opacity-10 p-3 mr-4">
-              <Heart className="h-5 w-5 text-secondary" />
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-800">Choose Your Style</h3>
-              <p className="text-sm text-gray-500 mt-1">Select "Casual" for hanging out or "Intimate" for more</p>
-            </div>
-          </div>
-
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <p className="text-sm text-gray-700 text-center italic">
+          <div className="border border-slate-700/50 rounded-xl p-4 bg-slate-800/30">
+            <p className="text-sm text-slate-300 text-center italic">
               "We prioritize real connections that start with real-life proximity"
             </p>
           </div>
 
           <Button
-            className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold"
+            className="w-full bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-blue-500/25 rounded-xl h-12"
             onClick={onClose}
           >
             Get Started
           </Button>
 
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-slate-500 text-center">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

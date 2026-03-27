@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,46 @@ export default function Profile() {
   const { user, updateProfile, logout } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please select an image under 2MB.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        await updateProfile({ profilePhoto: base64 });
+        toast({ title: "Photo updated", description: "Your profile photo has been saved." });
+        setIsUploading(false);
+      };
+      reader.onerror = () => {
+        toast({ title: "Upload failed", description: "Could not read the image file.", variant: "destructive" });
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast({ title: "Upload failed", description: "There was a problem uploading your photo.", variant: "destructive" });
+      setIsUploading(false);
+    }
+    // Reset file input so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -120,13 +160,31 @@ export default function Profile() {
             <div className="relative inline-block">
               <div className="avatar-ring shadow-[0_0_30px_rgba(59,130,246,0.5)] rounded-full">
                 <Avatar className="h-24 w-24 border-2 border-white/10 ring-4 ring-slate-900 shadow-2xl">
+                  {user.profilePhoto && (
+                    <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
+                  )}
                   <AvatarFallback className="text-2xl bg-gradient-to-br from-slate-700 to-slate-900 text-white font-heading">
                     {getInitials(user.firstName, user.lastName)}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <button className="absolute bottom-0 right-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full p-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all">
-                <Camera className="h-3.5 w-3.5" />
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoUpload}
+              />
+              <button
+                className="absolute bottom-0 right-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full p-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Camera className="h-3.5 w-3.5" />
+                )}
               </button>
             </div>
 

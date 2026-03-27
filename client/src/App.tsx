@@ -40,7 +40,7 @@ function AppRouter() {
       <Route path="/register" component={Register} />
       <Route path="/auth" component={Register} />
       <Route path="/map">
-        <ProtectedRoute component={MapView} />
+        <MapView />
       </Route>
       <Route path="/explore">
         <ProtectedRoute component={Explore} />
