@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   profilePhoto: text("profile_photo"), // base64 encoded photo string
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
+  safetyAcknowledged: boolean("safety_acknowledged").default(false),
 });
 
 export const bumps = pgTable("bumps", {
@@ -107,6 +108,7 @@ export const updateUserSchema = createInsertSchema(users).pick({
   profilePhoto: true,
   phoneNumber: true,
   isPhoneVerified: true,
+  safetyAcknowledged: true,
 });
 
 export const insertBumpSchema = createInsertSchema(bumps).pick({

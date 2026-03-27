@@ -78,7 +78,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                   <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
                     <SelectItem value="male">Male</SelectItem>
                     <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -134,13 +133,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                     : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   onClick={() => setDatingPreference("women")}>Women</Button>
-                <Button type="button"
-                  variant={datingPreference === "all" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${datingPreference === "all"
-                    ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-purple-500/25 border-purple-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setDatingPreference("all")}>All</Button>
               </div>
             </div>
             <div>
