@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Button } from "@/components/ui/button";
 import { MapPin, RotateCw, Heart, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { Logo } from "./Logo";
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -27,6 +28,14 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
         </div>
         <div className="bg-gradient-to-br from-blue-600/30 via-pink-500/20 to-slate-900 p-8 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.15),transparent_70%)]" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+            className="relative z-10"
+          >
+            <Logo className="w-16 h-14 mx-auto mb-3 drop-shadow-lg" />
+          </motion.div>
           <h2 className="text-3xl font-black text-white font-heading tracking-tight relative z-10">
             Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-pink-500">Face2Face</span>
           </h2>

@@ -1078,9 +1078,23 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
 
 /* Premium profile header */
 .profile-hero {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 40%, #1e1b4b 70%, #0f172a 100%);
+  background-size: 300% 300%;
+  animation: heroGradientShift 8s ease-in-out infinite;
   position: relative;
   overflow: hidden;
+}
+
+@keyframes heroGradientShift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .profile-hero::before {
@@ -1088,16 +1102,32 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 30% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 100%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 0%, rgba(59, 130, 246, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
 }
 
 /* Premium avatar ring */
 .avatar-ring {
-  background: linear-gradient(135deg, #3b82f6, #ec4899);
+  background: linear-gradient(135deg, #3b82f6, #a78bfa, #ec4899);
+  background-size: 200% 200%;
+  animation: avatarRingShift 3s ease-in-out infinite;
   padding: 3px;
   border-radius: 50%;
   display: inline-block;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+@keyframes avatarRingShift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .avatar-ring>* {
