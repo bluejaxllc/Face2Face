@@ -5,17 +5,26 @@ import Header from "@/components/Header";
 import Map from "@/components/Map";
 import BottomNavigation from "@/components/BottomNavigation";
 import WelcomeModal from "@/components/WelcomeModal";
+import SafetyModal from "@/components/SafetyModal";
 import { PageTransition } from "@/components/PageTransition";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MapView() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const { currentLocation, updateServerLocation } = useLocation();
+  const { toast } = useToast();
+
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showSafety, setShowSafety] = useState(false);
+  const [isUpdatingSafety, setIsUpdatingSafety] = useState(false);
 
   useEffect(() => {
     // Show welcome modal to new users or if profile is not completed
     if (user && !user.profileCompleted) {
       setShowWelcome(true);
+    } else if (user && user.profileCompleted && !user.safetyAcknowledged) {
+      // If profile is completed but safety wasn't acknowledged, show safety modal
+      setShowSafety(true);
     }
   }, [user]);
 
@@ -37,6 +46,23 @@ export default function MapView() {
 
   const handleCloseWelcome = () => {
     setShowWelcome(false);
+    // If they close the welcome modal and haven't accepted safety, show it next
+    if (user && !user.safetyAcknowledged) {
+      setShowSafety(true);
+    }
+  };
+
+  const handleAcceptSafety = async () => {
+    setIsUpdatingSafety(true);
+    try {
+      await updateProfile({ safetyAcknowledged: true });
+      setShowSafety(false);
+      toast({ title: "Safety Guidelines Accepted", description: "You are ready to start connecting!" });
+    } catch (error) {
+      toast({ title: "Update failed", description: "Failed to save safety acknowledgment.", variant: "destructive" });
+    } finally {
+      setIsUpdatingSafety(false);
+    }
   };
 
   return (
@@ -47,6 +73,7 @@ export default function MapView() {
       </div>
       <BottomNavigation />
       <WelcomeModal isOpen={showWelcome} onClose={handleCloseWelcome} />
+      <SafetyModal isOpen={showSafety} onAccept={handleAcceptSafety} isUpdating={isUpdatingSafety} />
     </PageTransition>
   );
 }

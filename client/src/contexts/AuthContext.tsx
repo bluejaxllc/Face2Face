@@ -33,6 +33,7 @@ interface User {
   profilePhoto: string | null;
   phoneNumber: string | null;
   isPhoneVerified: boolean;
+  safetyAcknowledged: boolean;
 }
 
 interface AuthContextType {

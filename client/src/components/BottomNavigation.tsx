@@ -55,15 +55,15 @@ export default function BottomNavigation() {
                   {isActive && (
                     <div className="absolute -inset-2 bg-blue-500/20 rounded-full blur-md -z-10" />
                   )}
-                  {badge && badge > 0 && (
+                  {(badge !== undefined && badge > 0) && (
                     <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
                       {badge > 9 ? "9+" : badge}
                     </span>
                   )}
                 </div>
                 <span
-                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400" : "text-transparent opacity-0 absolute"}`}
-                  style={{ fontSize: "10px", marginTop: "4px" }}
+                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
+                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
                 >
                   {label}
                 </span>
