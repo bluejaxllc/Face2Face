@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -158,7 +158,7 @@ export default function Register() {
   };
 
   // Resend cooldown timer
-  useState(() => {
+  useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
       setResendCooldown((prev) => {
@@ -170,7 +170,7 @@ export default function Register() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  });
+  }, [resendCooldown]);
 
   // OTP Verification screen
   if (showVerification) {

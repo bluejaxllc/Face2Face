@@ -404,7 +404,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[425px] bg-slate-900 border border-slate-700/50 text-white">
+      <DialogContent className="sm:max-w-[425px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 text-white">
         {renderStageContent()}
       </DialogContent>
     </Dialog>

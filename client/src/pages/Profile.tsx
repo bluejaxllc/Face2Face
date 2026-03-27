@@ -152,12 +152,12 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col page-dark">
+    <div className="h-screen page-dark">
       <Header />
 
       <motion.div
-        className="flex-1 overflow-y-auto pb-24 page-enter"
-        style={{ marginTop: "48px" }}
+        className="fixed left-0 right-0 overflow-y-auto pb-6 page-enter"
+        style={{ top: "48px", bottom: "52px" }}
         variants={containerVariants}
         initial="hidden"
         animate="show"

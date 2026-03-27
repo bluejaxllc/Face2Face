@@ -456,33 +456,39 @@ function Map() {
           </div>
         </div>
 
-        {/* ═══════ BOTTOM LEFT: Radius presets ═══════ */}
+        {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-1 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
-            style={{ padding: "3px", height: "34px" }}>
-            {[
-              { label: "5", value: 5 },
-              { label: "25", value: 25 },
-              { label: "50", value: 50 },
-              { label: "100", value: 100 },
-              { label: "∞", value: 25000 },
-            ].map((preset) => {
-              const isActive = radius === preset.value;
-              return (
-                <button
-                  key={preset.value}
-                  onClick={() => setRadius(preset.value)}
-                  className={`rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${isActive
-                    ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-blue-500/25"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700/50"
-                    }`}
-                  style={{ height: "28px", minWidth: "36px", padding: "0 8px", fontSize: "11px" }}
-                >
-                  {preset.label}
-                </button>
-              );
-            })}
-            <span className="text-slate-500 font-medium pl-1 pr-2" style={{ fontSize: "9px", letterSpacing: "0.5px" }}>MI</span>
+          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+            style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
+            <input
+              type="number"
+              value={radius >= 25000 ? "" : radius}
+              placeholder="∞"
+              min={1}
+              max={25000}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "" || val === "0") {
+                  setRadius(25000);
+                } else {
+                  setRadius(Math.min(25000, Math.max(1, parseInt(val) || 1)));
+                }
+              }}
+              className="bg-transparent text-white font-bold text-center outline-none border-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              style={{ width: "48px", fontSize: "13px" }}
+            />
+            <span className="text-slate-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
+            <button
+              onClick={() => setRadius(25000)}
+              className={`ml-0.5 rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${radius >= 25000
+                  ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-blue-500/25"
+                  : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                }`}
+              style={{ height: "26px", width: "26px", fontSize: "13px" }}
+              title="Unlimited radius"
+            >
+              ∞
+            </button>
           </div>
         </div>
       </div>

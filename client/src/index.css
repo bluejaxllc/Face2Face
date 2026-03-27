@@ -1145,6 +1145,11 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   padding: 0.75rem;
   text-align: center;
   backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Premium page background */
@@ -1161,6 +1166,13 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 1rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(148, 163, 184, 0.15);
 }
 
 /* Category badge */
@@ -1330,4 +1342,65 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
 
 .leaflet-control-attribution a {
   color: #64748b !important;
+}
+
+/* ═══════ Premium Extras ═══════ */
+
+/* Thin dark scrollbar globally */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.25) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.25);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.4);
+}
+
+/* Cluster marker glow borders */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Shimmer loading skeleton */
+.shimmer {
+  background: linear-gradient(90deg,
+      rgba(30, 41, 59, 0.6) 25%,
+      rgba(51, 65, 85, 0.6) 37%,
+      rgba(30, 41, 59, 0.6) 63%);
+  background-size: 400% 100%;
+  animation: shimmerSlide 1.4s ease infinite;
+}
+
+@keyframes shimmerSlide {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
 }

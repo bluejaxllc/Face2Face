@@ -31,6 +31,8 @@ interface User {
   lastLocation: Date;
   profileCompleted: boolean;
   profilePhoto: string | null;
+  phoneNumber: string | null;
+  isPhoneVerified: boolean;
 }
 
 interface AuthContextType {
@@ -49,6 +51,7 @@ interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
   gender?: string;
   age?: number;
   selfRating?: number;
