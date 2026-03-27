@@ -140,7 +140,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const radius = Number(req.query.radius) || 25000; // Default to unlimited (worldwide)
       const category = req.query.category as string | undefined;
-      const datingPreference = req.query.datingPreference as string | undefined;
+      const queryDatingPreference = req.query.datingPreference as string | undefined;
+      const datingPreference = queryDatingPreference || user.datingPreference || undefined;
+      const userGender = user.gender || undefined;
 
       const nearbyUsers = await storage.getNearbyUsers(
         Number(user.latitude),
@@ -150,6 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           category,
           datingPreference,
+          userGender
         }
       );
 

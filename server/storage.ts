@@ -31,6 +31,7 @@ export interface IStorage {
   getNearbyUsers(latitude: number, longitude: number, radius: number, userId: number, preferences?: {
     category?: string;
     datingPreference?: string;
+    userGender?: string;
     ageRange?: { min: number, max: number };
   }): Promise<User[]>;
 
@@ -127,6 +128,7 @@ export class DatabaseStorage implements IStorage {
     preferences: {
       category?: string;
       datingPreference?: string;
+      userGender?: string;
       ageRange?: { min: number; max: number };
     } = {}
   ): Promise<User[]> {
@@ -158,18 +160,24 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(users.category, preferences.category));
     }
 
-    let datingPref = 'all';
-    if (preferences.datingPreference && preferences.datingPreference !== "all") {
-      datingPref = preferences.datingPreference;
+    // Only see people whose gender matches our dating preference (unless we like 'all'/'everyone')
+    if (preferences.datingPreference && !['all', 'everyone', 'both'].includes(preferences.datingPreference.toLowerCase())) {
+      const cond = or(
+        eq(users.gender, preferences.datingPreference),
+        eq(users.gender, 'all'),
+        eq(users.gender, 'everyone')
+      );
+      if (cond) conditions.push(cond);
     }
 
-    const datingPrefCondition = or(
-      eq(users.datingPreference, 'all'),
-      eq(users.datingPreference, datingPref)
-    );
-
-    if (datingPrefCondition) {
-      conditions.push(datingPrefCondition);
+    // Only see people whose dating preference matches our gender (or they like 'all'/'everyone')
+    if (preferences.userGender) {
+      const cond = or(
+        eq(users.datingPreference, preferences.userGender),
+        eq(users.datingPreference, 'all'),
+        eq(users.datingPreference, 'everyone')
+      );
+      if (cond) conditions.push(cond);
     }
 
     return await db.select()
