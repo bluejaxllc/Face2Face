@@ -351,7 +351,8 @@ function Map() {
             chunkedLoading
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
-            maxClusterRadius={40}
+            maxClusterRadius={120}
+            spiderLegPolylineOptions={{ weight: 2, color: 'rgba(99,102,241,0.5)', opacity: 0.8 }}
             iconCreateFunction={(cluster: any) => {
               const count = cluster.getChildCount();
               return L.divIcon({
