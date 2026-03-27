@@ -5,7 +5,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { Send, Search, ArrowLeft, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -39,6 +39,7 @@ interface ConnectedUser {
   id: number;
   firstName: string;
   lastName: string;
+  profilePhoto?: string | null;
 }
 
 export default function Messages() {
@@ -133,6 +134,9 @@ export default function Messages() {
                   <div className="flex items-center">
                     <div className="avatar-ring mr-3">
                       <Avatar className="h-10 w-10">
+                        {bumpedUser.profilePhoto && (
+                          <AvatarImage src={bumpedUser.profilePhoto} alt={bumpedUser.firstName} />
+                        )}
                         <AvatarFallback className="bg-slate-700 text-slate-300 text-sm">
                           {getInitials(bumpedUser.firstName, bumpedUser.lastName)}
                         </AvatarFallback>
@@ -165,6 +169,9 @@ export default function Messages() {
                 </button>
                 <div className="avatar-ring">
                   <Avatar className="h-8 w-8">
+                    {selectedUser.profilePhoto && (
+                      <AvatarImage src={selectedUser.profilePhoto} alt={selectedUser.firstName} />
+                    )}
                     <AvatarFallback className="bg-slate-700 text-slate-300 text-xs">
                       {getInitials(selectedUser.firstName, selectedUser.lastName)}
                     </AvatarFallback>

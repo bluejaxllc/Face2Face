@@ -5,12 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
 import { calculateDistance } from "@/lib/distance";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Ruler, Weight } from "lucide-react";
 import ProfileCard from "@/components/ProfileCard";
 import ConnectOverlay from "@/components/ConnectOverlay";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { motion } from "framer-motion";
 
 export default function Explore() {
     const { currentLocation } = useLocation();
@@ -48,54 +49,88 @@ export default function Explore() {
         } catch (error) {
             toast({
                 title: "Connect failed",
-                description: "Failed to connect into this user",
+                description: "Failed to connect with this user",
                 variant: "destructive",
             });
         }
     };
 
+    const getGenderBadge = (gender: string) => {
+        if (gender === 'male') return { icon: '♂', color: 'text-blue-400' };
+        if (gender === 'female') return { icon: '♀', color: 'text-pink-400' };
+        return { icon: '⚥', color: 'text-purple-400' };
+    };
+
     return (
-        <div className="min-h-screen w-full flex flex-col bg-slate-50 pb-20">
+        <div className="min-h-screen w-full flex flex-col page-dark pb-20">
             <Header />
             <div className="flex-1 mt-14 px-4 w-full max-w-md mx-auto">
-                <h1 className="text-2xl font-black text-slate-800 tracking-tight mb-4 pt-4">Explore</h1>
+                <h1 className="text-2xl font-black text-white tracking-tight mb-4 pt-4">Explore</h1>
 
                 {isLoading ? (
                     <div className="flex justify-center mt-10">
                         <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
                     </div>
                 ) : nearbyUsers.length === 0 ? (
-                    <div className="text-center mt-10 p-6 bg-white rounded-xl shadow-sm border border-slate-100">
-                        <Search className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                        <h3 className="font-bold text-slate-600">No users found</h3>
+                    <div className="text-center mt-10 p-6 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                        <Search className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                        <h3 className="font-bold text-slate-300">No users found</h3>
                         <p className="text-sm text-slate-500 mt-1">Make sure you are active to see nearby users.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 gap-4">
-                        {nearbyUsers.map((nearbyUser) => (
-                            <div
-                                key={nearbyUser.id}
-                                className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer active:scale-95 transition-transform pb-2"
-                                onClick={() => setSelectedUser(nearbyUser)}
-                            >
-                                <div className="h-28 bg-gradient-to-br from-pink-400/20 to-blue-500/20 flex items-center justify-center">
-                                    <Avatar className="h-16 w-16 border-2 border-white shadow-md">
-                                        <AvatarFallback className="text-xl font-bold bg-slate-800 text-white">
-                                            {nearbyUser.firstName[0]}{(nearbyUser.lastName || '')[0] || ''}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </div>
-                                <div className="p-3 bg-white">
-                                    <h3 className="font-bold text-slate-800 truncate">{nearbyUser.firstName}, {nearbyUser.age}</h3>
-                                    <div className="flex justify-between items-center mt-1">
-                                        <span className="text-xs text-slate-500 capitalize">{nearbyUser.category}</span>
-                                        <span className="text-[10px] font-medium bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">
-                                            {currentLocation && calculateDistance(currentLocation.latitude, currentLocation.longitude, nearbyUser.latitude, nearbyUser.longitude).toFixed(1)} mi
-                                        </span>
+                    <div className="grid grid-cols-2 gap-3">
+                        {nearbyUsers.map((nearbyUser, i) => {
+                            const genderInfo = getGenderBadge(nearbyUser.gender);
+                            return (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    key={nearbyUser.id}
+                                    className="bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden cursor-pointer active:scale-95 transition-all duration-200 hover:border-pink-500/30"
+                                    onClick={() => setSelectedUser(nearbyUser)}
+                                >
+                                    <div className="h-28 bg-gradient-to-br from-pink-500/10 to-blue-500/10 flex items-center justify-center relative">
+                                        <Avatar className="h-16 w-16 border-2 border-slate-700 shadow-xl">
+                                            {nearbyUser.profilePhoto && (
+                                                <AvatarImage src={nearbyUser.profilePhoto} alt={nearbyUser.firstName} />
+                                            )}
+                                            <AvatarFallback className="text-xl font-bold bg-gradient-to-br from-slate-700 to-slate-800 text-white">
+                                                {nearbyUser.firstName[0]}{(nearbyUser.lastName || '')[0] || ''}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <span className={`absolute top-2 right-2 text-lg ${genderInfo.color}`}>{genderInfo.icon}</span>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
+                                    <div className="p-3">
+                                        <h3 className="font-bold text-white truncate text-sm">
+                                            {nearbyUser.firstName}, {nearbyUser.age}
+                                        </h3>
+                                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                            <span className="text-[10px] font-medium bg-slate-700/50 px-2 py-0.5 rounded-full text-slate-400 capitalize">
+                                                {nearbyUser.category}
+                                            </span>
+                                            {nearbyUser.height && (
+                                                <span className="text-[10px] bg-slate-700/50 px-1.5 py-0.5 rounded-full text-cyan-400 flex items-center gap-0.5">
+                                                    <Ruler className="w-2.5 h-2.5" />{nearbyUser.height}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-slate-500 mt-1">
+                                            {currentLocation && calculateDistance(currentLocation.latitude, currentLocation.longitude, nearbyUser.latitude, nearbyUser.longitude).toFixed(1)} mi
+                                        </p>
+                                        {nearbyUser.seeking && (
+                                            <div className="flex flex-wrap gap-0.5 mt-1">
+                                                {nearbyUser.seeking.split(",").slice(0, 2).map((item: string, idx: number) => (
+                                                    <span key={idx} className="text-[9px] bg-pink-950/50 border border-pink-800/30 rounded-full px-1.5 py-0.5 text-pink-300 truncate max-w-[80px]">
+                                                        {item.trim()}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -123,7 +158,7 @@ export default function Explore() {
             )}
 
             {isConnectingOverlayActive && selectedUser && currentLocation && (
-                <BumpOverlay
+                <ConnectOverlay
                     onSuccess={handlePhysicalConnectSuccess}
                     onCancel={() => setIsConnectingOverlayActive(false)}
                     targetUser={selectedUser}

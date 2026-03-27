@@ -30,11 +30,15 @@ interface User {
   isActive: boolean;
   latitude?: number;
   longitude?: number;
+  height?: string | null;
+  weight?: string | null;
   favoriteColor?: string | null;
   favoriteSong?: string | null;
   fieldOfStudy?: string | null;
   interests?: string | null;
+  seeking?: string | null;
   bumpMessage?: string | null;
+  profilePhoto?: string | null;
 }
 
 interface Notification {

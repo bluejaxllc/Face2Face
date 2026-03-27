@@ -59,44 +59,29 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   }, [toast]);
 
   // Wrapper functions to use the service
-  const updateLocation = useCallback(async () => {
-    setIsLoading(true);
-    // The original snippet had `setError(null)` and `setError(...)` which are not defined.
-    // Assuming the intent is to manage the `isError` boolean state.
-    setIsError(false); // Reset error state at the start of an update attempt
-
+  const updateLocation = async () => {
     try {
-      // Return mock location for local testing UI
-      const mockLocation = {
-        latitude: 32.8728576,
-        longitude: -96.5312512,
-        accuracy: 10,
-      };
+      setIsLoading(true);
+      await locationService.updateLocation();
 
-      setCurrentLocation(mockLocation);
-      setIsLoading(false);
-
-      // Show success toast for mock location
+      // If we successfully got a location, show success toast
+      if (locationService.getLocation()) {
+        toast({
+          title: "Location updated",
+          description: "Your current location has been updated successfully.",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating location:", error);
       toast({
-        title: "Location updated (Mock)",
-        description: "Your current location has been updated with mock data.",
-      });
-
-      // The original snippet returned mockLocation, but the context type expects Promise<void>
-      // So we don't return a value here to match the interface.
-    } catch (err: any) {
-      console.error("[LocationService] Failed to update location:", err);
-      setIsError(true); // Set error state on failure
-      setIsLoading(false);
-      toast({
-        title: "Location update failed (Mock)",
-        description: "Failed to update your location with mock data. Please try again.",
+        title: "Location update failed",
+        description: "Failed to update your location. Please try again.",
         variant: "destructive",
       });
-      // Re-throw the error if necessary, but the interface expects Promise<void>
-      // so we handle the error internally and don't propagate it as a rejected promise.
+    } finally {
+      setIsLoading(false);
     }
-  }, [toast]);
+  };
 
   // Create a debounced version of updateServerLocation using ref
   // to avoid creating new functions on each render

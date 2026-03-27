@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Send, X, Smartphone } from "lucide-react";
+import { ArrowRight, Send, X, Smartphone, Check, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { motionService, MotionDirection } from "@/services/motion-service";
@@ -39,7 +39,6 @@ interface ConnectInteractionProps {
 
 export function ConnectInteraction({ open, user, distance, onClose, onSuccess }: ConnectInteractionProps) {
   const { toast } = useToast();
-  // Added "direct_message" stage to allow direct messaging without motion
   const [stage, setStage] = useState<"initializing" | "moving" | "message" | "direct_message" | "complete">("initializing");
   const [motionProgress, setMotionProgress] = useState(0);
   const [message, setMessage] = useState("");
@@ -47,25 +46,20 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
   const [movementDirection, setMovementDirection] = useState<string | null>(null);
   const [isVibrating, setIsVibrating] = useState(false);
 
-  // Initialize motion detection when the dialog opens
   useEffect(() => {
     if (open && user) {
       initializeMotionDetection();
     }
 
     return () => {
-      // Clean up motion detection on unmount
       if (motionService) {
         motionService.stopListening();
       }
     };
   }, [open, user]);
 
-  // Initialize the interaction - determine if we should use motion detection or direct messaging
   const initializeMotionDetection = async () => {
-    // If this is a direct message (user has bumped before), skip motion detection
     if (distance && distance <= 3) {
-      // Skip motion detection and go straight to message
       setStage("direct_message");
       return;
     }
@@ -83,18 +77,14 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
     try {
       await motionService.startListening();
       setStage("moving");
-
-      // Add motion listener
       motionService.addMotionListener(handleMotion);
 
-      // Set random target direction
       const directions = [
         MotionDirection.FORWARD,
         MotionDirection.RIGHT,
         MotionDirection.LEFT,
       ];
       setMovementDirection(directions[Math.floor(Math.random() * directions.length)]);
-
     } catch (error) {
       console.error("Failed to initialize motion detection:", error);
       setMotionPermissionError(true);
@@ -106,19 +96,13 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
     }
   };
 
-  // Handle motion detection
   const handleMotion = useCallback((direction: MotionDirection, intensity: number) => {
     if (stage !== "moving" || !movementDirection) return;
 
-    console.log(`Motion detected: ${direction}, intensity: ${intensity}`);
-
-    // Check if motion is in the target direction
     if (direction === movementDirection) {
-      // Increase progress
       setMotionProgress(prev => {
         const newProgress = Math.min(prev + (intensity / 2), 100);
 
-        // If we hit 100%, trigger success
         if (newProgress >= 100 && prev < 100) {
           vibrate();
           setStage("message");
@@ -130,12 +114,10 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
     }
   }, [stage, movementDirection]);
 
-  // Vibrate the phone on success — uses native haptics on Capacitor, falls back to web
   const vibrate = async () => {
     setIsVibrating(true);
     try {
       if (Capacitor.isNativePlatform()) {
-        // Rich native haptic pattern
         await Haptics.impact({ style: ImpactStyle.Heavy });
         await new Promise(r => setTimeout(r, 100));
         await Haptics.impact({ style: ImpactStyle.Heavy });
@@ -150,7 +132,6 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
     setTimeout(() => setIsVibrating(false), 500);
   };
 
-  // Send bump request with message
   const sendConnect = async () => {
     if (!user) return;
 
@@ -173,7 +154,6 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
       setStage("complete");
       onSuccess();
 
-      // Close after a short delay
       setTimeout(() => {
         onClose();
       }, 2000);
@@ -198,20 +178,22 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle>Preparing to Connect</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-white font-heading text-xl">Preparing to Connect</DialogTitle>
+              <DialogDescription className="text-slate-400">
                 Hold on while we initialize motion detection...
               </DialogDescription>
             </DialogHeader>
-            <div className="flex justify-center my-6">
-              <Smartphone className="h-16 w-16 text-secondary animate-pulse" />
+            <div className="flex justify-center my-8">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-pink-500/20 border border-slate-700/50 flex items-center justify-center">
+                <Smartphone className="h-10 w-10 text-blue-400 animate-pulse" />
+              </div>
             </div>
             {motionPermissionError && (
-              <div className="text-center text-red-500 mt-2">
-                <p>Motion detection permission denied. Please enable it in your device settings.</p>
+              <div className="text-center mt-2">
+                <p className="text-red-400 text-sm">Motion detection permission denied. Please enable it in your device settings.</p>
                 <Button
                   variant="outline"
-                  className="mt-4"
+                  className="mt-4 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                   onClick={() => initializeMotionDetection()}
                 >
                   Try Again
@@ -225,22 +207,28 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle>Move Your Phone {getDirectionText(movementDirection)}</DialogTitle>
-              <DialogDescription>
-                To bump with {user?.firstName}, move your device in the indicated direction.
+              <DialogTitle className="text-white font-heading text-xl">
+                Move Your Phone {getDirectionText(movementDirection)}
+              </DialogTitle>
+              <DialogDescription className="text-slate-400">
+                To connect with {user?.firstName}, move your device in the indicated direction.
               </DialogDescription>
             </DialogHeader>
 
-            <div className={`flex flex-col items-center justify-center py-6 ${isVibrating ? 'animate-wiggle' : ''}`}>
-              {renderDirectionIcon(movementDirection)}
-              <Progress value={motionProgress} className="w-full mt-4" />
-              <p className="text-sm text-gray-500 mt-2">
-                Progress: {Math.round(motionProgress)}%
+            <div className={`flex flex-col items-center justify-center py-8 ${isVibrating ? 'animate-wiggle' : ''}`}>
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/15 to-pink-500/15 border border-slate-700/50 flex items-center justify-center mb-6">
+                {renderDirectionIcon(movementDirection)}
+              </div>
+              <Progress value={motionProgress} className="w-full" />
+              <p className="text-sm text-slate-400 mt-3 font-medium">
+                {Math.round(motionProgress)}% complete
               </p>
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button variant="outline" onClick={onClose} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                Cancel
+              </Button>
             </DialogFooter>
           </>
         );
@@ -249,43 +237,50 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle>Send a Message</DialogTitle>
-              <DialogDescription>
-                Since you're within range of {user?.firstName}, you can send a message directly!
+              <DialogTitle className="text-white font-heading text-xl">Send a Message</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                You're within range of {user?.firstName} — say something real!
               </DialogDescription>
             </DialogHeader>
 
             <div className="my-4 space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-10 w-10 bg-secondary">
-                  <AvatarFallback>
+              <div className="flex items-center gap-4 bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 font-bold">
                     {user ? getInitials(user.firstName, user.lastName) : "??"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-sm text-gray-500">{user?.category === "casual" ? "Looking to hang out" : "Looking for more"}</p>
+                  <p className="font-semibold text-white">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-xs text-slate-400">
+                    {user?.category === "casual" ? "Looking to hang out" : "Looking for more"}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bump-message">Your message</Label>
+                <Label htmlFor="bump-message" className="text-slate-300 text-sm font-medium">Your message</Label>
                 <Textarea
                   id="bump-message"
                   placeholder="Hey, want to meet up?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="min-h-[100px]"
+                  className="min-h-[100px] bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 focus:border-blue-500/50 resize-none"
                   autoFocus
                 />
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-              <Button onClick={sendConnect}>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={onClose} className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                Cancel
+              </Button>
+              <Button
+                onClick={sendConnect}
+                className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-blue-500/25"
+              >
                 <Send className="h-4 w-4 mr-2" />
-                Send Message
+                Send
               </Button>
             </DialogFooter>
           </>
@@ -295,40 +290,51 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle>Send a Message with your Connect</DialogTitle>
-              <DialogDescription>
-                Add a message to your bump request to {user?.firstName}. This helps break the ice!
+              <DialogTitle className="text-white font-heading text-xl">Send a Message</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Add a personal message to your connect request to {user?.firstName}
               </DialogDescription>
             </DialogHeader>
 
             <div className="my-4 space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-10 w-10 bg-secondary">
-                  <AvatarFallback>
+              <div className="flex items-center gap-4 bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+                <Avatar className="h-12 w-12">
+                  <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 font-bold">
                     {user ? getInitials(user.firstName, user.lastName) : "??"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-sm text-gray-500">{user?.category === "casual" ? "Looking to hang out" : "Looking for more"}</p>
+                  <p className="font-semibold text-white">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-xs text-slate-400">
+                    {user?.category === "casual" ? "Looking to hang out" : "Looking for more"}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bump-message">Your message</Label>
+                <Label htmlFor="bump-message" className="text-slate-300 text-sm font-medium">Your message</Label>
                 <Textarea
                   id="bump-message"
                   placeholder="Hey, want to meet up?"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="min-h-[100px]"
+                  className="min-h-[100px] bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 focus:border-blue-500/50 resize-none"
                 />
               </div>
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setStage("moving")}>Back</Button>
-              <Button onClick={sendConnect}>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setStage("moving")}
+                className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={sendConnect}
+                className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-blue-500/25"
+              >
                 <Send className="h-4 w-4 mr-2" />
                 Send Connect
               </Button>
@@ -340,19 +346,15 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle>Connect Sent!</DialogTitle>
-              <DialogDescription>
-                Your bump request has been sent to {user?.firstName}. You'll get a notification when they respond.
+              <DialogTitle className="text-white font-heading text-xl">Connect Sent!</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Your request has been sent to {user?.firstName}. You'll get a notification when they respond.
               </DialogDescription>
             </DialogHeader>
 
             <div className="flex justify-center my-8">
-              <div className="rounded-full bg-green-100 p-3">
-                <div className="rounded-full bg-green-200 p-2">
-                  <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.15)]">
+                <Check className="h-10 w-10 text-emerald-400" />
               </div>
             </div>
           </>
@@ -360,7 +362,6 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
     }
   };
 
-  // Helper function to get direction text
   const getDirectionText = (direction: string | null): string => {
     switch (direction) {
       case MotionDirection.FORWARD:
@@ -380,27 +381,21 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
     }
   };
 
-  // Helper function to render direction icon
   const renderDirectionIcon = (direction: string | null) => {
-    const iconSize = "h-16 w-16 text-primary animate-pulse";
+    const iconSize = "h-12 w-12 text-blue-400 animate-pulse";
 
     switch (direction) {
       case MotionDirection.FORWARD:
         return <ArrowRight className={iconSize} />;
       case MotionDirection.BACKWARD:
-        // Rotate arrow 180 degrees
         return <ArrowRight className={`${iconSize} transform rotate-180`} />;
       case MotionDirection.LEFT:
-        // Rotate arrow 270 degrees
         return <ArrowRight className={`${iconSize} transform -rotate-90`} />;
       case MotionDirection.RIGHT:
-        // Rotate arrow 90 degrees
         return <ArrowRight className={`${iconSize} transform rotate-90`} />;
       case MotionDirection.UP:
-        // Rotate arrow 270 degrees
         return <ArrowRight className={`${iconSize} transform -rotate-90`} />;
       case MotionDirection.DOWN:
-        // Rotate arrow 90 degrees
         return <ArrowRight className={`${iconSize} transform rotate-90`} />;
       default:
         return null;
@@ -409,7 +404,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-slate-900 border border-slate-700/50 text-white">
         {renderStageContent()}
       </DialogContent>
     </Dialog>
