@@ -373,14 +373,14 @@ function Map() {
 
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full" style={{ paddingBottom: "45px" }}>
-      <div className="flex-1 relative bg-gray-100" style={{ minHeight: '300px', height: 'calc(100%)', marginBottom: "50px" }}>
+      <div className="flex-1 relative" style={{ minHeight: '300px', height: 'calc(100%)', marginBottom: "50px" }}>
         {!mapLoaded && (
-          <div className="absolute inset-0 z-30 bg-gray-200 grid place-items-center">
+          <div className="absolute inset-0 z-30 bg-slate-900 grid place-items-center">
             <div className="flex flex-col items-center space-y-3">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-              <p className="text-gray-700 font-medium">Loading map tiles...</p>
-              <p className="text-xs text-gray-500 max-w-xs text-center">
-                If the map doesn't appear, try clicking the "Refresh Map" button above.
+              <p className="text-slate-300 font-medium">Loading map tiles...</p>
+              <p className="text-xs text-slate-500 max-w-xs text-center">
+                If the map doesn't appear, try clicking "↻ Refresh" in the status bar.
               </p>
             </div>
           </div>
@@ -392,7 +392,7 @@ function Map() {
           style={{
             height: '100%',
             width: '100%',
-            background: '#f8f9fa',
+            background: '#1a1b26',
             display: 'block',
             zIndex: 20,
             position: 'absolute',
@@ -475,10 +475,9 @@ function Map() {
             maxClusterRadius={40}
             iconCreateFunction={(cluster: any) => {
               const count = cluster.getChildCount();
-
               return L.divIcon({
                 html: `
-                  <div class="cluster-marker bg-white rounded-full flex items-center justify-center border-2 border-primary text-primary font-bold">
+                  <div style="width:40px;height:40px;border-radius:50%;background:rgba(15,23,42,0.85);backdrop-filter:blur(8px);border:2px solid rgba(99,102,241,0.6);display:flex;align-items:center;justify-content:center;color:#c7d2fe;font-weight:700;font-size:14px;box-shadow:0 0 12px rgba(99,102,241,0.3);">
                     ${count}
                   </div>
                 `,
@@ -507,28 +506,21 @@ function Map() {
                     </div>
                     <div className="text-xs text-slate-500">Rating: {user.selfRating}/10</div>
                     {(user.height || user.weight) && (
-                      <div className="text-xs text-slate-500">
-                        {user.height && <span>{user.height}</span>}
-                        {user.height && user.weight && <span> · </span>}
-                        {user.weight && <span>{user.weight}</span>}
+                      <div style="font-family:system-ui;text-align:center;padding:4px 2px;min-width:120px;">
+                        <div style="font-weight:700;font-size:16px;margin-bottom:4px;">{user.firstName}</div>
+                        <div style="font-size:12px;color:#94a3b8;">Age: {user.age}</div>
+                        <div style="font-size:12px;color:#cbd5e1;">Rating: {'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}</div>
+                        {currentLocation && (
+                          <div style="margin-top:6px;background:#1e293b;border-radius:12px;padding:3px 8px;display:inline-block;font-size:11px;font-weight:500;color:#a5b4fc;">
+                            {calculateDistance(
+                              currentLocation.latitude,
+                              currentLocation.longitude,
+                              user.latitude,
+                              user.longitude
+                            ).toFixed(1)} mi
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {user.seeking && (
-                      <div className="text-[10px] text-pink-500 mt-1 italic truncate max-w-[150px]">
-                        Seeking: {user.seeking.split(',').slice(0, 2).join(', ')}
-                      </div>
-                    )}
-                    {currentLocation && (
-                      <div className="text-xs mt-1.5 bg-slate-100 rounded-full py-0.5 px-2 text-slate-600 inline-block font-medium">
-                        {calculateDistance(
-                          currentLocation.latitude,
-                          currentLocation.longitude,
-                          user.latitude,
-                          user.longitude
-                        ).toFixed(1)} mi
-                      </div>
-                    )}
-                  </div>
                 </Popup>
               </Marker>
             ))}
