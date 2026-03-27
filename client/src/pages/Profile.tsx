@@ -196,10 +196,13 @@ export default function Profile() {
               </button>
             </div>
 
-            <h2 className="mt-4 text-2xl font-bold text-white font-heading">
+            <h2 className="mt-4 text-2xl font-bold text-white font-heading flex items-center justify-center gap-1.5">
               {user.firstName} {user.lastName}
+              <span className={`text-lg ${user.gender === 'male' ? 'text-blue-400' : user.gender === 'female' ? 'text-pink-400' : 'text-purple-400'}`}>
+                {user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥'}
+              </span>
             </h2>
-            <p className="text-slate-400 text-sm">@{user.username} · {user.gender || "other"} · {user.age || 18}</p>
+            <p className="text-slate-400 text-sm">@{user.username} · {user.age || 18} years old</p>
 
             <div className="flex justify-center mt-3 gap-2">
               <span className={user.category === "casual" ? "badge-casual" : "badge-intimate"}>
@@ -237,6 +240,40 @@ export default function Profile() {
             </div>
           </div>
         </motion.div>
+
+        {/* Physical stats row */}
+        {(user.height || user.weight) && (
+          <motion.div variants={itemVariants} className="px-4 mt-3">
+            <div className="flex justify-center gap-3">
+              {user.height && (
+                <div className="flex items-center gap-1.5 bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1.5">
+                  <Ruler className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-sm text-slate-200 font-medium">{user.height}</span>
+                </div>
+              )}
+              {user.weight && (
+                <div className="flex items-center gap-1.5 bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1.5">
+                  <Weight className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-sm text-slate-200 font-medium">{user.weight}</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Seeking tags */}
+        {user.seeking && !isEditing && (
+          <motion.div variants={itemVariants} className="px-4 mt-3">
+            <div className="flex justify-center flex-wrap gap-1.5">
+              <Search className="w-3.5 h-3.5 text-pink-400 mt-0.5" />
+              {user.seeking.split(",").map((item: string, i: number) => (
+                <span key={i} className="text-xs bg-pink-950/60 border border-pink-800/40 rounded-full px-2.5 py-1 text-pink-300 font-medium">
+                  {item.trim()}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         <div className="max-w-lg mx-auto px-4 mt-6 space-y-4">
           {/* Favorites view (when not editing) */}

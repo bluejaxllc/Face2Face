@@ -1,6 +1,6 @@
 /**
  * Motion Service
- * Handles device motion detection for the "bump" feature
+ * Handles device motion detection for the "connect" feature
  * Uses @capacitor/motion on native platforms, falls back to browser DeviceMotionEvent on web
  */
 

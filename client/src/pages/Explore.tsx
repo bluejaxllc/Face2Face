@@ -54,15 +54,24 @@ export default function Explore() {
     return (
         <div className="min-h-screen w-full flex flex-col page-dark pb-20">
             <Header />
-            <div className="flex-1 mt-14 px-4 w-full max-w-md mx-auto">
-                <h1 className="text-2xl font-black text-white tracking-tight mb-4 pt-4">Explore</h1>
+            <div className="flex-1 px-4 w-full max-w-md mx-auto" style={{ marginTop: "48px" }}>
+                <div className="flex items-center justify-between pt-4 mb-4">
+                    <h1 className="text-2xl font-black tracking-tight">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">Explore</span>
+                    </h1>
+                    {nearbyUsers.length > 0 && (
+                        <span className="text-xs text-slate-500 bg-slate-800/50 px-2.5 py-1 rounded-full border border-slate-700/30">
+                            {nearbyUsers.length} nearby
+                        </span>
+                    )}
+                </div>
 
                 {isLoading ? (
                     <div className="flex justify-center mt-10">
                         <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
                     </div>
                 ) : nearbyUsers.length === 0 ? (
-                    <div className="text-center mt-10 p-6 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                    <div className="text-center mt-10 p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
                         <Search className="w-12 h-12 text-slate-600 mx-auto mb-3" />
                         <h3 className="font-bold text-slate-300">No one nearby yet</h3>
                         <p className="text-sm text-slate-500 mt-1">Make sure you are active and have location enabled.</p>
@@ -75,17 +84,25 @@ export default function Explore() {
                     <div className="grid grid-cols-2 gap-3">
                         {nearbyUsers.map((nearbyUser, i) => {
                             const genderInfo = getGenderBadge(nearbyUser.gender);
+                            const isCasual = nearbyUser.category === "casual";
                             return (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.05 }}
                                     key={nearbyUser.id}
-                                    className="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden cursor-pointer active:scale-95 transition-all duration-200 hover:border-pink-500/30 hover:shadow-lg hover:shadow-pink-500/5"
+                                    className={`bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden cursor-pointer active:scale-95 transition-all duration-300 ${isCasual
+                                            ? "hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5"
+                                            : "hover:border-pink-500/30 hover:shadow-lg hover:shadow-pink-500/5"
+                                        }`}
                                     onClick={() => setSelectedUser(nearbyUser)}
                                 >
-                                    <div className="h-28 bg-gradient-to-br from-pink-500/10 to-blue-500/10 flex items-center justify-center relative">
-                                        <Avatar className="h-16 w-16 border-2 border-slate-700 shadow-xl">
+                                    <div className={`h-28 flex items-center justify-center relative ${isCasual
+                                            ? "bg-gradient-to-br from-blue-500/10 to-slate-800/10"
+                                            : "bg-gradient-to-br from-pink-500/10 to-slate-800/10"
+                                        }`}>
+                                        <Avatar className={`h-16 w-16 border-2 shadow-xl ${isCasual ? "border-blue-500/30" : "border-pink-500/30"
+                                            }`}>
                                             {nearbyUser.profilePhoto && (
                                                 <AvatarImage src={nearbyUser.profilePhoto} alt={nearbyUser.firstName} />
                                             )}
@@ -100,7 +117,10 @@ export default function Explore() {
                                             {nearbyUser.firstName}, {nearbyUser.age}
                                         </h3>
                                         <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                            <span className="text-[10px] font-medium bg-slate-700/50 px-2 py-0.5 rounded-full text-slate-400 capitalize">
+                                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${isCasual
+                                                    ? "bg-blue-500/15 text-blue-400 border border-blue-500/20"
+                                                    : "bg-pink-500/15 text-pink-400 border border-pink-500/20"
+                                                }`}>
                                                 {nearbyUser.category}
                                             </span>
                                             {nearbyUser.height && (

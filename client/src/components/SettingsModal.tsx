@@ -123,22 +123,22 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 <Button type="button"
                   variant={datingPreference === "men" ? "default" : "outline"}
                   className={`flex-1 rounded-xl h-10 font-semibold transition-all ${datingPreference === "men"
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
-                      : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   onClick={() => setDatingPreference("men")}>Men</Button>
                 <Button type="button"
                   variant={datingPreference === "women" ? "default" : "outline"}
                   className={`flex-1 rounded-xl h-10 font-semibold transition-all ${datingPreference === "women"
-                      ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
-                      : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   onClick={() => setDatingPreference("women")}>Women</Button>
                 <Button type="button"
                   variant={datingPreference === "all" ? "default" : "outline"}
                   className={`flex-1 rounded-xl h-10 font-semibold transition-all ${datingPreference === "all"
-                      ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-purple-500/25 border-purple-400/50"
-                      : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-purple-500/25 border-purple-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
                   onClick={() => setDatingPreference("all")}>All</Button>
               </div>
@@ -149,17 +149,17 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 <Button type="button"
                   variant={category === "casual" ? "default" : "outline"}
                   className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "casual"
-                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
-                      : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
-                  onClick={() => setCategory("casual")}>Connect</Button>
+                  onClick={() => setCategory("casual")}>Casual</Button>
                 <Button type="button"
                   variant={category === "intimate" ? "default" : "outline"}
                   className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "intimate"
-                      ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
-                      : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
-                  onClick={() => setCategory("intimate")}>Grind</Button>
+                  onClick={() => setCategory("intimate")}>Intimate</Button>
               </div>
             </div>
             <div>
