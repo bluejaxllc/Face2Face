@@ -68,8 +68,8 @@ function Map() {
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", { radius, category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate" }],
     enabled: !!currentLocation && isActive,
-    refetchInterval: 60000,
-    staleTime: 30000,
+    refetchInterval: 5000,
+    staleTime: 2000,
   });
 
   const mockUsers: User[] = [];

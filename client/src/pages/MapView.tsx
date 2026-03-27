@@ -38,7 +38,7 @@ export default function MapView() {
         if (currentLocation) {
           updateServerLocation(currentLocation);
         }
-      }, 60000); // Update every minute
+      }, 15000); // Update every 15 seconds
 
       return () => clearInterval(intervalId);
     }
