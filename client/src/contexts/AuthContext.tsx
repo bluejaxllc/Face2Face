@@ -95,6 +95,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
       const res = await apiRequest("POST", "/api/auth/login", { username, password });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Login failed (${res.status})`);
+      }
       return res.json();
     },
     onSuccess: (data) => {
@@ -117,6 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (userData: RegisterData) => {
       const res = await apiRequest("POST", "/api/auth/register", userData);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Registration failed (${res.status})`);
+      }
       return res.json();
     },
     onSuccess: (data) => {
@@ -138,6 +146,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/auth/logout", {});
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Logout failed (${res.status})`);
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -159,6 +171,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<User>) => {
       const res = await apiRequest("PATCH", "/api/users/profile", profileData);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Profile update failed (${res.status})`);
+      }
       return res.json();
     },
     onSuccess: (data) => {

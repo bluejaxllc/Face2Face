@@ -41,8 +41,8 @@ export async function apiRequest(
     const errorResponse = new Response(JSON.stringify({
       message: "Network error, please check your connection"
     }), {
-      status: 0,
-      statusText: "Network Error",
+      status: 503,
+      statusText: "Service Unavailable",
       headers: { 'Content-Type': 'application/json' }
     });
 
