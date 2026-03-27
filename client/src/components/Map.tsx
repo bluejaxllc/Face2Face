@@ -151,15 +151,21 @@ function Map() {
   // Custom marker icons (Triangle for male, Circle for female)
   const createCustomIcon = (gender: string) => {
     const isMale = gender === 'male';
+    const color = isMale ? '#3b82f6' : '#ec4899';
+    const glow = isMale ? 'rgba(59,130,246,0.6)' : 'rgba(236,72,153,0.6)';
     const svgHtml = isMale
-      ? `<svg width="30" height="30" viewBox="0 0 100 100" fill="var(--blue-500, #3b82f6)" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><polygon points="50,10 90,90 10,90"/></svg>`
-      : `<svg width="30" height="30" viewBox="0 0 100 100" fill="var(--pink-500, #ec4899)" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><circle cx="50" cy="50" r="40"/></svg>`;
+      ? `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 8px ${glow}) drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
+           <polygon points="50,8 94,92 6,92" fill="${color}" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+         </svg>`
+      : `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 8px ${glow}) drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
+           <circle cx="50" cy="50" r="38" fill="${color}" stroke="#fff" stroke-width="4"/>
+         </svg>`;
 
     return L.divIcon({
-      className: `custom-div-icon border-none bg-transparent`,
-      html: `<div class="marker-pin animate-pulse-slow">${svgHtml}</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
+      className: 'custom-div-icon border-none bg-transparent',
+      html: `<div class="marker-pin" style="transition: transform 0.2s ease;">${svgHtml}</div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
     });
   };
 
@@ -419,46 +425,13 @@ function Map() {
             />
           ) : (
             <>
-              {/* Most reliable tile provider for guaranteed visibility - CartoDB */}
+              {/* Dark-themed CartoDB tiles matching app aesthetic */}
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 subdomains="abcd"
                 maxZoom={20}
                 className="leaflet-tile-pane"
-                eventHandlers={{
-                  loading: () => console.log('CartoDB tiles are loading...'),
-                  load: () => console.log('CartoDB tiles have loaded'),
-                  error: (e) => console.error('CartoDB tile loading error:', e)
-                }}
-              />
-
-              {/* Second fallback - Stamen TonerLite */}
-              <TileLayer
-                attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png"
-                subdomains="abcd"
-                minZoom={0}
-                maxZoom={20}
-                className="leaflet-tile-pane"
-                eventHandlers={{
-                  loading: () => console.log('Stamen tiles are loading...'),
-                  load: () => console.log('Stamen tiles have loaded'),
-                  error: (e) => console.error('Stamen tile loading error:', e)
-                }}
-              />
-
-              {/* Third fallback - OpenStreetMap direct */}
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maxZoom={19}
-                className="leaflet-tile-pane"
-                eventHandlers={{
-                  loading: () => console.log('OSM tiles are loading...'),
-                  load: () => console.log('OSM tiles have loaded'),
-                  error: (e) => console.error('OSM tile loading error:', e)
-                }}
               />
             </>
           )}
@@ -489,7 +462,7 @@ function Map() {
               <Circle
                 center={[currentLocation.latitude, currentLocation.longitude]}
                 radius={radius * 1609.34} // Convert miles to meters
-                pathOptions={{ color: 'blue', fillColor: 'blue', fillOpacity: 0.1, weight: 1 }}
+                pathOptions={{ color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.08, weight: 1.5, dashArray: '6 4' }}
               />
             </>
           )}
@@ -562,6 +535,25 @@ function Map() {
           </MarkerClusterGroup>
         </MapContainer>
 
+        {/* Compact status bar */}
+        <div className="absolute top-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-700/30 text-slate-400 z-50 flex justify-between items-center px-3" style={{ height: "28px" }}>
+          <div className="flex items-center gap-3" style={{ fontSize: "10px", letterSpacing: "0.3px" }}>
+            <span className="flex items-center gap-1">
+              <span className={`inline-block w-1.5 h-1.5 rounded-full ${mapLoaded ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+              {mapLoaded ? 'Live' : 'Loading'}
+            </span>
+            <span>{filteredUsers.length} nearby</span>
+            {currentLocation && <span>{currentLocation.latitude.toFixed(3)}, {currentLocation.longitude.toFixed(3)}</span>}
+          </div>
+          <button
+            onClick={() => { setMapLoaded(false); setMapKey(Date.now()); }}
+            className="text-slate-500 hover:text-white transition-colors"
+            style={{ fontSize: "10px", fontWeight: "600" }}
+          >
+            ↻ Refresh
+          </button>
+        </div>
+
         {/* Filter drawer */}
         <div className="absolute top-2 left-2 z-[1000]" style={{ top: "8px", left: "8px" }}>
           <FilterDrawer
@@ -572,12 +564,15 @@ function Map() {
 
         {/* Map Style toggle button */}
         <button
-          className="absolute bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.5)] z-[1000] hover:bg-slate-800 transition-colors"
+          className="absolute bg-slate-900/85 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.5)] z-[1000] hover:bg-slate-800 transition-all duration-200 flex items-center gap-1.5"
           onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
           aria-label="Toggle map style"
-          style={{ bottom: "170px", right: "10px", padding: "6px", width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ bottom: "170px", right: "10px", padding: "5px 10px", height: "32px" }}
         >
-          <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-primary" : "text-slate-400"} />
+          <Layers style={{ width: "14px", height: "14px" }} className={mapStyle === 'satellite' ? "text-emerald-400" : "text-slate-400"} />
+          <span className="text-slate-300" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.3px" }}>
+            {mapStyle === 'satellite' ? 'SAT' : 'MAP'}
+          </span>
         </button>
 
         {/* Current location button */}

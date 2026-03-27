@@ -31,6 +31,7 @@ const registerSchema = z.object({
   gender: z.string().default("other"),
   age: z.coerce.number().min(18, "Must be at least 18").max(99),
   selfRating: z.coerce.number().min(1).max(10).default(5),
+  datingPreference: z.string().default("all"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -61,6 +62,7 @@ export default function Register() {
       gender: "other",
       age: 18,
       selfRating: 5,
+      datingPreference: "all",
     },
   });
 
@@ -307,6 +309,29 @@ export default function Register() {
                       )}
                     />
                   </div>
+
+                  <FormField
+                    control={registerForm.control}
+                    name="datingPreference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Interested In</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="auth-input">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="men">Men</SelectItem>
+                            <SelectItem value="women">Women</SelectItem>
+                            <SelectItem value="all">Everyone</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={registerForm.control}

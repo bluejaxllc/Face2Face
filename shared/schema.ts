@@ -69,6 +69,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   gender: true,
   age: true,
+  selfRating: true,
+  datingPreference: true,
 });
 
 export const updateUserSchema = createInsertSchema(users).pick({
