@@ -347,6 +347,39 @@ var DatabaseStorage = class {
   async markAllNotificationsAsRead(userId) {
     await db.update(notifications).set({ read: true }).where(eq(notifications.userId, userId));
   }
+  // Verification code operations
+  async createVerificationCode(phoneNumber, code, expiresAt) {
+    const result = await db.insert(verificationCodes).values({
+      phoneNumber,
+      code,
+      expiresAt,
+      used: false
+    }).returning();
+    return result[0];
+  }
+  async getValidVerificationCode(phoneNumber, code) {
+    const result = await db.select().from(verificationCodes).where(and(
+      eq(verificationCodes.phoneNumber, phoneNumber),
+      eq(verificationCodes.code, code),
+      eq(verificationCodes.used, false),
+      sql`${verificationCodes.expiresAt} > NOW()`
+    )).orderBy(desc(verificationCodes.id)).limit(1);
+    return result[0];
+  }
+  async markVerificationCodeUsed(id) {
+    await db.update(verificationCodes).set({ used: true }).where(eq(verificationCodes.id, id));
+  }
+  async getRecentCodeCount(phoneNumber, sinceMinutes) {
+    const result = await db.select({ count: sql`count(*)` }).from(verificationCodes).where(and(
+      eq(verificationCodes.phoneNumber, phoneNumber),
+      sql`${verificationCodes.createdAt} > NOW() - INTERVAL '${sql.raw(String(sinceMinutes))} minutes'`
+    ));
+    return result[0]?.count || 0;
+  }
+  async getUserByPhone(phone) {
+    const result = await db.select().from(users).where(eq(users.phoneNumber, phone)).limit(1);
+    return result[0];
+  }
 };
 var storage = new DatabaseStorage();
 
@@ -461,6 +494,83 @@ async function setupAuth(app2) {
       res.status(500).json({ message: "Failed to get user information" });
     }
   });
+}
+
+// server/ghl.ts
+var GHL_API_BASE = "https://services.leadconnectorhq.com";
+var GHL_API_KEY = process.env.GHL_API_KEY || "";
+var GHL_LOCATION_ID = process.env.GHL_LOCATION_ID || "";
+var GHL_PHONE_NUMBER = process.env.GHL_PHONE_NUMBER || "";
+function getHeaders() {
+  return {
+    Authorization: `Bearer ${GHL_API_KEY}`,
+    "Content-Type": "application/json",
+    Version: "2021-07-28"
+  };
+}
+async function findOrCreateContact(phone, firstName) {
+  const searchRes = await fetch(
+    `${GHL_API_BASE}/contacts/?locationId=${GHL_LOCATION_ID}&query=${encodeURIComponent(phone)}&limit=1`,
+    { method: "GET", headers: getHeaders() }
+  );
+  if (searchRes.ok) {
+    const searchData = await searchRes.json();
+    if (searchData.contacts && searchData.contacts.length > 0) {
+      return searchData.contacts[0].id;
+    }
+  }
+  const createRes = await fetch(`${GHL_API_BASE}/contacts/`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      locationId: GHL_LOCATION_ID,
+      phone,
+      firstName: firstName || "Face2Face User",
+      source: "Face2Face App",
+      tags: ["face2face", "sms-verification"]
+    })
+  });
+  if (!createRes.ok) {
+    const error = await createRes.text();
+    console.error("GHL create contact error:", error);
+    throw new Error(`Failed to create GHL contact: ${createRes.status}`);
+  }
+  const contactData = await createRes.json();
+  return contactData.contact.id;
+}
+async function sendSMS(contactId, message) {
+  const res = await fetch(`${GHL_API_BASE}/conversations/messages`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      type: "SMS",
+      contactId,
+      message
+    })
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    console.error("GHL send SMS error:", error);
+    return false;
+  }
+  return true;
+}
+async function sendVerificationSMS(phone, code, firstName) {
+  if (!GHL_API_KEY || !GHL_LOCATION_ID) {
+    console.error("GHL credentials not configured. Set GHL_API_KEY and GHL_LOCATION_ID env vars.");
+    console.log(`[DEV MODE] Verification code for ${phone}: ${code}`);
+    return true;
+  }
+  try {
+    const contactId = await findOrCreateContact(phone, firstName);
+    const message = `Your Face2Face verification code is: ${code}
+
+This code expires in 5 minutes. Do not share it with anyone.`;
+    return await sendSMS(contactId, message);
+  } catch (error) {
+    console.error("Failed to send verification SMS:", error);
+    return false;
+  }
 }
 
 // server/routes.ts
@@ -752,6 +862,54 @@ async function registerRoutes(app2) {
       res.status(200).json({ message: "All notifications marked as read" });
     } catch (error) {
       res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+  apiRouter.post("/verify/send", async (req, res) => {
+    try {
+      const { phoneNumber, firstName } = req.body;
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+      const normalizedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+1${phoneNumber.replace(/\D/g, "")}`;
+      const recentCount = await storage.getRecentCodeCount(normalizedPhone, 15);
+      if (recentCount >= 3) {
+        return res.status(429).json({ message: "Too many verification attempts. Please wait 15 minutes." });
+      }
+      const code = Math.floor(1e5 + Math.random() * 9e5).toString();
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1e3);
+      await storage.createVerificationCode(normalizedPhone, code, expiresAt);
+      const sent = await sendVerificationSMS(normalizedPhone, code, firstName || "User");
+      if (!sent) {
+        return res.status(500).json({ message: "Failed to send verification code. Please try again." });
+      }
+      res.status(200).json({ message: "Verification code sent", phone: normalizedPhone });
+    } catch (error) {
+      console.error("Verify send error:", error);
+      res.status(500).json({ message: "Failed to send verification code" });
+    }
+  });
+  apiRouter.post("/verify/check", async (req, res) => {
+    try {
+      const { phoneNumber, code } = req.body;
+      if (!phoneNumber || !code) {
+        return res.status(400).json({ message: "Phone number and code are required" });
+      }
+      const normalizedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+1${phoneNumber.replace(/\D/g, "")}`;
+      const verification = await storage.getValidVerificationCode(normalizedPhone, code);
+      if (!verification) {
+        return res.status(400).json({ message: "Invalid or expired verification code" });
+      }
+      await storage.markVerificationCodeUsed(verification.id);
+      if (req.session?.userId) {
+        await storage.updateUser(req.session.userId, {
+          phoneNumber: normalizedPhone,
+          isPhoneVerified: true
+        });
+      }
+      res.status(200).json({ message: "Phone verified successfully", verified: true });
+    } catch (error) {
+      console.error("Verify check error:", error);
+      res.status(500).json({ message: "Failed to verify code" });
     }
   });
   app2.use("/api", apiRouter);

@@ -172,13 +172,19 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 key={notification.id}
-                className={`p-4 border-b border-slate-800 cursor-pointer transition-all duration-200 ${!notification.read ? 'bg-blue-500/10 hover:bg-blue-500/15' : 'hover:bg-slate-800/50'}`}
+                className={`p-4 border-b border-slate-800 cursor-pointer transition-all duration-200 ${!notification.read
+                    ? 'bg-blue-500/10 hover:bg-blue-500/15'
+                    : 'hover:bg-slate-800/50'
+                  } ${notification.type === 'bump' ? 'border-l-2 border-l-pink-500/50' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex items-center">
                   <div className="h-10 w-10 rounded-full mr-3 overflow-hidden flex-shrink-0">
                     <Avatar>
-                      <AvatarFallback className="text-slate-200 bg-gradient-to-br from-slate-700 to-slate-800 font-bold">
+                      <AvatarFallback className={`text-slate-200 font-bold ${notification.type === 'bump'
+                          ? 'bg-gradient-to-br from-pink-600 to-rose-700'
+                          : 'bg-gradient-to-br from-slate-700 to-slate-800'
+                        }`}>
                         {getInitialsFromContent(notification.content)}
                       </AvatarFallback>
                     </Avatar>
@@ -193,7 +199,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
                     </p>
                   </div>
                   {!notification.read && (
-                    <div className="ml-2 w-2 h-2 rounded-full bg-blue-500 shadow-md shadow-blue-500/50"></div>
+                    <div className="ml-2 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 shadow-md shadow-blue-500/50"></div>
                   )}
                 </div>
               </motion.div>

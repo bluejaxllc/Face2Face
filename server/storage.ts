@@ -12,6 +12,8 @@ import {
   notifications,
   type Notification,
   type InsertNotification,
+  verificationCodes,
+  type VerificationCode,
 } from "@shared/schema";
 import { eq, or, and, desc, asc, sql, SQL } from "drizzle-orm";
 import { db } from "./db";
@@ -52,6 +54,13 @@ export interface IStorage {
 
   // Session store
   sessionStore: session.Store;
+
+  // Verification code operations
+  createVerificationCode(phoneNumber: string, code: string, expiresAt: Date): Promise<VerificationCode>;
+  getValidVerificationCode(phoneNumber: string, code: string): Promise<VerificationCode | undefined>;
+  markVerificationCodeUsed(id: number): Promise<void>;
+  getRecentCodeCount(phoneNumber: string, sinceMinutes: number): Promise<number>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -289,6 +298,52 @@ export class DatabaseStorage implements IStorage {
     await db.update(notifications)
       .set({ read: true })
       .where(eq(notifications.userId, userId));
+  }
+
+  // Verification code operations
+  async createVerificationCode(phoneNumber: string, code: string, expiresAt: Date): Promise<VerificationCode> {
+    const result = await db.insert(verificationCodes).values({
+      phoneNumber,
+      code,
+      expiresAt,
+      used: false,
+    }).returning();
+    return result[0];
+  }
+
+  async getValidVerificationCode(phoneNumber: string, code: string): Promise<VerificationCode | undefined> {
+    const result = await db.select()
+      .from(verificationCodes)
+      .where(and(
+        eq(verificationCodes.phoneNumber, phoneNumber),
+        eq(verificationCodes.code, code),
+        eq(verificationCodes.used, false),
+        sql`${verificationCodes.expiresAt} > NOW()`
+      ))
+      .orderBy(desc(verificationCodes.id))
+      .limit(1);
+    return result[0];
+  }
+
+  async markVerificationCodeUsed(id: number): Promise<void> {
+    await db.update(verificationCodes)
+      .set({ used: true })
+      .where(eq(verificationCodes.id, id));
+  }
+
+  async getRecentCodeCount(phoneNumber: string, sinceMinutes: number): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(verificationCodes)
+      .where(and(
+        eq(verificationCodes.phoneNumber, phoneNumber),
+        sql`${verificationCodes.createdAt} > NOW() - INTERVAL '${sql.raw(String(sinceMinutes))} minutes'`
+      ));
+    return result[0]?.count || 0;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.phoneNumber, phone)).limit(1);
+    return result[0];
   }
 }
 

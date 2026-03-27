@@ -57,19 +57,27 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
   return (
     <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.6)] overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
       <div className="relative pt-8 pb-4 px-6 flex flex-col items-center">
-        {/* Abstract shape background */}
-        <div className="absolute top-0 left-0 w-full h-28 bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-blue-500/20" />
+        {/* Category-aware header gradient */}
+        <div className={`absolute top-0 left-0 w-full h-28 ${user.category === 'casual'
+          ? 'bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-slate-900/0'
+          : 'bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-slate-900/0'
+          }`} />
 
-        <Avatar className="h-24 w-24 border-4 border-slate-900 shadow-[0_0_20px_rgba(236,72,153,0.2)] z-10 bg-slate-800">
-          {user.profilePhoto && (
-            <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
-          )}
-          <AvatarFallback className="text-3xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
-            {getInitials(user.firstName, user.lastName)}
-          </AvatarFallback>
-        </Avatar>
+        <div className={`p-[3px] rounded-full z-10 ${user.category === 'casual'
+          ? 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+          : 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
+          }`}>
+          <Avatar className="h-24 w-24 border-2 border-slate-900 bg-slate-800">
+            {user.profilePhoto && (
+              <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
+            )}
+            <AvatarFallback className="text-3xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
+              {getInitials(user.firstName, user.lastName)}
+            </AvatarFallback>
+          </Avatar>
+        </div>
 
-        <button className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1" onClick={onClose}>
+        <button className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-slate-800/50" onClick={onClose}>
           <X className="h-5 w-5" />
         </button>
 
@@ -81,18 +89,18 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
 
           {/* Stats row */}
           <div className="flex items-center justify-center mt-2 space-x-2 flex-wrap gap-1">
-            <span className="inline-flex items-center justify-center bg-slate-800 border border-slate-700 rounded-full px-3 py-1">
+            <span className="inline-flex items-center justify-center bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 backdrop-blur-sm">
               <span className="text-xs font-bold text-slate-400 mr-1">Rating</span>
               <span className="text-sm text-amber-400">{'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}</span>
             </span>
             {user.height && (
-              <span className="inline-flex items-center bg-slate-800 border border-slate-700 rounded-full px-2 py-1">
+              <span className="inline-flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full px-2.5 py-1 backdrop-blur-sm">
                 <Ruler className="w-3 h-3 text-cyan-400 mr-1" />
                 <span className="text-xs text-slate-300">{user.height}</span>
               </span>
             )}
             {user.weight && (
-              <span className="inline-flex items-center bg-slate-800 border border-slate-700 rounded-full px-2 py-1">
+              <span className="inline-flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full px-2.5 py-1 backdrop-blur-sm">
                 <Weight className="w-3 h-3 text-orange-400 mr-1" />
                 <span className="text-xs text-slate-300">{user.weight}</span>
               </span>
@@ -106,20 +114,23 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
 
           {!isRevealed && (
             <div className="mt-4 mb-2 grid grid-cols-2 gap-3 text-left">
-              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-                <Music className="w-4 h-4 text-blue-400 mb-1" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Music</p>
-                <p className="text-sm text-slate-200 font-semibold truncate">{user.favoriteSong || "Not set"}</p>
+              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 relative overflow-hidden group hover:border-blue-500/30 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Music className="w-4 h-4 text-blue-400 mb-1 relative z-10" />
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider relative z-10">Music</p>
+                <p className="text-sm text-slate-200 font-semibold truncate relative z-10">{user.favoriteSong || "Not set"}</p>
               </div>
-              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
-                <Palette className="w-4 h-4 text-pink-400 mb-1" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Color</p>
-                <p className="text-sm text-slate-200 font-semibold truncate">{user.favoriteColor || "Not set"}</p>
+              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 relative overflow-hidden group hover:border-pink-500/30 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Palette className="w-4 h-4 text-pink-400 mb-1 relative z-10" />
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider relative z-10">Color</p>
+                <p className="text-sm text-slate-200 font-semibold truncate relative z-10">{user.favoriteColor || "Not set"}</p>
               </div>
-              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 col-span-2">
-                <BookOpen className="w-4 h-4 text-purple-400 mb-1" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Field of Study/Work</p>
-                <p className="text-sm text-slate-200 font-semibold truncate">{user.fieldOfStudy || "Not set"}</p>
+              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 col-span-2 relative overflow-hidden group hover:border-purple-500/30 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <BookOpen className="w-4 h-4 text-purple-400 mb-1 relative z-10" />
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider relative z-10">Field of Study/Work</p>
+                <p className="text-sm text-slate-200 font-semibold truncate relative z-10">{user.fieldOfStudy || "Not set"}</p>
               </div>
             </div>
           )}

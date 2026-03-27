@@ -90,7 +90,7 @@
 }
 
 .leaflet-container {
-  background: #ddd;
+  background: #0B0F19;
   outline-offset: 1px;
 }
 
@@ -101,29 +101,29 @@
   transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
 }
 
-/* MarkerCluster CSS */
+/* MarkerCluster CSS — dark theme */
 .marker-cluster-small {
-  background-color: rgba(181, 226, 140, 0.6);
+  background-color: rgba(59, 130, 246, 0.2);
 }
 
 .marker-cluster-small div {
-  background-color: rgba(110, 204, 57, 0.6);
+  background-color: rgba(59, 130, 246, 0.5);
 }
 
 .marker-cluster-medium {
-  background-color: rgba(241, 211, 87, 0.6);
+  background-color: rgba(139, 92, 246, 0.2);
 }
 
 .marker-cluster-medium div {
-  background-color: rgba(240, 194, 12, 0.6);
+  background-color: rgba(139, 92, 246, 0.5);
 }
 
 .marker-cluster-large {
-  background-color: rgba(253, 156, 115, 0.6);
+  background-color: rgba(236, 72, 153, 0.2);
 }
 
 .marker-cluster-large div {
-  background-color: rgba(241, 128, 23, 0.6);
+  background-color: rgba(236, 72, 153, 0.5);
 }
 
 .marker-cluster {
@@ -138,7 +138,9 @@
   margin-top: 5px;
   text-align: center;
   border-radius: 15px;
-  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font: 12px "Inter", "Helvetica Neue", Arial, sans-serif;
+  color: white;
+  font-weight: 700;
 }
 
 .marker-cluster span {
@@ -545,7 +547,7 @@
     max-height: 100vh;
     scrollbar-width: thin;
     /* For Firefox */
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
     /* For Firefox */
     overscroll-behavior-y: contain;
     /* Prevent overscroll on Android */

@@ -10,6 +10,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth } from "./auth";
+import { sendVerificationSMS } from "./ghl";
 
 /** Strip HTML tags and trim to maxLength */
 function sanitizeInput(input: string, maxLength: number): string {
@@ -401,6 +402,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ message: "All notifications marked as read" });
     } catch (error) {
       res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // ---- Phone Verification Routes ----
+
+  // Send verification code
+  apiRouter.post("/verify/send", async (req: Request, res: Response) => {
+    try {
+      const { phoneNumber, firstName } = req.body;
+
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      // Normalize phone number (ensure +1 prefix)
+      const normalizedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+1${phoneNumber.replace(/\D/g, "")}`;
+
+      // Rate limit: max 3 codes per phone per 15 minutes
+      const recentCount = await storage.getRecentCodeCount(normalizedPhone, 15);
+      if (recentCount >= 3) {
+        return res.status(429).json({ message: "Too many verification attempts. Please wait 15 minutes." });
+      }
+
+      // Generate 6-digit code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+      // Store in DB
+      await storage.createVerificationCode(normalizedPhone, code, expiresAt);
+
+      // Send via GHL SMS
+      const sent = await sendVerificationSMS(normalizedPhone, code, firstName || "User");
+
+      if (!sent) {
+        return res.status(500).json({ message: "Failed to send verification code. Please try again." });
+      }
+
+      res.status(200).json({ message: "Verification code sent", phone: normalizedPhone });
+    } catch (error) {
+      console.error("Verify send error:", error);
+      res.status(500).json({ message: "Failed to send verification code" });
+    }
+  });
+
+  // Check verification code
+  apiRouter.post("/verify/check", async (req: Request, res: Response) => {
+    try {
+      const { phoneNumber, code } = req.body;
+
+      if (!phoneNumber || !code) {
+        return res.status(400).json({ message: "Phone number and code are required" });
+      }
+
+      const normalizedPhone = phoneNumber.startsWith("+") ? phoneNumber : `+1${phoneNumber.replace(/\D/g, "")}`;
+
+      // Find valid code
+      const verification = await storage.getValidVerificationCode(normalizedPhone, code);
+
+      if (!verification) {
+        return res.status(400).json({ message: "Invalid or expired verification code" });
+      }
+
+      // Mark code as used
+      await storage.markVerificationCodeUsed(verification.id);
+
+      // If user is logged in, mark their phone as verified
+      if (req.session?.userId) {
+        await storage.updateUser(req.session.userId, {
+          phoneNumber: normalizedPhone,
+          isPhoneVerified: true,
+        });
+      }
+
+      res.status(200).json({ message: "Phone verified successfully", verified: true });
+    } catch (error) {
+      console.error("Verify check error:", error);
+      res.status(500).json({ message: "Failed to verify code" });
     }
   });
 
