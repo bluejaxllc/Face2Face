@@ -17,15 +17,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck } from "lucide-react";
+import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
+import { apiRequest } from "@/lib/queryClient";
 
 const registerSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email"),
+  phoneNumber: z.string().min(10, "Enter a valid phone number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
   gender: z.string().default("other"),
@@ -57,6 +59,7 @@ export default function Register() {
       lastName: "",
       username: "",
       email: "",
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
       gender: "other",
@@ -74,11 +77,36 @@ export default function Register() {
     },
   });
 
+  // Verification state
+  const [showVerification, setShowVerification] = useState(false);
+  const [verifyPhone, setVerifyPhone] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [verifyError, setVerifyError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     try {
       const { confirmPassword, ...registerData } = values;
       await register(registerData);
-      setTimeout(() => navigate("/map"), 500);
+
+      // Send verification code
+      setVerifyPhone(values.phoneNumber);
+      setIsSendingCode(true);
+      try {
+        await apiRequest("POST", "/api/verify/send", {
+          phoneNumber: values.phoneNumber,
+          firstName: values.firstName,
+        });
+        setShowVerification(true);
+        setResendCooldown(60);
+      } catch (err) {
+        // Still show verification screen, user can resend
+        setShowVerification(true);
+      } finally {
+        setIsSendingCode(false);
+      }
     } catch (error) {
       console.error("Registration error:", error);
     }
@@ -92,6 +120,138 @@ export default function Register() {
       console.error("Login error:", error);
     }
   };
+
+  const handleVerifyCode = async () => {
+    if (verifyCode.length !== 6) return;
+    setIsVerifying(true);
+    setVerifyError("");
+    try {
+      const res = await apiRequest("POST", "/api/verify/check", {
+        phoneNumber: verifyPhone,
+        code: verifyCode,
+      });
+      const data = await res.json();
+      if (data.verified) {
+        navigate("/map");
+      }
+    } catch (error: any) {
+      setVerifyError("Invalid or expired code. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+    setIsSendingCode(true);
+    try {
+      await apiRequest("POST", "/api/verify/send", {
+        phoneNumber: verifyPhone,
+        firstName: "",
+      });
+      setResendCooldown(60);
+    } catch (error) {
+      setVerifyError("Failed to resend code. Please try again.");
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  // Resend cooldown timer
+  useState(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  });
+
+  // OTP Verification screen
+  if (showVerification) {
+    return (
+      <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
+        <div className="auth-bg" />
+        <div className="auth-glow auth-glow-1" />
+        <div className="auth-glow auth-glow-2" />
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 text-center flex flex-col items-center"
+          >
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 flex items-center justify-center mb-6">
+              <Phone className="w-10 h-10 text-blue-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Verify Your Phone</h2>
+            <p className="text-slate-400 text-sm max-w-xs">
+              We sent a 6-digit code to <span className="text-blue-400 font-semibold">{verifyPhone}</span>
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="auth-card w-full max-w-sm"
+          >
+            <div className="space-y-5">
+              <div>
+                <label className="text-slate-300 text-sm font-medium block mb-2">Verification Code</label>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={verifyCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setVerifyCode(val);
+                    setVerifyError("");
+                  }}
+                  className="auth-input text-center text-2xl tracking-[0.5em] font-bold h-14"
+                  autoFocus
+                />
+              </div>
+
+              {verifyError && (
+                <p className="text-red-400 text-sm text-center">{verifyError}</p>
+              )}
+
+              <Button
+                onClick={handleVerifyCode}
+                disabled={verifyCode.length !== 6 || isVerifying}
+                className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25"
+              >
+                {isVerifying ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</>
+                ) : "Verify Phone"}
+              </Button>
+
+              <div className="text-center">
+                <button
+                  onClick={handleResendCode}
+                  disabled={resendCooldown > 0 || isSendingCode}
+                  className={`text-sm transition-colors ${resendCooldown > 0 ? 'text-slate-600 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300 cursor-pointer'}`}
+                >
+                  {isSendingCode ? "Sending..." : resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Resend code"}
+                </button>
+              </div>
+
+              <p className="text-center text-xs text-slate-600 mt-2">
+                Code expires in 5 minutes
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
@@ -273,6 +433,35 @@ export default function Register() {
                         <FormControl>
                           <Input type="email" placeholder="Enter your email" {...field} className="auth-input" />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={registerForm.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-300 text-sm font-medium">Phone Number</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">+1</span>
+                            <Input
+                              type="tel"
+                              inputMode="numeric"
+                              placeholder="(555) 000-0000"
+                              {...field}
+                              onChange={(e) => {
+                                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                field.onChange(digits);
+                              }}
+                              value={field.value ? field.value.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3") : ""}
+                              className="auth-input pl-10"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription className="text-slate-500 text-[10px]">We'll send a verification code</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
