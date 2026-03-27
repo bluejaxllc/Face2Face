@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
-import { Send, Search, ArrowLeft, MessageSquare, Smile, Sparkles } from "lucide-react";
+import { Send, Search, ArrowLeft, MessageSquare, Smile, Sparkles, ShieldCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
@@ -224,9 +224,18 @@ export default function Messages() {
               </div>
 
               {/* Messages area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex justify-center mb-6 mt-2">
+                  <div className="bg-slate-800/60 border border-slate-700/50 backdrop-blur-md px-4 py-2 rounded-full inline-flex items-center gap-2 max-w-xs md:max-w-sm text-center">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <p className="text-[10px] text-slate-300 font-medium">
+                      Messages are private. You are chatting with a <span className="text-emerald-400 font-bold">verified real person</span>.
+                    </p>
+                  </div>
+                </div>
+
                 {messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center animate-in fade-in duration-700">
+                  <div className="flex flex-col items-center justify-center animate-in fade-in duration-700 mt-10">
                     <div className="relative mb-5">
                       <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-pink-500 rounded-full blur-xl opacity-20 animate-pulse" />
                       <div className="w-16 h-16 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center relative shadow-xl backdrop-blur-sm">
