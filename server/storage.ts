@@ -144,8 +144,8 @@ export class DatabaseStorage implements IStorage {
       // Bounding box filter (fast index-friendly pre-filter)
       sql`CAST(${users.latitude} AS DOUBLE PRECISION) BETWEEN ${latitude - latDelta} AND ${latitude + latDelta}`,
       sql`CAST(${users.longitude} AS DOUBLE PRECISION) BETWEEN ${longitude - lngDelta} AND ${longitude + lngDelta}`,
-      // Dynamic inactive timeout check!
-      sql`${users.lastLocation} > NOW() - (CAST(${users.inactiveTimeout} AS integer) || ' minutes')::interval`,
+      // TEMPORARILY DISABLED: Dynamic inactive timeout check (causes timezone/null bugs for new users)
+      // sql`${users.lastLocation} > NOW() - (CAST(${users.inactiveTimeout} AS integer) || ' minutes')::interval`,
       // Exact Haversine distance filter in SQL
       sql`(
         3958.8 * 2 * ASIN(SQRT(
@@ -161,9 +161,13 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Only see people whose gender matches our dating preference (unless we like 'all'/'everyone')
-    if (preferences.datingPreference && !['all', 'everyone', 'both'].includes(preferences.datingPreference.toLowerCase())) {
+    if (preferences.datingPreference && !['all', 'everyone', 'both', 'any'].includes(preferences.datingPreference.toLowerCase())) {
+      let targetGender = preferences.datingPreference.toLowerCase();
+      if (targetGender === 'women') targetGender = 'female';
+      if (targetGender === 'men') targetGender = 'male';
+
       const cond = or(
-        eq(users.gender, preferences.datingPreference),
+        eq(users.gender, targetGender),
         eq(users.gender, 'all'),
         eq(users.gender, 'everyone')
       );
@@ -172,10 +176,15 @@ export class DatabaseStorage implements IStorage {
 
     // Only see people whose dating preference matches our gender (or they like 'all'/'everyone')
     if (preferences.userGender) {
+      let targetPref = preferences.userGender.toLowerCase();
+      if (targetPref === 'female') targetPref = 'women';
+      if (targetPref === 'male') targetPref = 'men';
+
       const cond = or(
-        eq(users.datingPreference, preferences.userGender),
+        eq(users.datingPreference, targetPref),
         eq(users.datingPreference, 'all'),
-        eq(users.datingPreference, 'everyone')
+        eq(users.datingPreference, 'everyone'),
+        eq(users.datingPreference, 'any')
       );
       if (cond) conditions.push(cond);
     }

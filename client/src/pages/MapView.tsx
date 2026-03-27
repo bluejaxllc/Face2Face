@@ -19,18 +19,21 @@ export default function MapView() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showSafety, setShowSafety] = useState(false);
   const [isUpdatingSafety, setIsUpdatingSafety] = useState(false);
+  const [hasCheckedModals, setHasCheckedModals] = useState(false);
 
   useEffect(() => {
-    // Show welcome modal to new users or if profile is not completed
-    if (user && !user.profileCompleted && !sessionStorage.getItem('welcomeShown')) {
-      setShowWelcome(true);
-      sessionStorage.setItem('welcomeShown', 'true');
-    } else if (user && !user.safetyAcknowledged && !sessionStorage.getItem('safetyShown')) {
-      // If safety wasn't acknowledged, show safety modal
-      setShowSafety(true);
-      sessionStorage.setItem('safetyShown', 'true');
+    // Only check modal conditions once per component mount after user is loaded
+    if (user && !hasCheckedModals) {
+      if (!user.profileCompleted && !sessionStorage.getItem('welcomeShown')) {
+        setShowWelcome(true);
+        sessionStorage.setItem('welcomeShown', 'true');
+      } else if (!user.safetyAcknowledged && !sessionStorage.getItem('safetyShown')) {
+        setShowSafety(true);
+        sessionStorage.setItem('safetyShown', 'true');
+      }
+      setHasCheckedModals(true);
     }
-  }, [user]);
+  }, [user, hasCheckedModals]);
 
   // When we have both a user and a location, update the server
   useEffect(() => {
