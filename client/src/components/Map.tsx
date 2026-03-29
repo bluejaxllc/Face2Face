@@ -633,6 +633,7 @@ function Map() {
               )
               : null
           }
+          myLocation={currentLocation}
         />
       )}
     </div>
