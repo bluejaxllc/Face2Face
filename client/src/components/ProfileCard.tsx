@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistance } from "@/lib/distance";
-import { MessageSquare, Lock, X, Play, Music, Palette, BookOpen, UserCheck, Ruler, Weight } from "lucide-react";
-import { useLocation } from "wouter";
+import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface User {
   id: number;
@@ -31,116 +32,141 @@ interface User {
 interface ProfileCardProps {
   user: User;
   onClose: () => void;
-  onConnect: () => void;
+  onConnect: (message?: string) => void;
   distance: number | null;
 }
 
 export default function ProfileCard({ user, onClose, onConnect, distance }: ProfileCardProps) {
-  const [, setLocation] = useLocation();
+  const { user: currentUser } = useAuth();
+  const [showBumpComposer, setShowBumpComposer] = useState(false);
+  const [bumpMessage, setBumpMessage] = useState("");
+  const [shareProfile, setShareProfile] = useState(true);
+  const [isSending, setIsSending] = useState(false);
 
-  // Get connection count to determine profile reveal level
-  const { data: connections = [] } = useQuery<any[]>({
+  // Check if we already bumped this person
+  const { data: existingBumps = [] } = useQuery<any[]>({
     queryKey: ["/api/bumps", user.id],
     refetchOnWindowFocus: false,
   });
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
+  const hasBumped = existingBumps.length > 0;
+  const isMutual = existingBumps.some((b: any) => b.status === "revealed" || b.status === "completed");
+
+  const getInitials = (firstName: string, lastName: string) =>
+    `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
+
+  const genderIcon = user.gender === 'male'
+    ? <svg width="16" height="16" viewBox="0 0 100 100"><polygon points="50,8 94,92 6,92" fill="#4285F4" stroke="#1a73e8" strokeWidth="6" strokeLinejoin="round" /></svg>
+    : <svg width="16" height="16" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#EA4335" stroke="#c5221f" strokeWidth="6" /></svg>;
+
+  const ratingStars = Math.min(5, Math.round(user.selfRating / 2));
+
+  const handleSendBump = async () => {
+    setIsSending(true);
+    try {
+      const finalMessage = shareProfile
+        ? `${bumpMessage}\n\n— ${currentUser?.firstName || 'Someone'} wants to meet you`
+        : bumpMessage || "👋 Bump!";
+      await onConnect(finalMessage);
+      setShowBumpComposer(false);
+      setBumpMessage("");
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const hasConnected = connections.length > 0;
-  const isRevealed = connections.length >= 2;
-
-  const genderBadge = user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥';
-  const genderColor = user.gender === 'male' ? 'text-blue-400' : user.gender === 'female' ? 'text-pink-400' : 'text-purple-400';
+  // Info pills that are available
+  const infoPills = [
+    user.favoriteSong && { icon: <Music className="w-3.5 h-3.5 text-blue-400" />, label: "Song", value: user.favoriteSong },
+    user.favoriteColor && { icon: <Palette className="w-3.5 h-3.5 text-pink-400" />, label: "Color", value: user.favoriteColor },
+    user.fieldOfStudy && { icon: <BookOpen className="w-3.5 h-3.5 text-purple-400" />, label: "Study", value: user.fieldOfStudy },
+    user.height && { icon: <Ruler className="w-3.5 h-3.5 text-cyan-400" />, label: "Height", value: user.height },
+    user.weight && { icon: <Weight className="w-3.5 h-3.5 text-orange-400" />, label: "Weight", value: user.weight },
+  ].filter(Boolean) as { icon: JSX.Element; label: string; value: string }[];
 
   return (
     <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.6)] overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
-      <div className="relative pt-8 pb-4 px-6 flex flex-col items-center">
-        {/* Category-aware header gradient */}
-        <div className={`absolute top-0 left-0 w-full h-28 ${user.category === 'casual'
-          ? 'bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-slate-900/0'
-          : 'bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-slate-900/0'
+      <div className="relative pt-8 pb-5 px-5 flex flex-col items-center">
+        {/* Header gradient */}
+        <div className={`absolute top-0 left-0 w-full h-28 ${user.gender === 'male'
+            ? 'bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent'
+            : 'bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-transparent'
           }`} />
 
-        <div className={`p-[3px] rounded-full z-10 ${user.category === 'casual'
-          ? 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-          : 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
+        {/* Close */}
+        <button
+          className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-slate-800/50 z-20"
+          onClick={onClose}
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        {/* Avatar */}
+        <div className={`p-[3px] rounded-full z-10 ${user.gender === 'male'
+            ? 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+            : 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
           }`}>
-          <Avatar className="h-24 w-24 border-2 border-slate-900 bg-slate-800">
+          <Avatar className="h-20 w-20 border-2 border-slate-900 bg-slate-800">
             {user.profilePhoto && (
               <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
             )}
-            <AvatarFallback className="text-3xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
+            <AvatarFallback className="text-2xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
               {getInitials(user.firstName, user.lastName)}
             </AvatarFallback>
           </Avatar>
         </div>
 
-        <button className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-slate-800/50" onClick={onClose}>
-          <X className="h-5 w-5" />
-        </button>
-
-        <div className="text-center mt-4 z-10 w-full">
-          <h3 className="text-2xl font-black text-white tracking-tight">
+        {/* Name + Age + Gender */}
+        <div className="text-center mt-3 z-10 w-full">
+          <h3 className="text-xl font-black text-white tracking-tight flex items-center justify-center gap-2">
             {user.firstName}, <span className="text-pink-400">{user.age || 20}</span>
-            <span className={`ml-2 text-lg ${genderColor}`}>{genderBadge}</span>
+            <span className="inline-flex">{genderIcon}</span>
           </h3>
 
-          {/* Stats row */}
-          <div className="flex items-center justify-center mt-2 space-x-2 flex-wrap gap-1">
-            <span className="inline-flex items-center justify-center bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 backdrop-blur-sm">
-              <span className="text-xs font-bold text-slate-400 mr-1">Rating</span>
-              <span className="text-sm text-amber-400">{'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}</span>
+          {/* Rating + Distance row */}
+          <div className="flex items-center justify-center mt-1.5 gap-2">
+            <span className="inline-flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full px-2.5 py-0.5">
+              <span className="text-[10px] font-bold text-slate-500 mr-1">RATING</span>
+              <span className="text-xs text-amber-400">{'⭐'.repeat(ratingStars)}</span>
             </span>
-            {user.height && (
-              <span className="inline-flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full px-2.5 py-1 backdrop-blur-sm">
-                <Ruler className="w-3 h-3 text-cyan-400 mr-1" />
-                <span className="text-xs text-slate-300">{user.height}</span>
-              </span>
-            )}
-            {user.weight && (
-              <span className="inline-flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full px-2.5 py-1 backdrop-blur-sm">
-                <Weight className="w-3 h-3 text-orange-400 mr-1" />
-                <span className="text-xs text-slate-300">{user.weight}</span>
-              </span>
-            )}
+            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+              {distance ? formatDistance(distance) : "Nearby"}
+            </span>
           </div>
 
-          {/* Distance */}
-          <p className="text-[10px] text-slate-400 font-medium tracking-wide mt-2 text-center uppercase">
-            {distance ? formatDistance(distance) : "Unknown"} · <span className="capitalize">{user.category}</span>
-          </p>
-
-          {!isRevealed && (
-            <div className="mt-4 mb-2 grid grid-cols-2 gap-3 text-left">
-              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 relative overflow-hidden group hover:border-blue-500/30 transition-colors">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Music className="w-4 h-4 text-blue-400 mb-1 relative z-10" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider relative z-10">Music</p>
-                <p className="text-sm text-slate-200 font-semibold truncate relative z-10">{user.favoriteSong || "Not set"}</p>
-              </div>
-              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 relative overflow-hidden group hover:border-pink-500/30 transition-colors">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <Palette className="w-4 h-4 text-pink-400 mb-1 relative z-10" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider relative z-10">Color</p>
-                <p className="text-sm text-slate-200 font-semibold truncate relative z-10">{user.favoriteColor || "Not set"}</p>
-              </div>
-              <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 col-span-2 relative overflow-hidden group hover:border-purple-500/30 transition-colors">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <BookOpen className="w-4 h-4 text-purple-400 mb-1 relative z-10" />
-                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider relative z-10">Field of Study/Work</p>
-                <p className="text-sm text-slate-200 font-semibold truncate relative z-10">{user.fieldOfStudy || "Not set"}</p>
-              </div>
+          {/* Connect message / bio */}
+          {user.connectMessage && (
+            <div className="mt-3 bg-slate-800/40 border border-slate-700/30 rounded-xl px-4 py-2.5">
+              <p className="text-xs text-slate-300 italic leading-relaxed">"{user.connectMessage}"</p>
             </div>
           )}
 
-          {user.seeking && !isRevealed && (
-            <div className="mt-2 mb-2">
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Seeking</p>
+          {/* Info pills grid */}
+          {infoPills.length > 0 && (
+            <div className="mt-3 grid grid-cols-2 gap-2 text-left">
+              {infoPills.map((pill, i) => (
+                <div
+                  key={i}
+                  className={`bg-slate-800/40 p-2.5 rounded-xl border border-slate-700/30 ${i === infoPills.length - 1 && infoPills.length % 2 !== 0 ? 'col-span-2' : ''
+                    }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    {pill.icon}
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{pill.label}</span>
+                  </div>
+                  <p className="text-xs text-slate-200 font-semibold truncate">{pill.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Seeking tags */}
+          {user.seeking && (
+            <div className="mt-3">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1.5">Seeking</p>
               <div className="flex flex-wrap gap-1 justify-center">
                 {user.seeking.split(",").map((item, i) => (
-                  <span key={i} className="text-xs bg-pink-950/50 border border-pink-800/50 rounded-full px-2 py-0.5 text-pink-300">
+                  <span key={i} className="text-[11px] bg-indigo-950/50 border border-indigo-800/40 rounded-full px-2.5 py-0.5 text-indigo-300 font-medium">
                     {item.trim()}
                   </span>
                 ))}
@@ -148,53 +174,94 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
             </div>
           )}
 
-          {isRevealed && (
-            <div className="mt-4 mb-2 p-4 bg-slate-800/80 rounded-xl border border-pink-500/30">
-              <div className="flex items-center text-pink-400 mb-2">
-                <UserCheck className="w-5 h-5 mr-2" />
-                <h4 className="font-bold">Mutual Connect Achieved!</h4>
+          {/* Interests (if mutual / revealed) */}
+          {isMutual && user.interests && (
+            <div className="mt-3 p-3 bg-emerald-950/30 border border-emerald-700/30 rounded-xl">
+              <div className="flex items-center justify-center gap-1 text-emerald-400 mb-1">
+                <Heart className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Mutual — Full Profile</span>
               </div>
-              <p className="text-sm text-slate-300 text-left">
-                You've both connected with each other. The full profile is now revealed and direct messaging is enabled.
-              </p>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-left">
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase">Interests</p>
-                  <p className="text-xs text-white">{user.interests || "Not set"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-400 uppercase">Category</p>
-                  <p className="text-xs text-white capitalize">{user.category}</p>
-                </div>
-                {user.seeking && (
-                  <div className="col-span-2">
-                    <p className="text-[10px] text-slate-400 uppercase">Seeking</p>
-                    <p className="text-xs text-white">{user.seeking}</p>
-                  </div>
-                )}
-              </div>
+              <p className="text-xs text-slate-300">{user.interests}</p>
             </div>
           )}
 
-          <div className="mt-5 flex gap-2">
-            <Button
-              className="flex-1 h-14 rounded-xl font-bold tracking-wide shadow-lg shadow-pink-500/25 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 border border-pink-400/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              onClick={onConnect}
-            >
-              <Play className="w-5 h-5 mr-2 fill-current" />
-              {hasConnected ? "CONNECT AGAIN" : "CONNECT"}
-            </Button>
-            <Button
-              className="flex-1 h-14 rounded-xl font-bold tracking-wide shadow-lg shadow-blue-500/25 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 border border-blue-400/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              onClick={() => {
-                onClose();
-                setLocation(`/messages?userId=${user.id}`);
-              }}
-            >
-              <MessageSquare className="w-5 h-5 mr-2 fill-current" />
-              MESSAGE
-            </Button>
-          </div>
+          {/* ═══════ BUMP BUTTON ═══════ */}
+          <AnimatePresence mode="wait">
+            {!showBumpComposer ? (
+              <motion.div
+                key="bump-btn"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mt-5"
+              >
+                <Button
+                  onClick={() => setShowBumpComposer(true)}
+                  disabled={hasBumped && !isMutual}
+                  className={`w-full h-14 rounded-xl font-black text-base tracking-wider shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${hasBumped
+                      ? 'bg-slate-700 text-slate-400 shadow-none cursor-not-allowed'
+                      : 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 shadow-fuchsia-500/25 border border-fuchsia-400/30 text-white'
+                    }`}
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {hasBumped ? "BUMPED ✓" : "BUMP"}
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="bump-composer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="mt-4 w-full"
+              >
+                <div className="bg-slate-800/60 border border-fuchsia-500/30 rounded-xl p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-fuchsia-400 uppercase tracking-wider flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" /> Send a Bump
+                    </span>
+                    <button
+                      onClick={() => setShowBumpComposer(false)}
+                      className="text-slate-500 hover:text-white transition-colors"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Message input */}
+                  <textarea
+                    value={bumpMessage}
+                    onChange={(e) => setBumpMessage(e.target.value)}
+                    placeholder="Say something..."
+                    maxLength={200}
+                    rows={2}
+                    className="w-full bg-slate-900/60 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 resize-none focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/25"
+                  />
+
+                  {/* Share profile toggle */}
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <span className="text-[11px] text-slate-400 font-medium">Share your profile with this bump</span>
+                    <div
+                      onClick={() => setShareProfile(!shareProfile)}
+                      className={`w-9 h-5 rounded-full transition-colors relative ${shareProfile ? 'bg-fuchsia-500' : 'bg-slate-600'}`}
+                    >
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${shareProfile ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                    </div>
+                  </label>
+
+                  {/* Send */}
+                  <Button
+                    onClick={handleSendBump}
+                    disabled={isSending}
+                    className="w-full h-12 rounded-xl font-bold text-sm tracking-wide bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 shadow-lg shadow-fuchsia-500/20 border border-fuchsia-400/30 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {isSending ? "SENDING..." : "SEND BUMP"}
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </Card>

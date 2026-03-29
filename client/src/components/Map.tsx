@@ -174,50 +174,47 @@ function Map() {
 
   const handleMenClick = useCallback(() => {
     setFilterOptions(prev => {
-      const currentlyShowsWomen = ['women', 'any', 'everyone', 'both'].includes(prev.datingPreference);
-      let newPref: FilterOptions['datingPreference'] = 'men';
-      if (showMen && currentlyShowsWomen) newPref = 'women';
-      else if (!showMen && currentlyShowsWomen) newPref = 'any';
-      else if (showMen && !currentlyShowsWomen) return prev; // Cannot turn both off
-
-      const updated = { ...prev, datingPreference: newPref };
+      const next = !(prev.showMen ?? true);
+      const pref = (next && (prev.showWomen ?? true) ? 'any' : next ? 'men' : (prev.showWomen ?? true) ? 'women' : 'any') as FilterOptions['datingPreference'];
+      const updated = { ...prev, showMen: next, datingPreference: pref };
       localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
       return updated;
     });
-  }, [showMen]);
+  }, []);
 
   const handleWomenClick = useCallback(() => {
     setFilterOptions(prev => {
-      const currentlyShowsMen = ['men', 'any', 'everyone', 'both'].includes(prev.datingPreference);
-      let newPref: FilterOptions['datingPreference'] = 'women';
-      if (showWomen && currentlyShowsMen) newPref = 'men';
-      else if (!showWomen && currentlyShowsMen) newPref = 'any';
-      else if (showWomen && !currentlyShowsMen) return prev; // Cannot turn both off
-
-      const updated = { ...prev, datingPreference: newPref };
+      const next = !(prev.showWomen ?? true);
+      const pref = ((prev.showMen ?? true) && next ? 'any' : !(prev.showMen ?? true) && next ? 'women' : (prev.showMen ?? true) ? 'men' : 'any') as FilterOptions['datingPreference'];
+      const updated = { ...prev, showWomen: next, datingPreference: pref };
       localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
       return updated;
     });
-  }, [showWomen]);
+  }, []);
 
   const handleMarkerClick = useCallback((user: User) => {
     setSelectedUser(user);
   }, []);
 
-  const handleOpenConnect = useCallback(async () => {
+  const handleBump = useCallback(async (message?: string) => {
     if (!selectedUser) return;
     try {
-      await apiRequest("POST", "/api/bumps", { bumpedUserId: selectedUser.id });
+      await apiRequest("POST", "/api/bumps", {
+        bumpedUserId: selectedUser.id,
+        message: message || "👋 Bump!",
+      });
+      // Haptic feedback for sender — single 200ms vibration
+      if (navigator.vibrate) navigator.vibrate(200);
       toast({
-        title: "Connection sent!",
-        description: `You connected with ${selectedUser.firstName}! They will be notified.`,
+        title: "Bump sent!",
+        description: `You bumped ${selectedUser.firstName}!`,
       });
       setSelectedUser(null);
     } catch (error) {
-      console.error("Failed to connect:", error);
+      console.error("Failed to bump:", error);
       toast({
-        title: "Connect failed",
-        description: "Failed to send connection",
+        title: "Bump failed",
+        description: "Failed to send bump",
         variant: "destructive",
       });
     }
@@ -625,7 +622,7 @@ function Map() {
         <ProfileCard
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
-          onConnect={handleOpenConnect}
+          onConnect={handleBump}
           distance={
             currentLocation
               ? calculateDistance(
