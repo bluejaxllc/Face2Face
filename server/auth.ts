@@ -70,7 +70,10 @@ export async function setupAuth(app: Express) {
         req.session.userId = user.id;
       }
 
-      res.status(201).json(userWithoutPassword);
+      res.status(201).json({
+        ...userWithoutPassword,
+        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
@@ -108,7 +111,10 @@ export async function setupAuth(app: Express) {
       // Don't return the password in the response
       const { password: _, ...userWithoutPassword } = user;
 
-      res.status(200).json(userWithoutPassword);
+      res.status(200).json({
+        ...userWithoutPassword,
+        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -143,7 +149,10 @@ export async function setupAuth(app: Express) {
       // Don't return the password in the response
       const { password, ...userWithoutPassword } = user;
 
-      res.status(200).json(userWithoutPassword);
+      res.status(200).json({
+        ...userWithoutPassword,
+        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+      });
     } catch (error) {
       console.error("Get user error:", error);
       res.status(500).json({ message: "Failed to get user information" });

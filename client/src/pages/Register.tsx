@@ -243,7 +243,7 @@ export default function Register() {
                 </button>
               </div>
 
-              <p className="text-center text-xs text-slate-600 mt-2">
+              <p className="text-center text-xs text-slate-400 mt-2">
                 Code expires in 5 minutes
               </p>
             </div>
@@ -461,7 +461,7 @@ export default function Register() {
                             />
                           </div>
                         </FormControl>
-                        <FormDescription className="text-slate-500 text-[10px]">We'll send a verification code</FormDescription>
+                        <FormDescription className="text-slate-400 text-[10px]">We'll send a verification code</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -512,7 +512,7 @@ export default function Register() {
                           <FormControl>
                             <Input type="number" min="1" max="10" {...field} className="auth-input" />
                           </FormControl>
-                          <FormDescription className="text-slate-500 text-[10px]">1-10</FormDescription>
+                          <FormDescription className="text-slate-400 text-[10px]">1-10</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -583,7 +583,7 @@ export default function Register() {
             </TabsContent>
           </Tabs>
 
-          <p className="text-center text-xs text-slate-500 mt-6">
+          <p className="text-center text-xs text-slate-400 mt-6">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </motion.div>

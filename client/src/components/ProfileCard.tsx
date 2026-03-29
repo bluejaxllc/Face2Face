@@ -108,7 +108,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
           </div>
 
           {/* Distance */}
-          <p className="text-[10px] text-slate-500 font-medium tracking-wide mt-2 text-center uppercase">
+          <p className="text-[10px] text-slate-400 font-medium tracking-wide mt-2 text-center uppercase">
             {distance ? formatDistance(distance) : "Unknown"} · <span className="capitalize">{user.category}</span>
           </p>
 
@@ -137,7 +137,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
 
           {user.seeking && !isRevealed && (
             <div className="mt-2 mb-2">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Seeking</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Seeking</p>
               <div className="flex flex-wrap gap-1 justify-center">
                 {user.seeking.split(",").map((item, i) => (
                   <span key={i} className="text-xs bg-pink-950/50 border border-pink-800/50 rounded-full px-2 py-0.5 text-pink-300">
@@ -159,16 +159,16 @@ export default function ProfileCard({ user, onClose, onConnect, distance }: Prof
               </p>
               <div className="mt-3 grid grid-cols-2 gap-2 text-left">
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase">Interests</p>
+                  <p className="text-[10px] text-slate-400 uppercase">Interests</p>
                   <p className="text-xs text-white">{user.interests || "Not set"}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase">Category</p>
+                  <p className="text-[10px] text-slate-400 uppercase">Category</p>
                   <p className="text-xs text-white capitalize">{user.category}</p>
                 </div>
                 {user.seeking && (
                   <div className="col-span-2">
-                    <p className="text-[10px] text-slate-500 uppercase">Seeking</p>
+                    <p className="text-[10px] text-slate-400 uppercase">Seeking</p>
                     <p className="text-xs text-white">{user.seeking}</p>
                   </div>
                 )}

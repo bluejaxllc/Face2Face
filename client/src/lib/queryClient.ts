@@ -60,9 +60,21 @@ export const getQueryFn: <T>(options: {
         // Use the same URL handling logic as apiRequest
         const baseUrl = getApiBaseUrl();
         const url = queryKey[0] as string;
-        const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
+        let fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : url;
 
-
+        // Append query parameters from queryKey[1] if present
+        if (queryKey[1] && typeof queryKey[1] === 'object') {
+          const params = new URLSearchParams();
+          for (const [key, value] of Object.entries(queryKey[1] as Record<string, any>)) {
+            if (value !== undefined && value !== null) {
+              params.append(key, String(value));
+            }
+          }
+          const qs = params.toString();
+          if (qs) {
+            fullUrl += (fullUrl.includes('?') ? '&' : '?') + qs;
+          }
+        }
 
         const res = await fetch(fullUrl, {
           credentials: "include",
@@ -77,6 +89,12 @@ export const getQueryFn: <T>(options: {
           const message = text || res.statusText;
 
           console.warn(`Query failed for ${fullUrl}: ${res.status} - ${message}`);
+
+          // On rate limit, don't throw — let React Query keep previous data
+          if (res.status === 429) {
+            console.warn(`Rate limited on ${fullUrl}, keeping previous data`);
+            return undefined as any;
+          }
 
           if (res.status === 500) {
             throw new Error("Server error. Please try again later.");

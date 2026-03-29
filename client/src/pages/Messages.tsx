@@ -67,11 +67,13 @@ export default function Messages() {
   const { data: connectedUsers = [] } = useQuery<ConnectedUser[]>({
     queryKey: ["/api/bumps/users"],
     enabled: !!user,
+    refetchInterval: 10000, // Refresh contacts every 10 seconds for new bumps/badges
   });
 
   const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages", selectedUserId],
     enabled: !!selectedUserId,
+    refetchInterval: 3000, // Pull new chat messages every 3 seconds
   });
 
   const sendMessageMutation = useMutation({
@@ -118,10 +120,10 @@ export default function Messages() {
           {/* Search with icon */}
           <div className="p-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
               <Input
                 placeholder="Search conversations..."
-                className="pl-10 bg-slate-800/50 border-slate-700/50 text-slate-200 placeholder:text-slate-500 rounded-xl h-10 focus:border-blue-500/50"
+                className="pl-10 bg-slate-800/50 border-slate-700/50 text-slate-200 placeholder:text-slate-400 rounded-xl h-10 focus:border-blue-500/50"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -136,7 +138,7 @@ export default function Messages() {
                   <Sparkles className="w-8 h-8 text-slate-600" />
                 </div>
                 <p className="text-slate-300 font-semibold">No conversations yet</p>
-                <p className="text-slate-500 text-sm mt-1 max-w-[200px] mx-auto">Connect with people on the map to start chatting</p>
+                <p className="text-slate-400 text-sm mt-1 max-w-[200px] mx-auto">Connect with people on the map to start chatting</p>
               </div>
             ) : (
               filteredUsers.map((connectedUser) => (
@@ -167,13 +169,13 @@ export default function Messages() {
                           {connectedUser.firstName} {connectedUser.lastName}
                         </p>
                         {connectedUser.lastMessage && (
-                          <span className="text-[10px] text-slate-500 ml-2 flex-shrink-0">
+                          <span className="text-[10px] text-slate-400 ml-2 flex-shrink-0">
                             {formatDistanceToNow(new Date(connectedUser.lastMessage.timestamp), { addSuffix: false })}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-xs text-slate-400 truncate">
                           {connectedUser.lastMessage
                             ? (connectedUser.lastMessage.senderId === user?.id ? 'You: ' : '') + connectedUser.lastMessage.content
                             : 'Tap to start chatting'}
@@ -313,7 +315,7 @@ export default function Messages() {
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl animate-pulse" />
                   <div className="w-20 h-20 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mx-auto relative shadow-2xl backdrop-blur-sm">
-                    <MessageSquare className="w-10 h-10 text-slate-500" />
+                    <MessageSquare className="w-10 h-10 text-slate-400" />
                   </div>
                 </div>
                 <h3 className="text-xl font-bold text-white tracking-wide">Your Messages</h3>

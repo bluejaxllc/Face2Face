@@ -48,7 +48,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Don't return the password in the response
       const { password, ...userWithoutPassword } = updatedUser;
 
-      res.status(200).json(userWithoutPassword);
+      res.status(200).json({
+        ...userWithoutPassword,
+        profilePhoto: updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
@@ -90,16 +93,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific user by ID
-  apiRouter.get("/users/:id", async (req: Request, res: Response) => {
+  apiRouter.get("/users/:id", async (req: Request, res: Response, next) => {
     try {
       if (!req.session || !req.session.userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
       const idStr = req.params.id;
-      // Prevent mapping to /users/profile or other non-number routes
+      // Let dedicated routes handle these paths
       if (idStr === "profile" || idStr === "location" || idStr === "nearby") {
-        return res.status(404).json({ message: "Invalid user ID" });
+        return next();
       }
 
       const userId = parseInt(idStr);
@@ -114,10 +117,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Don't return sensitive information
-      const { password, email, ...safeUser } = user;
-      res.status(200).json(safeUser);
+      const { password, email, phoneNumber, ...safeUser } = user;
+      res.status(200).json({
+        ...safeUser,
+        profilePhoto: safeUser.profilePhoto ? `/api/users/${safeUser.id}/photo` : null
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to get user details" });
+    }
+  });
+
+  // Serve user profile photo as a cacheable binary image
+  apiRouter.get("/users/:id/photo", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).send("Invalid user ID");
+      }
+
+      const user = await storage.getUser(userId);
+
+      if (!user || !user.profilePhoto) {
+        return res.status(404).send("Photo not found");
+      }
+
+      const matches = user.profilePhoto.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        const mimeType = matches[1];
+        const buffer = Buffer.from(matches[2], "base64");
+        res.set("Content-Type", mimeType);
+        res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
+        return res.send(buffer);
+      } else {
+        return res.status(400).send("Invalid photo format");
+      }
+    } catch (error) {
+      res.status(500).send("Failed to load photo");
     }
   });
 
@@ -157,7 +192,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // Don't return sensitive information about other users
-      const sanitizedUsers = nearbyUsers.map(({ password, email, ...rest }) => rest);
+      const sanitizedUsers = nearbyUsers.map(({ password, email, phoneNumber, ...rest }) => ({
+        ...rest,
+        profilePhoto: rest.profilePhoto ? `/api/users/${rest.id}/photo` : null
+      }));
 
       res.status(200).json(sanitizedUsers);
     } catch (error) {
@@ -193,6 +231,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // In a real app, calculate actual distance here
       // For MVP, we'll simulate the distance check (assume they're close enough)
+
+      // Prevent duplicate bumps (race condition / spam guard)
+      const existingBumps = await storage.getBumpsBetweenUsers(userId, bumpedUserId);
+      const isAlreadyBumped = existingBumps.some(b => b.userId === userId);
+      if (isAlreadyBumped) {
+        return res.status(400).json({ message: "You have already bumped this user" });
+      }
 
       // Create the bump
       const bump = await storage.createBump({
@@ -247,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: user.id,
               firstName: user.firstName,
               lastName: user.lastName,
-              profilePhoto: user.profilePhoto,
+              profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null,
               lastMessage: lastMessage ? { content: lastMessage.content, timestamp: lastMessage.timestamp, senderId: lastMessage.senderId } : null,
               unreadCount,
             };

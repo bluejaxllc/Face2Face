@@ -63,7 +63,7 @@ export default function Explore() {
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">Explore</span>
                         </h1>
                         {nearbyUsers.length > 0 && (
-                            <span className="text-xs text-slate-500 bg-slate-800/50 px-2.5 py-1 rounded-full border border-slate-700/30">
+                            <span className="text-xs text-slate-400 bg-slate-800/50 px-2.5 py-1 rounded-full border border-slate-700/30">
                                 {nearbyUsers.length} nearby
                             </span>
                         )}
@@ -76,8 +76,8 @@ export default function Explore() {
                     ) : nearbyUsers.length === 0 ? (
                         <div className="text-center mt-10 p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50">
                             <Search className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                            <h3 className="font-bold text-slate-300">No one nearby yet</h3>
-                            <p className="text-sm text-slate-500 mt-1">Make sure you are active and have location enabled.</p>
+                            <h2 className="font-bold text-slate-300">No one nearby yet</h2>
+                            <p className="text-sm text-slate-400 mt-1">Make sure you are active and have location enabled.</p>
                             <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                                 <ShieldCheck className="w-3 h-3 text-emerald-400" />
                                 <span className="text-emerald-400 text-[10px] font-semibold">Every profile here is a real person</span>
@@ -117,9 +117,9 @@ export default function Explore() {
                                         </div>
                                         <div className="p-3">
                                             <div className="flex justify-between items-start mb-0.5">
-                                                <h3 className="font-bold text-white truncate text-sm flex-1">
+                                                <h2 className="font-bold text-white truncate text-sm flex-1">
                                                     {nearbyUser.firstName}, {nearbyUser.age}
-                                                </h3>
+                                                </h2>
                                                 <div className="flex items-center gap-0.5 bg-slate-900/50 rounded-full px-1.5 py-0.5 border border-slate-700/50">
                                                     <Star className="w-2.5 h-2.5 text-yellow-500" />
                                                     <span className="text-[10px] font-bold text-amber-400">{nearbyUser.selfRating || 5}</span>
@@ -139,7 +139,7 @@ export default function Explore() {
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                                            <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                                 {currentLocation && calculateDistance(currentLocation.latitude, currentLocation.longitude, nearbyUser.latitude, nearbyUser.longitude).toFixed(1)} mi away
                                             </p>

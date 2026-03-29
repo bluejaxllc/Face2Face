@@ -39,9 +39,10 @@ interface User {
   profilePhoto?: string | null;
 }
 
-function MapEventHandler({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+function MapEventHandler({ onZoomChange, onUserInteract }: { onZoomChange: (zoom: number) => void; onUserInteract?: () => void }) {
   const map = useMapEvents({
     zoomend: () => { onZoomChange(map.getZoom()); },
+    dragstart: () => { onUserInteract?.(); },
   });
   return null;
 }
@@ -87,9 +88,11 @@ function Map() {
       category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate",
       datingPreference: filterOptions.datingPreference
     }],
-    enabled: !!currentLocation && isActive,
-    refetchInterval: 1000,
-    staleTime: 2000,
+    enabled: isActive,
+    refetchInterval: 10000,
+    staleTime: 5000,
+    retry: 2,
+    retryDelay: 3000,
   });
 
   const mockUsers: User[] = [];
@@ -103,19 +106,19 @@ function Map() {
 
   const createCustomIcon = (gender: string) => {
     const isMale = gender === 'male';
-    const color = isMale ? '#3b82f6' : '#ec4899';
-    const glow = isMale ? 'rgba(59,130,246,0.6)' : 'rgba(236,72,153,0.6)';
+    const color = isMale ? '#4285F4' : '#EA4335';
+    const borderColor = isMale ? '#1a73e8' : '#c5221f';
     const svgHtml = isMale
-      ? `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 8px ${glow}) drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
-           <polygon points="50,8 94,92 6,92" fill="${color}" stroke="rgba(255,255,255,0.5)" stroke-width="3" stroke-linejoin="round"/>
+      ? `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+           <polygon points="50,8 94,92 6,92" fill="${color}" stroke="${borderColor}" stroke-width="4" stroke-linejoin="round"/>
          </svg>`
-      : `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 8px ${glow}) drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
-           <circle cx="50" cy="50" r="38" fill="${color}" stroke="rgba(255,255,255,0.5)" stroke-width="3"/>
+      : `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+           <circle cx="50" cy="50" r="38" fill="${color}" stroke="${borderColor}" stroke-width="4"/>
          </svg>`;
 
     return L.divIcon({
       className: 'custom-div-icon border-none bg-transparent',
-      html: `<div class="marker-pin" style="transition: transform 0.2s ease;">${svgHtml}</div>`,
+      html: `<div class="marker-pin" style="transition: transform 0.2s ease;" role="img" aria-label="User marker">${svgHtml}</div>`,
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
@@ -209,19 +212,28 @@ function Map() {
   }, [currentLocation]);
 
   const center: [number, number] = useMemo(() => {
-    return currentLocation
-      ? [currentLocation.latitude, currentLocation.longitude]
-      : [32.8728576, -96.5312512];
-  }, [currentLocation]);
+    if (currentLocation) {
+      return [currentLocation.latitude, currentLocation.longitude];
+    }
+    // Fall back to user's stored server-side coordinates
+    if (user?.latitude && user?.longitude && Number(user.latitude) !== 0 && Number(user.longitude) !== 0) {
+      return [Number(user.latitude), Number(user.longitude)];
+    }
+    return [32.8728576, -96.5312512]; // Default: Dallas
+  }, [currentLocation, user?.latitude, user?.longitude]);
 
   const handleZoomChange = useCallback((newZoom: number) => {
     setZoom(newZoom);
   }, []);
 
+  // Track if user has manually interacted with the map (pan/drag)
+  const userHasInteracted = useRef(false);
+
   // Effect to automatically center the map once after actual location is acquired
+  // But ONLY if the user hasn't started panning yet
   useEffect(() => {
-    if (mapLoaded && currentLocation && mapRef.current && !hasCenteredInitially.current) {
-      mapRef.current.setView([currentLocation.latitude, currentLocation.longitude], 14);
+    if (mapLoaded && currentLocation && mapRef.current && !userHasInteracted.current) {
+      mapRef.current.setView([currentLocation.latitude, currentLocation.longitude], mapRef.current.getZoom() || 15, { animate: true, duration: 0.5 });
       hasCenteredInitially.current = true;
     }
   }, [mapLoaded, currentLocation]);
@@ -269,17 +281,12 @@ function Map() {
     }
   }, [mapLoaded, mapKey]);
 
-  if (isError) {
-    return (
-      <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full page-dark" style={{ paddingBottom: "45px" }}>
-        <LocationError onEnableLocation={updateLocation} />
-      </div>
-    );
-  }
+  // Note: We no longer block the map when geolocation fails.
+  // The query fires regardless, and the map uses stored server-side coordinates as fallback.
 
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full" style={{ paddingBottom: "45px" }}>
-      <div className="flex-1 relative" style={{ minHeight: '300px', height: 'calc(100%)', marginBottom: "50px" }}>
+    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full pb-[50px]">
+      <div className="flex-1 relative" style={{ minHeight: '300px', height: '100%' }}>
 
         <MapContainer
           key={mapKey}
@@ -288,7 +295,7 @@ function Map() {
           style={{
             height: '100%',
             width: '100%',
-            background: '#0f172a',
+            background: '#e8e8e8',
             display: 'block',
             zIndex: 20,
             position: 'absolute',
@@ -315,15 +322,15 @@ function Map() {
             />
           ) : (
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-              subdomains="abcd"
-              maxZoom={20}
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              subdomains="abc"
+              maxZoom={19}
               className="leaflet-tile-pane"
             />
           )}
 
-          <MapEventHandler onZoomChange={handleZoomChange} />
+          <MapEventHandler onZoomChange={handleZoomChange} onUserInteract={() => { userHasInteracted.current = true; }} />
 
           {currentLocation && (
             <>
@@ -331,9 +338,9 @@ function Map() {
                 position={[currentLocation.latitude, currentLocation.longitude]}
                 icon={L.divIcon({
                   className: 'current-location-marker',
-                  html: '<div class="pulse"></div>',
-                  iconSize: [20, 20],
-                  iconAnchor: [10, 10]
+                  html: '<div style="width:16px;height:16px;background:#4285F4;border:3px solid white;border-radius:50%;box-shadow:0 0 0 2px rgba(66,133,244,0.3), 0 2px 6px rgba(0,0,0,0.3);"></div>',
+                  iconSize: [16, 16],
+                  iconAnchor: [8, 8]
                 })}
               >
                 <Popup>Your location</Popup>
@@ -342,7 +349,7 @@ function Map() {
               <Circle
                 center={[currentLocation.latitude, currentLocation.longitude]}
                 radius={radius * 1609.34}
-                pathOptions={{ color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.06, weight: 1, dashArray: '8 6' }}
+                pathOptions={{ color: '#4285F4', fillColor: '#4285F4', fillOpacity: 0.08, weight: 2, dashArray: '6 4' }}
               />
             </>
           )}
@@ -351,19 +358,33 @@ function Map() {
             chunkedLoading
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
-            maxClusterRadius={120}
-            spiderLegPolylineOptions={{ weight: 2, color: 'rgba(99,102,241,0.5)', opacity: 0.8 }}
+            zoomToBoundsOnClick={true}
+            maxClusterRadius={50}
+            disableClusteringAtZoom={14}
+            animate={true}
+            animateAddingMarkers={true}
+            spiderLegPolylineOptions={{ weight: 2, color: 'rgba(66,133,244,0.5)', opacity: 0.8 }}
             iconCreateFunction={(cluster: any) => {
               const count = cluster.getChildCount();
+              const size = count < 5 ? 40 : count < 10 ? 46 : 52;
               return L.divIcon({
                 html: `
-                  <div style="width:40px;height:40px;border-radius:50%;background:rgba(15,23,42,0.9);backdrop-filter:blur(12px);border:2px solid rgba(99,102,241,0.5);display:flex;align-items:center;justify-content:center;color:#c7d2fe;font-weight:700;font-size:14px;box-shadow:0 0 20px rgba(99,102,241,0.25);">
+                  <div role="img" aria-label="Cluster of ${count} users" style="
+                    width:${size}px;height:${size}px;
+                    border-radius:50%;
+                    background:white;
+                    border:3px solid #4285F4;
+                    display:flex;align-items:center;justify-content:center;
+                    color:#1a73e8;font-weight:700;font-size:${count < 10 ? 14 : 12}px;
+                    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+                    transition: all 0.3s ease;
+                  ">
                     ${count}
                   </div>
                 `,
                 className: 'custom-cluster-icon',
-                iconSize: L.point(40, 40),
-                iconAnchor: L.point(20, 20)
+                iconSize: L.point(size, size),
+                iconAnchor: L.point(size / 2, size / 2)
               });
             }}
           >
@@ -411,32 +432,38 @@ function Map() {
             onChange={handleFilterChange}
           />
           {/* Mini status pill */}
-          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full px-3"
+          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-gray-200 rounded-full px-3 shadow-md"
             style={{ height: "32px" }}>
-            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]' : 'bg-amber-400 animate-pulse'}`} />
-            <span className="text-slate-300 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
+            <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
               {filteredUsers.length}
             </span>
-            <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
+            <Users style={{ width: "11px", height: "11px" }} className="text-gray-400" />
           </div>
         </div>
 
         {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
         <div className="absolute z-[1000] left-1/2 -translate-x-1/2" style={{ top: "12px" }}>
-          <div className="flex bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 p-[3px] rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+          <div className="flex bg-white/90 backdrop-blur-xl border border-gray-200 p-[3px] rounded-full shadow-md gap-1">
             <button
               onClick={handleMenClick}
-              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showMen ? 'bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.6)]' : 'text-slate-400 hover:text-white'
+              className={`w-9 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${showMen ? 'bg-blue-500 shadow-sm' : 'hover:bg-gray-100'
                 }`}
+              aria-label="Show men"
             >
-              Men
+              <svg width="14" height="14" viewBox="0 0 100 100">
+                <polygon points="50,8 94,92 6,92" fill={showMen ? "white" : "#9ca3af"} strokeLinejoin="round" />
+              </svg>
             </button>
             <button
               onClick={handleWomenClick}
-              className={`px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${showWomen ? 'bg-pink-500 text-white shadow-[0_0_12px_rgba(236,72,153,0.6)]' : 'text-slate-400 hover:text-white'
+              className={`w-9 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${showWomen ? 'bg-pink-500 shadow-sm' : 'hover:bg-gray-100'
                 }`}
+              aria-label="Show women"
             >
-              Women
+              <svg width="14" height="14" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill={showWomen ? "white" : "#9ca3af"} />
+              </svg>
             </button>
           </div>
         </div>
@@ -446,12 +473,12 @@ function Map() {
 
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
-          <div className={`flex items-center gap-2 backdrop-blur-xl border rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)] transition-all duration-300 ${isActive
-            ? "bg-emerald-500/15 border-emerald-500/30 map-live-active"
-            : "bg-slate-900/80 border-slate-700/40"
+          <div className={`flex items-center gap-2 backdrop-blur-xl border rounded-full shadow-md transition-all duration-300 ${isActive
+            ? "bg-green-50/90 border-green-300 map-live-active"
+            : "bg-white/90 border-gray-200"
             }`} style={{ padding: "4px 12px", height: "32px" }}>
-            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-emerald-400 animate-pulse" : "text-slate-500"}`} />
-            <span className={`font-bold tracking-wider ${isActive ? "text-emerald-300" : "text-slate-400"}`} style={{ fontSize: "10px" }}>
+            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-green-500 animate-pulse" : "text-gray-400"}`} />
+            <span className={`font-bold tracking-wider ${isActive ? "text-green-600" : "text-gray-400"}`} style={{ fontSize: "10px" }}>
               {isActive ? "LIVE" : "OFF"}
             </span>
             <Switch
@@ -467,42 +494,43 @@ function Map() {
         <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
           {/* Map style toggle */}
           <button
-            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 shadow-[0_4px_24px_rgba(0,0,0,0.4)] flex items-center justify-center hover:bg-slate-800/90 hover:border-slate-600/50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
             aria-label="Toggle map style"
           >
-            <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-emerald-400" : "text-slate-400"} />
+            <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-green-500" : "text-gray-500"} />
           </button>
 
           {/* Current location */}
           <button
-            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 shadow-[0_4px_24px_rgba(0,0,0,0.4)] flex items-center justify-center hover:bg-slate-800/90 hover:border-blue-500/30 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={async () => {
+              userHasInteracted.current = false;
               await updateLocation();
               if (mapRef.current && currentLocation) {
                 mapRef.current.flyTo(
                   [currentLocation.latitude, currentLocation.longitude],
-                  mapRef.current.getZoom(),
+                  16,
                   { duration: 1.5 }
                 );
               }
             }}
             aria-label="Get current location"
           >
-            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-400" />
+            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-500" />
           </button>
 
           {/* Zoom controls */}
-          <div className="flex flex-col bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.4)] overflow-hidden">
+          <div className="flex flex-col bg-white/90 backdrop-blur-xl border border-gray-200 rounded-xl shadow-md overflow-hidden">
             <button
-              className="w-10 h-8 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-300 border-b border-slate-700/30"
+              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600 border-b border-gray-200"
               onClick={() => mapRef.current?.zoomIn()}
               aria-label="Zoom in"
             >
               <Plus style={{ width: "14px", height: "14px" }} />
             </button>
             <button
-              className="w-10 h-8 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-300"
+              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
               onClick={() => mapRef.current?.zoomOut()}
               aria-label="Zoom out"
             >
@@ -513,7 +541,7 @@ function Map() {
 
         {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 rounded-full shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-gray-200 rounded-full shadow-md"
             style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
             <input
               type="number"
@@ -521,6 +549,7 @@ function Map() {
               placeholder="∞"
               min={1}
               max={25000}
+              aria-label="Search radius in miles"
               onChange={(e) => {
                 const val = e.target.value;
                 if (val === "" || val === "0") {
@@ -529,18 +558,19 @@ function Map() {
                   setRadius(Math.min(25000, Math.max(1, parseInt(val) || 1)));
                 }
               }}
-              className="bg-transparent text-white font-bold text-center outline-none border-none"
+              className="bg-transparent text-gray-800 font-bold text-center outline-none border-none"
               style={{ width: "48px", fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
             />
-            <span className="text-slate-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
+            <span className="text-gray-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
             <button
               onClick={() => setRadius(25000)}
               className={`ml-0.5 rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${radius >= 25000
-                ? "bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg shadow-blue-500/25"
-                : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                ? "bg-blue-500 text-white shadow-sm"
+                : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                 }`}
               style={{ height: "26px", width: "26px", fontSize: "13px" }}
               title="Unlimited radius"
+              aria-label="Unlimited radius"
             >
               ∞
             </button>

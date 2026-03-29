@@ -185,6 +185,7 @@ export default function Profile() {
                 onChange={handlePhotoUpload}
               />
               <button
+                aria-label="Change profile photo"
                 className="absolute bottom-0 right-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full p-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
@@ -286,42 +287,42 @@ export default function Profile() {
                 <div className="flex items-start gap-2">
                   <Ruler className="w-4 h-4 text-cyan-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-slate-500">Height</p>
+                    <p className="text-xs text-slate-400">Height</p>
                     <p className="text-sm text-slate-200">{user.height || "Not set"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Weight className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-slate-500">Weight</p>
+                    <p className="text-xs text-slate-400">Weight</p>
                     <p className="text-sm text-slate-200">{user.weight || "Not set"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Music className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-slate-500">Music</p>
+                    <p className="text-xs text-slate-400">Music</p>
                     <p className="text-sm text-slate-200">{user.favoriteSong || "Not set"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <Palette className="w-4 h-4 text-pink-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-slate-500">Favorite Color</p>
+                    <p className="text-xs text-slate-400">Favorite Color</p>
                     <p className="text-sm text-slate-200">{user.favoriteColor || "Not set"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
                   <BookOpen className="w-4 h-4 text-purple-400 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-xs text-slate-500">Field of Study/Work</p>
+                    <p className="text-xs text-slate-400">Field of Study/Work</p>
                     <p className="text-sm text-slate-200">{user.fieldOfStudy || "Not set"}</p>
                   </div>
                 </div>
               </div>
               {user.seeking && (
                 <div className="mt-2 pt-2 border-t border-slate-700/50">
-                  <p className="text-xs text-slate-500 mb-1">Seeking</p>
+                  <p className="text-xs text-slate-400 mb-1">Seeking</p>
                   <div className="flex flex-wrap gap-1">
                     {user.seeking.split(",").map((item: string, i: number) => (
                       <span key={i} className="text-xs bg-pink-950/50 border border-pink-800/50 rounded-full px-2 py-0.5 text-pink-300">
@@ -333,7 +334,7 @@ export default function Profile() {
               )}
               {user.interests && (
                 <div className="mt-2 pt-2 border-t border-slate-700/50">
-                  <p className="text-xs text-slate-500 mb-1">Interests</p>
+                  <p className="text-xs text-slate-400 mb-1">Interests</p>
                   <div className="flex flex-wrap gap-1">
                     {user.interests.split(",").map((interest: string, i: number) => (
                       <span key={i} className="text-xs bg-slate-800 border border-slate-700 rounded-full px-2 py-0.5 text-slate-300">
@@ -366,6 +367,7 @@ export default function Profile() {
             {!isEditing && (
               <Button
                 variant="outline"
+                aria-label="Log out"
                 className="h-11 rounded-xl border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-950/50 hover:text-red-300 transition-all"
                 onClick={handleLogout}
               >
@@ -383,7 +385,7 @@ export default function Profile() {
               </h3>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                  <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Personal Info</h4>
+                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Personal Info</h4>
                   <div className="grid grid-cols-2 gap-3">
                     <FormField control={form.control} name="firstName" render={({ field }) => (
                       <FormItem>
@@ -451,7 +453,7 @@ export default function Profile() {
                   </div>
 
                   <div className="border-t border-slate-700/50 pt-4 mt-2">
-                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Preferences</h4>
+                    <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Preferences</h4>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -492,7 +494,7 @@ export default function Profile() {
                     <FormItem>
                       <FormLabel className="text-slate-300 text-sm">Seeking</FormLabel>
                       <FormControl><Input placeholder="e.g. Friendship, Dating, Networking" {...field} value={field.value || ""} className="auth-input" /></FormControl>
-                      <FormDescription className="text-slate-500 text-xs">Comma-separated list of what you're looking for</FormDescription>
+                      <FormDescription className="text-slate-400 text-xs">Comma-separated list of what you're looking for</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -530,7 +532,7 @@ export default function Profile() {
                       <FormItem className="mt-3">
                         <FormLabel className="text-slate-300 text-sm">Interests</FormLabel>
                         <FormControl><Input placeholder="e.g. Music, Travel, Coffee" {...field} value={field.value || ""} className="auth-input" /></FormControl>
-                        <FormDescription className="text-slate-500 text-xs">Comma-separated list</FormDescription>
+                        <FormDescription className="text-slate-400 text-xs">Comma-separated list</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )} />
@@ -542,7 +544,7 @@ export default function Profile() {
                       <FormControl>
                         <Textarea placeholder="Tell us about yourself" {...field} value={field.value || ""} className="auth-input min-h-20" />
                       </FormControl>
-                      <FormDescription className="text-slate-500 text-xs">Max 250 characters</FormDescription>
+                      <FormDescription className="text-slate-400 text-xs">Max 250 characters</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -552,7 +554,7 @@ export default function Profile() {
                       <FormItem className="flex flex-row items-center justify-between glass-card p-3">
                         <div>
                           <FormLabel className="text-slate-300 text-sm">Active</FormLabel>
-                          <FormDescription className="text-slate-500 text-xs">Show on map</FormDescription>
+                          <FormDescription className="text-slate-400 text-xs">Show on map</FormDescription>
                         </div>
                         <FormControl>
                           <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -589,11 +591,11 @@ export default function Profile() {
             <motion.div variants={itemVariants} className="glass-card p-5 border-t-0 border-x-0 rounded-t-none bg-transparent shadow-none border-b border-slate-800">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-slate-500">Email</p>
+                  <p className="text-xs text-slate-400">Email</p>
                   <p className="text-sm text-slate-200 truncate">{user.email}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Username</p>
+                  <p className="text-xs text-slate-400">Username</p>
                   <p className="text-sm text-slate-300 font-medium">@{user.username}</p>
                 </div>
               </div>

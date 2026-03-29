@@ -5,6 +5,7 @@ import { setupVite, serveStatic } from "./vite";
 import { log } from "./log";
 import { storage } from "./storage";
 import cors from "cors";
+import compression from "compression";
 import rateLimit from "express-rate-limit";
 
 if (!process.env.SESSION_SECRET) {
@@ -12,8 +13,30 @@ if (!process.env.SESSION_SECRET) {
 }
 
 const app = express();
+// Trust Railway's reverse proxy (Fastly CDN) so secure cookies work
+app.set('trust proxy', 1);
+
+// Enable gzip/brotli compression for all responses
+app.use(compression());
+
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: false, limit: '5mb' }));
+
+// Security headers for all responses
+app.use((_req, res, next) => {
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('X-Frame-Options', 'DENY');
+  res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.set('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()');
+  next();
+});
+
+// Prevent CDN caching of API responses (Fastly strips set-cookie from cached responses)
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  next();
+});
 
 // CORS — locked to known origins
 const allowedOrigins = [
@@ -44,7 +67,7 @@ app.use(cors({
 if (process.env.NODE_ENV === "production") {
   app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 300,
     message: { message: "Too many requests, please try again later" },
     standardHeaders: true,
     legacyHeaders: false,

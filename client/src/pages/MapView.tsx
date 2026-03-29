@@ -36,18 +36,10 @@ export default function MapView() {
   }, [user, hasCheckedModals]);
 
   // When we have both a user and a location, update the server
+  // (LocationService now inherently handles real-time throttled pushing as well)
   useEffect(() => {
     if (user && currentLocation) {
       updateServerLocation(currentLocation);
-
-      // Set up interval to update server location while on map page
-      const intervalId = setInterval(() => {
-        if (currentLocation) {
-          updateServerLocation(currentLocation);
-        }
-      }, 1000); // Update every 1 second
-
-      return () => clearInterval(intervalId);
     }
   }, [user, currentLocation, updateServerLocation]);
 

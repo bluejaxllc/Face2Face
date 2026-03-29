@@ -33,6 +33,7 @@ class LocationService {
   private lastServerUpdateTime: number = 0;
   private updateDelay: number = 1000; // Minimum time between server updates (1 second)
   private watchId: string | null = null; // For native watch position
+  private webWatchId: number | null = null; // For web watch position
 
   // Private constructor for singleton
   private constructor() { }
@@ -88,20 +89,46 @@ class LocationService {
       this.updateLocation();
     }
 
-    // Set up interval for periodic updates (web fallback only)
-    // On native, we use watchPosition instead
-    if (!Capacitor.isNativePlatform() && this.intervalId === null) {
-      this.intervalId = window.setInterval(() => {
-        if (!this.isError) {
-          this.updateLocation();
-        }
-      }, 1000); // 1 second
-    }
-
     // On native, start watching position for continuous updates
     if (Capacitor.isNativePlatform() && !this.watchId) {
       this.startNativeWatch();
+    } else if (!Capacitor.isNativePlatform() && this.webWatchId === null) {
+      this.startWebWatch();
     }
+  }
+
+  // Start web continuous location watching
+  private startWebWatch(): void {
+    if (!navigator.geolocation) {
+      this.isError = true;
+      this.notifyErrorListeners();
+      return;
+    }
+
+    this.webWatchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const location = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        this.currentLocation = location;
+        this.isError = false;
+        this.notifyLocationListeners();
+        this.notifyErrorListeners();
+
+        // Throttled server update
+        if (Date.now() - this.lastServerUpdateTime > this.updateDelay) {
+          this.updateServerLocation(location);
+        }
+      },
+      (error) => {
+        console.error('[LocationService] Web watch position error:', error);
+        this.isError = true;
+        this.notifyErrorListeners();
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+    console.log('[LocationService] Web watch position started');
   }
 
   // Start native continuous location watching
@@ -146,6 +173,10 @@ class LocationService {
     if (this.watchId !== null) {
       Geolocation.clearWatch({ id: this.watchId });
       this.watchId = null;
+    }
+    if (this.webWatchId !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(this.webWatchId);
+      this.webWatchId = null;
     }
   }
 

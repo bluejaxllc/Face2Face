@@ -17,6 +17,7 @@ import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { AnimatePresence } from "framer-motion";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -85,16 +86,26 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   return <Component />;
 }
 
+// Inner component that has access to AuthContext
+function AuthenticatedApp() {
+  const { isAuthenticated } = useAuth();
+  return (
+    <LocationProvider enabled={isAuthenticated}>
+      <div className="app-container">
+        <ErrorBoundary>
+          <AppRouter />
+        </ErrorBoundary>
+        <Toaster />
+      </div>
+    </LocationProvider>
+  );
+}
+
 // Separate the providers to avoid dependency issues
 function AppWithProviders() {
   return (
     <AuthProvider>
-      <LocationProvider>
-        <div className="app-container">
-          <AppRouter />
-          <Toaster />
-        </div>
-      </LocationProvider>
+      <AuthenticatedApp />
     </AuthProvider>
   );
 }

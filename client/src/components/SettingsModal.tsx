@@ -64,7 +64,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         <div className="space-y-5 py-2">
           {/* Personal */}
           <div className="space-y-3">
-            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <User className="w-3 h-3" />
               Personal
             </Label>
@@ -112,7 +112,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
           {/* Preferences */}
           <div className="space-y-3 border-t border-slate-700/50 pt-4">
-            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Heart className="w-3 h-3" />
               Preferences
             </Label>
@@ -161,13 +161,13 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 onChange={(e) => setSeeking(e.target.value)}
                 className="bg-slate-800/60 border-slate-700/50 text-slate-200 placeholder:text-slate-600 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Comma-separated</p>
+              <p className="text-[10px] text-slate-400 mt-1">Comma-separated</p>
             </div>
           </div>
 
           {/* Visibility */}
           <div className="space-y-3 border-t border-slate-700/50 pt-4">
-            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Eye className="w-3 h-3" />
               Visibility
             </Label>
@@ -182,7 +182,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 onChange={(e) => setInactiveTimeout(parseInt(e.target.value) || 30)}
                 className="bg-slate-800/60 border-slate-700/50 text-slate-200 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Hide from map after this many minutes</p>
+              <p className="text-[10px] text-slate-400 mt-1">Hide from map after this many minutes</p>
             </div>
           </div>
         </div>

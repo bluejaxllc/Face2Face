@@ -163,7 +163,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
             <div className="p-8 text-center">
               <Bell className="w-10 h-10 text-slate-700 mx-auto mb-3" />
               <p className="text-slate-400 font-medium">No notifications yet</p>
-              <p className="text-slate-500 text-sm mt-1">Connect with someone to get started!</p>
+              <p className="text-slate-400 text-sm mt-1">Connect with someone to get started!</p>
             </div>
           ) : (
             notifications.map((notification, i) => (
@@ -173,8 +173,8 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
                 transition={{ delay: i * 0.05 }}
                 key={notification.id}
                 className={`p-4 border-b border-slate-800 cursor-pointer transition-all duration-200 ${!notification.read
-                    ? 'bg-blue-500/10 hover:bg-blue-500/15'
-                    : 'hover:bg-slate-800/50'
+                  ? 'bg-blue-500/10 hover:bg-blue-500/15'
+                  : 'hover:bg-slate-800/50'
                   } ${notification.type === 'bump' ? 'border-l-2 border-l-pink-500/50' : ''}`}
                 onClick={() => handleNotificationClick(notification)}
               >
@@ -182,8 +182,8 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
                   <div className="h-10 w-10 rounded-full mr-3 overflow-hidden flex-shrink-0">
                     <Avatar>
                       <AvatarFallback className={`text-slate-200 font-bold ${notification.type === 'bump'
-                          ? 'bg-gradient-to-br from-pink-600 to-rose-700'
-                          : 'bg-gradient-to-br from-slate-700 to-slate-800'
+                        ? 'bg-gradient-to-br from-pink-600 to-rose-700'
+                        : 'bg-gradient-to-br from-slate-700 to-slate-800'
                         }`}>
                         {getInitialsFromContent(notification.content)}
                       </AvatarFallback>
@@ -193,7 +193,7 @@ export default function NotificationsModal({ onClose }: NotificationsModalProps)
                     <p className={`text-sm ${!notification.read ? 'font-semibold text-white' : 'text-slate-300'}`}>
                       {notification.content}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center">
+                    <p className="text-xs text-slate-400 mt-1 flex items-center">
                       <Clock className="inline h-3 w-3 mr-1" />
                       {formatTime(notification.timestamp)}
                     </p>

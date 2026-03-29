@@ -80,7 +80,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             Get Started
           </Button>
 
-          <p className="text-xs text-slate-500 text-center">
+          <p className="text-xs text-slate-400 text-center">
             By continuing, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>

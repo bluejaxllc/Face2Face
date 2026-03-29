@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, numeric, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, numeric, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -33,6 +33,13 @@ export const users = pgTable("users", {
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
   safetyAcknowledged: boolean("safety_acknowledged").default(false),
+}, (table) => {
+  return {
+    usernameIdx: index("username_idx").on(table.username),
+    emailIdx: index("email_idx").on(table.email),
+    phoneIdx: index("phone_idx").on(table.phoneNumber),
+    isActiveIdx: index("is_active_idx").on(table.isActive)
+  };
 });
 
 export const bumps = pgTable("bumps", {
@@ -43,6 +50,11 @@ export const bumps = pgTable("bumps", {
   seen: boolean("seen").default(false),
   status: text("status").default("pending"), // "pending", "initiated", "completed" or "rejected", "bumping_back", "revealed"
   message: text("message"), // Optional message sent with the bump
+}, (table) => {
+  return {
+    userIdIdx: index("bump_user_id_idx").on(table.userId),
+    bumpedUserIdIdx: index("bumped_user_id_idx").on(table.bumpedUserId)
+  };
 });
 
 export const messages = pgTable("messages", {
@@ -52,6 +64,11 @@ export const messages = pgTable("messages", {
   content: text("content").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   read: boolean("read").default(false),
+}, (table) => {
+  return {
+    senderIdIdx: index("sender_id_idx").on(table.senderId),
+    receiverIdIdx: index("receiver_id_idx").on(table.receiverId)
+  };
 });
 
 export const notifications = pgTable("notifications", {
@@ -62,6 +79,10 @@ export const notifications = pgTable("notifications", {
   content: text("content").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   read: boolean("read").default(false),
+}, (table) => {
+  return {
+    userIdIdx: index("notification_user_id_idx").on(table.userId)
+  };
 });
 
 export const verificationCodes = pgTable("verification_codes", {
@@ -71,6 +92,10 @@ export const verificationCodes = pgTable("verification_codes", {
   expiresAt: timestamp("expires_at").notNull(),
   used: boolean("used").default(false),
   createdAt: timestamp("created_at").defaultNow(),
+}, (table) => {
+  return {
+    phoneCodeIdx: index("phone_code_idx").on(table.phoneNumber, table.code)
+  };
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

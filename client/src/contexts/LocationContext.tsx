@@ -13,7 +13,7 @@ interface LocationContextType {
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
-export function LocationProvider({ children }: { children: ReactNode }) {
+export function LocationProvider({ children, enabled = true }: { children: ReactNode; enabled?: boolean }) {
   // Get the singleton location service
   const locationService = LocationService.getInstance();
 
@@ -25,8 +25,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [isError, setIsError] = useState(locationService.getErrorState());
   const { toast } = useToast();
 
-  // Initialize the location service on mount
+  // Initialize the location service on mount — but only when enabled (authenticated)
   useEffect(() => {
+    if (!enabled) return;
+
     // Subscribe to location updates
     const unsubscribeLocation = locationService.subscribeToLocation((location) => {
       setCurrentLocation(location);
@@ -56,7 +58,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       unsubscribeError();
       // Don't call cleanup() here as other components might still need the service
     };
-  }, [toast]);
+  }, [toast, enabled]);
 
   // Wrapper functions to use the service
   const updateLocation = async () => {

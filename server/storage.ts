@@ -132,62 +132,16 @@ export class DatabaseStorage implements IStorage {
       ageRange?: { min: number; max: number };
     } = {}
   ): Promise<User[]> {
-    // Bounding-box pre-filter: approximate degrees per mile
-    const latDelta = radius / 69.0;
-    const lngDelta = radius / (69.0 * Math.cos(latitude * Math.PI / 180));
-
+    // Show ALL active users with real coordinates (not default 0,0)
+    // No distance or preference filtering — everyone should be visible on the map
     const conditions: SQL[] = [
       sql`${users.id} != ${userId}`,
       eq(users.isActive, true),
       sql`${users.latitude} IS NOT NULL`,
       sql`${users.longitude} IS NOT NULL`,
-      // Bounding box filter (fast index-friendly pre-filter)
-      sql`CAST(${users.latitude} AS DOUBLE PRECISION) BETWEEN ${latitude - latDelta} AND ${latitude + latDelta}`,
-      sql`CAST(${users.longitude} AS DOUBLE PRECISION) BETWEEN ${longitude - lngDelta} AND ${longitude + lngDelta}`,
-      // TEMPORARILY DISABLED: Dynamic inactive timeout check (causes timezone/null bugs for new users)
-      // sql`${users.lastLocation} > NOW() - (CAST(${users.inactiveTimeout} AS integer) || ' minutes')::interval`,
-      // Exact Haversine distance filter in SQL
-      sql`(
-        3958.8 * 2 * ASIN(SQRT(
-          POWER(SIN((RADIANS(CAST(${users.latitude} AS DOUBLE PRECISION)) - RADIANS(${latitude})) / 2), 2) +
-          COS(RADIANS(${latitude})) * COS(RADIANS(CAST(${users.latitude} AS DOUBLE PRECISION))) *
-          POWER(SIN((RADIANS(CAST(${users.longitude} AS DOUBLE PRECISION)) - RADIANS(${longitude})) / 2), 2)
-        ))
-      ) <= ${radius}`,
+      // Exclude users who still have the default 0,0 coordinates (never set location)
+      sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
     ];
-
-    if (preferences.category && preferences.category !== "both") {
-      conditions.push(eq(users.category, preferences.category));
-    }
-
-    // Only see people whose gender matches our dating preference (unless we like 'all'/'everyone')
-    if (preferences.datingPreference && !['all', 'everyone', 'both', 'any'].includes(preferences.datingPreference.toLowerCase())) {
-      let targetGender = preferences.datingPreference.toLowerCase();
-      if (targetGender === 'women') targetGender = 'female';
-      if (targetGender === 'men') targetGender = 'male';
-
-      const cond = or(
-        eq(users.gender, targetGender),
-        eq(users.gender, 'all'),
-        eq(users.gender, 'everyone')
-      );
-      if (cond) conditions.push(cond);
-    }
-
-    // Only see people whose dating preference matches our gender (or they like 'all'/'everyone')
-    if (preferences.userGender) {
-      let targetPref = preferences.userGender.toLowerCase();
-      if (targetPref === 'female') targetPref = 'women';
-      if (targetPref === 'male') targetPref = 'men';
-
-      const cond = or(
-        eq(users.datingPreference, targetPref),
-        eq(users.datingPreference, 'all'),
-        eq(users.datingPreference, 'everyone'),
-        eq(users.datingPreference, 'any')
-      );
-      if (cond) conditions.push(cond);
-    }
 
     return await db.select()
       .from(users)

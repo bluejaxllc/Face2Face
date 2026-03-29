@@ -195,7 +195,7 @@ export default function LocationError({ onEnableLocation }: LocationErrorProps) 
             </>
           )}
         </Button>
-        <p className="text-xs text-center text-slate-500">
+        <p className="text-xs text-center text-slate-400">
           After enabling location, click the button above to retry
         </p>
       </CardFooter>
