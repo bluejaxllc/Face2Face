@@ -5,7 +5,6 @@ import {
   insertUserSchema,
   updateUserSchema,
   insertBumpSchema,
-  insertMessageSchema,
   insertNotificationSchema
 } from "@shared/schema";
 import { z } from "zod";
@@ -251,7 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: bumpedUserId,
         type: "bump",
         relatedId: userId, // Pass sender ID so receiver can easily bump back
-        content: `You've connected with ${user.firstName}!`,
+        content: `${user.firstName} bumped you!`,
       });
 
       res.status(201).json(bump);
@@ -293,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               fieldOfStudy: sender.fieldOfStudy,
               interests: sender.interests,
               seeking: sender.seeking,
-              connectMessage: sender.connectMessage,
+              connectMessage: sender.bumpMessage,
             } : null,
           };
         })
@@ -344,61 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all users the current user has bumped with (for message contacts)
-  // IMPORTANT: This MUST be before /bumps/:userId to avoid param collision
-  apiRouter.get("/bumps/users", async (req: Request, res: Response) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
 
-      const userId = req.session.userId;
-      const allBumps = await storage.getBumpsByUser(userId);
-
-      // Get unique user IDs from bumps (the other person)
-      const uniqueUserIds = new Set<number>();
-      allBumps.forEach(bump => {
-        if (bump.userId === userId) {
-          uniqueUserIds.add(bump.bumpedUserId);
-        } else {
-          uniqueUserIds.add(bump.userId);
-        }
-      });
-
-      // Fetch user info + last message for each bumped user
-      const bumpedUsers = await Promise.all(
-        Array.from(uniqueUserIds).map(async (id) => {
-          const user = await storage.getUser(id);
-          if (user) {
-            const messages = await storage.getMessagesBetweenUsers(userId, id);
-            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-            const unreadCount = messages.filter(m => m.receiverId === userId && !m.read).length;
-            return {
-              id: user.id,
-              firstName: user.firstName,
-              lastName: user.lastName,
-              profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null,
-              lastMessage: lastMessage ? { content: lastMessage.content, timestamp: lastMessage.timestamp, senderId: lastMessage.senderId } : null,
-              unreadCount,
-            };
-          }
-          return null;
-        })
-      );
-
-      // Sort by most recent message first
-      const sorted = bumpedUsers.filter(Boolean).sort((a: any, b: any) => {
-        if (!a.lastMessage && !b.lastMessage) return 0;
-        if (!a.lastMessage) return 1;
-        if (!b.lastMessage) return -1;
-        return new Date(b.lastMessage.timestamp).getTime() - new Date(a.lastMessage.timestamp).getTime();
-      });
-
-      res.status(200).json(sorted);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get bumped users" });
-    }
-  });
 
   apiRouter.get("/bumps/:userId", async (req: Request, res: Response) => {
     try {
@@ -417,81 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Message routes
-  apiRouter.post("/messages", async (req: Request, res: Response) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
 
-      const senderId = req.session.userId;
-      const { receiverId, content: rawContent } = req.body;
-
-      if (!receiverId || !rawContent) {
-        return res.status(400).json({ message: "receiverId and content are required" });
-      }
-
-      const content = sanitizeInput(String(rawContent), 2000);
-      if (content.length === 0) {
-        return res.status(400).json({ message: "Message content cannot be empty" });
-      }
-
-      // Check if the receiver exists
-      const receiver = await storage.getUser(receiverId);
-      if (!receiver) {
-        return res.status(404).json({ message: "Receiver not found" });
-      }
-
-      // Check if they've bumped before (required to message)
-      const bumps = await storage.getBumpsBetweenUsers(senderId, receiverId);
-      if (bumps.length === 0) {
-        return res.status(403).json({ message: "You need to bump into this user before messaging" });
-      }
-
-      // Create the message
-      const message = await storage.createMessage({
-        senderId,
-        receiverId,
-        content,
-      });
-
-      // Create a notification for the receiver
-      const sender = await storage.getUser(senderId);
-      await storage.createNotification({
-        userId: receiverId,
-        type: "message",
-        relatedId: message.id,
-        content: `${sender?.username} sent you a message`,
-      });
-
-      res.status(201).json(message);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to send message" });
-    }
-  });
-
-  apiRouter.get("/messages/:userId", async (req: Request, res: Response) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const currentUserId = req.session.userId;
-      const otherUserId = parseInt(req.params.userId);
-
-      // First check if they've bumped (required to view messages)
-      const bumps = await storage.getBumpsBetweenUsers(currentUserId, otherUserId);
-      if (bumps.length === 0) {
-        return res.status(403).json({ message: "You need to bump into this user to see messages" });
-      }
-
-      const messages = await storage.getMessagesBetweenUsers(currentUserId, otherUserId);
-
-      res.status(200).json(messages);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get messages" });
-    }
-  });
 
   // Notification routes
   apiRouter.get("/notifications", async (req: Request, res: Response) => {

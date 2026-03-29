@@ -1,19 +1,12 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, MessageSquare, User, Compass, Bell } from "lucide-react";
+import { Map, User, Compass, Bell } from "lucide-react";
 
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
 
-  // Fetch connected users to get total unread count
-  const { data: connectedUsers = [] } = useQuery<any[]>({
-    queryKey: ["/api/bumps/users"],
-    enabled: !!user,
-    refetchInterval: 15000, // poll every 15s for new messages
-  });
-  const unreadCount = connectedUsers.reduce((sum, u) => sum + (u.unreadCount || 0), 0);
   // Fetch unread notifications
   const { data: notifications = [] } = useQuery<any[]>({
     queryKey: ["/api/notifications"],
@@ -29,7 +22,6 @@ export default function BottomNavigation() {
   const navItems = [
     { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
     { path: "/map", icon: Map, label: "Map" },
-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: unreadCount },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 

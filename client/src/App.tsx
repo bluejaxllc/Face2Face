@@ -7,7 +7,7 @@ import NotFound from "@/pages/not-found";
 import MapView from "@/pages/MapView";
 import Explore from "@/pages/Explore";
 import Register from "@/pages/Register";
-import Messages from "@/pages/Messages";
+
 import Profile from "@/pages/Profile";
 import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -48,9 +48,7 @@ function AppRouter() {
         <Route path="/explore">
           <ProtectedRoute component={Explore} />
         </Route>
-        <Route path="/messages">
-          <ProtectedRoute component={Messages} />
-        </Route>
+
         <Route path="/profile">
           <ProtectedRoute component={Profile} />
         </Route>

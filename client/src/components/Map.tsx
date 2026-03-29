@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
+import BeenBumpedBadge from "./BeenBumpedBadge";
 import { calculateDistance } from "@/lib/distance";
 import { Locate, Plus, Minus, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -456,8 +457,11 @@ function Map() {
             <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
               {filteredUsers.length}
             </span>
-            <Users style={{ width: "11px", height: "11px" }} className="text-gray-400" />
+            <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
           </div>
+          <BeenBumpedBadge onClick={() => {
+            /* TODO: open received bumps sheet */
+          }} />
         </div>
 
         {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}

@@ -6,9 +6,6 @@ import {
   bumps,
   type Bump,
   type InsertBump,
-  messages,
-  type Message,
-  type InsertMessage,
   notifications,
   type Notification,
   type InsertNotification,
@@ -37,14 +34,12 @@ export interface IStorage {
 
   // Bump operations
   createBump(bump: InsertBump): Promise<Bump>;
+  getBump(id: number): Promise<Bump | undefined>;
+  updateBump(id: number, updates: Partial<{ status: string; seen: boolean }>): Promise<Bump | undefined>;
   getBumpsBetweenUsers(userId: number, bumpedUserId: number): Promise<Bump[]>;
   getBumpsByUser(userId: number): Promise<Bump[]>;
   getRecentBumps(userId: number, limit?: number): Promise<Bump[]>;
 
-  // Message operations
-  createMessage(message: InsertMessage): Promise<Message>;
-  getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Message[]>;
-  getUnreadMessageCount(userId: number): Promise<number>;
 
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -158,6 +153,16 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getBump(id: number): Promise<Bump | undefined> {
+    const result = await db.select().from(bumps).where(eq(bumps.id, id)).limit(1);
+    return result[0];
+  }
+
+  async updateBump(id: number, updates: Partial<{ status: string; seen: boolean }>): Promise<Bump | undefined> {
+    const result = await db.update(bumps).set(updates).where(eq(bumps.id, id)).returning();
+    return result[0];
+  }
+
   async getBumpsBetweenUsers(userId: number, bumpedUserId: number): Promise<Bump[]> {
     return await db.select()
       .from(bumps)
@@ -195,42 +200,7 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const result = await db.insert(messages).values({
-      ...insertMessage,
-      timestamp: new Date(),
-      read: false,
-    }).returning();
 
-    return result[0];
-  }
-
-  async getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Message[]> {
-    return await db.select()
-      .from(messages)
-      .where(or(
-        and(
-          eq(messages.senderId, userId1),
-          eq(messages.receiverId, userId2)
-        ),
-        and(
-          eq(messages.senderId, userId2),
-          eq(messages.receiverId, userId1)
-        )
-      ))
-      .orderBy(asc(messages.timestamp));
-  }
-
-  async getUnreadMessageCount(userId: number): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` })
-      .from(messages)
-      .where(and(
-        eq(messages.receiverId, userId),
-        eq(messages.read, false)
-      ));
-
-    return result[0]?.count || 0;
-  }
 
   async createNotification(insertNotification: InsertNotification): Promise<Notification> {
     const result = await db.insert(notifications).values({
