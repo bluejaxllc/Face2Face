@@ -41,7 +41,7 @@ const profileSchema = z.object({
   height: z.string().optional(),
   weight: z.string().optional(),
   selfRating: z.coerce.number().min(1).max(10).default(5),
-  category: z.string().default("casual"),
+  category: z.string().default("friendships"),
   bio: z.string().max(250, "Bio must be less than 250 characters").optional(),
   datingPreference: z.string().default("all"),
   seeking: z.string().optional(),
@@ -110,7 +110,7 @@ export default function Profile() {
       height: user?.height || "",
       weight: user?.weight || "",
       selfRating: user?.selfRating || 5,
-      category: user?.category || "casual",
+      category: user?.category || "friendships",
       bio: user?.bio || "",
       datingPreference: user?.datingPreference || "all",
       seeking: user?.seeking || "",
@@ -207,8 +207,8 @@ export default function Profile() {
             <p className="text-slate-400 text-sm">@{user.username} · {user.age || 18} years old</p>
 
             <div className="flex justify-center mt-3 gap-2">
-              <span className={user.category === "casual" ? "badge-casual" : "badge-intimate"}>
-                {user.category === "casual" ? "Casual" : "Intimate"}
+              <span className="text-xs px-3 py-1 rounded-full font-semibold bg-slate-800/60 border border-slate-700/50 text-slate-300 capitalize">
+                {user.category || 'friendships'}
               </span>
               <span className={user.isActive ? "badge-active" : "badge-inactive"}>
                 {user.isActive ? "Active" : "Inactive"}
@@ -465,8 +465,9 @@ export default function Profile() {
                             <SelectTrigger className="auth-input"><SelectValue placeholder="Select" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="casual">Casual</SelectItem>
-                            <SelectItem value="intimate">Intimate</SelectItem>
+                            <SelectItem value="dating">💕 Dating</SelectItem>
+                            <SelectItem value="business">💼 Business</SelectItem>
+                            <SelectItem value="friendships">🤝 Friendships</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

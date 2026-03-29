@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Define our filter options and types
 export interface FilterOptions {
   datingPreference: 'any' | 'men' | 'women' | 'everyone';
-  showCasual: boolean;
-  showIntimate: boolean;
+  showDating: boolean;
+  showBusiness: boolean;
+  showFriendships: boolean;
   showMen: boolean;
   showWomen: boolean;
   ageRange: [number, number];
@@ -101,19 +102,27 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">User Types</Label>
             <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
-              <Label htmlFor="show-casual" className="cursor-pointer text-slate-300">Show Casual users</Label>
+              <Label htmlFor="show-dating" className="cursor-pointer text-slate-300">💕 Dating</Label>
               <Switch
-                id="show-casual"
-                checked={localOptions.showCasual}
-                onCheckedChange={(checked) => updateOption('showCasual', checked)}
+                id="show-dating"
+                checked={localOptions.showDating}
+                onCheckedChange={(checked) => updateOption('showDating', checked)}
               />
             </div>
             <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
-              <Label htmlFor="show-intimate" className="cursor-pointer text-slate-300">Show Intimate users</Label>
+              <Label htmlFor="show-business" className="cursor-pointer text-slate-300">💼 Business</Label>
               <Switch
-                id="show-intimate"
-                checked={localOptions.showIntimate}
-                onCheckedChange={(checked) => updateOption('showIntimate', checked)}
+                id="show-business"
+                checked={localOptions.showBusiness}
+                onCheckedChange={(checked) => updateOption('showBusiness', checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+              <Label htmlFor="show-friendships" className="cursor-pointer text-slate-300">🤝 Friendships</Label>
+              <Switch
+                id="show-friendships"
+                checked={localOptions.showFriendships}
+                onCheckedChange={(checked) => updateOption('showFriendships', checked)}
               />
             </div>
           </div>
@@ -135,7 +144,7 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
             />
           </div>
 
-          {/* Distance Radius */}
+          {/* Distance Radius — typed input */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Search Radius</Label>
@@ -143,13 +152,39 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
                 {localOptions.radius >= 25000 ? 'Unlimited' : `${localOptions.radius} miles`}
               </span>
             </div>
-            <Slider
-              defaultValue={[localOptions.radius]}
-              min={1}
-              max={25000}
-              step={100}
-              onValueChange={(value) => updateOption('radius', value[0])}
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={localOptions.radius >= 25000 ? "" : localOptions.radius}
+                placeholder="∞"
+                min={1}
+                max={25000}
+                aria-label="Search radius in miles"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || val === "0") {
+                    updateOption('radius', 25000);
+                  } else {
+                    updateOption('radius', Math.min(25000, Math.max(1, parseInt(val) || 1)));
+                  }
+                }}
+                className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-2 text-white font-bold text-center outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 transition-colors"
+                style={{ fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+              />
+              <span className="text-slate-400 font-semibold text-xs">MI</span>
+              <button
+                onClick={() => updateOption('radius', 25000)}
+                className={`rounded-xl flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${localOptions.radius >= 25000
+                  ? "bg-blue-500 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white hover:bg-slate-700 bg-slate-800/50 border border-slate-700/50"
+                  }`}
+                style={{ height: "38px", width: "38px", fontSize: "16px" }}
+                title="Unlimited radius"
+                aria-label="Unlimited radius"
+              >
+                ∞
+              </button>
+            </div>
           </div>
 
           {/* Minimum Rating */}

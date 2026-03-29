@@ -6,6 +6,7 @@ import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
 import BeenBumpedBadge from "./BeenBumpedBadge";
+import ReceivedBumpsSheet from "./ReceivedBumpsSheet";
 import { calculateDistance } from "@/lib/distance";
 import { Locate, Plus, Minus, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -36,7 +37,7 @@ interface User {
   fieldOfStudy?: string | null;
   interests?: string | null;
   seeking?: string | null;
-  connectMessage?: string | null;
+  bumpMessage?: string | null;
   profilePhoto?: string | null;
 }
 
@@ -63,8 +64,9 @@ function Map() {
     }
     return {
       datingPreference: 'any',
-      showCasual: true,
-      showIntimate: false,
+      showDating: true,
+      showBusiness: true,
+      showFriendships: true,
       showMen: true,
       showWomen: true,
       ageRange: [18, 50],
@@ -73,10 +75,12 @@ function Map() {
     };
   });
 
-  const [showCasual, setShowConnect] = useState(filterOptions.showCasual);
-  const [showIntimate, setShowGrind] = useState(filterOptions.showIntimate);
+  const [showDating, setShowDating] = useState(filterOptions.showDating);
+  const [showBusiness, setShowBusiness] = useState(filterOptions.showBusiness);
+  const [showFriendships, setShowFriendships] = useState(filterOptions.showFriendships);
   const [radius, setRadius] = useState(filterOptions.radius);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
+  const [showReceivedBumps, setShowReceivedBumps] = useState(false);
 
   const isActive = user?.isActive ?? true;
   const [zoom, setZoom] = useState(14);
@@ -88,7 +92,7 @@ function Map() {
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", {
       radius,
-      category: showCasual && showIntimate ? "both" : showCasual ? "casual" : "intimate",
+      category: [showDating && "dating", showBusiness && "business", showFriendships && "friendships"].filter(Boolean).join(",") || "all",
       datingPreference: filterOptions.datingPreference
     }],
     enabled: isActive,
@@ -146,8 +150,9 @@ function Map() {
   const showWomen = filterOptions.showWomen ?? true;
 
   const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
-    if (!filterOptions.showCasual && nearbyUser.category === "casual") return false;
-    if (!filterOptions.showIntimate && nearbyUser.category === "intimate") return false;
+    if (!filterOptions.showDating && nearbyUser.category === "dating") return false;
+    if (!filterOptions.showBusiness && nearbyUser.category === "business") return false;
+    if (!filterOptions.showFriendships && nearbyUser.category === "friendships") return false;
     if (nearbyUser.selfRating < filterOptions.minRating) return false;
     if (!showMen && nearbyUser.gender === "male") return false;
     if (!showWomen && nearbyUser.gender === "female") return false;
@@ -200,15 +205,10 @@ function Map() {
   const handleBump = useCallback(async (message?: string) => {
     if (!selectedUser) return;
     try {
-      await apiRequest("POST", "/api/bumps", {
-        bumpedUserId: selectedUser.id,
-        message: message || "👋 Bump!",
-      });
-      // Haptic feedback for sender — single 200ms vibration
-      if (navigator.vibrate) navigator.vibrate(200);
+      await apiRequest("POST", "/api/bumps", { bumpedUserId: selectedUser.id });
       toast({
         title: "Bump sent!",
-        description: `You bumped ${selectedUser.firstName}!`,
+        description: `You bumped ${selectedUser.firstName}! They will be notified.`,
       });
       setSelectedUser(null);
     } catch (error) {
@@ -261,20 +261,22 @@ function Map() {
     setFilterOptions(prev => {
       const updated = {
         ...prev,
-        showCasual,
-        showIntimate,
+        showDating,
+        showBusiness,
+        showFriendships,
         radius
       };
       localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
       return updated;
     });
-  }, [showCasual, showIntimate, radius]);
+  }, [showDating, showBusiness, showFriendships, radius]);
 
   const handleFilterChange = useCallback((options: FilterOptions) => {
     try {
       setFilterOptions(options);
-      setShowConnect(options.showCasual);
-      setShowGrind(options.showIntimate);
+      setShowDating(options.showDating);
+      setShowBusiness(options.showBusiness);
+      setShowFriendships(options.showFriendships);
       setRadius(options.radius);
       localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
       toast({
@@ -459,9 +461,7 @@ function Map() {
             </span>
             <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
           </div>
-          <BeenBumpedBadge onClick={() => {
-            /* TODO: open received bumps sheet */
-          }} />
+          <BeenBumpedBadge onClick={() => setShowReceivedBumps(true)} />
         </div>
 
         {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
@@ -640,6 +640,19 @@ function Map() {
           myLocation={currentLocation}
         />
       )}
+
+      {/* Received bumps sheet */}
+      <ReceivedBumpsSheet
+        open={showReceivedBumps}
+        onOpenChange={setShowReceivedBumps}
+        onBumpBack={(senderId) => {
+          // Find the sender in our nearby users list and auto-select them
+          const sender = nearbyUsers.find(u => u.id === senderId);
+          if (sender) {
+            setSelectedUser(sender);
+          }
+        }}
+      />
     </div>
   );
 }

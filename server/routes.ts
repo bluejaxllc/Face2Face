@@ -292,7 +292,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               fieldOfStudy: sender.fieldOfStudy,
               interests: sender.interests,
               seeking: sender.seeking,
-              connectMessage: sender.bumpMessage,
             } : null,
           };
         })
@@ -343,6 +342,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reveal profile — mutual opt-in
+  apiRouter.patch("/bumps/:id/reveal", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const bumpId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      const bump = await storage.getBump(bumpId);
+      if (!bump) return res.status(404).json({ message: "Bump not found" });
+
+      // Determine which side is revealing
+      const isSender = bump.userId === userId;
+      const isReceiver = bump.bumpedUserId === userId;
+      if (!isSender && !isReceiver) {
+        return res.status(403).json({ message: "Not your bump" });
+      }
+
+      // Track reveals with status field:
+      //   pending/bumping_back → one side hasn't revealed
+      //   "sender_revealed" / "receiver_revealed" → one side revealed
+      //   "revealed" → both sides revealed
+      let newStatus = bump.status;
+      if (bump.status === "revealed") {
+        return res.status(200).json({ mutual: true, status: "revealed" });
+      }
+      if (isSender && bump.status === "receiver_revealed") newStatus = "revealed";
+      else if (isReceiver && bump.status === "sender_revealed") newStatus = "revealed";
+      else if (isSender) newStatus = "sender_revealed";
+      else newStatus = "receiver_revealed";
+
+      await storage.updateBump(bumpId, { status: newStatus });
+
+      const mutual = newStatus === "revealed";
+      const user = await storage.getUser(userId);
+
+      // Notify the other party
+      const otherId = isSender ? bump.bumpedUserId : bump.userId;
+      if (user) {
+        await storage.createNotification({
+          userId: otherId,
+          type: "bump",
+          relatedId: userId,
+          content: mutual
+            ? `${user.firstName} also revealed their profile! You can now see each other's full profiles.`
+            : `${user.firstName} wants to reveal profiles. Reveal yours to unlock full access!`,
+        });
+      }
+
+      // If mutual, trigger heartbeat haptic hint (client will handle)
+      res.status(200).json({ mutual, status: newStatus });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reveal profile" });
+    }
+  });
 
 
   apiRouter.get("/bumps/:userId", async (req: Request, res: Response) => {

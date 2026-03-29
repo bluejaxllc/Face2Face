@@ -22,7 +22,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   const [height, setHeight] = useState(user?.height || "");
   const [weight, setWeight] = useState(user?.weight || "");
   const [datingPreference, setDatingPreference] = useState(user?.datingPreference || "women");
-  const [category, setCategory] = useState(user?.category || "casual");
+  const [category, setCategory] = useState(user?.category || "friendships");
   const [seeking, setSeeking] = useState(user?.seeking || "");
   const [showOnMap, setShowOnMap] = useState(user?.isActive !== false);
   const [inactiveTimeout, setInactiveTimeout] = useState(user?.inactiveTimeout || 30);
@@ -139,19 +139,26 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               <Label className="block text-xs font-medium text-slate-300 mb-2">Category</Label>
               <div className="flex space-x-2">
                 <Button type="button"
-                  variant={category === "casual" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "casual"
-                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setCategory("casual")}>Casual</Button>
-                <Button type="button"
-                  variant={category === "intimate" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "intimate"
+                  variant={category === "dating" ? "default" : "outline"}
+                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "dating"
                     ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
                     : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
                     }`}
-                  onClick={() => setCategory("intimate")}>Intimate</Button>
+                  onClick={() => setCategory("dating")}>💕 Dating</Button>
+                <Button type="button"
+                  variant={category === "business" ? "default" : "outline"}
+                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "business"
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    }`}
+                  onClick={() => setCategory("business")}>💼 Business</Button>
+                <Button type="button"
+                  variant={category === "friendships" ? "default" : "outline"}
+                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "friendships"
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 border-emerald-400/50"
+                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
+                    }`}
+                  onClick={() => setCategory("friendships")}>🤝 Friends</Button>
               </div>
             </div>
             <div>

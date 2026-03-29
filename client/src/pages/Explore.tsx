@@ -27,21 +27,21 @@ export default function Explore() {
         refetchInterval: 1000,
     });
 
-    const handleConnect = async (targetUser: any) => {
+    const handleBump = async (targetUser: any) => {
         try {
             await apiRequest("POST", "/api/bumps", {
                 bumpedUserId: targetUser.id,
             });
 
             toast({
-                title: "Connection sent!",
-                description: `You connected with ${targetUser.firstName}! They will be notified.`,
+                title: "Bump sent!",
+                description: `You bumped ${targetUser.firstName}! They will be notified.`,
             });
             setSelectedUser(null);
         } catch (error) {
             toast({
-                title: "Connect failed",
-                description: "Failed to send connection",
+                title: "Bump failed",
+                description: "Failed to send bump",
                 variant: "destructive",
             });
         }
@@ -87,25 +87,18 @@ export default function Explore() {
                         <div className="grid grid-cols-2 gap-3 pb-4">
                             {nearbyUsers.map((nearbyUser, i) => {
                                 const genderInfo = getGenderBadge(nearbyUser.gender);
-                                const isCasual = nearbyUser.category === "casual";
+                                const categoryColor = nearbyUser.category === 'dating' ? 'pink' : nearbyUser.category === 'business' ? 'blue' : 'emerald';
                                 return (
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i * 0.05 }}
                                         key={nearbyUser.id}
-                                        className={`glass-card overflow-hidden cursor-pointer active:scale-95 transition-all duration-300 ${isCasual
-                                            ? "hover:border-blue-500/30"
-                                            : "hover:border-pink-500/30"
-                                            }`}
+                                        className="glass-card overflow-hidden cursor-pointer active:scale-95 transition-all duration-300 hover:border-slate-600/50"
                                         onClick={() => setSelectedUser(nearbyUser)}
                                     >
-                                        <div className={`h-28 flex items-center justify-center relative ${isCasual
-                                            ? "bg-gradient-to-br from-blue-500/10 to-slate-800/10"
-                                            : "bg-gradient-to-br from-pink-500/10 to-slate-800/10"
-                                            }`}>
-                                            <Avatar className={`h-16 w-16 border-2 shadow-xl ${isCasual ? "border-blue-500/30" : "border-pink-500/30"
-                                                }`}>
+                                        <div className={`h-28 flex items-center justify-center relative bg-gradient-to-br from-${categoryColor}-500/10 to-slate-800/10`}>
+                                            <Avatar className={`h-16 w-16 border-2 shadow-xl border-${categoryColor}-500/30`}>
                                                 {nearbyUser.profilePhoto && (
                                                     <AvatarImage src={nearbyUser.profilePhoto} alt={nearbyUser.firstName} />
                                                 )}
@@ -127,10 +120,7 @@ export default function Explore() {
                                             </div>
 
                                             <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${isCasual
-                                                    ? "bg-blue-500/15 text-blue-400 border border-blue-500/20"
-                                                    : "bg-pink-500/15 text-pink-400 border border-pink-500/20"
-                                                    }`}>
+                                                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize bg-${categoryColor}-500/15 text-${categoryColor}-400 border border-${categoryColor}-500/20`}>
                                                     {nearbyUser.category}
                                                 </span>
                                                 {nearbyUser.height && (
@@ -167,7 +157,7 @@ export default function Explore() {
                         <ProfileCard
                             user={selectedUser}
                             onClose={() => setSelectedUser(null)}
-                            onConnect={() => handleConnect(selectedUser)}
+                            onConnect={() => handleBump(selectedUser)}
                             distance={
                                 currentLocation
                                     ? calculateDistance(

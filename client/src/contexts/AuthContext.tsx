@@ -23,7 +23,6 @@ interface User {
   fieldOfStudy: string | null;
   interests: string | null;
   seeking: string | null;
-  connectMessage: string | null;
   isActive: boolean;
   inactiveTimeout: number;
   latitude: number | null;

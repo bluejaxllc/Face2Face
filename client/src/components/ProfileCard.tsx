@@ -4,10 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistance } from "@/lib/distance";
-import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight } from "lucide-react";
+import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight, Eye, UserPlus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import DirectionalArrow from "./DirectionalArrow";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface User {
   id: number;
@@ -26,7 +28,7 @@ interface User {
   fieldOfStudy?: string | null;
   interests?: string | null;
   seeking?: string | null;
-  connectMessage?: string | null;
+  bio?: string | null;
   profilePhoto?: string | null;
   latitude?: number;
   longitude?: number;
@@ -42,12 +44,14 @@ interface ProfileCardProps {
 
 export default function ProfileCard({ user, onClose, onConnect, distance, myLocation }: ProfileCardProps) {
   const { user: currentUser } = useAuth();
+  const { toast } = useToast();
   const [showBumpComposer, setShowBumpComposer] = useState(false);
   const [showArrow, setShowArrow] = useState(false);
   const [bumpMessage, setBumpMessage] = useState("");
   const [shareProfile, setShareProfile] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [pendingMessage, setPendingMessage] = useState("");
+  const [isRevealing, setIsRevealing] = useState(false);
 
   // Check if we already bumped this person
   const { data: existingBumps = [] } = useQuery<any[]>({
@@ -56,7 +60,10 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
   });
 
   const hasBumped = existingBumps.length > 0;
-  const isMutual = existingBumps.some((b: any) => b.status === "revealed" || b.status === "completed");
+  const hasMutualBumps = existingBumps.length >= 2 ||
+    existingBumps.some((b: any) => ['bumping_back', 'sender_revealed', 'receiver_revealed', 'revealed'].includes(b.status));
+  const isRevealed = existingBumps.some((b: any) => b.status === 'revealed');
+  const isPartialReveal = existingBumps.some((b: any) => ['sender_revealed', 'receiver_revealed'].includes(b.status));
 
   const getInitials = (firstName: string, lastName: string) =>
     `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
@@ -85,6 +92,27 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
     } finally {
       setIsSending(false);
       setShowArrow(false);
+    }
+  };
+
+  // Step 3: Reveal profile (mutual opt-in)
+  const handleReveal = async () => {
+    const bump = existingBumps[0];
+    if (!bump) return;
+    setIsRevealing(true);
+    try {
+      const res = await apiRequest("PATCH", `/api/bumps/${bump.id}/reveal`, {});
+      const data = await res.json();
+      if (data.mutual) {
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 300, 100, 50, 100]);
+        toast({ title: "Profiles Revealed! \ud83c\udf89", description: `You and ${user.firstName} can now see each other's full profiles.` });
+      } else {
+        toast({ title: "Reveal sent", description: `Waiting for ${user.firstName} to reveal theirs too.` });
+      }
+    } catch {
+      toast({ title: "Failed", description: "Could not reveal profile", variant: "destructive" });
+    } finally {
+      setIsRevealing(false);
     }
   };
 
@@ -149,9 +177,9 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
             </div>
 
             {/* Connect message / bio */}
-            {user.connectMessage && (
+            {user.bio && (
               <div className="mt-3 bg-slate-800/40 border border-slate-700/30 rounded-xl px-4 py-2.5">
-                <p className="text-xs text-slate-300 italic leading-relaxed">"{user.connectMessage}"</p>
+                <p className="text-xs text-slate-300 italic leading-relaxed">"{user.bio}"</p>
               </div>
             )}
 

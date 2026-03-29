@@ -27,7 +27,7 @@ export default function UserMarker({ user, position, onClick }: UserMarkerProps)
 
   return (
     <div
-      className={`user-marker ${user.category === "casual" ? "casual-marker" : "intimate-marker"}`}
+      className={`user-marker ${user.category === "dating" ? "intimate-marker" : user.category === "business" ? "casual-marker" : "casual-marker"}`}
       style={style}
       onClick={onClick}
     >

@@ -147,8 +147,8 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
       }
 
       toast({
-        title: "Connect sent!",
-        description: `You've connected with ${user.firstName}!`,
+        title: "Bump sent!",
+        description: `You bumped ${user.firstName}!`,
       });
 
       setStage("complete");
@@ -253,7 +253,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
                 <div>
                   <p className="font-semibold text-white">{user?.firstName} {user?.lastName}</p>
                   <p className="text-xs text-slate-400">
-                    {user?.category === "casual" ? "Looking to hang out" : "Looking for more"}
+                    {user?.category ? user.category.charAt(0).toUpperCase() + user.category.slice(1) : 'Friendships'}
                   </p>
                 </div>
               </div>
@@ -306,7 +306,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
                 <div>
                   <p className="font-semibold text-white">{user?.firstName} {user?.lastName}</p>
                   <p className="text-xs text-slate-400">
-                    {user?.category === "casual" ? "Looking to hang out" : "Looking for more"}
+                    {user?.category ? user.category.charAt(0).toUpperCase() + user.category.slice(1) : 'Friendships'}
                   </p>
                 </div>
               </div>
