@@ -3,7 +3,6 @@ import { Filter, X, Sliders } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,6 +12,8 @@ export interface FilterOptions {
   datingPreference: 'any' | 'men' | 'women' | 'everyone';
   showCasual: boolean;
   showIntimate: boolean;
+  showMen: boolean;
+  showWomen: boolean;
   ageRange: [number, number];
   radius: number;
   minRating: number;
@@ -55,21 +56,45 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
         </SheetHeader>
 
         <div className="space-y-6 pb-20">
-          {/* Dating Preference */}
+          {/* Seeking — symbol toggles */}
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Dating Preference</Label>
-            <RadioGroup
-              value={localOptions.datingPreference}
-              onValueChange={(value) => updateOption('datingPreference', value as FilterOptions['datingPreference'])}
-              className="flex flex-col space-y-1"
-            >
-              {["any", "men", "women", "everyone"].map(val => (
-                <div key={val} className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2 border border-slate-700/30 hover:border-slate-600/50 transition-colors">
-                  <RadioGroupItem value={val} id={`pref-${val}`} />
-                  <Label htmlFor={`pref-${val}`} className="text-slate-300 capitalize cursor-pointer">{val}</Label>
-                </div>
-              ))}
-            </RadioGroup>
+            <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Seeking</Label>
+            <div className="flex gap-3">
+              {/* Triangle = Men */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !localOptions.showMen;
+                  const pref = next && localOptions.showWomen ? 'any' : next ? 'men' : localOptions.showWomen ? 'women' : 'any';
+                  setLocalOptions(prev => ({ ...prev, showMen: next, datingPreference: pref }));
+                }}
+                className={`flex-1 flex items-center justify-center rounded-xl p-4 border-2 transition-all duration-300 ${localOptions.showMen
+                  ? 'bg-blue-500/20 border-blue-500 shadow-[0_0_16px_rgba(59,130,246,0.35)]'
+                  : 'bg-slate-800/50 border-slate-700/30 opacity-40'
+                  }`}
+              >
+                <svg width="40" height="40" viewBox="0 0 100 100">
+                  <polygon points="50,8 94,92 6,92" fill={localOptions.showMen ? '#4285F4' : '#475569'} stroke={localOptions.showMen ? '#1a73e8' : '#334155'} strokeWidth="4" strokeLinejoin="round" />
+                </svg>
+              </button>
+              {/* Circle = Women */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !localOptions.showWomen;
+                  const pref = localOptions.showMen && next ? 'any' : !localOptions.showMen && next ? 'women' : localOptions.showMen ? 'men' : 'any';
+                  setLocalOptions(prev => ({ ...prev, showWomen: next, datingPreference: pref }));
+                }}
+                className={`flex-1 flex items-center justify-center rounded-xl p-4 border-2 transition-all duration-300 ${localOptions.showWomen
+                  ? 'bg-pink-500/20 border-pink-500 shadow-[0_0_16px_rgba(236,72,153,0.35)]'
+                  : 'bg-slate-800/50 border-slate-700/30 opacity-40'
+                  }`}
+              >
+                <svg width="40" height="40" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="38" fill={localOptions.showWomen ? '#EA4335' : '#475569'} stroke={localOptions.showWomen ? '#c5221f' : '#334155'} strokeWidth="4" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* User Types */}

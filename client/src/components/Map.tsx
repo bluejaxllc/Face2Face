@@ -64,6 +64,8 @@ function Map() {
       datingPreference: 'any',
       showCasual: true,
       showIntimate: false,
+      showMen: true,
+      showWomen: true,
       ageRange: [18, 50],
       radius: 25000,
       minRating: 1
@@ -106,14 +108,29 @@ function Map() {
 
   const createCustomIcon = (gender: string) => {
     const isMale = gender === 'male';
-    const color = isMale ? '#4285F4' : '#EA4335';
-    const borderColor = isMale ? '#1a73e8' : '#c5221f';
+
+    // Male: Blue-400 to Blue-500 gradient, Blue-600 stroke
+    // Female: Pink-400 to Pink-500 gradient, Pink-600 stroke
     const svgHtml = isMale
-      ? `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-           <polygon points="50,8 94,92 6,92" fill="${color}" stroke="${borderColor}" stroke-width="4" stroke-linejoin="round"/>
+      ? `<svg width="40" height="40" viewBox="0 0 100 100" style="filter: drop-shadow(0 4px 6px rgba(59,130,246,0.3));">
+           <defs>
+             <linearGradient id="pin-male-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+               <stop offset="0%" stop-color="#60a5fa" />
+               <stop offset="100%" stop-color="#3b82f6" />
+             </linearGradient>
+           </defs>
+           <polygon points="50,6 94,88 6,88" fill="url(#pin-male-grad)" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
+           <circle cx="50" cy="60" r="10" fill="white" opacity="0.9" />
          </svg>`
-      : `<svg width="36" height="36" viewBox="0 0 100 100" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-           <circle cx="50" cy="50" r="38" fill="${color}" stroke="${borderColor}" stroke-width="4"/>
+      : `<svg width="40" height="40" viewBox="0 0 100 100" style="filter: drop-shadow(0 4px 6px rgba(236,72,153,0.3));">
+           <defs>
+             <linearGradient id="pin-female-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+               <stop offset="0%" stop-color="#f472b6" />
+               <stop offset="100%" stop-color="#ec4899" />
+             </linearGradient>
+           </defs>
+           <circle cx="50" cy="50" r="42" fill="url(#pin-female-grad)" stroke="#db2777" stroke-width="4"/>
+           <circle cx="50" cy="50" r="12" fill="white" opacity="0.9" />
          </svg>`;
 
     return L.divIcon({
@@ -124,10 +141,15 @@ function Map() {
     });
   };
 
+  const showMen = filterOptions.showMen ?? true;
+  const showWomen = filterOptions.showWomen ?? true;
+
   const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
     if (!filterOptions.showCasual && nearbyUser.category === "casual") return false;
     if (!filterOptions.showIntimate && nearbyUser.category === "intimate") return false;
     if (nearbyUser.selfRating < filterOptions.minRating) return false;
+    if (!showMen && nearbyUser.gender === "male") return false;
+    if (!showWomen && nearbyUser.gender === "female") return false;
     return true;
   });
 
@@ -148,8 +170,7 @@ function Map() {
     }
   }, [updateProfile, toast]);
 
-  const showMen = ['men', 'any', 'everyone', 'both'].includes(filterOptions.datingPreference || 'any');
-  const showWomen = ['women', 'any', 'everyone', 'both'].includes(filterOptions.datingPreference || 'any');
+
 
   const handleMenClick = useCallback(() => {
     setFilterOptions(prev => {
@@ -444,25 +465,46 @@ function Map() {
 
         {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
         <div className="absolute z-[1000] left-1/2 -translate-x-1/2" style={{ top: "12px" }}>
-          <div className="flex bg-white/90 backdrop-blur-xl border border-gray-200 p-[3px] rounded-full shadow-md gap-1">
+          <div className="flex bg-white/90 backdrop-blur-xl border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
             <button
               onClick={handleMenClick}
-              className={`w-9 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${showMen ? 'bg-blue-500 shadow-sm' : 'hover:bg-gray-100'
+              className={`w-10 h-8 rounded-full flex items-center justify-center transition-all duration-300 relative ${showMen
+                ? 'bg-blue-50/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_2px_4px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20'
+                : 'hover:bg-slate-50 opacity-60 hover:opacity-100'
                 }`}
               aria-label="Show men"
             >
-              <svg width="14" height="14" viewBox="0 0 100 100">
-                <polygon points="50,8 94,92 6,92" fill={showMen ? "white" : "#9ca3af"} strokeLinejoin="round" />
+              <svg width="15" height="15" viewBox="0 0 100 100" className={showMen ? "drop-shadow-sm" : ""}>
+                {showMen && (
+                  <defs>
+                    <linearGradient id="blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#60a5fa" />
+                      <stop offset="100%" stopColor="#3b82f6" />
+                    </linearGradient>
+                  </defs>
+                )}
+                <polygon points="50,12 90,88 10,88" fill={showMen ? "url(#blue-grad)" : "#94a3b8"} strokeLinejoin="round" />
               </svg>
             </button>
+            <div className="w-[1px] h-4 bg-gray-200 rounded-full"></div>
             <button
               onClick={handleWomenClick}
-              className={`w-9 h-7 rounded-full flex items-center justify-center transition-all duration-300 ${showWomen ? 'bg-pink-500 shadow-sm' : 'hover:bg-gray-100'
+              className={`w-10 h-8 rounded-full flex items-center justify-center transition-all duration-300 relative ${showWomen
+                ? 'bg-pink-50/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1),0_2px_4px_rgba(236,72,153,0.15)] ring-1 ring-pink-500/20'
+                : 'hover:bg-slate-50 opacity-60 hover:opacity-100'
                 }`}
               aria-label="Show women"
             >
-              <svg width="14" height="14" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill={showWomen ? "white" : "#9ca3af"} />
+              <svg width="15" height="15" viewBox="0 0 100 100" className={showWomen ? "drop-shadow-sm" : ""}>
+                {showWomen && (
+                  <defs>
+                    <linearGradient id="pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f472b6" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
+                )}
+                <circle cx="50" cy="50" r="38" fill={showWomen ? "url(#pink-grad)" : "#94a3b8"} />
               </svg>
             </button>
           </div>
