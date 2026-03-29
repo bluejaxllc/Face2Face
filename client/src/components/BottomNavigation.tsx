@@ -46,7 +46,7 @@ export default function BottomNavigation() {
                 className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
                 style={{ minWidth: "56px", padding: "4px 8px" }}
               >
-                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : 'hover:scale-105'}`}>
+                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
                   <Icon
                     className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
                     style={{ width: "22px", height: "22px" }}

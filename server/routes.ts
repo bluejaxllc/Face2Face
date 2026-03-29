@@ -243,6 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bump = await storage.createBump({
         userId,
         bumpedUserId,
+        message: req.body.message || null,
       });
 
       // Create a notification for the bumped user
@@ -256,6 +257,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(bump);
     } catch (error) {
       res.status(500).json({ message: "Failed to create bump" });
+    }
+  });
+
+  // Get bumps received by the current user (for "Been Bumped" badge)
+  // IMPORTANT: This MUST be before /bumps/:userId to avoid param collision
+  apiRouter.get("/bumps/received", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const userId = req.session.userId;
+      const allBumps = await storage.getBumpsByUser(userId);
+      // Filter to bumps WHERE I am the receiver (bumpedUserId === me)
+      const received = allBumps.filter(b => b.bumpedUserId === userId && b.status === 'pending');
+      // Enrich with sender info
+      const enriched = await Promise.all(
+        received.map(async (bump) => {
+          const sender = await storage.getUser(bump.userId);
+          return {
+            ...bump,
+            sender: sender ? {
+              id: sender.id,
+              firstName: sender.firstName,
+              lastName: sender.lastName,
+              gender: sender.gender,
+              age: sender.age,
+              selfRating: sender.selfRating,
+              category: sender.category,
+              profilePhoto: sender.profilePhoto ? `/api/users/${sender.id}/photo` : null,
+              latitude: parseFloat(sender.latitude as string),
+              longitude: parseFloat(sender.longitude as string),
+              favoriteColor: sender.favoriteColor,
+              favoriteSong: sender.favoriteSong,
+              fieldOfStudy: sender.fieldOfStudy,
+              interests: sender.interests,
+              seeking: sender.seeking,
+              connectMessage: sender.connectMessage,
+            } : null,
+          };
+        })
+      );
+      res.status(200).json(enriched);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get received bumps" });
+    }
+  });
+
+  // Respond to a bump (bump_back, ignore, reply_later)
+  apiRouter.patch("/bumps/:id/respond", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const bumpId = parseInt(req.params.id);
+      const { action } = req.body; // "bump_back", "ignore", "reply_later"
+      if (!['bump_back', 'ignore', 'reply_later'].includes(action)) {
+        return res.status(400).json({ message: "Invalid action" });
+      }
+      // Update bump status
+      const statusMap: Record<string, string> = {
+        bump_back: 'bumping_back',
+        ignore: 'rejected',
+        reply_later: 'pending',
+      };
+      await storage.updateBump(bumpId, { status: statusMap[action], seen: true });
+      // Notify the original sender
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      const bump = await storage.getBump(bumpId);
+      if (bump && user) {
+        let content = '';
+        if (action === 'bump_back') content = `${user.firstName} bumped you back!`;
+        else if (action === 'ignore') content = `${user.firstName} isn't interested right now.`;
+        else content = `${user.firstName} will reply later.`;
+        await storage.createNotification({
+          userId: bump.userId,
+          type: 'bump',
+          relatedId: userId,
+          content,
+        });
+      }
+      res.status(200).json({ success: true, action });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to respond to bump" });
     }
   });
 
