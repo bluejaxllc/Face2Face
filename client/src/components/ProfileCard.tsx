@@ -217,13 +217,14 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
             )}
 
             {/* Interests (if mutual / revealed) */}
-            {isMutual && user.interests && (
+            {isRevealed && user.interests && (
               <div className="mt-3 p-3 bg-emerald-950/30 border border-emerald-700/30 rounded-xl">
                 <div className="flex items-center justify-center gap-1 text-emerald-400 mb-1">
                   <Heart className="w-3.5 h-3.5" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">Mutual — Full Profile</span>
                 </div>
                 <p className="text-xs text-slate-300">{user.interests}</p>
+                {user.bio && <p className="text-xs text-slate-400 mt-1">{user.bio}</p>}
               </div>
             )}
 
@@ -239,7 +240,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                 >
                   <Button
                     onClick={() => setShowBumpComposer(true)}
-                    disabled={hasBumped && !isMutual}
+                    disabled={hasBumped && !hasMutualBumps}
                     className={`w-full h-14 rounded-xl font-black text-base tracking-wider shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${hasBumped
                       ? 'bg-slate-700 text-slate-400 shadow-none cursor-not-allowed'
                       : 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 shadow-fuchsia-500/25 border border-fuchsia-400/30 text-white'
@@ -304,6 +305,29 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* ═══════ REVEAL / ADD CONTACT ═══════ */}
+            {hasMutualBumps && !isRevealed && (
+              <div className="mt-3">
+                <Button
+                  onClick={handleReveal}
+                  disabled={isRevealing}
+                  className="w-full h-12 rounded-xl font-bold text-sm tracking-wide bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/20 border border-emerald-400/30 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  {isPartialReveal ? "WAITING FOR REVEAL..." : "REVEAL PROFILE"}
+                </Button>
+              </div>
+            )}
+            {isRevealed && (
+              <div className="mt-3">
+                <Button
+                  className="w-full h-12 rounded-xl font-bold text-sm tracking-wide bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg shadow-emerald-500/20 border border-emerald-400/30 text-white"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" /> ADD CONTACT
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </Card>
