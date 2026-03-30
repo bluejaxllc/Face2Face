@@ -31,37 +31,34 @@
     /* Critical styles in head to avoid FOUC */
     html,
     body {
-      height: 100%;
+      height: 100dvh;
       margin: 0;
       padding: 0;
       width: 100%;
     }
 
-    /* Special handling for auth page - allow normal scrolling */
     .auth-page {
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       position: relative;
-      height: auto;
-      min-height: 100vh;
+      height: 100dvh;
+      min-height: 100dvh;
     }
 
-    /* Map view needs fixed positioning */
     .map-view {
       overflow: hidden;
       position: fixed;
       width: 100%;
-      height: 100%;
+      height: 100dvh;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
     }
 
-    /* Root container adapts to content type */
     #root {
       width: 100%;
-      height: 100%;
+      height: 100dvh;
     }
 
     /* Root inherits fixed positioning for map view */
@@ -105,14 +102,14 @@
     /* Prevent content from being hidden under keyboard on mobile */
     @media (max-width: 640px) {
       html {
-        height: -webkit-fill-available;
+        height: 100dvh;
       }
 
       body {
         position: fixed;
         width: 100%;
-        height: 100%;
-        min-height: -webkit-fill-available;
+        height: 100dvh;
+        min-height: 100dvh;
         overflow: hidden;
       }
 
