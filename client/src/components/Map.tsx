@@ -209,7 +209,10 @@ function Map() {
   const handleBump = useCallback(async (message?: string) => {
     if (!selectedUser) return;
     try {
-      await apiRequest("POST", "/api/bumps", { bumpedUserId: selectedUser.id });
+      await apiRequest("POST", "/api/bumps", {
+        bumpedUserId: selectedUser.id,
+        message
+      });
       toast({
         title: "Bump sent!",
         description: `You bumped ${selectedUser.firstName}! They will be notified.`,

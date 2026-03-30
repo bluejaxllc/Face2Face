@@ -27,15 +27,17 @@ export default function Explore() {
         refetchInterval: 1000,
     });
 
-    const handleBump = async (targetUser: any) => {
+    const handleBump = async (message?: string) => {
+        if (!selectedUser) return;
         try {
             await apiRequest("POST", "/api/bumps", {
-                bumpedUserId: targetUser.id,
+                bumpedUserId: selectedUser.id,
+                message,
             });
 
             toast({
                 title: "Bump sent!",
-                description: `You bumped ${targetUser.firstName}! They will be notified.`,
+                description: `You bumped ${selectedUser.firstName}! They will be notified.`,
             });
             setSelectedUser(null);
         } catch (error) {
@@ -157,7 +159,7 @@ export default function Explore() {
                         <ProfileCard
                             user={selectedUser}
                             onClose={() => setSelectedUser(null)}
-                            onConnect={() => handleBump(selectedUser)}
+                            onConnect={handleBump}
                             distance={
                                 currentLocation
                                     ? calculateDistance(
