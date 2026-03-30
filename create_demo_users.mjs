@@ -17,7 +17,7 @@ const client = new Client({ connectionString: dbUrl });
 const dallasCenter = [32.8728576, -96.5312512];
 
 function getRandomCoordinate(base) {
-    return (base + (Math.random() * 0.1 - 0.05)).toFixed(6);
+    return (base + (Math.random() * 0.4 - 0.2)).toFixed(6);
 }
 
 const names = [
