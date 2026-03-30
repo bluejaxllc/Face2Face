@@ -135,7 +135,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
       });
 
       if (!res.ok) {
-        throw new Error("Failed to send connect request");
+        throw new Error("Failed to send bump");
       }
 
       toast({
@@ -151,10 +151,10 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
       }, 2000);
 
     } catch (error) {
-      console.error("Failed to send connect:", error);
+      console.error("Failed to send bump:", error);
       toast({
-        title: "Connect failed",
-        description: "Unable to send connect request. Please try again.",
+        title: "Bump failed",
+        description: "Unable to send bump. Please try again.",
         variant: "destructive",
       });
     }
@@ -170,7 +170,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-white font-heading text-xl">Preparing to Connect</DialogTitle>
+              <DialogTitle className="text-white font-heading text-xl">Preparing to Bump</DialogTitle>
               <DialogDescription className="text-slate-400">
                 Hold on while we initialize motion detection...
               </DialogDescription>
@@ -203,7 +203,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
                 Move Your Phone {getDirectionText(movementDirection)}
               </DialogTitle>
               <DialogDescription className="text-slate-400">
-                To connect with {user?.firstName}, move your device in the indicated direction.
+                To bump {user?.firstName}, move your device in the indicated direction.
               </DialogDescription>
             </DialogHeader>
 
@@ -229,9 +229,9 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-white font-heading text-xl">Send a Message</DialogTitle>
+              <DialogTitle className="text-white font-heading text-xl">Bump {user?.firstName}</DialogTitle>
               <DialogDescription className="text-slate-400">
-                You're within range of {user?.firstName} — say something real!
+                You're within range — add a message to your bump!
               </DialogDescription>
             </DialogHeader>
 
@@ -251,7 +251,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="connect-message" className="text-slate-300 text-sm font-medium">Your message</Label>
+                <Label htmlFor="bump-message" className="text-slate-300 text-sm font-medium">Your message</Label>
                 <Textarea
                   id="connect-message"
                   placeholder="Hey, want to meet up?"
@@ -282,9 +282,9 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-white font-heading text-xl">Send a Message</DialogTitle>
+              <DialogTitle className="text-white font-heading text-xl">Bump {user?.firstName}</DialogTitle>
               <DialogDescription className="text-slate-400">
-                Add a personal message to your connect request to {user?.firstName}
+                Add a personal message to your bump
               </DialogDescription>
             </DialogHeader>
 
@@ -304,7 +304,7 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="connect-message" className="text-slate-300 text-sm font-medium">Your message</Label>
+                <Label htmlFor="bump-message" className="text-slate-300 text-sm font-medium">Your message</Label>
                 <Textarea
                   id="connect-message"
                   placeholder="Hey, want to meet up?"
@@ -325,10 +325,10 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
               </Button>
               <Button
                 onClick={sendConnect}
-                className="bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-blue-500/25"
+                className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-bold shadow-lg shadow-fuchsia-500/25"
               >
-                <Send className="h-4 w-4 mr-2" />
-                Send Connect
+                <Zap className="h-4 w-4 mr-2" />
+                Send Bump
               </Button>
             </DialogFooter>
           </>
@@ -338,9 +338,9 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
         return (
           <>
             <DialogHeader>
-              <DialogTitle className="text-white font-heading text-xl">Connect Sent!</DialogTitle>
+              <DialogTitle className="text-white font-heading text-xl">Bump Sent! ⚡</DialogTitle>
               <DialogDescription className="text-slate-400">
-                Your request has been sent to {user?.firstName}. You'll get a notification when they respond.
+                Your bump has been sent to {user?.firstName}. You'll get a notification when they respond.
               </DialogDescription>
             </DialogHeader>
 
