@@ -218,6 +218,7 @@
     height: 100dvh;
     width: 100vw;
     overflow: hidden;
+    overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     position: fixed;
     top: 0;
@@ -243,6 +244,7 @@
     bottom: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
     z-index: 1;
   }

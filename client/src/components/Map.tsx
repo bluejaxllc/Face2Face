@@ -297,7 +297,7 @@ function Map() {
   // The query fires regardless, and the map uses stored server-side coordinates as fallback.
 
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full pb-[50px]">
+    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full">
       <div className="flex-1 relative" style={{ minHeight: '300px', height: '100%' }}>
 
         <MapContainer
