@@ -9,6 +9,7 @@ import Explore from "@/pages/Explore";
 import Register from "@/pages/Register";
 
 import Profile from "@/pages/Profile";
+import Messages from "@/pages/Messages";
 import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
@@ -48,6 +49,9 @@ function AppRouter() {
         </Route>
         <Route path="/explore">
           <ProtectedRoute component={Explore} />
+        </Route>
+        <Route path="/messages">
+          <ProtectedRoute component={Messages} />
         </Route>
 
         <Route path="/profile">
