@@ -71,7 +71,7 @@ export default function Messages() {
   });
 
   const { data: messages = [] } = useQuery<Message[]>({
-    queryKey: ["/api/messages", selectedUserId],
+    queryKey: [`/api/messages/${selectedUserId}`],
     enabled: !!selectedUserId,
     refetchInterval: 3000, // Pull new chat messages every 3 seconds
   });
@@ -83,7 +83,7 @@ export default function Messages() {
     },
     onSuccess: () => {
       setMessageText("");
-      queryClient.invalidateQueries({ queryKey: ["/api/messages", selectedUserId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/messages/${selectedUserId}`] });
     },
   });
 

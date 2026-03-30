@@ -245,6 +245,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: req.body.message || null,
       });
 
+      // Automatically send the "bumpMessage" as the first chat message to bridge the gap
+      // This is crucial so that when they go to the Messages tab, a conversation is already initiated
+      const bumpMessageContent = req.body.message || user.bumpMessage || "Hey! I just bumped you \u2728";
+      await storage.createMessage({
+        senderId: userId,
+        receiverId: bumpedUserId,
+        content: bumpMessageContent
+      });
+
       // Create a notification for the bumped user
       await storage.createNotification({
         userId: bumpedUserId,

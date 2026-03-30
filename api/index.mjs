@@ -261,7 +261,9 @@ var DatabaseStorage = class {
       sql`${users.latitude} IS NOT NULL`,
       sql`${users.longitude} IS NOT NULL`,
       // Exclude users who still have the default 0,0 coordinates (never set location)
-      sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`
+      sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
+      // Only show users who have been active/pinged location in the last 30 minutes
+      sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`
     ];
     return await db.select().from(users).where(and(...conditions));
   }
@@ -789,6 +791,12 @@ async function registerRoutes(app2) {
         userId,
         bumpedUserId,
         message: req.body.message || null
+      });
+      const bumpMessageContent = req.body.message || user.bumpMessage || "Hey! I just bumped you \u2728";
+      await storage.createMessage({
+        senderId: userId,
+        receiverId: bumpedUserId,
+        content: bumpMessageContent
       });
       await storage.createNotification({
         userId: bumpedUserId,
