@@ -408,22 +408,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  apiRouter.get("/bumps/:userId", async (req: Request, res: Response) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const currentUserId = req.session.userId;
-      const otherUserId = parseInt(req.params.userId);
-
-      const bumps = await storage.getBumpsBetweenUsers(currentUserId, otherUserId);
-
-      res.status(200).json(bumps);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get bumps" });
-    }
-  });
   apiRouter.get("/bumps/users", async (req: Request, res: Response) => {
     try {
       if (!req.session || !req.session.userId) {
@@ -463,8 +447,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(200).json(usersWithDetails);
     } catch (error) {
-      console.error("Failed to get connected users:", error);
+      console.error(error);
       res.status(500).json({ message: "Failed to get users" });
+    }
+  });
+
+  apiRouter.get("/bumps/:userId", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const currentUserId = req.session.userId;
+      const otherUserId = parseInt(req.params.userId);
+
+      const bumps = await storage.getBumpsBetweenUsers(currentUserId, otherUserId);
+
+      res.status(200).json(bumps);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get bumps" });
     }
   });
 
