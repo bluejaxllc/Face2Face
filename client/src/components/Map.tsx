@@ -291,14 +291,7 @@ function Map() {
     }
   }, [toast]);
 
-  useEffect(() => {
-    if (!mapLoaded) {
-      const timer = setTimeout(() => {
-        setMapKey(Date.now());
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [mapLoaded, mapKey]);
+  // Removed glitchy mapKey reload loop that rebuilt the map every 5 seconds
 
   // Note: We no longer block the map when geolocation fails.
   // The query fires regardless, and the map uses stored server-side coordinates as fallback.
@@ -308,7 +301,6 @@ function Map() {
       <div className="flex-1 relative" style={{ minHeight: '300px', height: '100%' }}>
 
         <MapContainer
-          key={mapKey}
           center={center}
           zoom={14}
           style={{
