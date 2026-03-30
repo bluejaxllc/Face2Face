@@ -415,7 +415,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get bumps" });
     }
   });
+  apiRouter.get("/bumps/users", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
 
+      const connectedUsers = await storage.getConnectedUsers(req.session.userId);
+
+      const usersWithDetails = await Promise.all(connectedUsers.map(async (u) => {
+        const msgs = await storage.getMessagesBetweenUsers(req.session!.userId!, u.id);
+        const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+        const unreadCount = await storage.getUnreadMessageCount(req.session!.userId!, u.id);
+
+        return {
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          profilePhoto: u.profilePhoto,
+          lastMessage: lastMsg ? {
+            content: lastMsg.content,
+            timestamp: lastMsg.timestamp,
+            senderId: lastMsg.senderId
+          } : null,
+          unreadCount
+        };
+      }));
+
+      usersWithDetails.sort((a, b) => {
+        const timeA = a.lastMessage ? new Date(a.lastMessage.timestamp!).getTime() : 0;
+        const timeB = b.lastMessage ? new Date(b.lastMessage.timestamp!).getTime() : 0;
+        return timeB - timeA;
+      });
+
+      res.status(200).json(usersWithDetails);
+    } catch (error) {
+      console.error("Failed to get connected users:", error);
+      res.status(500).json({ message: "Failed to get users" });
+    }
+  });
+
+  apiRouter.get("/messages/:userId", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const otherUserId = parseInt(req.params.userId);
+      const messages = await storage.getMessagesBetweenUsers(req.session.userId, otherUserId);
+      await storage.markMessagesAsRead(req.session.userId, otherUserId);
+
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Failed to get messages:", error);
+      res.status(500).json({ message: "Failed to get messages" });
+    }
+  });
+
+  apiRouter.post("/messages", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { receiverId, content } = req.body;
+      if (!receiverId || !content) {
+        return res.status(400).json({ message: "Missing receiverId or content" });
+      }
+
+      const message = await storage.createMessage({
+        senderId: req.session.userId,
+        receiverId: parseInt(receiverId),
+        content
+      });
+
+      const sender = await storage.getUser(req.session.userId);
+      await storage.createNotification({
+        userId: receiverId,
+        type: "message",
+        relatedId: req.session.userId,
+        content: `${sender?.firstName} sent you a message`
+      });
+
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
 
 
   // Notification routes

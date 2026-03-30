@@ -57,7 +57,19 @@ export const bumps = pgTable("bumps", {
   };
 });
 
-
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  senderId: integer("sender_id").notNull(),
+  receiverId: integer("receiver_id").notNull(),
+  content: text("content").notNull(),
+  timestamp: timestamp("timestamp").defaultNow(),
+  read: boolean("read").default(false),
+}, (table) => {
+  return {
+    senderIdIdx: index("message_sender_id_idx").on(table.senderId),
+    receiverIdIdx: index("message_receiver_id_idx").on(table.receiverId)
+  };
+});
 
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
@@ -131,7 +143,11 @@ export const insertBumpSchema = createInsertSchema(bumps).pick({
   message: true,
 });
 
-
+export const insertMessageSchema = createInsertSchema(messages).pick({
+  senderId: true,
+  receiverId: true,
+  content: true,
+});
 
 export const insertNotificationSchema = createInsertSchema(notifications).pick({
   userId: true,
@@ -146,6 +162,9 @@ export type User = typeof users.$inferSelect;
 
 export type InsertBump = z.infer<typeof insertBumpSchema>;
 export type Bump = typeof bumps.$inferSelect;
+
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
 
 
 

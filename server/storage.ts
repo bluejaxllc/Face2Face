@@ -9,6 +9,9 @@ import {
   notifications,
   type Notification,
   type InsertNotification,
+  messages,
+  type Message,
+  type InsertMessage,
   verificationCodes,
   type VerificationCode,
 } from "@shared/schema";
@@ -39,7 +42,12 @@ export interface IStorage {
   getBumpsBetweenUsers(userId: number, bumpedUserId: number): Promise<Bump[]>;
   getBumpsByUser(userId: number): Promise<Bump[]>;
   getRecentBumps(userId: number, limit?: number): Promise<Bump[]>;
-
+  // Message operations
+  createMessage(message: InsertMessage): Promise<Message>;
+  getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Message[]>;
+  getUnreadMessageCount(userId: number, fromUserId?: number): Promise<number>;
+  markMessagesAsRead(userId: number, fromUserId: number): Promise<void>;
+  getConnectedUsers(userId: number): Promise<User[]>;
 
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -200,7 +208,91 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
+  // Message Operations
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const result = await db.insert(messages).values(insertMessage).returning();
+    return result[0];
+  }
 
+  async getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Message[]> {
+    return await db.select()
+      .from(messages)
+      .where(or(
+        and(eq(messages.senderId, userId1), eq(messages.receiverId, userId2)),
+        and(eq(messages.senderId, userId2), eq(messages.receiverId, userId1))
+      ))
+      .orderBy(asc(messages.timestamp));
+  }
+
+  async getUnreadMessageCount(userId: number, fromUserId?: number): Promise<number> {
+    const conditions = [
+      eq(messages.receiverId, userId),
+      eq(messages.read, false)
+    ];
+    if (fromUserId) {
+      conditions.push(eq(messages.senderId, fromUserId));
+    }
+
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(messages)
+      .where(and(...conditions));
+
+    return Number(result[0]?.count || 0);
+  }
+
+  async markMessagesAsRead(userId: number, fromUserId: number): Promise<void> {
+    await db.update(messages)
+      .set({ read: true })
+      .where(and(
+        eq(messages.receiverId, userId),
+        eq(messages.senderId, fromUserId),
+        eq(messages.read, false)
+      ));
+  }
+
+  async getConnectedUsers(userId: number): Promise<User[]> {
+    const userBumps = await db.select()
+      .from(bumps)
+      .where(or(
+        eq(bumps.userId, userId),
+        eq(bumps.bumpedUserId, userId)
+      ));
+
+    const connectedSet = new Set<number>();
+    for (const b of userBumps) {
+      if (b.userId !== userId) connectedSet.add(b.userId);
+      if (b.bumpedUserId !== userId) connectedSet.add(b.bumpedUserId);
+    }
+
+    // Also include anyone who has exchanged messages just in case
+    const chatHistory = await db.select()
+      .from(messages)
+      .where(or(
+        eq(messages.senderId, userId),
+        eq(messages.receiverId, userId)
+      ));
+
+    for (const m of chatHistory) {
+      if (m.senderId !== userId) connectedSet.add(m.senderId);
+      if (m.receiverId !== userId) connectedSet.add(m.receiverId);
+    }
+
+    if (connectedSet.size === 0) return [];
+
+    // Fallback if there are too many or we need a specific query array format
+    // Because IN clause requires array.
+    const userIds = Array.from(connectedSet);
+
+    // We fetch one by one or chunk if needed, but for simplicity here use JS filter/map or multiple ORs.
+    // Alternatively, Drizzle `inArray`:
+    const { inArray } = await import('drizzle-orm');
+
+    const connectedUsers = await db.select()
+      .from(users)
+      .where(inArray(users.id, userIds));
+
+    return connectedUsers;
+  }
 
   async createNotification(insertNotification: InsertNotification): Promise<Notification> {
     const result = await db.insert(notifications).values({

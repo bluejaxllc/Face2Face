@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, User, Compass, Bell } from "lucide-react";
+import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
 
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
@@ -22,6 +22,7 @@ export default function BottomNavigation() {
   const navItems = [
     { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
     { path: "/map", icon: Map, label: "Map" },
+    { path: "/messages", icon: MessageSquare, label: "Messages" },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 
