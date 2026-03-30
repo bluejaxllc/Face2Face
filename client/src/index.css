@@ -220,9 +220,6 @@
     overflow: hidden;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
-    position: fixed;
-    top: 0;
-    left: 0;
   }
 
   h1,
