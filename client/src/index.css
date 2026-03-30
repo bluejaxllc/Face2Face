@@ -89,6 +89,13 @@
   height: 0;
 }
 
+/* Override: allow custom marker SVGs to render at their natural size */
+.leaflet-marker-pane .custom-div-icon svg {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
 .leaflet-container {
   background: #0B0F19;
   outline-offset: 1px;
