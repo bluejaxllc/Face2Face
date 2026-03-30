@@ -135,7 +135,7 @@ class LocationService {
   private async startNativeWatch(): Promise<void> {
     try {
       this.watchId = await Geolocation.watchPosition(
-        { enableHighAccuracy: true },
+        { enableHighAccuracy: true, maximumAge: 0 },
         (position, err) => {
           if (err) {
             console.error('[LocationService] Watch position error:', err);
@@ -226,6 +226,7 @@ class LocationService {
       const position: Position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 15000,
+        maximumAge: 0,
       });
       return position;
     } else {
