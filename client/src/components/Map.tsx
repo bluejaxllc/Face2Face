@@ -111,42 +111,30 @@ function Map() {
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
   });
 
-  // Memoize custom icons — only recreate when gender changes, not every render
+  // Memoize custom icons — blue triangle (male), pink circle (female)
   const maleIcon = useMemo(() => {
-    const svgHtml = `<svg width="40" height="40" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="pin-male-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#60a5fa" />
-          <stop offset="100%" stop-color="#3b82f6" />
-        </linearGradient>
-      </defs>
-      <polygon points="50,6 94,88 6,88" fill="url(#pin-male-grad)" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
-      <circle cx="50" cy="60" r="10" fill="white" opacity="0.9" />
+    const svgHtml = `<svg width="44" height="44" viewBox="0 0 100 100">
+      <polygon points="50,4 96,92 4,92" fill="#3b82f6" stroke="#1e40af" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="50" cy="62" r="9" fill="white" opacity="0.95" />
     </svg>`;
     return L.divIcon({
       className: 'custom-div-icon border-none bg-transparent',
-      html: `<div class="marker-pin" role="img" aria-label="User marker">${svgHtml}</div>`,
-      iconSize: [36, 36],
-      iconAnchor: [18, 18]
+      html: `<div class="marker-pin" role="img" aria-label="Male user">${svgHtml}</div>`,
+      iconSize: [42, 42],
+      iconAnchor: [21, 21]
     });
   }, []);
 
   const femaleIcon = useMemo(() => {
-    const svgHtml = `<svg width="40" height="40" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="pin-female-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#f472b6" />
-          <stop offset="100%" stop-color="#ec4899" />
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="42" fill="url(#pin-female-grad)" stroke="#db2777" stroke-width="4"/>
-      <circle cx="50" cy="50" r="12" fill="white" opacity="0.9" />
+    const svgHtml = `<svg width="44" height="44" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="43" fill="#ec4899" stroke="#be185d" stroke-width="5"/>
+      <circle cx="50" cy="50" r="11" fill="white" opacity="0.95" />
     </svg>`;
     return L.divIcon({
       className: 'custom-div-icon border-none bg-transparent',
-      html: `<div class="marker-pin" role="img" aria-label="User marker">${svgHtml}</div>`,
-      iconSize: [36, 36],
-      iconAnchor: [18, 18]
+      html: `<div class="marker-pin" role="img" aria-label="Female user">${svgHtml}</div>`,
+      iconSize: [42, 42],
+      iconAnchor: [21, 21]
     });
   }, []);
 
