@@ -144,6 +144,8 @@ export class DatabaseStorage implements IStorage {
       sql`${users.longitude} IS NOT NULL`,
       // Exclude users who still have the default 0,0 coordinates (never set location)
       sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
+      // Only show users who have been active/pinged location in the last 30 minutes
+      sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`,
     ];
 
     return await db.select()
