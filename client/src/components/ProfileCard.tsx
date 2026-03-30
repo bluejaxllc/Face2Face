@@ -70,8 +70,8 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
     `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
 
   const genderIcon = user.gender === 'male'
-    ? <svg width="16" height="16" viewBox="0 0 100 100"><polygon points="50,8 94,92 6,92" fill="#4285F4" stroke="#1a73e8" strokeWidth="6" strokeLinejoin="round" /></svg>
-    : <svg width="16" height="16" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#EA4335" stroke="#c5221f" strokeWidth="6" /></svg>;
+    ? <svg width="16" height="16" viewBox="0 0 100 100"><defs><linearGradient id="pc-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#3b82f6" /></linearGradient></defs><polygon points="50,8 94,92 6,92" fill="url(#pc-blue-grad)" stroke="#2563eb" strokeWidth="6" strokeLinejoin="round" /></svg>
+    : <svg width="16" height="16" viewBox="0 0 100 100"><defs><linearGradient id="pc-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f472b6" /><stop offset="100%" stopColor="#ec4899" /></linearGradient></defs><circle cx="50" cy="50" r="40" fill="url(#pc-pink-grad)" stroke="#db2777" strokeWidth="6" /></svg>;
 
   const ratingStars = Math.min(5, Math.round(user.selfRating / 2));
 
