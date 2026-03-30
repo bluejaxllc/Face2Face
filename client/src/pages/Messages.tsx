@@ -43,6 +43,7 @@ interface ConnectedUser {
   profilePhoto?: string | null;
   lastMessage?: { content: string; timestamp: string; senderId: number } | null;
   unreadCount?: number;
+  hasPendingReceivedBump?: boolean;
 }
 
 export default function Messages() {
@@ -178,7 +179,9 @@ export default function Messages() {
                         <p className="text-xs text-slate-400 truncate">
                           {connectedUser.lastMessage
                             ? (connectedUser.lastMessage.senderId === user?.id ? 'You: ' : '') + connectedUser.lastMessage.content
-                            : 'Tap to start chatting'}
+                            : connectedUser.hasPendingReceivedBump
+                              ? <span className="text-pink-400 font-medium">👋 Bumped you! Tap to reply</span>
+                              : 'Tap to start chatting'}
                         </p>
                         {(connectedUser.unreadCount ?? 0) > 0 && (
                           <span className="ml-2 flex-shrink-0 min-w-[18px] h-[18px] rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center px-1">

@@ -2,6 +2,8 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { useEffect, useRef } from "react";
 
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
@@ -14,6 +16,22 @@ export default function BottomNavigation() {
     refetchInterval: 15000,
   });
   const notifCount = notifications.filter((n: any) => !n.isRead).length;
+
+  const previousNotifCount = useRef(notifCount);
+
+  useEffect(() => {
+    // If the unread notification count INCREASES, it means we got a new bump/message
+    if (notifCount > previousNotifCount.current) {
+      try {
+        // Trigger a heavy haptic vibration
+        Haptics.vibrate();
+        setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 200);
+      } catch (err) {
+        console.warn("Haptics not available on this device", err);
+      }
+    }
+    previousNotifCount.current = notifCount;
+  }, [notifCount]);
 
   const navigateTo = (path: string) => () => {
     navigate(path);

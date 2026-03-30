@@ -437,6 +437,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
         const unreadCount = await storage.getUnreadMessageCount(req.session!.userId!, u.id);
 
+        const bumps = await storage.getBumpsBetweenUsers(req.session!.userId!, u.id);
+        const hasPendingReceivedBump = bumps.some(b => b.bumpedUserId === req.session!.userId! && b.status === "pending");
+
         return {
           id: u.id,
           firstName: u.firstName,
@@ -447,7 +450,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             timestamp: lastMsg.timestamp,
             senderId: lastMsg.senderId
           } : null,
-          unreadCount
+          unreadCount,
+          hasPendingReceivedBump
         };
       }));
 
