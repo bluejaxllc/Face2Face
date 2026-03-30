@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap } from "lucide-react";
+import { triggerHeartbeatHaptic } from "@/services/haptics-service";
 
 interface BeenBumpedBadgeProps {
     onClick: () => void;
@@ -15,14 +16,11 @@ export default function BeenBumpedBadge({ onClick }: BeenBumpedBadgeProps) {
 
     const count = receivedBumps.length;
 
-    // Trigger heartbeat haptic when new bumps arrive
-    // Pattern: vib-vib-pause-vib-vib (100,50,100,300,100,50,100)
-    // We track this with a ref to avoid repeating
-    if (count > 0 && typeof window !== 'undefined' && navigator.vibrate) {
-        // Only vibrate once per session per bump count change
+    // Trigger heartbeat haptic when new bumps arrive (cross-platform)
+    if (count > 0 && typeof window !== 'undefined') {
         const lastVibCount = parseInt(sessionStorage.getItem('f2f_lastVibCount') || '0');
         if (count > lastVibCount) {
-            navigator.vibrate([100, 50, 100, 300, 100, 50, 100]);
+            triggerHeartbeatHaptic();
             sessionStorage.setItem('f2f_lastVibCount', count.toString());
         }
     }

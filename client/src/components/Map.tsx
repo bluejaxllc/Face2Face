@@ -111,40 +111,46 @@ function Map() {
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
   });
 
-  const createCustomIcon = (gender: string) => {
-    const isMale = gender === 'male';
-
-    // Male: Blue-400 to Blue-500 gradient, Blue-600 stroke
-    // Female: Pink-400 to Pink-500 gradient, Pink-600 stroke
-    const svgHtml = isMale
-      ? `<svg width="40" height="40" viewBox="0 0 100 100" style="filter: drop-shadow(0 4px 6px rgba(59,130,246,0.3));">
-           <defs>
-             <linearGradient id="pin-male-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-               <stop offset="0%" stop-color="#60a5fa" />
-               <stop offset="100%" stop-color="#3b82f6" />
-             </linearGradient>
-           </defs>
-           <polygon points="50,6 94,88 6,88" fill="url(#pin-male-grad)" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
-           <circle cx="50" cy="60" r="10" fill="white" opacity="0.9" />
-         </svg>`
-      : `<svg width="40" height="40" viewBox="0 0 100 100" style="filter: drop-shadow(0 4px 6px rgba(236,72,153,0.3));">
-           <defs>
-             <linearGradient id="pin-female-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-               <stop offset="0%" stop-color="#f472b6" />
-               <stop offset="100%" stop-color="#ec4899" />
-             </linearGradient>
-           </defs>
-           <circle cx="50" cy="50" r="42" fill="url(#pin-female-grad)" stroke="#db2777" stroke-width="4"/>
-           <circle cx="50" cy="50" r="12" fill="white" opacity="0.9" />
-         </svg>`;
-
+  // Memoize custom icons — only recreate when gender changes, not every render
+  const maleIcon = useMemo(() => {
+    const svgHtml = `<svg width="40" height="40" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="pin-male-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#60a5fa" />
+          <stop offset="100%" stop-color="#3b82f6" />
+        </linearGradient>
+      </defs>
+      <polygon points="50,6 94,88 6,88" fill="url(#pin-male-grad)" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="50" cy="60" r="10" fill="white" opacity="0.9" />
+    </svg>`;
     return L.divIcon({
       className: 'custom-div-icon border-none bg-transparent',
-      html: `<div class="marker-pin" style="transition: transform 0.2s ease;" role="img" aria-label="User marker">${svgHtml}</div>`,
+      html: `<div class="marker-pin" role="img" aria-label="User marker">${svgHtml}</div>`,
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
-  };
+  }, []);
+
+  const femaleIcon = useMemo(() => {
+    const svgHtml = `<svg width="40" height="40" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="pin-female-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f472b6" />
+          <stop offset="100%" stop-color="#ec4899" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="42" fill="url(#pin-female-grad)" stroke="#db2777" stroke-width="4"/>
+      <circle cx="50" cy="50" r="12" fill="white" opacity="0.9" />
+    </svg>`;
+    return L.divIcon({
+      className: 'custom-div-icon border-none bg-transparent',
+      html: `<div class="marker-pin" role="img" aria-label="User marker">${svgHtml}</div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
+    });
+  }, []);
+
+  const getIcon = useCallback((gender: string) => gender === 'male' ? maleIcon : femaleIcon, [maleIcon, femaleIcon]);
 
   const showMen = filterOptions.showMen ?? true;
   const showWomen = filterOptions.showWomen ?? true;
@@ -347,6 +353,8 @@ function Map() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               subdomains="abc"
               maxZoom={19}
+              updateWhenZooming={false}
+              updateWhenIdle={true}
               className="leaflet-tile-pane"
             />
           )}
@@ -380,10 +388,10 @@ function Map() {
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
             zoomToBoundsOnClick={true}
-            maxClusterRadius={50}
-            disableClusteringAtZoom={14}
-            animate={true}
-            animateAddingMarkers={true}
+            maxClusterRadius={30}
+            disableClusteringAtZoom={10}
+            animate={false}
+            animateAddingMarkers={false}
             spiderLegPolylineOptions={{ weight: 2, color: 'rgba(66,133,244,0.5)', opacity: 0.8 }}
             iconCreateFunction={(cluster: any) => {
               const count = cluster.getChildCount();
@@ -398,7 +406,6 @@ function Map() {
                     display:flex;align-items:center;justify-content:center;
                     color:#1a73e8;font-weight:700;font-size:${count < 10 ? 14 : 12}px;
                     box-shadow:0 2px 6px rgba(0,0,0,0.2);
-                    transition: all 0.3s ease;
                   ">
                     ${count}
                   </div>
@@ -413,7 +420,7 @@ function Map() {
               <Marker
                 key={user.id}
                 position={[user.latitude, user.longitude]}
-                icon={createCustomIcon(user.gender || "other")}
+                icon={getIcon(user.gender || "other")}
                 eventHandlers={{
                   click: () => handleMarkerClick(user)
                 }}
@@ -453,7 +460,7 @@ function Map() {
             onChange={handleFilterChange}
           />
           {/* Mini status pill */}
-          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-gray-200 rounded-full px-3 shadow-md"
+          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-3 shadow-md"
             style={{ height: "32px" }}>
             <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
             <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
@@ -466,7 +473,7 @@ function Map() {
 
         {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
         <div className="absolute z-[1000] left-1/2 -translate-x-1/2" style={{ top: "12px" }}>
-          <div className="flex bg-white/90 backdrop-blur-xl border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
+          <div className="flex bg-white/90 backdrop-blur-sm border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
             <button
               onClick={handleMenClick}
               className={`w-10 h-8 rounded-full flex items-center justify-center transition-all duration-300 relative ${showMen
@@ -516,7 +523,7 @@ function Map() {
 
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
-          <div className={`flex items-center gap-2 backdrop-blur-xl border rounded-full shadow-md transition-all duration-300 ${isActive
+          <div className={`flex items-center gap-2 backdrop-blur-sm border rounded-full shadow-md transition-all duration-300 ${isActive
             ? "bg-green-50/90 border-green-300 map-live-active"
             : "bg-white/90 border-gray-200"
             }`} style={{ padding: "4px 12px", height: "32px" }}>
@@ -537,7 +544,7 @@ function Map() {
         <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
           {/* Map style toggle */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-sm border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
             aria-label="Toggle map style"
           >
@@ -546,7 +553,7 @@ function Map() {
 
           {/* Current location */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-sm border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={async () => {
               userHasInteracted.current = false;
               await updateLocation();
@@ -564,7 +571,7 @@ function Map() {
           </button>
 
           {/* Zoom controls */}
-          <div className="flex flex-col bg-white/90 backdrop-blur-xl border border-gray-200 rounded-xl shadow-md overflow-hidden">
+          <div className="flex flex-col bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl shadow-md overflow-hidden">
             <button
               className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600 border-b border-gray-200"
               onClick={() => mapRef.current?.zoomIn()}
@@ -584,7 +591,7 @@ function Map() {
 
         {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-xl border border-gray-200 rounded-full shadow-md"
+          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-md"
             style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
             <input
               type="number"

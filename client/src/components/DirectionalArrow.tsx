@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Navigation, Check } from "lucide-react";
+import { triggerBumpHaptic, triggerHaptic } from "@/services/haptics-service";
 
 interface DirectionalArrowProps {
     /** The GPS coordinates of the target user */
@@ -127,8 +128,8 @@ export default function DirectionalArrow({
                 setPhase("thrust");
                 setGestureDetected(true);
 
-                // Haptic: 2-second vibration for sender confirmation
-                if (navigator.vibrate) navigator.vibrate(2000);
+                // Haptic: 2-second vibration for sender confirmation (cross-platform)
+                triggerBumpHaptic();
 
                 // Complete after brief UI feedback
                 setTimeout(() => {
@@ -154,7 +155,7 @@ export default function DirectionalArrow({
         const timer = setTimeout(() => {
             if (compassHeading === null && !gestureDetected) {
                 setPhase("done");
-                if (navigator.vibrate) navigator.vibrate(200);
+                triggerHaptic(200);
                 onBumpComplete();
             }
         }, 4000);

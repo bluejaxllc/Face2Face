@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Capacitor } from '@capacitor/core';
-import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { triggerHaptic, triggerBumpHaptic, triggerLightTap } from "@/services/haptics-service";
 import {
   Dialog,
   DialogContent,
@@ -117,15 +116,8 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
   const vibrate = async () => {
     setIsVibrating(true);
     try {
-      if (Capacitor.isNativePlatform()) {
-        await Haptics.impact({ style: ImpactStyle.Heavy });
-        await new Promise(r => setTimeout(r, 100));
-        await Haptics.impact({ style: ImpactStyle.Heavy });
-        await new Promise(r => setTimeout(r, 100));
-        await Haptics.notification({ type: NotificationType.Success });
-      } else if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100, 50, 100]);
-      }
+      // Use the universal haptics service (works on Android + iOS 17.4+)
+      triggerBumpHaptic();
     } catch (e) {
       console.warn('[Haptics] Vibration failed:', e);
     }

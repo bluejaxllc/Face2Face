@@ -1,11 +1,10 @@
 /**
  * Motion Service
- * Handles device motion detection for the "connect" feature
- * Uses @capacitor/motion on native platforms, falls back to browser DeviceMotionEvent on web
+ * Cross-platform device motion detection using the browser DeviceMotionEvent API.
+ * 
+ * Handles iOS 13+ permission prompts automatically. No Capacitor dependency.
+ * Permission must be requested from within a user gesture (tap/click).
  */
-
-import { Capacitor } from '@capacitor/core';
-import { Motion } from '@capacitor/motion';
 
 // Type for motion detection callback
 type MotionCallback = (direction: MotionDirection, intensity: number) => void;
@@ -32,98 +31,57 @@ class MotionService {
   private isListening: boolean = false;
   private callbacks: Set<MotionCallback> = new Set();
   private lastReading: DeviceAccelerationData | null = null;
-  private movementThreshold: number = 10; // Acceleration threshold to detect movement
+  private movementThreshold: number = 10;
   private debounceTimeout: number | null = null;
-  private debounceDelay: number = 300; // Milliseconds to wait between motion events
-  private nativeListenerHandle: any = null;
+  private debounceDelay: number = 300;
 
   constructor() {
     this.handleDeviceMotion = this.handleDeviceMotion.bind(this);
   }
 
   /**
-   * Start listening for device motion events
-   * Uses Capacitor Motion plugin on native, falls back to browser API on web
+   * Request IMU permission and start listening for device motion events.
+   * MUST be called from within a user gesture handler (tap/click).
    */
   public async startListening(): Promise<boolean> {
     if (this.isListening) {
       return true;
     }
 
-    if (Capacitor.isNativePlatform()) {
-      return this.startNativeListening();
-    } else {
-      return this.startWebListening();
-    }
-  }
-
-  /**
-   * Start listening using Capacitor Motion plugin (native)
-   */
-  private async startNativeListening(): Promise<boolean> {
-    try {
-      this.nativeListenerHandle = await Motion.addListener('accel', (event) => {
-        const { x, y, z } = event.acceleration;
-        this.processAcceleration(x, y, z);
-      });
-      this.isListening = true;
-      console.log('[MotionService] Native accelerometer listener started');
-      return true;
-    } catch (error) {
-      console.error('[MotionService] Failed to start native motion:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Start listening using browser DeviceMotionEvent (web fallback)
-   */
-  private startWebListening(): Promise<boolean> {
     if (!window.DeviceMotionEvent) {
-      console.error('[MotionService] Device motion not supported in browser');
+      console.error('[MotionService] Device motion not supported in this browser');
       return Promise.reject('Device motion not supported');
     }
 
-    return new Promise((resolve, reject) => {
+    // iOS 13+ requires explicit permission request via user gesture
+    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
       try {
-        // For iOS 13+, we need to request permission
-        if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
-          (DeviceMotionEvent as any).requestPermission()
-            .then((permissionState: string) => {
-              if (permissionState === 'granted') {
-                this.addWebEventListeners();
-                resolve(true);
-              } else {
-                reject('Permission denied');
-              }
-            })
-            .catch(reject);
-        } else {
+        const permissionState = await (DeviceMotionEvent as any).requestPermission();
+        if (permissionState === 'granted') {
           this.addWebEventListeners();
-          resolve(true);
+          return true;
+        } else {
+          console.warn('[MotionService] User denied IMU access.');
+          return Promise.reject('Permission denied');
         }
       } catch (error) {
-        console.error('[MotionService] Error starting web motion detection:', error);
-        reject(error);
+        console.error('[MotionService] Permission request failed:', error);
+        return Promise.reject(error);
       }
-    });
+    }
+
+    // Android and older iOS — no permission prompt needed
+    this.addWebEventListeners();
+    return true;
   }
 
   /**
    * Stop listening for device motion events
    */
   public stopListening(): void {
-    if (!this.isListening) {
-      return;
-    }
+    if (!this.isListening) return;
 
-    if (Capacitor.isNativePlatform() && this.nativeListenerHandle) {
-      this.nativeListenerHandle.remove();
-      this.nativeListenerHandle = null;
-    } else {
-      window.removeEventListener('devicemotion', this.handleDeviceMotion);
-    }
-
+    window.removeEventListener('devicemotion', this.handleDeviceMotion);
     this.isListening = false;
     this.lastReading = null;
 
@@ -148,8 +106,7 @@ class MotionService {
   }
 
   /**
-   * Set the threshold for motion detection
-   * Higher values require more forceful movement
+   * Set the threshold for motion detection (higher = more forceful movement needed)
    */
   public setMovementThreshold(threshold: number): void {
     this.movementThreshold = threshold;
@@ -159,38 +116,39 @@ class MotionService {
    * Check if the device supports motion detection
    */
   public static isSupported(): boolean {
-    if (Capacitor.isNativePlatform()) {
-      return true; // Native always has accelerometer
-    }
     return !!window.DeviceMotionEvent;
   }
 
   /**
-   * Add web event listeners for device motion (browser fallback)
+   * Check if iOS 13+ permission prompt is required
+   */
+  public static requiresPermission(): boolean {
+    return typeof (DeviceMotionEvent as any).requestPermission === 'function';
+  }
+
+  /**
+   * Add the devicemotion event listener
    */
   private addWebEventListeners(): void {
     window.addEventListener('devicemotion', this.handleDeviceMotion);
     this.isListening = true;
+    console.log('[MotionService] Accelerometer listener started');
   }
 
   /**
-   * Handle web device motion events (browser fallback)
+   * Handle web device motion events
    */
   private handleDeviceMotion(event: DeviceMotionEvent): void {
-    if (!event.accelerationIncludingGravity) {
-      return;
-    }
+    if (!event.accelerationIncludingGravity) return;
 
     const { x, y, z } = event.accelerationIncludingGravity;
-    if (x === null || y === null || z === null) {
-      return;
-    }
+    if (x === null || y === null || z === null) return;
 
     this.processAcceleration(x, y, z);
   }
 
   /**
-   * Process acceleration data from either native or web source
+   * Process acceleration data and detect significant motion
    */
   private processAcceleration(x: number, y: number, z: number): void {
     if (this.lastReading) {
@@ -198,21 +156,16 @@ class MotionService {
       const deltaY = y - this.lastReading.y!;
       const deltaZ = z - this.lastReading.z!;
 
-      // Calculate the magnitude of the acceleration change
       const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
-      // If the magnitude is above our threshold, determine the direction
       if (magnitude > this.movementThreshold) {
-        // Debounce the motion event to prevent rapid firing
         if (this.debounceTimeout === null) {
           const direction = this.determineDirection(deltaX, deltaY, deltaZ);
 
-          // Notify all callbacks
           this.callbacks.forEach(callback => {
             callback(direction, magnitude);
           });
 
-          // Set debounce timeout
           this.debounceTimeout = window.setTimeout(() => {
             this.debounceTimeout = null;
           }, this.debounceDelay);
@@ -220,12 +173,11 @@ class MotionService {
       }
     }
 
-    // Update last reading
     this.lastReading = { x, y, z };
   }
 
   /**
-   * Determine the direction of motion based on acceleration changes
+   * Determine the direction of motion based on acceleration deltas
    */
   private determineDirection(deltaX: number, deltaY: number, deltaZ: number): MotionDirection {
     const absX = Math.abs(deltaX);

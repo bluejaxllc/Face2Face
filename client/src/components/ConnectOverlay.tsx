@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { Haptics, ImpactStyle } from "@capacitor/haptics";
-import { Motion } from "@capacitor/motion";
 import { X, ArrowUp } from "lucide-react";
+import { triggerBumpHaptic } from "@/services/haptics-service";
 
 interface ConnectOverlayProps {
     onSuccess: () => void;
@@ -28,38 +27,40 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
         const brng = Math.atan2(y, x);
         const bearingDeg = ((brng * 180) / Math.PI + 360) % 360;
 
-        // In a real app we'd combine bearingDeg with the device's compass (alpha)
-        // For MVP, we'll just fix an arrow upwards as the required motion direction
         setRotation(0);
     }, [currentLocation, targetUser]);
 
     useEffect(() => {
-        let listener: any;
+        let cleanup: (() => void) | null = null;
 
         const startMotionDetection = async () => {
             try {
-                // Required for iOS 13+
+                // iOS 13+ requires explicit permission request from user gesture
                 if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
                     const permission = await (DeviceMotionEvent as any).requestPermission();
                     if (permission !== 'granted') return;
                 }
 
-                listener = await Motion.addListener('accel', event => {
+                const handleMotion = (event: DeviceMotionEvent) => {
                     if (isConnectingRef.current) return;
 
-                    // Detect a strong forward acceleration (Y-axis or Z-axis depending on how phone is held)
-                    // Threshold set around 15 m/s^2 to detect a deliberate thrust
-                    const accY = Math.abs(event.acceleration.y);
-                    const accZ = Math.abs(event.acceleration.z);
+                    const accel = event.accelerationIncludingGravity;
+                    if (!accel) return;
+
+                    const accY = Math.abs(accel.y ?? 0);
+                    const accZ = Math.abs(accel.z ?? 0);
 
                     if (accY > 15 || accZ > 15) {
                         isConnectingRef.current = true;
                         handlePhysicalConnectDetected();
                     }
-                });
+                };
+
+                window.addEventListener('devicemotion', handleMotion);
+                cleanup = () => window.removeEventListener('devicemotion', handleMotion);
+
             } catch (err) {
                 console.warn("Motion detection not supported or permission denied", err);
-                // Fallback for desktop/web testing
                 setInstruction("Motion not available. Tap the circle below to connect.");
             }
         };
@@ -67,22 +68,15 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
         startMotionDetection();
 
         return () => {
-            if (listener) listener.remove();
+            if (cleanup) cleanup();
         };
     }, []);
 
     const handlePhysicalConnectDetected = async () => {
-        setInstruction("Connection Sent! ✨");
-        try {
-            // Sender: 1x 2-second continuous vibration.
-            // Capacitor Haptics doesn't support custom duration easily on all platforms,
-            // but we can simulate a long vibration or use ImpactStyle.Heavy
-            await Haptics.impact({ style: ImpactStyle.Heavy });
-            setTimeout(async () => await Haptics.impact({ style: ImpactStyle.Heavy }), 200);
-            setTimeout(async () => await Haptics.impact({ style: ImpactStyle.Heavy }), 400);
-            setTimeout(async () => await Haptics.impact({ style: ImpactStyle.Heavy }), 600);
-            setTimeout(async () => await Haptics.impact({ style: ImpactStyle.Heavy }), 800);
-        } catch (e) { }
+        setInstruction("Bump Sent! ✨");
+
+        // Use the cross-platform haptics service
+        triggerBumpHaptic();
 
         setTimeout(() => {
             onSuccess();
@@ -97,7 +91,7 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
 
             <div className="mb-12">
                 <h2 className="text-3xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-500">
-                    Ready to Connect?
+                    Ready to Bump?
                 </h2>
                 <p className="text-slate-300 font-medium">{instruction}</p>
             </div>
@@ -106,7 +100,6 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
                 className="w-48 h-48 rounded-full bg-slate-800/80 border-4 border-blue-500/30 flex items-center justify-center shadow-[0_0_60px_rgba(59,130,246,0.2),0_0_30px_rgba(236,72,153,0.15)] cursor-pointer hover:bg-slate-800 hover:border-pink-500/40 transition-all duration-500"
                 style={{ transform: `rotate(${rotation}deg)` }}
                 onClick={() => {
-                    // Allow click to simulate connection for desktop testing
                     if (!isConnectingRef.current) {
                         isConnectingRef.current = true;
                         handlePhysicalConnectDetected();
@@ -117,7 +110,7 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
             </div>
 
             <p className="mt-12 text-slate-400 text-sm max-w-xs">
-                Connecting sends a face-to-face request to {targetUser.firstName}. They'll feel your presence instantly.
+                Bumping sends a face-to-face request to {targetUser.firstName}. They'll feel your presence instantly.
             </p>
         </div>
     );
