@@ -111,6 +111,12 @@ function Map() {
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
   });
 
+  // Fix for iOS Safari touchend freeze bug 
+  // (Prevents Safari from blocking touch release on map drag)
+  L.Map.mergeOptions({
+    tap: false,
+  });
+
   // Memoize custom icons — blue triangle (male), pink circle (female)
   const maleIcon = useMemo(() => {
     const svgHtml = `<svg width="44" height="44" viewBox="0 0 100 100">
@@ -455,8 +461,8 @@ function Map() {
           <BeenBumpedBadge onClick={() => setShowReceivedBumps(true)} />
         </div>
 
-        {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
-        <div className="absolute z-[1000] left-1/2 -translate-x-1/2" style={{ top: "12px" }}>
+        {/* ═══════ BOTTOM CENTER: Mode Toggles ═══════ */}
+        <div className="absolute z-[1000] left-1/2 -translate-x-1/2 pointer-events-auto" style={{ bottom: "24px" }}>
           <div className="flex bg-white/90 backdrop-blur-sm border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
             <button
               onClick={handleMenClick}
