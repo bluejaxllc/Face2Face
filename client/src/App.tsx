@@ -18,6 +18,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { AnimatePresence } from "framer-motion";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import SensorPermissionGate from "@/components/SensorPermissionGate";
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -89,12 +90,14 @@ function AuthenticatedApp() {
   const { isAuthenticated } = useAuth();
   return (
     <LocationProvider enabled={isAuthenticated}>
-      <div className="app-container">
-        <ErrorBoundary>
-          <AppRouter />
-        </ErrorBoundary>
-        <Toaster />
-      </div>
+      <SensorPermissionGate>
+        <div className="app-container">
+          <ErrorBoundary>
+            <AppRouter />
+          </ErrorBoundary>
+          <Toaster />
+        </div>
+      </SensorPermissionGate>
     </LocationProvider>
   );
 }

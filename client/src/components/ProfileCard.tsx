@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { triggerHeartbeatHaptic } from "@/services/haptics-service";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -104,7 +105,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
       const res = await apiRequest("PATCH", `/api/bumps/${bump.id}/reveal`, {});
       const data = await res.json();
       if (data.mutual) {
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 300, 100, 50, 100]);
+        triggerHeartbeatHaptic();
         toast({ title: "Profiles Revealed! \ud83c\udf89", description: `You and ${user.firstName} can now see each other's full profiles.` });
       } else {
         toast({ title: "Reveal sent", description: `Waiting for ${user.firstName} to reveal theirs too.` });

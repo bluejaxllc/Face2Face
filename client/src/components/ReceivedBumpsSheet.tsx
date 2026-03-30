@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, ArrowLeftRight, X, Clock, Eye } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { triggerHapticPattern } from "@/services/haptics-service";
 import { useToast } from "@/hooks/use-toast";
 
 interface ReceivedBump {
@@ -55,7 +56,7 @@ export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack }: R
 
             if (action === "bump_back") {
                 // Haptic: heartbeat for bump back confirmation
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                triggerHapticPattern([100, 50, 100]);
                 toast({ title: "Bumping back!", description: `Sending bump back to ${senderName}...` });
                 onOpenChange(false);
                 if (senderId) onBumpBack(senderId);
