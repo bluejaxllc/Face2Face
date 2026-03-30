@@ -144,9 +144,9 @@ function Map() {
   const showWomen = filterOptions.showWomen ?? true;
 
   const filteredUsers = [...nearbyUsers, ...mockUsers].filter(nearbyUser => {
-    if (!filterOptions.showDating && nearbyUser.category === "dating") return false;
-    if (!filterOptions.showBusiness && nearbyUser.category === "business") return false;
-    if (!filterOptions.showFriendships && nearbyUser.category === "friendships") return false;
+    if (!(filterOptions.showDating ?? true) && nearbyUser.category === "dating") return false;
+    if (!(filterOptions.showBusiness ?? true) && nearbyUser.category === "business") return false;
+    if (!(filterOptions.showFriendships ?? true) && nearbyUser.category === "friendships") return false;
     if (nearbyUser.selfRating < filterOptions.minRating) return false;
     if (!showMen && nearbyUser.gender === "male") return false;
     if (!showWomen && nearbyUser.gender === "female") return false;
@@ -175,6 +175,8 @@ function Map() {
   const handleMenClick = useCallback(() => {
     setFilterOptions(prev => {
       const next = !(prev.showMen ?? true);
+      // Don't allow both off
+      if (!next && !(prev.showWomen ?? true)) return prev;
       const pref = (next && (prev.showWomen ?? true) ? 'any' : next ? 'men' : (prev.showWomen ?? true) ? 'women' : 'any') as FilterOptions['datingPreference'];
       const updated = { ...prev, showMen: next, datingPreference: pref };
       localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
@@ -185,7 +187,9 @@ function Map() {
   const handleWomenClick = useCallback(() => {
     setFilterOptions(prev => {
       const next = !(prev.showWomen ?? true);
-      const pref = ((prev.showMen ?? true) && next ? 'any' : !(prev.showMen ?? true) && next ? 'women' : (prev.showMen ?? true) ? 'men' : 'any') as FilterOptions['datingPreference'];
+      // Don't allow both off
+      if (!next && !(prev.showMen ?? true)) return prev;
+      const pref = ((prev.showMen ?? true) && next ? 'any' : next ? 'women' : (prev.showMen ?? true) ? 'men' : 'any') as FilterOptions['datingPreference'];
       const updated = { ...prev, showWomen: next, datingPreference: pref };
       localStorage.setItem('face2face_filterOptions', JSON.stringify(updated));
       return updated;
