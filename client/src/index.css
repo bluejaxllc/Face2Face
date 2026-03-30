@@ -1399,15 +1399,22 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   }
 }
 
-/* Override Leaflet cluster default styles */
+/* Override Leaflet cluster default styles without breaking Leaflet's translate3d positioning */
 .leaflet-marker-icon.custom-cluster-icon {
-  transition: transform 0.3s ease !important;
   cursor: pointer;
 }
 
-.leaflet-marker-icon.custom-cluster-icon:hover {
+/* Target the inner div for scaling so we don't wipe out Leaflet's inline transform positioning */
+.custom-cluster-icon:hover>div,
+.custom-cluster-icon.leaflet-interactive:focus>div {
   transform: scale(1.15) !important;
-  z-index: 9999 !important;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.custom-cluster-icon>div {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  transform-origin: center;
 }
 
 /* Shimmer loading skeleton */
