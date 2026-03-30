@@ -428,16 +428,18 @@
   }
 
   /* Leaflet Map Marker Pin Styles */
+  .custom-div-icon,
+  .custom-div-icon.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
   .marker-pin {
-    width: 30px;
-    height: 30px;
-    border-radius: 50% 50% 50% 0;
-    position: relative;
-    transform: rotate(-45deg);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: -15px 0 0 -15px;
+    line-height: 0;
   }
 
   .marker-pin.casual-marker {
