@@ -77,11 +77,12 @@ export function triggerBumpHaptic(): void {
 }
 
 /**
- * Heartbeat haptic pattern: vib-vib-pause-vib-vib
- * Used when receiving bumps
+ * Heartbeat haptic pattern: vib-vib-pause-vib-vib (4 vibrations total)
+ * Matches spec: "vibrate vibrate pause vibrate vibrate"
+ * Pattern: ba-dum — ba-dum
  */
 export function triggerHeartbeatHaptic(): void {
-    triggerHapticPattern([100, 50, 100, 300, 100, 50, 100]);
+    triggerHapticPattern([150, 80, 150, 400, 150, 80, 150]);
 }
 
 /**

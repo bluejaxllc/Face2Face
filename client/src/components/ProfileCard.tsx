@@ -30,6 +30,7 @@ interface User {
   interests?: string | null;
   seeking?: string | null;
   bio?: string | null;
+  bumpMessage?: string | null;
   profilePhoto?: string | null;
   latitude?: number;
   longitude?: number;
@@ -150,7 +151,8 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
             : 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
             }`}>
             <Avatar className="h-20 w-20 border-2 border-slate-900 bg-slate-800">
-              {user.profilePhoto && (
+              {/* Per spec: profile photo only visible after mutual Reveal */}
+              {isRevealed && user.profilePhoto && (
                 <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
               )}
               <AvatarFallback className="text-2xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
@@ -214,6 +216,14 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Bump greeting message (spec: "a text message from the user") */}
+            {user.bumpMessage && (
+              <div className="mt-3 bg-fuchsia-950/20 border border-fuchsia-700/20 rounded-xl px-4 py-2.5">
+                <p className="text-[10px] text-fuchsia-400/70 uppercase tracking-wider font-bold mb-1">Bump Greeting</p>
+                <p className="text-xs text-slate-300 italic leading-relaxed">"{user.bumpMessage}"</p>
               </div>
             )}
 

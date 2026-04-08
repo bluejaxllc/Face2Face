@@ -160,5 +160,18 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
   }, () => {
     log(`serving on port ${port}`);
+
+    // Inactive timeout enforcement: every 60 seconds, deactivate users
+    // whose lastLocation exceeds their personal inactiveTimeout setting
+    setInterval(async () => {
+      try {
+        const count = await storage.deactivateInactiveUsers();
+        if (count > 0) {
+          log(`[InactiveTimeout] Deactivated ${count} inactive user(s)`);
+        }
+      } catch (err) {
+        console.error('[InactiveTimeout] Error:', err);
+      }
+    }, 60_000);
   });
 })();

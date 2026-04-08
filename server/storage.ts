@@ -65,6 +65,7 @@ export interface IStorage {
   markVerificationCodeUsed(id: number): Promise<void>;
   getRecentCodeCount(phoneNumber: string, sinceMinutes: number): Promise<number>;
   getUserByPhone(phone: string): Promise<User | undefined>;
+  deactivateInactiveUsers(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -379,6 +380,25 @@ export class DatabaseStorage implements IStorage {
   async getUserByPhone(phone: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.phoneNumber, phone)).limit(1);
     return result[0];
+  }
+
+  /**
+   * Deactivate users who have exceeded their personal inactiveTimeout.
+   * Compares lastLocation timestamp against inactiveTimeout (in minutes).
+   * Returns the number of users deactivated.
+   */
+  async deactivateInactiveUsers(): Promise<number> {
+    const result = await db.update(users)
+      .set({ isActive: false })
+      .where(and(
+        eq(users.isActive, true),
+        sql`${users.lastLocation} IS NOT NULL`,
+        sql`${users.inactiveTimeout} IS NOT NULL`,
+        sql`${users.inactiveTimeout} > 0`,
+        sql`${users.lastLocation} < NOW() - (${users.inactiveTimeout} || ' minutes')::INTERVAL`
+      ))
+      .returning();
+    return result.length;
   }
 }
 

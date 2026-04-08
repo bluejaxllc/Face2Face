@@ -521,8 +521,8 @@ function Map() {
             : "bg-white/90 border-gray-200"
             }`} style={{ padding: "4px 12px", height: "32px" }}>
             <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-green-500 animate-pulse" : "text-gray-400"}`} />
-            <span className={`font-bold tracking-wider ${isActive ? "text-green-600" : "text-gray-400"}`} style={{ fontSize: "10px" }}>
-              {isActive ? "LIVE" : "OFF"}
+            <span className={`font-bold tracking-wider ${isActive ? "text-green-600" : "text-gray-400"}`} style={{ fontSize: "9px" }}>
+              {isActive ? "GO LIVE" : "LEAVE MAP"}
             </span>
             <Switch
               checked={isActive}
@@ -650,6 +650,13 @@ function Map() {
           const sender = nearbyUsers.find(u => u.id === senderId);
           if (sender) {
             setSelectedUser(sender);
+          }
+        }}
+        onShowOnMap={(lat, lng) => {
+          // Pan and zoom to the sender's location
+          if (mapRef.current) {
+            userHasInteracted.current = true;
+            mapRef.current.flyTo([lat, lng], 16, { duration: 1.5 });
           }
         }}
       />

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, ArrowLeftRight, X, Clock, Eye } from "lucide-react";
+import { Zap, ArrowLeftRight, X, Clock, Eye, MapPin } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { triggerHapticPattern } from "@/services/haptics-service";
 import { useToast } from "@/hooks/use-toast";
@@ -36,9 +36,10 @@ interface ReceivedBumpsSheetProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onBumpBack: (senderId: number) => void;
+    onShowOnMap?: (lat: number, lng: number) => void;
 }
 
-export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack }: ReceivedBumpsSheetProps) {
+export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack, onShowOnMap }: ReceivedBumpsSheetProps) {
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const [respondingId, setRespondingId] = useState<number | null>(null);
@@ -114,9 +115,6 @@ export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack }: R
                                                 : 'bg-gradient-to-br from-pink-400 to-rose-500'
                                                 }`}>
                                                 <Avatar className="h-12 w-12 border-2 border-slate-900">
-                                                    {bump.sender.profilePhoto && (
-                                                        <AvatarImage src={bump.sender.profilePhoto} />
-                                                    )}
                                                     <AvatarFallback className="text-sm font-bold bg-slate-800 text-slate-300">
                                                         {getInitials(bump.sender.firstName, bump.sender.lastName)}
                                                     </AvatarFallback>
@@ -159,6 +157,18 @@ export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack }: R
                                             <ArrowLeftRight className="w-3.5 h-3.5 mr-1" />
                                             Bump Back
                                         </Button>
+                                        {onShowOnMap && bump.sender && (
+                                            <Button
+                                                onClick={() => {
+                                                    onShowOnMap(bump.sender!.latitude, bump.sender!.longitude);
+                                                    onOpenChange(false);
+                                                }}
+                                                variant="outline"
+                                                className="h-10 rounded-xl text-xs font-bold tracking-wide bg-slate-800/50 border-blue-700/30 text-blue-400 hover:text-blue-300 hover:bg-blue-950/30"
+                                            >
+                                                <MapPin className="w-3.5 h-3.5" />
+                                            </Button>
+                                        )}
                                         <Button
                                             onClick={() => handleRespond(bump.id, "reply_later", bump.sender?.firstName || "User")}
                                             disabled={respondingId === bump.id}
