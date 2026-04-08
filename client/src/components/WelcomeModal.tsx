@@ -21,7 +21,7 @@ const stepVariants = {
 export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-slate-900 border border-slate-700/50">
+      <DialogContent className="sm:max-w-md p-0 bg-slate-900 border border-slate-700/50 max-h-[90vh] overflow-y-auto">
         <div className="sr-only">
           <DialogTitle>Welcome to Face2Face</DialogTitle>
           <DialogDescription>Meet people in real life, your way</DialogDescription>

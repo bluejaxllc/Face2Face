@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap } from "lucide-react";
@@ -15,15 +16,24 @@ export default function BeenBumpedBadge({ onClick }: BeenBumpedBadgeProps) {
     });
 
     const count = receivedBumps.length;
+    const lastVibCount = useRef(
+        parseInt(sessionStorage.getItem('f2f_lastVibCount') || '0')
+    );
 
-    // Trigger heartbeat haptic when new bumps arrive (cross-platform)
-    if (count > 0 && typeof window !== 'undefined') {
-        const lastVibCount = parseInt(sessionStorage.getItem('f2f_lastVibCount') || '0');
-        if (count > lastVibCount) {
+    // Trigger vibration when new bumps arrive — must be in useEffect, not render body
+    useEffect(() => {
+        if (count > 0 && count > lastVibCount.current) {
+            // Strong vibration pattern for incoming bump (Android)
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 400]);
+            }
+            // Also trigger the cross-platform heartbeat (iOS fallback)
             triggerHeartbeatHaptic();
+            
+            lastVibCount.current = count;
             sessionStorage.setItem('f2f_lastVibCount', count.toString());
         }
-    }
+    }, [count]);
 
     if (count === 0) return null;
 
