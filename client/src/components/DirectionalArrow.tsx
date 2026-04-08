@@ -197,7 +197,7 @@ export default function DirectionalArrow({
                     <p className="text-sm text-slate-400 mt-2 max-w-[260px] mx-auto">
                         {phase === "done"
                             ? "They'll feel it."
-                            : "Move your phone in this direction"}
+                            : "Thrust your phone in this direction to BUMP!"}
                     </p>
                 </div>
 
@@ -224,8 +224,17 @@ export default function DirectionalArrow({
                             className="w-40 h-40 flex items-center justify-center transition-transform duration-100"
                             style={{ transform: `rotate(${arrowRotation}deg)` }}
                         >
-                            {/* Large arrow SVG */}
-                            <svg width="120" height="120" viewBox="0 0 100 100">
+                            {/* Large arrow SVG with a thrust animation */}
+                            <motion.svg 
+                                width="120" height="120" viewBox="0 0 100 100"
+                                animate={{ y: [0, -30, 4, 0, 0] }}
+                                transition={{ 
+                                    duration: 1.5, 
+                                    repeat: Infinity, 
+                                    times: [0, 0.15, 0.3, 0.4, 1], 
+                                    ease: "easeInOut" 
+                                }}
+                            >
                                 <defs>
                                     <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="0%" y2="0%">
                                         <stop offset="0%" stopColor="#a855f7" />
@@ -242,7 +251,7 @@ export default function DirectionalArrow({
                                     stroke="rgba(255,255,255,0.15)"
                                     strokeWidth="1"
                                 />
-                            </svg>
+                            </motion.svg>
                         </div>
                     )}
                 </motion.div>

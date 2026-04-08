@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone } from "lucide-react";
+import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone, Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
@@ -49,6 +49,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Register() {
   const [activeTab, setActiveTab] = useState("login");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [_, navigate] = useLocation();
   const { login, register } = useAuth();
 
@@ -359,7 +362,17 @@ export default function Register() {
                       <FormItem>
                         <FormLabel className="text-slate-300 text-sm font-medium">Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Enter your password" {...field} className="auth-input" />
+                          <div className="relative">
+                            <Input type={showLoginPassword ? "text" : "password"} placeholder="Enter your password" {...field} className="auth-input pr-10" />
+                            <button
+                              type="button"
+                              onClick={() => setShowLoginPassword(!showLoginPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                              tabIndex={-1}
+                            >
+                              {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -548,7 +561,17 @@ export default function Register() {
                       <FormItem>
                         <FormLabel className="text-slate-300 text-sm font-medium">Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Create a password" {...field} className="auth-input" />
+                          <div className="relative">
+                            <Input type={showRegisterPassword ? "text" : "password"} placeholder="Create a password" {...field} className="auth-input pr-10" />
+                            <button
+                              type="button"
+                              onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                              tabIndex={-1}
+                            >
+                              {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -562,7 +585,17 @@ export default function Register() {
                       <FormItem>
                         <FormLabel className="text-slate-300 text-sm font-medium">Confirm Password</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Confirm your password" {...field} className="auth-input" />
+                          <div className="relative">
+                            <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" {...field} className="auth-input pr-10" />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                              tabIndex={-1}
+                            >
+                              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
