@@ -416,6 +416,21 @@ var DatabaseStorage = class {
     const result = await db.select().from(users).where(eq(users.phoneNumber, phone)).limit(1);
     return result[0];
   }
+  /**
+   * Deactivate users who have exceeded their personal inactiveTimeout.
+   * Compares lastLocation timestamp against inactiveTimeout (in minutes).
+   * Returns the number of users deactivated.
+   */
+  async deactivateInactiveUsers() {
+    const result = await db.update(users).set({ isActive: false }).where(and(
+      eq(users.isActive, true),
+      sql`${users.lastLocation} IS NOT NULL`,
+      sql`${users.inactiveTimeout} IS NOT NULL`,
+      sql`${users.inactiveTimeout} > 0`,
+      sql`${users.lastLocation} < NOW() - (${users.inactiveTimeout} || ' minutes')::INTERVAL`
+    )).returning();
+    return result.length;
+  }
 };
 var storage = new DatabaseStorage();
 
@@ -727,6 +742,21 @@ async function registerRoutes(app2) {
       res.status(500).send("Failed to load photo");
     }
   });
+  apiRouter.patch("/users/profile", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const updatedUser = await storage.updateUser(req.session.userId, req.body);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
   apiRouter.get("/users/nearby", async (req, res) => {
     try {
       if (!req.session || !req.session.userId) {
@@ -923,6 +953,43 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to reveal profile" });
     }
   });
+  apiRouter.get("/bumps/users", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const connectedUsers = await storage.getConnectedUsers(req.session.userId);
+      const usersWithDetails = await Promise.all(connectedUsers.map(async (u) => {
+        const msgs = await storage.getMessagesBetweenUsers(req.session.userId, u.id);
+        const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+        const unreadCount = await storage.getUnreadMessageCount(req.session.userId, u.id);
+        const bumps2 = await storage.getBumpsBetweenUsers(req.session.userId, u.id);
+        const hasPendingReceivedBump = bumps2.some((b) => b.bumpedUserId === req.session.userId && b.status === "pending");
+        return {
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          profilePhoto: u.profilePhoto,
+          lastMessage: lastMsg ? {
+            content: lastMsg.content,
+            timestamp: lastMsg.timestamp,
+            senderId: lastMsg.senderId
+          } : null,
+          unreadCount,
+          hasPendingReceivedBump
+        };
+      }));
+      usersWithDetails.sort((a, b) => {
+        const timeA = a.lastMessage ? new Date(a.lastMessage.timestamp).getTime() : 0;
+        const timeB = b.lastMessage ? new Date(b.lastMessage.timestamp).getTime() : 0;
+        return timeB - timeA;
+      });
+      res.status(200).json(usersWithDetails);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to get users" });
+    }
+  });
   apiRouter.get("/bumps/:userId", async (req, res) => {
     try {
       if (!req.session || !req.session.userId) {
@@ -934,40 +1001,6 @@ async function registerRoutes(app2) {
       res.status(200).json(bumps2);
     } catch (error) {
       res.status(500).json({ message: "Failed to get bumps" });
-    }
-  });
-  apiRouter.get("/bumps/users", async (req, res) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      const connectedUsers = await storage.getConnectedUsers(req.session.userId);
-      const usersWithDetails = await Promise.all(connectedUsers.map(async (u) => {
-        const msgs = await storage.getMessagesBetweenUsers(req.session.userId, u.id);
-        const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-        const unreadCount = await storage.getUnreadMessageCount(req.session.userId, u.id);
-        return {
-          id: u.id,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          profilePhoto: u.profilePhoto,
-          lastMessage: lastMsg ? {
-            content: lastMsg.content,
-            timestamp: lastMsg.timestamp,
-            senderId: lastMsg.senderId
-          } : null,
-          unreadCount
-        };
-      }));
-      usersWithDetails.sort((a, b) => {
-        const timeA = a.lastMessage ? new Date(a.lastMessage.timestamp).getTime() : 0;
-        const timeB = b.lastMessage ? new Date(b.lastMessage.timestamp).getTime() : 0;
-        return timeB - timeA;
-      });
-      res.status(200).json(usersWithDetails);
-    } catch (error) {
-      console.error("Failed to get connected users:", error);
-      res.status(500).json({ message: "Failed to get users" });
     }
   });
   apiRouter.get("/messages/:userId", async (req, res) => {

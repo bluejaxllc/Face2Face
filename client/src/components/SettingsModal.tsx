@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -191,13 +192,17 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               />
               <p className="text-[10px] text-slate-400 mt-1">Hide from map after this many minutes</p>
             </div>
-            <a
-              href="/dev"
-              className="flex items-center justify-center gap-2 bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30 hover:bg-slate-700/40 transition-colors"
+            <button
+              onClick={() => {
+                onClose();
+                // Use a small delay to let the modal close before navigating
+                setTimeout(() => { window.location.hash = ''; window.history.pushState({}, '', '/dev'); window.dispatchEvent(new PopStateEvent('popstate')); }, 100);
+              }}
+              className="flex items-center justify-center gap-2 bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30 hover:bg-slate-700/40 transition-colors w-full"
             >
               <Settings className="w-4 h-4 text-amber-400" />
               <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Device Diagnostics</span>
-            </a>
+            </button>
           </div>
         </div>
 
