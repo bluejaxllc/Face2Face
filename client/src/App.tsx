@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import MapView from "@/pages/MapView";
 import Explore from "@/pages/Explore";
 import Register from "@/pages/Register";
+import DevDiagnostics from "@/pages/DevDiagnostics";
 
 import Profile from "@/pages/Profile";
 import Messages from "@/pages/Messages";
@@ -56,6 +57,9 @@ function AppRouter() {
 
         <Route path="/profile">
           <ProtectedRoute component={Profile} />
+        </Route>
+        <Route path="/dev">
+          <ProtectedRoute component={DevDiagnostics} />
         </Route>
         <Route component={NotFound} />
       </Switch>

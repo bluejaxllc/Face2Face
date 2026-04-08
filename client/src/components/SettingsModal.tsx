@@ -191,6 +191,13 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               />
               <p className="text-[10px] text-slate-400 mt-1">Hide from map after this many minutes</p>
             </div>
+            <a
+              href="/dev"
+              className="flex items-center justify-center gap-2 bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30 hover:bg-slate-700/40 transition-colors"
+            >
+              <Settings className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Device Diagnostics</span>
+            </a>
           </div>
         </div>
 
