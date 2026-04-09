@@ -51,7 +51,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 text-white">
+      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto bg-slate-900/95 border border-slate-700/50 text-white">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold text-white font-heading flex items-center gap-2">
             <Settings className="w-5 h-5 text-blue-400" />

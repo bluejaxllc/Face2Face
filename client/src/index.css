@@ -351,7 +351,7 @@
   }
 
   .settings-overlay {
-    @apply backdrop-blur-md;
+    background-color: rgba(2, 6, 23, 0.8);
   }
 
   .hide-scrollbar::-webkit-scrollbar {
