@@ -40,6 +40,8 @@ app.use('/api', (_req, res, next) => {
 
 // CORS — locked to known origins
 const allowedOrigins = [
+  "https://face2face.icu",
+  "https://www.face2face.icu",
   "https://bump.bluejax.ai",
   "https://face2face-production-11ee.up.railway.app",
   "http://localhost:5000",
