@@ -5,6 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <script>
+    // CRITICAL: Force kill any stale Service Workers from previous PWA setup
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log("Stale Service Worker unregistered.");
+        }
+      }).catch(function(err) {
+        console.log('Service Worker unregistration failed: ', err);
+      });
+    }
+
     // Failsafe error catcher right in the HTML
     window.addEventListener('error', function(e) {
       if (!window.hasShownError) {
