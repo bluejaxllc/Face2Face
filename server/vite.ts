@@ -67,9 +67,18 @@ export function serveStatic(app: Express) {
   }
 
   app.use(express.static(distPath, {
-    setHeaders: (res) => {
-      // Force browser to revalidate all assets
-      res.set('Cache-Control', 'no-cache, must-revalidate');
+    setHeaders: (res, path) => {
+      if (path.endsWith('.html')) {
+        // CRITICAL: Force CDNs and browsers to NEVER cache the HTML file
+        // This is the ONLY way to prevent the "black screen of death" on iOS Safari
+        // caused by loading old HTML that references outdated JS chunks.
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+      } else {
+        // Assets can be cached but must revalidate
+        res.set('Cache-Control', 'no-cache, must-revalidate');
+      }
     }
   }));
 
