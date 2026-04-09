@@ -35,13 +35,8 @@ export default function MapView() {
     }
   }, [user, hasCheckedModals]);
 
-  // When we have both a user and a location, update the server
-  // (LocationService now inherently handles real-time throttled pushing as well)
-  useEffect(() => {
-    if (user && currentLocation) {
-      updateServerLocation(currentLocation);
-    }
-  }, [user, currentLocation, updateServerLocation]);
+  // Note: LocationService implicitly updates the server location internally
+  // when a location change is detected, using debounced syncing.
 
   const handleCloseWelcome = () => {
     setShowWelcome(false);

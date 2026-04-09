@@ -412,7 +412,7 @@ function Map() {
             {isActive && filteredUsers.map((user) => (
               <Marker
                 key={user.id}
-                position={[user.latitude, user.longitude]}
+                position={[Number(user.latitude), Number(user.longitude)]}
                 icon={getIcon(user.gender || "other")}
                 eventHandlers={{
                   click: () => handleMarkerClick(user)
@@ -432,10 +432,10 @@ function Map() {
                     {currentLocation && (
                       <div style={{ marginTop: '6px', background: '#1e293b', borderRadius: '12px', padding: '3px 8px', display: 'inline-block', fontSize: '11px', fontWeight: 500, color: '#a5b4fc' }}>
                         {calculateDistance(
-                          currentLocation.latitude,
-                          currentLocation.longitude,
-                          user.latitude,
-                          user.longitude
+                          Number(currentLocation.latitude),
+                          Number(currentLocation.longitude),
+                          Number(user.latitude),
+                          Number(user.longitude)
                         ).toFixed(1)} mi
                       </div>
                     )}

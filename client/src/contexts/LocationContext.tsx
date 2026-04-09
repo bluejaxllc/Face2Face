@@ -85,9 +85,9 @@ export function LocationProvider({ children, enabled = true }: { children: React
     }
   };
 
-  // Create a debounced version of updateServerLocation using ref
+  // Create a memoized version of updateServerLocation
   // to avoid creating new functions on each render
-  const updateServerLocation = async (location: { latitude: number; longitude: number }) => {
+  const updateServerLocation = useCallback(async (location: { latitude: number; longitude: number }) => {
     // No need to show success toast every time - it's now handled in the service
     // with proper throttling
     try {
@@ -102,15 +102,15 @@ export function LocationProvider({ children, enabled = true }: { children: React
         variant: "destructive",
       });
     }
-  };
+  }, [locationService, toast]);
 
-  const resetError = () => {
+  const resetError = useCallback(() => {
     locationService.resetError();
     toast({
       title: "Trying again",
       description: "Attempting to reconnect to location services.",
     });
-  };
+  }, [locationService, toast]);
 
   const contextValue = {
     currentLocation,
