@@ -118,7 +118,7 @@ export default function Register() {
   const onLoginSubmit = async (values: LoginFormValues) => {
     try {
       await login(values.username, values.password);
-      setTimeout(() => navigate("/map"), 500);
+      navigate("/map");
     } catch (error) {
       console.error("Login error:", error);
     }
