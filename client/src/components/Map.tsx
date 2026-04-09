@@ -112,15 +112,9 @@ const InvalidateSizeComponent = () => {
       map.invalidateSize({ animate: false });
     }, 1000);
     
-    const handleResize = () => {
-      map.invalidateSize({ animate: false });
-    };
-    
-    window.addEventListener('resize', handleResize);
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
-      window.removeEventListener('resize', handleResize);
     };
   }, [map]);
   return null;
@@ -415,7 +409,7 @@ function Map() {
             bottom: 0
           }}
           zoomControl={false}
-          preferCanvas={true}
+          preferCanvas={false}
           fadeAnimation={false}
           markerZoomAnimation={false}
           attributionControl={false}
@@ -467,27 +461,14 @@ function Map() {
             </>
           )}
 
-          <MarkerClusterGroup
-            chunkedLoading={true}
-            spiderfyOnMaxZoom={true}
-            showCoverageOnHover={false}
-            zoomToBoundsOnClick={true}
-            maxClusterRadius={30}
-            disableClusteringAtZoom={10}
-            animate={false}
-            animateAddingMarkers={false}
-            spiderLegPolylineOptions={{ weight: 2, color: 'rgba(66,133,244,0.5)', opacity: 0.8 }}
-            iconCreateFunction={clusterIconCreate}
-          >
-            {isActive && filteredUsers.map((user) => (
-              <UserMarker
-                key={user.id}
-                user={user}
-                currentLocation={currentLocation}
-                onMarkerClick={handleMarkerClick}
-              />
-            ))}
-          </MarkerClusterGroup>
+          {isActive && filteredUsers.map((user) => (
+            <UserMarker
+              key={user.id}
+              user={user}
+              currentLocation={currentLocation}
+              onMarkerClick={handleMarkerClick}
+            />
+          ))}
         </MapContainer>
 
         {/* ═══════ TOP LEFT: Filter + Status info ═══════ */}
