@@ -756,7 +756,7 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   position: relative;
 }
 
-/* Animated grid lines background */
+/* Animated grid lines background - Removed GPU intensive animation */
 .auth-page::before {
   content: '';
   position: absolute;
@@ -765,19 +765,8 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
     linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
-  animation: gridShift 20s linear infinite;
   mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-}
-
-@keyframes gridShift {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(60px, 60px);
-  }
 }
 
 .auth-bg {
@@ -790,63 +779,27 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
     radial-gradient(ellipse at 50% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
 }
 
-/* Floating glow orbs */
+/* Floating glow orbs - Removed blur and animation for iOS Safari performance */
 .auth-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.25;
-  animation: glowFloat 10s ease-in-out infinite;
+  opacity: 0.15;
 }
 
 .auth-glow-1 {
   width: 500px;
   height: 500px;
-  background: rgba(59, 130, 246, 0.5);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%);
   top: -200px;
   left: -200px;
-  animation: glowFloat 10s ease-in-out infinite, glowPulse 4s ease-in-out infinite;
 }
 
 .auth-glow-2 {
   width: 450px;
   height: 450px;
-  background: rgba(236, 72, 153, 0.4);
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, transparent 70%);
   bottom: -150px;
   right: -150px;
-  animation: glowFloat 10s ease-in-out infinite reverse, glowPulse 4s ease-in-out infinite 2s;
-}
-
-@keyframes glowFloat {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-
-  25% {
-    transform: translate(40px, -30px) scale(1.15);
-  }
-
-  50% {
-    transform: translate(-20px, 40px) scale(0.9);
-  }
-
-  75% {
-    transform: translate(30px, 20px) scale(1.05);
-  }
-}
-
-@keyframes glowPulse {
-
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
 }
 
 /* Floating particles */
@@ -855,15 +808,12 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  opacity: 0.3;
 }
 
 .auth-particle {
   position: absolute;
-  width: 3px;
-  height: 3px;
   border-radius: 50%;
-  opacity: 0;
-  animation: particleFloat linear infinite;
 }
 
 .auth-particle:nth-child(1) {
@@ -898,91 +848,15 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   height: 2px;
 }
 
-.auth-particle:nth-child(5) {
-  left: 70%;
-  background: rgba(236, 72, 153, 0.6);
-  animation-duration: 11s;
-  animation-delay: 3s;
-}
-
-.auth-particle:nth-child(6) {
-  left: 85%;
-  background: rgba(139, 92, 246, 0.4);
-  animation-duration: 13s;
-  animation-delay: 5s;
-  width: 5px;
-  height: 5px;
-}
-
-.auth-particle:nth-child(7) {
-  left: 50%;
-  background: rgba(59, 130, 246, 0.3);
-  animation-duration: 15s;
-  animation-delay: 6s;
-}
-
-.auth-particle:nth-child(8) {
-  left: 15%;
-  background: rgba(236, 72, 153, 0.3);
-  animation-duration: 18s;
-  animation-delay: 7s;
-  width: 4px;
-  height: 4px;
-}
-
-@keyframes particleFloat {
-  0% {
-    transform: translateY(100vh) scale(0);
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 1;
-  }
-
-  90% {
-    opacity: 0.8;
-  }
-
-  100% {
-    transform: translateY(-20vh) scale(1);
-    opacity: 0;
-  }
-}
-
-/* Logo breathing animation */
+/* Logo breathing animation - static for iOS Safari performance */
 .logo-breathe {
-  animation: logoBreathe 3s ease-in-out infinite;
+  /* Removed drop-shadow animation */
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
 }
 
-@keyframes logoBreathe {
-
-  0%,
-  100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
-  }
-
-  50% {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 20px rgba(236, 72, 153, 0.4));
-  }
-}
-
-/* Title shimmer animation */
+/* Title shimmer animation - static for performance */
 .title-shimmer {
-  background-size: 200% auto;
-  animation: titleShimmer 3s linear infinite;
-}
-
-@keyframes titleShimmer {
-  0% {
-    background-position: 0% center;
-  }
-
-  100% {
-    background-position: 200% center;
-  }
+  background-size: 100% auto;
 }
 
 /* Glassmorphism auth card */
@@ -994,9 +868,7 @@ body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.7),
     0 0 0 1px rgba(255, 255, 255, 0.03) inset,
-    0 4px 6px -1px rgba(0, 0, 0, 0.5),
-    0 0 80px -20px rgba(59, 130, 246, 0.08);
-  transition: box-shadow 0.4s ease;
+    0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
 .auth-card:hover {
