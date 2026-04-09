@@ -175,13 +175,9 @@ export default function Register() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  // OTP Verification screen
   if (showVerification) {
     return (
       <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
-        <div className="auth-bg" />
-        <div className="auth-glow auth-glow-1" />
-        <div className="auth-glow auth-glow-2" />
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -258,22 +254,6 @@ export default function Register() {
 
   return (
     <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
-      <div className="auth-bg" />
-      <div className="auth-glow auth-glow-1" />
-      <div className="auth-glow auth-glow-2" />
-
-      {/* Floating particles */}
-      <div className="auth-particles">
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-        <div className="auth-particle" />
-      </div>
-
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-4 md:py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
