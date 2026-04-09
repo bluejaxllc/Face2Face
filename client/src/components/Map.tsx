@@ -100,6 +100,27 @@ const femaleIcon = L.divIcon({
 
 const getIcon = (gender: string) => gender === 'male' ? maleIcon : femaleIcon;
 
+const InvalidateSizeComponent = () => {
+  const map = useMap();
+  useEffect(() => {
+    // Wait for Safari toolbars to settle or layout shifts
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 400);
+    
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map]);
+  return null;
+};
+
 const UserMarker = memo(({ user, currentLocation, onMarkerClick }: { user: User, currentLocation: any, onMarkerClick: (u: User) => void }) => {
   const eventHandlers = useMemo(() => ({
     click: () => onMarkerClick(user)
@@ -317,14 +338,16 @@ function Map() {
   // Track if user has manually interacted with the map (pan/drag)
   const userHasInteracted = useRef(false);
 
-  // Effect to automatically center the map once after actual location is acquired
-  // But ONLY if the user hasn't started panning yet
   useEffect(() => {
-    if (mapLoaded && currentLocation && mapRef.current && !userHasInteracted.current) {
-      mapRef.current.setView([currentLocation.latitude, currentLocation.longitude], mapRef.current.getZoom() || 15, { animate: true, duration: 0.5 });
+    if (currentLocation && mapRef.current && !userHasInteracted.current && !hasCenteredInitially.current) {
+      mapRef.current.setView(
+        [currentLocation.latitude, currentLocation.longitude], 
+        mapRef.current.getZoom() || 15, 
+        { animate: true, duration: 0.5 }
+      );
       hasCenteredInitially.current = true;
     }
-  }, [mapLoaded, currentLocation]);
+  }, [currentLocation]);
 
   useEffect(() => {
     setFilterOptions(prev => {
@@ -362,10 +385,6 @@ function Map() {
     }
   }, [toast]);
 
-  // Removed glitchy mapKey reload loop that rebuilt the map every 5 seconds
-
-  // Note: We no longer block the map when geolocation fails.
-  // The query fires regardless, and the map uses stored server-side coordinates as fallback.
   const handleUserInteract = useCallback(() => {
     userHasInteracted.current = true;
   }, []);
@@ -393,10 +412,9 @@ function Map() {
           attributionControl={false}
           className="leaflet-container map-container"
           ref={mapRef}
-          whenReady={() => {
-            setMapLoaded(true);
-          }}
         >
+          <InvalidateSizeComponent />
+          
           {mapStyle === 'satellite' ? (
             <TileLayer
               attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
