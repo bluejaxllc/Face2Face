@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Circle, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+// Leaflet CSS is inlined in index.css — do NOT import here to avoid duplicate rules
 
 interface User {
   id: number;
@@ -103,18 +103,23 @@ const getIcon = (gender: string) => gender === 'male' ? maleIcon : femaleIcon;
 const InvalidateSizeComponent = () => {
   const map = useMap();
   useEffect(() => {
-    // Wait for Safari toolbars to settle or layout shifts
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 400);
+    // First invalidation after initial layout settles
+    const timer1 = setTimeout(() => {
+      map.invalidateSize({ animate: false });
+    }, 200);
+    // Second invalidation after iOS Safari toolbar animation completes
+    const timer2 = setTimeout(() => {
+      map.invalidateSize({ animate: false });
+    }, 1000);
     
     const handleResize = () => {
-      map.invalidateSize();
+      map.invalidateSize({ animate: false });
     };
     
     window.addEventListener('resize', handleResize);
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       window.removeEventListener('resize', handleResize);
     };
   }, [map]);
@@ -340,10 +345,12 @@ function Map() {
 
   useEffect(() => {
     if (currentLocation && mapRef.current && !userHasInteracted.current && !hasCenteredInitially.current) {
+      // CRITICAL: Use animate:false on iOS Safari — animated setView triggers
+      // a CSS transition on the tile container that corrupts rendering.
       mapRef.current.setView(
         [currentLocation.latitude, currentLocation.longitude], 
         mapRef.current.getZoom() || 15, 
-        { animate: true, duration: 0.5 }
+        { animate: false }
       );
       hasCenteredInitially.current = true;
     }
