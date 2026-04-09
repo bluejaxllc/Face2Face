@@ -1,4 +1,9 @@
 import { createRoot } from "react-dom/client";
+
+// Force framer-motion into main bundle immediately to prevent Safari chunk race
+import * as motionModule from "framer-motion";
+(window as any)._motion_preloaded = motionModule;
+
 import App from "./App";
 import "./index.css";
 // Import Android-specific styles
