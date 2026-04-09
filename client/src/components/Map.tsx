@@ -96,8 +96,8 @@ function Map() {
       datingPreference: filterOptions.datingPreference
     }],
     enabled: isActive,
-    refetchInterval: 10000,
-    staleTime: 5000,
+    refetchInterval: 30000,
+    staleTime: 25000,
     retry: 2,
     retryDelay: 3000,
   });

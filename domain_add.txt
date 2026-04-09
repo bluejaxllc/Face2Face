@@ -1,0 +1,32 @@
+﻿{
+  "customDomainCreate": {
+    "id": "2f20f71f-51e7-4f2c-82bc-f5558a5282a9",
+    "domain": "face2face.icu",
+    "createdAt": "2026-04-09T01:14:53.360Z",
+    "updatedAt": "2026-04-09T01:14:53.360Z",
+    "serviceId": "41046eb5-bde9-4b14-90e9-69c3e798283e",
+    "environmentId": "638ea985-1d88-475a-b6f6-d7984a0563a1",
+    "projectId": "56909d6f-a298-48d6-b6d5-8d7a1a2d3245",
+    "targetPort": null,
+    "status": {
+      "dnsRecords": [
+        {
+          "hostlabel": "",
+          "fqdn": "face2face.icu",
+          "recordType": "DNS_RECORD_TYPE_CNAME",
+          "requiredValue": "m38jw7ph.up.railway.app",
+          "currentValue": "",
+          "status": "DNS_RECORD_STATUS_PROPAGATED",
+          "zone": "face2face.icu",
+          "purpose": "DNS_RECORD_PURPOSE_TRAFFIC_ROUTE"
+        }
+      ],
+      "cdnProvider": null,
+      "certificates": [],
+      "certificateStatus": "CERTIFICATE_STATUS_TYPE_VALIDATING_OWNERSHIP",
+      "verificationToken": "railway-verify=5ed5b5191f945963c17f70ba0b00a6e34c0ec5cd2027f27a1e683ea29e3eb672",
+      "verificationDnsHost": "_railway-verify",
+      "verified": false
+    }
+  }
+}

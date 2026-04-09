@@ -126,7 +126,7 @@ class LocationService {
         this.isError = true;
         this.notifyErrorListeners();
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 30000, maximumAge: 10000 }
     );
     console.log('[LocationService] Web watch position started');
   }
@@ -239,7 +239,7 @@ class LocationService {
         navigator.geolocation.getCurrentPosition(
           position => resolve(position),
           error => reject(error),
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+          { enableHighAccuracy: false, timeout: 30000, maximumAge: 10000 }
         );
       });
     }
