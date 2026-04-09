@@ -4,6 +4,7 @@ import { Smartphone, Vibrate, Check, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MotionService } from "@/services/motion-service";
 import { triggerHaptic, isHapticsSupported } from "@/services/haptics-service";
+import { useAuth } from "@/contexts/AuthContext";
 
 const STORAGE_KEY = "f2f_sensor_permission_granted";
 
@@ -21,11 +22,17 @@ interface SensorPermissionGateProps {
  * a direct user gesture before granting IMU sensor access.
  */
 export default function SensorPermissionGate({ children }: SensorPermissionGateProps) {
+    const { isAuthenticated } = useAuth();
     const [permissionGranted, setPermissionGranted] = useState(() => {
         return localStorage.getItem(STORAGE_KEY) === "true";
     });
     const [isRequesting, setIsRequesting] = useState(false);
     const [step, setStep] = useState<"intro" | "granted">("intro");
+
+    // Skip gate entirely for non-authenticated users (Register page doesn't need sensors)
+    if (!isAuthenticated) {
+        return <>{children}</>;
+    }
 
     const handleEnableSensors = async () => {
         setIsRequesting(true);
