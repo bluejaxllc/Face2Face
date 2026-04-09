@@ -40,12 +40,19 @@ if (detectAndroid()) {
   });
 }
 
-// Global error handler — shows error instead of white screen
+// Global error handler — log but don't nuke the app (ErrorBoundary handles React errors)
 window.onerror = (msg, src, line, col, err) => {
-  document.getElementById("root")!.innerHTML = `<div style="background:#0f172a;color:#f87171;padding:20px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;min-height:100vh"><h2 style="color:#fff;font-size:18px">App Crash</h2><p>${msg}</p><p>Source: ${src}:${line}:${col}</p><pre>${err?.stack || 'no stack'}</pre></div>`;
+  console.error(`[GlobalError] ${msg} at ${src}:${line}:${col}`, err);
 };
+// Silently catch Capacitor plugin "unavailable" rejections that happen on web
 window.addEventListener('unhandledrejection', (e) => {
-  document.getElementById("root")!.innerHTML = `<div style="background:#0f172a;color:#f87171;padding:20px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;min-height:100vh"><h2 style="color:#fff;font-size:18px">Promise Rejection</h2><pre>${e.reason?.stack || e.reason || 'unknown'}</pre></div>`;
+  const reason = String(e.reason?.message || e.reason || '');
+  if (reason.includes('unavailable') || reason.includes('not implemented')) {
+    // Capacitor web plugin — harmless, just no native API available
+    e.preventDefault();
+    return;
+  }
+  console.error('[UnhandledRejection]', e.reason);
 });
 
 try {
