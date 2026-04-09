@@ -70,8 +70,8 @@ export function serveStatic(app: Express) {
     setHeaders: (res, path) => {
       if (path.endsWith('.html')) {
         // CRITICAL: Force CDNs and browsers to NEVER cache the HTML file
-        // This is the ONLY way to prevent the "black screen of death" on iOS Safari
-        // caused by loading old HTML that references outdated JS chunks.
+        // Surrogate-Control specifically targets Fastly (Railway's CDN edge)
+        res.set('Surrogate-Control', 'no-store');
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
         res.set('Pragma', 'no-cache');
         res.set('Expires', '0');
@@ -84,7 +84,12 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    // CRITICAL: Surrogate-Control tells Fastly (Railway's CDN) to NEVER cache this
+    // Cache-Control alone is NOT enough — Fastly ignores it for edge caching
+    res.set('Surrogate-Control', 'no-store');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
