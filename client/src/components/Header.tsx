@@ -27,7 +27,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/50 flex justify-between items-center z-[9999] fixed top-0 left-0 right-0" style={{ height: "48px", padding: "0 14px", borderImage: "linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.2), rgba(236,72,153,0.3)) 1" }}>
+    <header className="bg-slate-900/90  border-b border-slate-800/50 flex justify-between items-center z-[9999] fixed top-0 left-0 right-0" style={{ height: "48px", padding: "0 14px", borderImage: "linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.2), rgba(236,72,153,0.3)) 1" }}>
       <div className="flex items-center gap-2">
         <Logo className="w-6 h-5" />
         <span className="font-black tracking-tight" style={{ fontSize: "16px" }}>

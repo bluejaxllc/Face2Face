@@ -44,7 +44,7 @@ export default function BeenBumpedBadge({ onClick }: BeenBumpedBadgeProps) {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 onClick={onClick}
-                className="flex items-center gap-1.5 bg-fuchsia-500/20 backdrop-blur-xl border border-fuchsia-500/40 rounded-full px-3 py-1.5 shadow-[0_0_20px_rgba(217,70,239,0.3)] hover:bg-fuchsia-500/30 transition-all active:scale-95"
+                className="flex items-center gap-1.5 bg-fuchsia-500/20  border border-fuchsia-500/40 rounded-full px-3 py-1.5 shadow-[0_0_20px_rgba(217,70,239,0.3)] hover:bg-fuchsia-500/30 transition-all active:scale-95"
             >
                 {/* Pulsing dot */}
                 <span className="relative">

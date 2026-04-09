@@ -129,7 +129,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
 
   return (
     <>
-      <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.6)] overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
+      <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900/95  border border-slate-700/50 rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.6)] overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
         <div className="relative pt-8 pb-5 px-5 flex flex-col items-center">
           {/* Header gradient */}
           <div className={`absolute top-0 left-0 w-full h-28 ${user.gender === 'male'

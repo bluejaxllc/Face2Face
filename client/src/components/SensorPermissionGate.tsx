@@ -95,7 +95,7 @@ export default function SensorPermissionGate({ children }: SensorPermissionGateP
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-6"
-                    style={{ background: "rgba(2, 6, 23, 0.97)", backdropFilter: "blur(20px)" }}
+                    style={{ background: "rgba(2, 6, 23, 0.97)",  }}
                 >
                     {step === "intro" ? (
                         <motion.div

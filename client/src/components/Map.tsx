@@ -453,7 +453,7 @@ function Map() {
             onChange={handleFilterChange}
           />
           {/* Mini status pill */}
-          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-3 shadow-md"
+          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full px-3 shadow-md"
             style={{ height: "32px" }}>
             <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
             <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
@@ -466,7 +466,7 @@ function Map() {
 
         {/* ═══════ BOTTOM CENTER: Mode Toggles ═══════ */}
         <div className="absolute z-[1000] left-1/2 -translate-x-1/2 pointer-events-auto" style={{ bottom: "24px" }}>
-          <div className="flex bg-white/90 backdrop-blur-sm border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
+          <div className="flex bg-white/90  border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
             <button
               onClick={handleMenClick}
               className={`w-10 h-8 rounded-full flex items-center justify-center transition-all duration-300 relative ${showMen
@@ -516,7 +516,7 @@ function Map() {
 
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
-          <div className={`flex items-center gap-2 backdrop-blur-sm border rounded-full shadow-md transition-all duration-300 ${isActive
+          <div className={`flex items-center gap-2  border rounded-full shadow-md transition-all duration-300 ${isActive
             ? "bg-green-50/90 border-green-300 map-live-active"
             : "bg-white/90 border-gray-200"
             }`} style={{ padding: "4px 12px", height: "32px" }}>
@@ -537,7 +537,7 @@ function Map() {
         <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
           {/* Map style toggle */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-sm border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
             aria-label="Toggle map style"
           >
@@ -546,7 +546,7 @@ function Map() {
 
           {/* Current location */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/90 backdrop-blur-sm border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={async () => {
               userHasInteracted.current = false;
               await updateLocation();
@@ -564,7 +564,7 @@ function Map() {
           </button>
 
           {/* Zoom controls */}
-          <div className="flex flex-col bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl shadow-md overflow-hidden">
+          <div className="flex flex-col bg-white/90  border border-gray-200 rounded-xl shadow-md overflow-hidden">
             <button
               className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600 border-b border-gray-200"
               onClick={() => mapRef.current?.zoomIn()}
@@ -584,7 +584,7 @@ function Map() {
 
         {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-md"
+          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full shadow-md"
             style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
             <input
               type="number"

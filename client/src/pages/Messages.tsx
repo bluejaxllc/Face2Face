@@ -202,7 +202,7 @@ export default function Messages() {
           {selectedUser ? (
             <>
               {/* Chat header */}
-              <div className="p-3 border-b border-slate-800 flex items-center gap-3 bg-slate-900/80 backdrop-blur-md">
+              <div className="p-3 border-b border-slate-800 flex items-center gap-3 bg-slate-900/80 ">
                 <button
                   onClick={() => setSelectedUserId(null)}
                   className="md:hidden text-slate-400 hover:text-white transition-colors p-1"
@@ -231,7 +231,7 @@ export default function Messages() {
               {/* Messages area */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 <div className="flex justify-center mb-6 mt-2">
-                  <div className="bg-slate-800/60 border border-slate-700/50 backdrop-blur-md px-4 py-2 rounded-full inline-flex items-center gap-2 max-w-xs md:max-w-sm text-center">
+                  <div className="bg-slate-800/60 border border-slate-700/50  px-4 py-2 rounded-full inline-flex items-center gap-2 max-w-xs md:max-w-sm text-center">
                     <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                     <p className="text-[10px] text-slate-300 font-medium">
                       Messages are private. You are chatting with a <span className="text-emerald-400 font-bold">verified real person</span>.
@@ -243,7 +243,7 @@ export default function Messages() {
                   <div className="flex flex-col items-center justify-center animate-in fade-in duration-700 mt-10">
                     <div className="relative mb-5">
                       <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-pink-500 rounded-full blur-xl opacity-20 animate-pulse" />
-                      <div className="w-16 h-16 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center relative shadow-xl backdrop-blur-sm">
+                      <div className="w-16 h-16 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center relative shadow-xl ">
                         <Smile className="w-8 h-8 text-blue-400" />
                       </div>
                     </div>
@@ -262,7 +262,7 @@ export default function Messages() {
                       >
                         <div className={`max-w-[75%] px-4 py-2.5 rounded-[20px] shadow-sm relative group ${message.senderId === user?.id
                           ? "bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white rounded-br-[4px] shadow-pink-500/20"
-                          : "bg-slate-800/90 border border-slate-700/60 text-slate-100 rounded-bl-[4px] backdrop-blur-md shadow-black/20"
+                          : "bg-slate-800/90 border border-slate-700/60 text-slate-100 rounded-bl-[4px]  shadow-black/20"
                           }`}>
                           <p className="text-[15px] leading-relaxed tracking-wide">{message.content}</p>
                           <div className={`flex items-center gap-1.5 mt-1.5 justify-end ${message.senderId === user?.id ? "text-white/70" : "text-slate-400"
@@ -285,7 +285,7 @@ export default function Messages() {
               </div>
 
               {/* Compose bar */}
-              <div className="p-3 border-t border-slate-800/60 bg-slate-900/95 backdrop-blur-xl">
+              <div className="p-3 border-t border-slate-800/60 bg-slate-900/95 ">
                 <div className="flex items-center gap-2.5 max-w-4xl mx-auto">
                   <div className="flex-1 relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-pink-500/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
@@ -317,7 +317,7 @@ export default function Messages() {
               <div className="text-center animate-in fade-in zoom-in-95 duration-500">
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl animate-pulse" />
-                  <div className="w-20 h-20 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mx-auto relative shadow-2xl backdrop-blur-sm">
+                  <div className="w-20 h-20 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mx-auto relative shadow-2xl ">
                     <MessageSquare className="w-10 h-10 text-slate-400" />
                   </div>
                 </div>

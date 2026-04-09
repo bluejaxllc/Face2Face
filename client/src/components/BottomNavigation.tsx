@@ -42,7 +42,7 @@ export default function BottomNavigation() {
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <nav className="bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+      <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
         <div className="flex justify-around items-center h-full relative">
           {navItems.map(({ path, icon: Icon, label, badge }) => {
             const isActive = location === path;

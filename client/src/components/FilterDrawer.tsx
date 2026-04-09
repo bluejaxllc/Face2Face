@@ -42,7 +42,7 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
         <Button
           variant="outline"
           size="icon"
-          className="h-9 w-9 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
+          className="h-9 w-9 rounded-full bg-slate-900/80  border border-slate-700/50 shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
           aria-label="Filter"
         >
           <Sliders className="h-4 w-4" />

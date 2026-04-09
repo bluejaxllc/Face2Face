@@ -84,7 +84,7 @@ export default function ConnectOverlay({ onSuccess, onCancel, targetUser, curren
     };
 
     return (
-        <div className="fixed inset-0 z-[3000] bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center transition-all duration-300">
+        <div className="fixed inset-0 z-[3000] bg-slate-900/90  flex flex-col items-center justify-center p-6 text-white text-center transition-all duration-300">
             <button onClick={onCancel} className="absolute top-8 right-8 text-slate-400 hover:text-white p-2">
                 <X className="w-8 h-8" />
             </button>
