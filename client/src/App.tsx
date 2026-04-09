@@ -14,8 +14,9 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SensorPermissionGate from "@/components/SensorPermissionGate";
 
-// Lazy-load heavy route components so Leaflet/framer-motion don't block initial paint
-const MapView = lazy(() => import("@/pages/MapView"));
+import MapView from "@/pages/MapView";
+
+// Lazy-load secondary route components so they don't block initial paint
 const Explore = lazy(() => import("@/pages/Explore"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Messages = lazy(() => import("@/pages/Messages"));
