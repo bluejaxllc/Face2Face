@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
-import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef } from "react";
 
 export default function BottomNavigation() {
@@ -22,13 +22,9 @@ export default function BottomNavigation() {
   useEffect(() => {
     // If the unread notification count INCREASES, it means we got a new bump/message
     if (notifCount > previousNotifCount.current) {
-      try {
-        // Trigger a heavy haptic vibration
-        Haptics.vibrate();
-        setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 200);
-      } catch (err) {
-        console.warn("Haptics not available on this device", err);
-      }
+      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
+      triggerHaptic(100);
+      setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
     }
     previousNotifCount.current = notifCount;
   }, [notifCount]);
