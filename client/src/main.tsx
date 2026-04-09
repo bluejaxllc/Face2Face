@@ -34,6 +34,18 @@ if (detectAndroid()) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
-  <App />
-);
+// Global error handler — shows error instead of white screen
+window.onerror = (msg, src, line, col, err) => {
+  document.getElementById("root")!.innerHTML = `<div style="background:#0f172a;color:#f87171;padding:20px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;min-height:100vh"><h2 style="color:#fff;font-size:18px">App Crash</h2><p>${msg}</p><p>Source: ${src}:${line}:${col}</p><pre>${err?.stack || 'no stack'}</pre></div>`;
+};
+window.addEventListener('unhandledrejection', (e) => {
+  document.getElementById("root")!.innerHTML = `<div style="background:#0f172a;color:#f87171;padding:20px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;min-height:100vh"><h2 style="color:#fff;font-size:18px">Promise Rejection</h2><pre>${e.reason?.stack || e.reason || 'unknown'}</pre></div>`;
+});
+
+try {
+  createRoot(document.getElementById("root")!).render(
+    <App />
+  );
+} catch (e: any) {
+  document.getElementById("root")!.innerHTML = `<div style="background:#0f172a;color:#f87171;padding:20px;font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;min-height:100vh"><h2 style="color:#fff;font-size:18px">Render Error</h2><pre>${e?.stack || e?.message || e}</pre></div>`;
+}
