@@ -153,7 +153,7 @@
       <p style="color:#888;">If you see this for more than a few seconds, JavaScript failed to execute.</p>
     </div>
   </div>
-  <script type="module" src="/src/main.tsx"></script>
+  <script type="module" src="/src/main.tsx" onerror="document.getElementById('root').innerHTML = '<div style=\'color:red;padding:20px;font-family:monospace;background:#000;height:100vh\'><h2>SCRIPT LOAD BLOCKED</h2><p>Browser refused to load the JavaScript bundle. This is typically a CDN/Hostinger cache or MIME issue blocking the file.</p></div>'"></script>
   <script>
     // Mobile device optimizations
     document.addEventListener('DOMContentLoaded', function () {
