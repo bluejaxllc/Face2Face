@@ -180,7 +180,49 @@
       <p style="color:#888;">If you see this for more than a few seconds, JavaScript failed to execute.</p>
     </div>
   </div>
-  <script type="module" src="/src/main.tsx" onerror="document.getElementById('root').innerHTML = '<div style=\'color:red;padding:20px;font-family:monospace;background:#000;height:100vh\'><h2>SCRIPT LOAD BLOCKED</h2><p>Browser refused to load the JavaScript bundle. This is typically a CDN/Hostinger cache or MIME issue blocking the file.</p></div>'"></script>
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    // DIAGNOSTIC: If the module script silently fails, this will catch it
+    // Module scripts on custom domains can be silently blocked by CDN/proxy
+    setTimeout(function() {
+      var root = document.getElementById('root');
+      if (root && root.innerHTML.indexOf('App is loading') !== -1) {
+        // App didn't mount after 3 seconds — the module script failed silently
+        // Try to fetch the JS bundle to see what the browser actually gets
+        var scripts = document.querySelectorAll('link[rel="modulepreload"], script[type="module"][src]');
+        var jsUrl = '';
+        scripts.forEach(function(s) { if (s.src) jsUrl = s.src; });
+        
+        root.innerHTML = '<div style="color:#0f0;padding:15px;font-family:monospace;font-size:11px;background:#000;min-height:100vh;word-break:break-all;">' +
+          '<b>MODULE SCRIPT FAILED - DIAGNOSTICS:</b><br/>' +
+          'Script URL: ' + jsUrl + '<br/>' +
+          'Page URL: ' + location.href + '<br/>' +
+          'User Agent: ' + navigator.userAgent + '<br/><br/>' +
+          '<b>Fetching JS bundle directly...</b><br/></div>';
+
+        // Now fetch the JS file to see what happens
+        fetch(jsUrl || '/assets/').then(function(r) {
+          var info = 'Fetch Status: ' + r.status + '<br/>' +
+            'Content-Type: ' + r.headers.get('content-type') + '<br/>' +
+            'Content-Length: ' + r.headers.get('content-length') + '<br/>';
+          root.querySelector('div').innerHTML += info;
+          return r.text();
+        }).then(function(text) {
+          var first100 = text.substring(0, 200).replace(/</g, '&lt;');
+          root.querySelector('div').innerHTML += 'First 200 chars: <code>' + first100 + '</code><br/><br/>';
+          
+          // Check if we got HTML instead of JS
+          if (text.indexOf('<!DOCTYPE') !== -1 || text.indexOf('<html') !== -1) {
+            root.querySelector('div').innerHTML += '<span style="color:red;font-size:14px"><b>CRITICAL: Server returned HTML instead of JavaScript!</b><br/>The CDN/proxy is serving the wrong file.</span>';
+          } else {
+            root.querySelector('div').innerHTML += '<span style="color:yellow"><b>JS file looks correct but module execution failed.</b><br/>Likely a CORS or CSP policy issue on this domain.</span>';
+          }
+        }).catch(function(e) {
+          root.querySelector('div').innerHTML += '<span style="color:red">Fetch Error: ' + e.message + '</span>';
+        });
+      }
+    }, 3000);
+  </script>
   <script>
     // Mobile device optimizations
     document.addEventListener('DOMContentLoaded', function () {
