@@ -409,6 +409,8 @@ function Map() {
           }}
           zoomControl={false}
           preferCanvas={true}
+          fadeAnimation={false}
+          markerZoomAnimation={false}
           attributionControl={false}
           className="leaflet-container map-container"
           ref={mapRef}
@@ -459,7 +461,7 @@ function Map() {
           )}
 
           <MarkerClusterGroup
-            chunkedLoading={false}
+            chunkedLoading={true}
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
             zoomToBoundsOnClick={true}

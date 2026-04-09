@@ -60,7 +60,7 @@ export default function BottomNavigation() {
                     strokeWidth={isActive ? 2.5 : 1.5}
                   />
                   {isActive && (
-                    <div className="absolute -inset-2 bg-blue-500/20 rounded-full blur-md -z-10" />
+                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
                   )}
                   {(badge !== undefined && badge > 0) && (
                     <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
