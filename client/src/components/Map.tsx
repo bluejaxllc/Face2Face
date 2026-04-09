@@ -41,13 +41,104 @@ interface User {
   profilePhoto?: string | null;
 }
 
-function MapEventHandler({ onZoomChange, onUserInteract }: { onZoomChange: (zoom: number) => void; onUserInteract?: () => void }) {
-  const map = useMapEvents({
-    zoomend: () => { onZoomChange(map.getZoom()); },
-    dragstart: () => { onUserInteract?.(); },
-  });
+const MapEventHandler = memo(({ onZoomChange, onUserInteract }: { onZoomChange: (zoom: number) => void; onUserInteract: () => void }) => {
+  const mapEvents = useMemo(() => ({
+    zoomend: (e: any) => onZoomChange(e.target.getZoom()),
+    dragstart: onUserInteract,
+  }), [onZoomChange, onUserInteract]);
+
+  useMapEvents(mapEvents);
   return null;
-}
+});
+
+const clusterIconCreate = (cluster: any) => {
+  const count = cluster.getChildCount();
+  const size = count < 5 ? 40 : count < 10 ? 46 : 52;
+  return L.divIcon({
+    html: `
+      <div role="img" aria-label="Cluster of ${count} users" style="
+        width:${size}px;height:${size}px;
+        border-radius:50%;
+        background:white;
+        border:3px solid #4285F4;
+        display:flex;align-items:center;justify-content:center;
+        color:#1a73e8;font-weight:700;font-size:${count < 10 ? 14 : 12}px;
+        box-shadow:0 2px 6px rgba(0,0,0,0.2);
+      ">
+        ${count}
+      </div>
+    `,
+    className: 'custom-cluster-icon',
+    iconSize: L.point(size, size),
+    iconAnchor: L.point(size / 2, size / 2)
+  });
+};
+
+const maleIcon = L.divIcon({
+  className: 'custom-div-icon border-none bg-transparent',
+  html: `<div class="marker-pin" role="img" aria-label="Male user">
+    <svg width="44" height="44" viewBox="0 0 100 100">
+      <polygon points="50,4 96,92 4,92" fill="#3b82f6" stroke="#1e40af" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="50" cy="62" r="9" fill="white" opacity="0.95" />
+    </svg>
+  </div>`,
+  iconSize: [42, 42],
+  iconAnchor: [21, 21]
+});
+
+const femaleIcon = L.divIcon({
+  className: 'custom-div-icon border-none bg-transparent',
+  html: `<div class="marker-pin" role="img" aria-label="Female user">
+    <svg width="44" height="44" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="43" fill="#ec4899" stroke="#be185d" stroke-width="5"/>
+      <circle cx="50" cy="50" r="11" fill="white" opacity="0.95" />
+    </svg>
+  </div>`,
+  iconSize: [42, 42],
+  iconAnchor: [21, 21]
+});
+
+const getIcon = (gender: string) => gender === 'male' ? maleIcon : femaleIcon;
+
+const UserMarker = memo(({ user, currentLocation, onMarkerClick }: { user: User, currentLocation: any, onMarkerClick: (u: User) => void }) => {
+  const eventHandlers = useMemo(() => ({
+    click: () => onMarkerClick(user)
+  }), [user, onMarkerClick]);
+
+  const mapIcon = useMemo(() => getIcon(user.gender || "other"), [user.gender]);
+
+  return (
+    <Marker
+      position={[Number(user.latitude), Number(user.longitude)]}
+      icon={mapIcon}
+      eventHandlers={eventHandlers}
+    >
+      <Popup>
+        <div style={{ fontFamily: "'Inter', system-ui", textAlign: 'center', padding: '4px 2px', minWidth: '130px' }}>
+          <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '2px' }}>
+            {user.firstName}, {user.age}
+            <span style={{ marginLeft: '4px', fontSize: '14px', color: user.gender === 'male' ? '#3b82f6' : user.gender === 'female' ? '#ec4899' : '#a855f7' }}>
+              {user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥'}
+            </span>
+          </div>
+          <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
+            {'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}
+          </div>
+          {currentLocation && (
+            <div style={{ marginTop: '6px', background: '#1e293b', borderRadius: '12px', padding: '3px 8px', display: 'inline-block', fontSize: '11px', fontWeight: 500, color: '#a5b4fc' }}>
+              {calculateDistance(
+                Number(currentLocation.latitude),
+                Number(currentLocation.longitude),
+                Number(user.latitude),
+                Number(user.longitude)
+              ).toFixed(1)} mi
+            </div>
+          )}
+        </div>
+      </Popup>
+    </Marker>
+  );
+});
 
 function Map() {
   const { currentLocation, updateLocation, isError } = useLocationContext();
@@ -116,35 +207,6 @@ function Map() {
   L.Map.mergeOptions({
     tap: false,
   });
-
-  // Memoize custom icons — blue triangle (male), pink circle (female)
-  const maleIcon = useMemo(() => {
-    const svgHtml = `<svg width="44" height="44" viewBox="0 0 100 100">
-      <polygon points="50,4 96,92 4,92" fill="#3b82f6" stroke="#1e40af" stroke-width="5" stroke-linejoin="round"/>
-      <circle cx="50" cy="62" r="9" fill="white" opacity="0.95" />
-    </svg>`;
-    return L.divIcon({
-      className: 'custom-div-icon border-none bg-transparent',
-      html: `<div class="marker-pin" role="img" aria-label="Male user">${svgHtml}</div>`,
-      iconSize: [42, 42],
-      iconAnchor: [21, 21]
-    });
-  }, []);
-
-  const femaleIcon = useMemo(() => {
-    const svgHtml = `<svg width="44" height="44" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="43" fill="#ec4899" stroke="#be185d" stroke-width="5"/>
-      <circle cx="50" cy="50" r="11" fill="white" opacity="0.95" />
-    </svg>`;
-    return L.divIcon({
-      className: 'custom-div-icon border-none bg-transparent',
-      html: `<div class="marker-pin" role="img" aria-label="Female user">${svgHtml}</div>`,
-      iconSize: [42, 42],
-      iconAnchor: [21, 21]
-    });
-  }, []);
-
-  const getIcon = useCallback((gender: string) => gender === 'male' ? maleIcon : femaleIcon, [maleIcon, femaleIcon]);
 
   const showMen = filterOptions.showMen ?? true;
   const showWomen = filterOptions.showWomen ?? true;
@@ -304,19 +366,21 @@ function Map() {
 
   // Note: We no longer block the map when geolocation fails.
   // The query fires regardless, and the map uses stored server-side coordinates as fallback.
+  const handleUserInteract = useCallback(() => {
+    userHasInteracted.current = true;
+  }, []);
 
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full">
-      <div className="flex-1 relative" style={{ minHeight: '300px', height: '100%' }}>
-
+    <div className="w-full h-full relative map-wrapper" style={{ touchAction: 'none' }}>
+      {/* ═══════ THE MAP ITSELF ═══════ */}
+      <div className="absolute inset-0 z-0">
         <MapContainer
+          key={mapKey}
           center={center}
-          zoom={14}
+          zoom={zoom}
           style={{
             height: '100%',
             width: '100%',
-            background: '#e8e8e8',
-            display: 'block',
             zIndex: 20,
             position: 'absolute',
             top: 0,
@@ -352,7 +416,7 @@ function Map() {
             />
           )}
 
-          <MapEventHandler onZoomChange={handleZoomChange} onUserInteract={() => { userHasInteracted.current = true; }} />
+          <MapEventHandler onZoomChange={handleZoomChange} onUserInteract={handleUserInteract} />
 
           {currentLocation && (
             <>
@@ -386,62 +450,15 @@ function Map() {
             animate={false}
             animateAddingMarkers={false}
             spiderLegPolylineOptions={{ weight: 2, color: 'rgba(66,133,244,0.5)', opacity: 0.8 }}
-            iconCreateFunction={(cluster: any) => {
-              const count = cluster.getChildCount();
-              const size = count < 5 ? 40 : count < 10 ? 46 : 52;
-              return L.divIcon({
-                html: `
-                  <div role="img" aria-label="Cluster of ${count} users" style="
-                    width:${size}px;height:${size}px;
-                    border-radius:50%;
-                    background:white;
-                    border:3px solid #4285F4;
-                    display:flex;align-items:center;justify-content:center;
-                    color:#1a73e8;font-weight:700;font-size:${count < 10 ? 14 : 12}px;
-                    box-shadow:0 2px 6px rgba(0,0,0,0.2);
-                  ">
-                    ${count}
-                  </div>
-                `,
-                className: 'custom-cluster-icon',
-                iconSize: L.point(size, size),
-                iconAnchor: L.point(size / 2, size / 2)
-              });
-            }}
+            iconCreateFunction={clusterIconCreate}
           >
             {isActive && filteredUsers.map((user) => (
-              <Marker
+              <UserMarker
                 key={user.id}
-                position={[Number(user.latitude), Number(user.longitude)]}
-                icon={getIcon(user.gender || "other")}
-                eventHandlers={{
-                  click: () => handleMarkerClick(user)
-                }}
-              >
-                <Popup>
-                  <div style={{ fontFamily: "'Inter', system-ui", textAlign: 'center', padding: '4px 2px', minWidth: '130px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '2px' }}>
-                      {user.firstName}, {user.age}
-                      <span style={{ marginLeft: '4px', fontSize: '14px', color: user.gender === 'male' ? '#3b82f6' : user.gender === 'female' ? '#ec4899' : '#a855f7' }}>
-                        {user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥'}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
-                      {'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}
-                    </div>
-                    {currentLocation && (
-                      <div style={{ marginTop: '6px', background: '#1e293b', borderRadius: '12px', padding: '3px 8px', display: 'inline-block', fontSize: '11px', fontWeight: 500, color: '#a5b4fc' }}>
-                        {calculateDistance(
-                          Number(currentLocation.latitude),
-                          Number(currentLocation.longitude),
-                          Number(user.latitude),
-                          Number(user.longitude)
-                        ).toFixed(1)} mi
-                      </div>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
+                user={user}
+                currentLocation={currentLocation}
+                onMarkerClick={handleMarkerClick}
+              />
             ))}
           </MarkerClusterGroup>
         </MapContainer>
