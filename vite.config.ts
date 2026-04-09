@@ -1,10 +1,22 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+
+// Strip crossorigin attribute from script/link tags — fixes white screen on custom domains behind Railway CDN
+function stripCrossOrigin(): Plugin {
+  return {
+    name: 'strip-crossorigin',
+    enforce: 'post',
+    transformIndexHtml(html) {
+      return html.replace(/ crossorigin/g, '');
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
     react(),
+    stripCrossOrigin(),
   ],
   resolve: {
     alias: {

@@ -1,0 +1,22 @@
+﻿
+dist\public\index.html:19: 
+ <meta name="description"
+dist\public\index.html:22: 
+ <meta 
+property="og:description"
+dist\public\index.html:27: 
+ <meta 
+name="twitter:description" 
+content="Meet real people 
+nearby. No bots, no fake 
+profiles." />
+dist\public\index.html:126:
+  <script type="module" 
+crossorigin src="/assets/in
+dex-cyzck5ku.js"></script>
+dist\public\index.html:132:
+  <script>
+dist\public\index.html:186:
+  </script>
+
+
