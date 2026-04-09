@@ -1,29 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
-import MapView from "@/pages/MapView";
-import Explore from "@/pages/Explore";
 import Register from "@/pages/Register";
-import DevDiagnostics from "@/pages/DevDiagnostics";
-
-import Profile from "@/pages/Profile";
-import Messages from "@/pages/Messages";
 import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
-import { Loader2 } from "lucide-react";
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
-import { AnimatePresence } from "framer-motion";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SensorPermissionGate from "@/components/SensorPermissionGate";
 
+// Lazy-load heavy route components so Leaflet/framer-motion don't block initial paint
+const MapView = lazy(() => import("@/pages/MapView"));
+const Explore = lazy(() => import("@/pages/Explore"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Messages = lazy(() => import("@/pages/Messages"));
+const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
+
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
+
+// Minimal loading fallback — shows instantly while lazy chunks download
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-screen w-full bg-slate-950">
+    <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+  </div>
+);
 
 // Create a separate AppRouter component that uses the auth context
 function AppRouter() {
@@ -38,7 +44,7 @@ function AppRouter() {
   }
 
   return (
-    <AnimatePresence mode="wait">
+    <Suspense fallback={<PageLoader />}>
       <Switch location={location} key={location}>
         <Route path="/">
           {isAuthenticated ? <MapView /> : <Register />}
@@ -63,7 +69,7 @@ function AppRouter() {
         </Route>
         <Route component={NotFound} />
       </Switch>
-    </AnimatePresence>
+    </Suspense>
   );
 }
 
