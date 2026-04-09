@@ -441,7 +441,7 @@ function Map() {
           )}
 
           <MarkerClusterGroup
-            chunkedLoading
+            chunkedLoading={false}
             spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
             zoomToBoundsOnClick={true}

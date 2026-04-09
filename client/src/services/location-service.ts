@@ -34,6 +34,7 @@ class LocationService {
   private updateDelay: number = 1000; // Minimum time between server updates (1 second)
   private watchId: string | null = null; // For native watch position
   private webWatchId: number | null = null; // For web watch position
+  private lastUINotificationTime: number = 0;
 
   // Private constructor for singleton
   private constructor() { }
@@ -97,16 +98,6 @@ class LocationService {
     }
   }
 
-  // Helper to determine if we should notify UI
-  // Threshold: at least 2000ms delay OR significant distance change
-  private shouldNotifyUI(): boolean {
-    const now = Date.now();
-    if (now - this.lastServerUpdateTime > 2000) {
-      return true;
-    }
-    return false;
-  }
-
   // Start web continuous location watching
   private startWebWatch(): void {
     if (!navigator.geolocation) {
@@ -124,7 +115,8 @@ class LocationService {
         this.currentLocation = location;
         
         // Only trigger React state updates periodically to prevent UI lag on rapid GPS events
-        if (this.shouldNotifyUI()) {
+        if (Date.now() - this.lastUINotificationTime > 2000) {
+          this.lastUINotificationTime = Date.now();
           this.isError = false;
           this.notifyLocationListeners();
           this.notifyErrorListeners();
@@ -162,8 +154,9 @@ class LocationService {
             };
             this.currentLocation = location;
             
-            // Throttle UI updates exactly like web watch to prevent massive DOM lag
-            if (this.shouldNotifyUI()) {
+            // Throttle UI updates independently of server heartbeat
+            if (Date.now() - this.lastUINotificationTime > 2000) {
+              this.lastUINotificationTime = Date.now();
               this.isError = false;
               this.notifyLocationListeners();
               this.notifyErrorListeners();
