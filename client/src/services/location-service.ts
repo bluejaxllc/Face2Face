@@ -228,13 +228,35 @@ class LocationService {
 
   // Get current position — native or web
   private async getCurrentPosition(): Promise<{ coords: { latitude: number; longitude: number } }> {
-    console.log("[LocationService] EXPERIMENT: Geolocation bypassed, using mock location");
-    return Promise.resolve({
-      coords: {
-        latitude: 32.7767, // Dallas
-        longitude: -96.7970
+    if (Capacitor.isNativePlatform()) {
+      // Check permissions first on native
+      const permission = await Geolocation.checkPermissions();
+      if (permission.location !== 'granted') {
+        const requested = await Geolocation.requestPermissions();
+        if (requested.location !== 'granted') {
+          throw new Error('Location permission denied');
+        }
       }
-    });
+      const position: Position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      });
+      return position;
+    } else {
+      // Web fallback
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('Geolocation not supported'));
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          position => resolve(position),
+          error => reject(error),
+          { enableHighAccuracy: false, timeout: 30000, maximumAge: 10000 }
+        );
+      });
+    }
   }
 
   // Debounced server update

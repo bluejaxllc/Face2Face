@@ -30,8 +30,7 @@ export default function SensorPermissionGate({ children }: SensorPermissionGateP
     const [step, setStep] = useState<"intro" | "granted">("intro");
 
     // Skip gate entirely for non-authenticated users (Register page doesn't need sensors)
-    // TEMPORARY EXPERIMENT: Skip gate for ALL users to see if iOS Safari crash stops
-    if (!isAuthenticated || true) {
+    if (!isAuthenticated) {
         return <>{children}</>;
     }
 
