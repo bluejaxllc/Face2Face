@@ -58,10 +58,6 @@ export function ConnectInteraction({ open, user, distance, onClose, onSuccess }:
   }, [open, user]);
 
   const initializeMotionDetection = async () => {
-    if (distance && distance <= 3) {
-      setStage("direct_message");
-      return;
-    }
 
     if (!window.DeviceMotionEvent) {
       toast({
