@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Face 2 Face — Meet Someone. For Real.</title>
+  <meta name="description" content="Face 2 Face is the proximity-based dating app where real, verified people connect face to face. No bots. No catfish. Just real connections."/>
+  <meta property="og:title" content="Face 2 Face — Meet Someone. For Real."/>
+  <meta property="og:description" content="The dating app built for real connections. See who's nearby, send a Bump, and meet face to face."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://face2face.icu"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 120 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 88L10 74C10 68 14 64 20 62L28 59C24 56 22 52 22 47L22 45C22 44 22 43 22 42L22 40C20 38 19 35 19 32C19 28 21 24 24 22C24 18 24 14 26 12C29 7 34 5 40 5C46 5 50 8 50 14C50 16 49 18 48 20L48 22C50 24 51 27 51 30L51 32C52 34 52 35 53 36L55 38C56 39 56 40 56 41L56 42L54 44L53 46L56 48C57 49 57 50 56 51L53 54C51 56 50 58 50 60L55 62C58 64 60 68 60 72L60 88Z' fill='%233B5998' opacity='0.95'/%3E%3Cpath d='M110 88L110 74C110 68 106 64 100 62L92 59C96 56 98 52 98 47L98 45C98 44 98 43 98 42L98 40C100 38 101 35 101 32C101 28 99 24 96 22C96 18 96 14 94 12C91 7 86 5 80 5C74 5 70 8 70 14C70 16 71 18 72 20L72 22C70 24 69 27 69 30L69 32C68 34 68 35 67 36L65 38C64 39 64 40 64 41L64 42L66 44L67 46L64 48C63 49 63 50 64 51L67 54C69 56 70 58 70 60L65 62C62 64 60 68 60 72L60 88Z' fill='%23E84393' opacity='0.95'/%3E%3C/svg%3E"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- Floating particles for ambient depth -->
+<div class="particles" id="particles" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════════ NAVIGATION ═══════════════════════════════════════ -->
+<header id="navbar" class="navbar">
+  <nav class="navbar__inner">
+    <a href="#hero" class="navbar__logo" aria-label="Face 2 Face">
+      <svg class="navbar__logo-icon" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 88L10 74C10 68 14 64 20 62L28 59C24 56 22 52 22 47L22 45C22 44 22 43 22 42L22 40C20 38 19 35 19 32C19 28 21 24 24 22C24 18 24 14 26 12C29 7 34 5 40 5C46 5 50 8 50 14C50 16 49 18 48 20L48 22C50 24 51 27 51 30L51 32C52 34 52 35 53 36L55 38C56 39 56 40 56 41L56 42L54 44L53 46L56 48C57 49 57 50 56 51L53 54C51 56 50 58 50 60L55 62C58 64 60 68 60 72L60 88Z" fill="hsl(222,60%,45%)" opacity=".95"/>
+        <path d="M110 88L110 74C110 68 106 64 100 62L92 59C96 56 98 52 98 47L98 45C98 44 98 43 98 42L98 40C100 38 101 35 101 32C101 28 99 24 96 22C96 18 96 14 94 12C91 7 86 5 80 5C74 5 70 8 70 14C70 16 71 18 72 20L72 22C70 24 69 27 69 30L69 32C68 34 68 35 67 36L65 38C64 39 64 40 64 41L64 42L66 44L67 46L64 48C63 49 63 50 64 51L67 54C69 56 70 58 70 60L65 62C62 64 60 68 60 72L60 88Z" fill="hsl(330,81%,60%)" opacity=".95"/>
+      </svg>
+      <span class="navbar__logo-text">Face<span class="navbar__logo-2">2</span>Face</span>
+    </a>
+    <div class="navbar__links" id="nav-links">
+      <a href="#features" class="navbar__link">Features</a>
+      <a href="#safety" class="navbar__link">Safety</a>
+      <a href="#testimonials" class="navbar__link">Reviews</a>
+      <a href="#download" class="navbar__link">Download</a>
+    </div>
+    <a href="#download" class="btn btn--primary btn--sm">Download App</a>
+    <button class="navbar__burger" id="burger-btn" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+<section id="hero" class="hero">
+  <div class="hero__glow hero__glow--coral"></div>
+  <div class="hero__glow hero__glow--blue"></div>
+  <div class="hero__content">
+    <span class="eyebrow">THE FUTURE OF DATING</span>
+    <h1 class="hero__title">Meet <span class="gradient-text">Someone.</span></h1>
+    <p class="hero__subtitle">No bots. No catfish. No ghosting.<br/>Just real people, face to face.</p>
+    <div class="hero__ctas">
+      <a href="#download" class="btn btn--primary btn--lg">
+        <span class="material-symbols-outlined" style="font-size:20px">phone_iphone</span>
+        Download for iOS
+      </a>
+      <a href="#download" class="btn btn--glass btn--lg">
+        <span class="material-symbols-outlined" style="font-size:20px">android</span>
+        Download for Android
+      </a>
+    </div>
+    <div class="hero__proof">
+      <span class="hero__proof-dot"></span>
+      Join 10,000+ real people
+    </div>
+  </div>
+  <div class="hero__mockup">
+    <div class="hero__phone">
+      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu9WNBEIDy_e03brG2QckmLyIiGZf_G3TwFZnePAMZ8am-_0b3BeS5cZBK8cfES-S1dBylfSa5Oy2_IIDUBZlaHPiim0dbZ1cv7JmvAsi8QK0kwcYPvSilQTu9jckZZHkRYQXI96hcKrmThJQ9bZN8kAGSR4mOFkoliY_yxOgVYIq9YXyI_zXSws_j1v434O05-5yuC2MNwvEZbAXHdGLGK5X-7-eDHXnqDKm4H9NJJa_82KG2umJmdpbbQ-UIbjVnmmVAwQZZz7Y" alt="Face 2 Face app map view showing nearby connections" loading="lazy"/>
+    </div>
+  </div>
+  <div class="hero__scroll-hint">
+    <span>Scroll</span>
+    <span class="material-symbols-outlined">expand_more</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ STATS ═══════════════════════════════════════ -->
+<section class="stats">
+  <div class="stats__inner">
+    <div class="stats__item"><span class="stats__number">10K+</span><span class="stats__label">Users</span></div>
+    <div class="stats__item"><span class="stats__number">50K+</span><span class="stats__label">Connections</span></div>
+    <div class="stats__item"><span class="stats__number">100%</span><span class="stats__label">Verified</span></div>
+    <div class="stats__item"><span class="stats__number">4.8★</span><span class="stats__label">Rating</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ HOW IT WORKS ═══════════════════════════════════════ -->
+<section id="how-it-works" class="section">
+  <div class="section__container">
+    <span class="eyebrow">HOW IT WORKS</span>
+    <h2 class="section__title">Three Steps to Your Next<br/><span class="gradient-text">Real Connection</span></h2>
+    <div class="steps-grid">
+      <div class="glass-card steps-card">
+        <div class="steps-card__icon steps-card__icon--coral">
+          <span class="material-symbols-outlined">location_on</span>
+        </div>
+        <h3 class="steps-card__title">Go Active</h3>
+        <p class="steps-card__desc">Turn on your presence. Everyone nearby sees you're real and ready to connect.</p>
+        <span class="steps-card__number">01</span>
+      </div>
+      <div class="glass-card steps-card">
+        <div class="steps-card__icon steps-card__icon--blue">
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <h3 class="steps-card__title">Get Bumped</h3>
+        <p class="steps-card__desc">Someone nearby is interested. Receive their icebreaker message instantly.</p>
+        <span class="steps-card__number">02</span>
+      </div>
+      <div class="glass-card steps-card">
+        <div class="steps-card__icon steps-card__icon--green">
+          <span class="material-symbols-outlined">chat_bubble</span>
+        </div>
+        <h3 class="steps-card__title">Meet Face to Face</h3>
+        <p class="steps-card__desc">Chat, plan, and meet in person. No endless swiping. Just real connections.</p>
+        <span class="steps-card__number">03</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FEATURES ═══════════════════════════════════════ -->
+<section id="features" class="section section--dark">
+  <div class="section__container">
+    <span class="eyebrow">FEATURES</span>
+    <h2 class="section__title">Built for <span class="gradient-text">Real Connections</span></h2>
+
+    <!-- Feature 1: Proximity -->
+    <div class="feature-row">
+      <div class="feature-row__phone">
+        <div class="feature-row__phone-glow feature-row__phone-glow--coral"></div>
+        <div class="glass-card phone-frame">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu9WNBEIDy_e03brG2QckmLyIiGZf_G3TwFZnePAMZ8am-_0b3BeS5cZBK8cfES-S1dBylfSa5Oy2_IIDUBZlaHPiim0dbZ1cv7JmvAsi8QK0kwcYPvSilQTu9jckZZHkRYQXI96hcKrmThJQ9bZN8kAGSR4mOFkoliY_yxOgVYIq9YXyI_zXSws_j1v434O05-5yuC2MNwvEZbAXHdGLGK5X-7-eDHXnqDKm4H9NJJa_82KG2umJmdpbbQ-UIbjVnmmVAwQZZz7Y" alt="Proximity map interface" loading="lazy"/>
+        </div>
+      </div>
+      <div class="feature-row__content">
+        <h3 class="feature-row__title gradient-text">Real-Time Proximity</h3>
+        <p class="feature-row__desc">Never miss a chance encounter. Our proximity engine alerts you when a compatible match is nearby, turning your daily commute or coffee run into a potential date.</p>
+        <ul class="feature-row__list">
+          <li><span class="material-symbols-outlined">map</span><div><strong>25 mile radius</strong><br/><small>Configurable range to find locals nearby.</small></div></li>
+          <li><span class="material-symbols-outlined">speed</span><div><strong>Live updates every second</strong><br/><small>Ultra-fast positioning for real-time meetings.</small></div></li>
+          <li><span class="material-symbols-outlined">battery_charging_full</span><div><strong>Battery-friendly GPS</strong><br/><small>Smart technology that saves power while staying active.</small></div></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Feature 2: The Bump -->
+    <div class="feature-row feature-row--reverse">
+      <div class="feature-row__content">
+        <h3 class="feature-row__title gradient-text">The Bump</h3>
+        <p class="feature-row__desc">See someone interesting? Send them a Bump — a quick icebreaker message that lets them know you're nearby and interested.</p>
+        <div class="glass-card bump-preview">
+          <div class="bump-preview__header">
+            <div class="bump-preview__icon"><span class="material-symbols-outlined">bolt</span></div>
+            <span class="bump-preview__label">Instant Icebreaker</span>
+          </div>
+          <p class="bump-preview__message">"I think we're both in the same coffee shop. Your profile mentioned you love jazz—they're playing Miles Davis right now."</p>
+        </div>
+      </div>
+      <div class="feature-row__phone">
+        <div class="feature-row__phone-glow feature-row__phone-glow--blue"></div>
+        <div class="glass-card phone-frame">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA84IDyT7_BH6V3jIimjeAkQAHEcBNNSllPdmjQyLqOUmu39e1OVQ_GSuw5MxXqP73LjnfKZ6MlFWTUJNEze5b63dfxuThjrC_VNSOJH8QNHgDIZLUAR0QXLwmAZ4ltaq1Pke6hOMhMg8FqzbOd01BmRI_LKnBARlHRgCZQ3YW0Lc3D46YxIVmcyEfT-goYGDQIgHzh0cK3LJQpfPorjSeVjJ8k9jB8Nl0nvrvms9c-x87cCnWOUP3K0Ui7BRv9ukcub5pgI7uK280" alt="Bump notification on Face 2 Face" loading="lazy"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="feature-grid">
+      <div class="glass-card feature-card"><span class="material-symbols-outlined feature-card__icon">psychology</span><h4>Smart Matching</h4><p>AI that learns your preferences from real interactions.</p></div>
+      <div class="glass-card feature-card"><span class="material-symbols-outlined feature-card__icon">chat_bubble</span><h4>Instant Chat</h4><p>Low-latency messaging with built-in icebreaker prompts.</p></div>
+      <div class="glass-card feature-card"><span class="material-symbols-outlined feature-card__icon">grade</span><h4>Self Rating</h4><p>Honest 1-10 self-assessment for better matches.</p></div>
+      <div class="glass-card feature-card"><span class="material-symbols-outlined feature-card__icon">category</span><h4>Category Modes</h4><p>Switch between Dating and Business networking.</p></div>
+      <div class="glass-card feature-card"><span class="material-symbols-outlined feature-card__icon">photo_library</span><h4>Photo Gallery</h4><p>Share up to 6 photos on your profile.</p></div>
+      <div class="glass-card feature-card"><span class="material-symbols-outlined feature-card__icon">sensors</span><h4>Activity Status</h4><p>Go active or invisible whenever you want.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ SAFETY ═══════════════════════════════════════ -->
+<section id="safety" class="section">
+  <div class="section__container">
+    <div class="safety-hero">
+      <div class="safety-hero__shield"><span class="material-symbols-outlined" style="font-size:48px;font-variation-settings:'FILL' 1">shield_with_heart</span></div>
+      <span class="eyebrow eyebrow--blue">SAFETY FIRST</span>
+      <h2 class="section__title">Your Safety is Our <span class="gradient-text--blue">Priority</span></h2>
+      <p class="section__subtitle">Every feature, every decision, every line of code — built with your safety in mind.</p>
+    </div>
+
+    <div class="safety-grid">
+      <div class="glass-card safety-card">
+        <span class="material-symbols-outlined safety-card__icon safety-card__icon--coral" style="font-variation-settings:'FILL' 1">block</span>
+        <h4>Block & Report</h4>
+        <p>Instantly block anyone and report inappropriate behavior. Our team reviews every report within 24 hours.</p>
+      </div>
+      <div class="glass-card safety-card">
+        <span class="material-symbols-outlined safety-card__icon safety-card__icon--blue" style="font-variation-settings:'FILL' 1">visibility_off</span>
+        <h4>Location Privacy</h4>
+        <p>Your exact location is never shared. Other users only see approximate distance from you.</p>
+      </div>
+      <div class="glass-card safety-card">
+        <span class="material-symbols-outlined safety-card__icon safety-card__icon--green" style="font-variation-settings:'FILL' 1">filter_alt</span>
+        <h4>Message Controls</h4>
+        <p>Control who can message you. Only matched users can start conversations.</p>
+      </div>
+      <div class="glass-card safety-card">
+        <span class="material-symbols-outlined safety-card__icon safety-card__icon--purple" style="font-variation-settings:'FILL' 1">enhanced_encryption</span>
+        <h4>Data Encryption</h4>
+        <p>All messages and personal data are encrypted end-to-end. We never sell your data.</p>
+      </div>
+    </div>
+
+    <div class="trust-stats">
+      <div class="trust-stats__item">
+        <span class="trust-stats__number gradient-text--blue">100%</span>
+        <span class="trust-stats__label">Verified Profiles</span>
+      </div>
+      <div class="trust-stats__item">
+        <span class="trust-stats__number gradient-text--blue">24hr</span>
+        <span class="trust-stats__label">Report Response</span>
+      </div>
+      <div class="trust-stats__item">
+        <span class="trust-stats__number gradient-text--blue">Zero</span>
+        <span class="trust-stats__label">Tolerance for Abuse</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ TESTIMONIALS ═══════════════════════════════════════ -->
+<section id="testimonials" class="section section--dark">
+  <div class="section__container">
+    <span class="eyebrow">REVIEWS</span>
+    <h2 class="section__title">What People Are <span class="gradient-text">Saying</span></h2>
+    <div class="testimonials-grid">
+      <div class="glass-card testimonial-card">
+        <div class="testimonial-card__header">
+          <img class="testimonial-card__avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1dQEzqqhBOBQL0pCLwlXYtipDd9e3pcDM1tHJGQHV7nkjGGVPVCZjji9nV9JQzl4sTBmOygfP6Uhsn1XPiQ3opFPL7SKiGbOdQWxu6A_i8WmlDPKQlJxD4wgE2AGS_wsxixbkkKFGHH97t42R6M66AwVdBBzIc1BD7tlYaxZTekAtYCtAhQZMFCl_WRIkJ3vEWqZfwx5Ev0BEfafkjiVvbToVhhf-cLuCIc7p4KQtXMiA2lrmr857pJRNhwejMUwOyGOHBYBpn28" alt="Sarah M."/>
+          <div>
+            <strong>Sarah M.</strong>
+            <div class="testimonial-card__stars">★★★★★</div>
+          </div>
+        </div>
+        <p>"Finally an app where people actually show up. I've met 3 amazing people in my first week!"</p>
+        <span class="testimonial-card__location">Austin, TX</span>
+      </div>
+      <div class="glass-card testimonial-card">
+        <div class="testimonial-card__header">
+          <img class="testimonial-card__avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjfeadfPQmPwG21MUvp_fds9qX4kJbwZmAn1AApX-x2F9KyduEN4ziUWf-iomQxFjUZyQSrW9BsdT8ZfvFWqC8zJJlK-9-OMRhV3NJ0GpEddNIk6CEpLC5AXvBoKTnjSm4Tk1a2jmD2WxYdRNW6rMJbylvU52nFJEWSW43bbRgxk0mzH6RGcUje-gQJKKBFkMs_cTj-PVIPLho6JlzyH5Otvi9-fq6t4oNGfSItHKHPm-oTM_hlif5FBfSYW8PItHGpbjiCfMXaOQ" alt="Marcus J."/>
+          <div>
+            <strong>Marcus J.</strong>
+            <div class="testimonial-card__stars">★★★★★</div>
+          </div>
+        </div>
+        <p>"The Bump feature is genius. No more awkward first messages — just a quick tap and we were chatting."</p>
+        <span class="testimonial-card__location">Miami, FL</span>
+      </div>
+      <div class="glass-card testimonial-card">
+        <div class="testimonial-card__header">
+          <img class="testimonial-card__avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUnbBo0jT-3aDI8T7jjZMyL6axIHKwRMe7PpXoBn6o9iJkN8oFRWGZIlO_2cmV9ZA2YTqtDc1tfIY8FS-WIFu5_wf8K0Zwsw1eSh7BaVkZzj2Ww-GZ_8VDqxsA9JCf_21TbwSx29Eh2QFfTclN_QF_xf1frcA8X0o0cgsIQ7FnZCmd86mxm6KBW07xvUDWQ2grSj-C3naLeg1aS4Jbpop-ImQsgd8o--UJr8y9-T8p6_54Kw6rui3pGm-rLyCZuXEHqVUMaojOMlU" alt="Emily R."/>
+          <div>
+            <strong>Emily R.</strong>
+            <div class="testimonial-card__stars">★★★★★</div>
+          </div>
+        </div>
+        <p>"I deleted every other dating app. Face 2 Face is the only one where everyone is real."</p>
+        <span class="testimonial-card__location">Denver, CO</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ DOWNLOAD ═══════════════════════════════════════ -->
+<section id="download" class="section download-section">
+  <div class="section__container download-inner">
+    <div class="download__content">
+      <span class="eyebrow">DOWNLOAD</span>
+      <h2 class="section__title">Ready to Meet <span class="gradient-text">Someone?</span></h2>
+      <p class="section__subtitle">Your next real connection is closer than you think. Download Face 2 Face — free on iOS and Android.</p>
+      <div class="download__badges">
+        <a href="#" class="store-badge" aria-label="Download on the App Store">
+          <span class="material-symbols-outlined" style="font-size:32px">phone_iphone</span>
+          <div><small>Download on the</small><strong>App Store</strong></div>
+        </a>
+        <a href="#" class="store-badge" aria-label="Get it on Google Play">
+          <span class="material-symbols-outlined" style="font-size:32px">android</span>
+          <div><small>GET IT ON</small><strong>Google Play</strong></div>
+        </a>
+      </div>
+      <div class="download__info">
+        <span>iOS 15+ · Android 10+</span>
+        <span>45 MB</span>
+        <span>Version 2.1.0</span>
+      </div>
+    </div>
+    <div class="download__phones">
+      <div class="download__phone download__phone--left">
+        <div class="glass-card phone-frame">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWmjeXjmaxocNqdWf_68tFRRPjYCvJjb2Zu3NEe7lYUQmAIzwXliwEBoF21ZXFHKOWZe1MhROaXCwrOk7ghGV9DD9WPp84GXnfqzvusLxrIui6yGXmr68GfIyHZiq_zwW63pmyVpTcCNd1lEnW3Hbhm66eEl47v8KVYfCOpmk6dRlat3MT1tPfwtFml21GYwjwYQFzpNj5WymwrcapRY47mFlflWHPJpCqc9QWbVMCOMR11D0ko4nuEDrvy8CzOx0nuTqJSZgbkiA" alt="Map discovery view" loading="lazy"/>
+        </div>
+      </div>
+      <div class="download__phone download__phone--right">
+        <div class="glass-card phone-frame">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv7cu79fHGM2FL-JNWjgycZghYziaHR7iV6zs1ixhApoQqzIVVl6zHkqMPcLtmm-3d_jKKi4xyNrOtqfQmZbvAYwnfnv3k9tqSEMa_G6aTsGXnvy9cGdJ2YxbGGRU9i9meAGQMR69tWi5JroArN007oJRxCq2uwcSj6GbMKhKsLou63YmVaoEXhsZz5KVhSFWmp5qqWCD9TaokjslzxVA6qthR7vxHAevhZpM_uo5TAE9UZR0-2Ru-4tLFomtxDhcTFK0yz5gBYsQ" alt="Profile view" loading="lazy"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ FOOTER ═══════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer__gradient-line"></div>
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <svg class="footer__logo" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 88L10 74C10 68 14 64 20 62L28 59C24 56 22 52 22 47L22 45C22 44 22 43 22 42L22 40C20 38 19 35 19 32C19 28 21 24 24 22C24 18 24 14 26 12C29 7 34 5 40 5C46 5 50 8 50 14C50 16 49 18 48 20L48 22C50 24 51 27 51 30L51 32C52 34 52 35 53 36L55 38C56 39 56 40 56 41L56 42L54 44L53 46L56 48C57 49 57 50 56 51L53 54C51 56 50 58 50 60L55 62C58 64 60 68 60 72L60 88Z" fill="hsl(222,60%,45%)" opacity=".95"/>
+        <path d="M110 88L110 74C110 68 106 64 100 62L92 59C96 56 98 52 98 47L98 45C98 44 98 43 98 42L98 40C100 38 101 35 101 32C101 28 99 24 96 22C96 18 96 14 94 12C91 7 86 5 80 5C74 5 70 8 70 14C70 16 71 18 72 20L72 22C70 24 69 27 69 30L69 32C68 34 68 35 67 36L65 38C64 39 64 40 64 41L64 42L66 44L67 46L64 48C63 49 63 50 64 51L67 54C69 56 70 58 70 60L65 62C62 64 60 68 60 72L60 88Z" fill="hsl(330,81%,60%)" opacity=".95"/>
+      </svg>
+      <span class="footer__wordmark">Face2Face</span>
+      <p class="footer__tagline">Meet Someone. For Real.</p>
+    </div>
+    <div class="footer__links">
+      <div class="footer__col">
+        <h5>Product</h5>
+        <a href="#features">Features</a>
+        <a href="#safety">Safety</a>
+        <a href="#download">Download</a>
+      </div>
+      <div class="footer__col">
+        <h5>Legal</h5>
+        <a href="terms.html">Terms of Use</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </div>
+      <div class="footer__col">
+        <h5>Company</h5>
+        <a href="mailto:support@face2face.icu">Contact</a>
+        <a href="mailto:support@face2face.icu">Support</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <p>© 2026 Face 2 Face. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

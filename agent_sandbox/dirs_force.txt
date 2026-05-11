@@ -1,0 +1,13 @@
+﻿C:\Users\edgar\OneDrive\Desktop\AI APPS\.git
+C:\Users\edgar\OneDrive\Desktop\AI APPS\MLS\.git
+C:\Users\edgar\OneDrive\Desktop\AI APPS\Pulpo\.git
+C:\Users\edgar\OneDrive\Desktop\AI APPS\Pulpo\backend\.git
+C:\Users\edgar\OneDrive\Desktop\AI APPS\Pulpo\frontend\.git
+C:\Users\edgar\OneDrive\Desktop\Asilo\asilo-web\.git
+C:\Users\edgar\OneDrive\Desktop\BlueJax\.git
+C:\Users\edgar\OneDrive\Desktop\Botanas\.git
+C:\Users\edgar\OneDrive\Desktop\Face 2 Face\Bump-and-Grind\.git
+C:\Users\edgar\OneDrive\Desktop\Jack\.git
+C:\Users\edgar\OneDrive\Desktop\MLS\.git
+C:\Users\edgar\OneDrive\Desktop\MLS_fresh\.git
+C:\Users\edgar\OneDrive\Desktop\Vibrana\.git

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#e0bfbd",
+                        "surface-container-high": "#352726",
+                        "on-secondary": "#000ea4",
+                        "on-secondary-container": "#a8afff",
+                        "on-primary-container": "#6d0010",
+                        "on-tertiary-fixed": "#002113",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#160b0b",
+                        "primary-fixed": "#ffdad8",
+                        "surface-container-low": "#251818",
+                        "surface-variant": "#403130",
+                        "secondary-container": "#1425d5",
+                        "surface-bright": "#453635",
+                        "on-surface": "#f5dddb",
+                        "tertiary-fixed-dim": "#52dea2",
+                        "outline-variant": "#584140",
+                        "tertiary-fixed": "#72fbbd",
+                        "primary-fixed-dim": "#ffb3b0",
+                        "surface-tint": "#ffb3b0",
+                        "primary-container": "#ff6b6b",
+                        "surface": "#1c1010",
+                        "tertiary-container": "#01b179",
+                        "primary": "#ffb3b0",
+                        "on-primary-fixed": "#410006",
+                        "tertiary": "#52dea2",
+                        "on-tertiary-container": "#003b26",
+                        "on-tertiary": "#003824",
+                        "inverse-on-surface": "#3b2d2c",
+                        "on-background": "#f5dddb",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "surface-container": "#291c1c",
+                        "secondary": "#bdc2ff",
+                        "on-secondary-fixed": "#000668",
+                        "on-primary-fixed-variant": "#8c1520",
+                        "surface-dim": "#1c1010",
+                        "on-primary": "#68000f",
+                        "surface-container-highest": "#403130",
+                        "secondary-fixed-dim": "#bdc2ff",
+                        "outline": "#a78a88",
+                        "background": "#1c1010",
+                        "inverse-surface": "#f5dddb",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "inverse-primary": "#ae2f34",
+                        "secondary-fixed": "#e0e0ff",
+                        "on-secondary-fixed-variant": "#1425d5",
+                        "privacy-blue": "#4E5DFF"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "container-padding": "24px",
+                        "unit": "8px",
+                        "stack-lg": "32px",
+                        "gutter": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "h3": ["Plus Jakarta Sans"],
+                        "h1": ["Plus Jakarta Sans"],
+                        "h2": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "h1": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "h2": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0D0D1A;
+            color: #f5dddb;
+        }
+        .glass-card {
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.02;
+            pointer-events: none;
+        }
+        .glow-blue {
+            box-shadow: 0 0 25px rgba(78, 93, 255, 0.4);
+        }
+        .blue-gradient-line {
+            background: linear-gradient(90deg, transparent, #4E5DFF, transparent);
+            height: 1px;
+            width: 100%;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="font-body-md selection:bg-privacy-blue selection:text-white">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 bg-slate-950/80 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]">
+<div class="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-black text-rose-500 tracking-tighter font-['Plus_Jakarta_Sans']">Face 2 Face</div>
+<nav class="hidden md:flex items-center space-x-8 font-['Plus_Jakarta_Sans'] tracking-tight">
+<a class="text-slate-400 font-medium hover:text-cyan-400 transition-all duration-300 active:scale-95" href="#">Discover</a>
+<a class="text-slate-400 font-medium hover:text-cyan-400 transition-all duration-300 active:scale-95" href="#">Matches</a>
+<a class="text-slate-400 font-medium hover:text-cyan-400 transition-all duration-300 active:scale-95" href="#">Safety</a>
+<a class="text-slate-400 font-medium hover:text-cyan-400 transition-all duration-300 active:scale-95" href="#">Support</a>
+</nav>
+<div class="flex items-center space-x-6 text-slate-400">
+<button class="active:scale-95 transition-transform hover:text-cyan-400">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="active:scale-95 transition-transform hover:text-cyan-400">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-container-padding py-stack-lg">
+<!-- Header Section -->
+<section class="flex flex-col items-center text-center mb-16">
+<div class="mb-6 relative">
+<div class="absolute inset-0 bg-privacy-blue/20 blur-2xl rounded-full"></div>
+<span class="material-symbols-outlined text-7xl text-privacy-blue relative z-10 drop-shadow-[0_0_15px_rgba(78,93,255,0.6)]" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+</div>
+<h1 class="text-h1 font-h1 text-white mb-2" style="font-size: 48px;">Privacy Policy</h1>
+<p class="text-label-sm text-slate-500 mb-4 uppercase tracking-widest">Last updated: April 29, 2026</p>
+<p class="text-body-lg text-privacy-blue font-medium mb-8">Your privacy matters to us.</p>
+<div class="blue-gradient-line max-w-md mx-auto opacity-50"></div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-stack-lg items-start">
+<!-- Table of Contents -->
+<aside class="lg:col-span-4 sticky top-28">
+<div class="glass-card p-8 rounded-xl shadow-2xl">
+<h3 class="text-h3 font-h3 text-white mb-6 border-b border-white/5 pb-4">Table of Contents</h3>
+<nav class="space-y-3">
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-1">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">01</span>
+<span class="font-medium">Information We Collect</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-2">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">02</span>
+<span class="font-medium">How We Use Your Information</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-3">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">03</span>
+<span class="font-medium">Location Data</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-4">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">04</span>
+<span class="font-medium">Data Sharing</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-5">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">05</span>
+<span class="font-medium">Data Security</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-6">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">06</span>
+<span class="font-medium">Your Rights</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-7">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">07</span>
+<span class="font-medium">Data Retention</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-8">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">08</span>
+<span class="font-medium">Third-Party Services</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-9">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">09</span>
+<span class="font-medium">Children's Privacy</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-10">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">10</span>
+<span class="font-medium">International Users</span>
+</a>
+<a class="flex items-center text-slate-400 hover:text-privacy-blue transition-colors group" href="#section-11">
+<span class="text-privacy-blue/60 font-mono mr-3 text-sm">11</span>
+<span class="font-medium">Changes to Policy</span>
+</a>
+<a class="flex items-center text-privacy-blue hover:text-white transition-colors group" href="#section-12">
+<span class="font-mono mr-3 text-sm">12</span>
+<span class="font-medium underline decoration-privacy-blue/30 underline-offset-4">Contact Support</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Sections -->
+<div class="lg:col-span-8 space-y-16 max-w-[800px]">
+<section id="section-1">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 1: Information We Collect</h2>
+<div class="text-body-md text-[#C0C0D0] space-y-4">
+<p>We collect information that you provide directly to us when creating an account, such as your phone number, email address, and profile details including photographs and biography. This helps create an authentic environment for face-to-face interaction.</p>
+<p>Automatically collected information includes device identifiers, browser types, and usage data via cookies to improve the seamless delivery of the Face 2 Face experience.</p>
+</div>
+</section>
+<section id="section-2">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 2: How We Use Your Information</h2>
+<p class="text-body-md text-[#C0C0D0]">Your data is used to provide, maintain, and improve our services. This includes matching you with potential connections based on shared interests, sending service notifications, and ensuring the safety and security of our community.</p>
+</section>
+<section class="p-8 glass-card rounded-xl border-l-4 border-l-privacy-blue" id="section-3">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-privacy-blue text-3xl mt-1">my_location</span>
+<div>
+<h2 class="text-h3 font-h3 text-white mb-6">Section 3: Location Data</h2>
+<p class="text-body-md text-[#C0C0D0]">To facilitate real-time connections, we process your location data in real-time. Crucially, <span class="text-white font-bold">Face 2 Face does not store your location history.</span> Your precise coordinates are used momentarily to identify nearby users and are discarded immediately after the session ends.</p>
+</div>
+</div>
+</section>
+<section id="section-4">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 4: Data Sharing</h2>
+<p class="text-body-md text-[#C0C0D0]">We do not sell your personal data to third parties. We only share information with service providers who help us operate our platform, or when required by law to protect the rights and safety of our users.</p>
+</section>
+<section id="section-5">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 5: Data Security</h2>
+<p class="text-body-md text-[#C0C0D0]">Security is at the heart of Deep Space Intimacy. We use industry-standard End-to-End (E2E) encryption for all messaging and private data transmission. Our servers are housed in Tier-4 data centers with 24/7 monitoring to prevent unauthorized access.</p>
+</section>
+<section id="section-6">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 6: Your Rights</h2>
+<div class="text-body-md text-[#C0C0D0] space-y-4">
+<p>Under global data protection laws, you maintain the following rights over your personal data:</p>
+<ul class="list-disc pl-6 space-y-2 marker:text-privacy-blue">
+<li>Right to Access: Request a copy of the personal data we hold about you.</li>
+<li>Right to Correct: Update inaccurate or incomplete information.</li>
+<li>Right to Delete: Request the permanent removal of your account and data.</li>
+<li>Right to Export: Receive your data in a portable, machine-readable format.</li>
+</ul>
+</div>
+</section>
+<section id="section-7">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 7: Data Retention</h2>
+<p class="text-body-md text-[#C0C0D0]">We retain your information only as long as necessary to provide our services. Inactive accounts are flagged after 12 months, and associated personal data is purged within 30 days of a deletion request.</p>
+</section>
+<section id="section-8">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 8: Third-Party Services</h2>
+<p class="text-body-md text-[#C0C0D0]">Our platform may contain links to third-party services. We are not responsible for the privacy practices of these external sites and recommend reviewing their policies separately.</p>
+</section>
+<section id="section-9">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 9: Children's Privacy</h2>
+<p class="text-body-md text-[#C0C0D0]">Face 2 Face is strictly for individuals aged 18 and older. We do not knowingly collect information from children under 18. If we become aware of such data, it will be immediately deleted.</p>
+</section>
+<section id="section-10">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 10: International Users</h2>
+<p class="text-body-md text-[#C0C0D0]">By using the service, you consent to the processing of your information in the United States, where our primary servers are located. We adhere to Standard Contractual Clauses (SCCs) for international data transfers.</p>
+</section>
+<section id="section-11">
+<h2 class="text-h3 font-h3 text-white mb-6">Section 11: Changes to Policy</h2>
+<p class="text-body-md text-[#C0C0D0]">We may update this policy periodically. We will notify you of any significant changes via the app or email. Continued use of Face 2 Face constitutes acceptance of the revised terms.</p>
+</section>
+<section class="p-8 glass-card rounded-xl border border-privacy-blue/30" id="section-12">
+<h2 class="text-h3 font-h3 text-white mb-4">Section 12: Contact</h2>
+<p class="text-body-md text-[#C0C0D0] mb-6">If you have any questions or concerns regarding your privacy at Face 2 Face, please reach out to our dedicated privacy officer.</p>
+<a class="inline-flex items-center gap-2 bg-privacy-blue hover:bg-privacy-blue/80 text-white font-bold py-3 px-8 rounded-full transition-all glow-blue" href="mailto:privacy@face2face.icu">
+<span class="material-symbols-outlined">mail</span>
+                        privacy@face2face.icu
+                    </a>
+</section>
+</div>
+</div>
+<!-- Data Rights Summary Card -->
+<section class="mt-24 mb-16">
+<div class="glass-card p-12 rounded-3xl text-center relative">
+<div class="absolute top-0 right-0 p-8 opacity-10">
+<span class="material-symbols-outlined text-9xl">verified_user</span>
+</div>
+<h2 class="text-h2 font-h2 text-white mb-12">Your Data Rights at a Glance</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-privacy-blue/10 flex items-center justify-center mb-4 border border-privacy-blue/20">
+<span class="material-symbols-outlined text-privacy-blue text-3xl">visibility</span>
+</div>
+<h4 class="text-white font-bold mb-2">Access</h4>
+<p class="text-xs text-slate-500">Request your full data profile anytime.</p>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-privacy-blue/10 flex items-center justify-center mb-4 border border-privacy-blue/20">
+<span class="material-symbols-outlined text-privacy-blue text-3xl">edit_square</span>
+</div>
+<h4 class="text-white font-bold mb-2">Correct</h4>
+<p class="text-xs text-slate-500">Fix any inaccuracies in your profile.</p>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-privacy-blue/10 flex items-center justify-center mb-4 border border-privacy-blue/20">
+<span class="material-symbols-outlined text-privacy-blue text-3xl">delete_forever</span>
+</div>
+<h4 class="text-white font-bold mb-2">Delete</h4>
+<p class="text-xs text-slate-500">Permanent data wipe on request.</p>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-privacy-blue/10 flex items-center justify-center mb-4 border border-privacy-blue/20">
+<span class="material-symbols-outlined text-privacy-blue text-3xl">file_download</span>
+</div>
+<h4 class="text-white font-bold mb-2">Export</h4>
+<p class="text-xs text-slate-500">Download your data in JSON format.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-950 w-full py-12 border-t border-white/5 font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="text-lg font-bold text-rose-500">Face 2 Face</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-rose-500 transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-cyan-400 transition-colors" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-cyan-400 transition-colors" href="#">Cookie Settings</a>
+<a class="text-slate-500 hover:text-cyan-400 transition-colors" href="#">Safety Center</a>
+</div>
+<div class="text-slate-500 opacity-80">
+                © 2024 Face 2 Face. Deep Space Intimacy.
+            </div>
+</div>
+</footer>
+<!-- Decorative Elements -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 opacity-30">
+<div class="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-privacy-blue/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-rose-500/5 rounded-full blur-[150px]"></div>
+</div>
+</body></html>

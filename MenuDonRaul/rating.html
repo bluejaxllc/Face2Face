@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Califica tu Experiencia | Merendero Don Raúl</title>
+  <meta name="theme-color" content="#040a12">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #040a12;
+      --bg-card: #0c1524;
+      --gold: #c9a96e;
+      --gold-light: #e4cc94;
+      --gold-dim: #7a6438;
+      --cream: #f0e8da;
+      --cream-dim: #8e8678;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--cream);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 0 20px;
+    }
+
+    /* Ambient background lights */
+    .amb { position: fixed; width: 500px; height: 500px; pointer-events: none; z-index: -1; opacity: 0.15; }
+    .amb-gold { background: radial-gradient(circle at center, rgba(201,169,110,0.8) 0%, transparent 70%); top: 0; right: -50px; }
+
+    .brand {
+      margin-top: 50px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .brand h1 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .brand span {
+      color: var(--gold);
+    }
+
+    /* Screen Containers */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header text */
+    h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: var(--cream-dim);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* Rating Grid */
+    .rating-container {
+      background: var(--bg-card);
+      border: 1px solid rgba(201, 169, 110, 0.15);
+      border-radius: 24px;
+      padding: 24px 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+    .rating-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      justify-items: center;
+    }
+    .rating-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      background: transparent;
+      color: var(--gold-light);
+      font-family: var(--font-body);
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 360px) {
+      .rating-grid { gap: 8px; }
+      .rating-btn { width: 44px; height: 44px; font-size: 18px; }
+    }
+
+    .rating-btn:hover, .rating-btn:active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--bg-deep);
+      border-color: var(--gold);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(201, 169, 110, 0.3);
+    }
+
+    .rating-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding: 0 8px;
+      font-size: 11px;
+      color: var(--cream-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    /* Feedback Form */
+    .feedback-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(201, 169, 110, 0.2);
+      padding: 16px;
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    textarea:focus {
+      border-color: var(--gold);
+    }
+    textarea::placeholder {
+      color: rgba(142, 134, 120, 0.5);
+    }
+    .submit-btn {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--bg-deep);
+      border: none;
+      padding: 16px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(201, 169, 110, 0.2);
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--cream-dim);
+      font-size: 13px;
+      margin-top: 20px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Success Icon */
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .loader {
+      border: 3px solid rgba(201, 169, 110, 0.2);
+      border-top: 3px solid var(--gold);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 30px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  </style>
+</head>
+<body>
+
+  <div class="amb amb-gold"></div>
+
+  <div class="brand">
+    <h1>Don <span>Raúl.</span></h1>
+  </div>
+
+  <!-- SCREEN 1: RATING -->
+  <div class="screen active" id="screen-rating">
+    <h2>¡Evalúa tu Experiencia!</h2>
+    <p class="subtitle">En una escala del 1 al 10, ¿Qué te pareció nuestro servicio y la comida?</p>
+
+    <div class="rating-container">
+      <div class="rating-grid" id="rating-buttons">
+        <!-- JS fills these -->
+      </div>
+      <div class="rating-labels">
+        <span>1 = Mal</span>
+        <span>10 = Excelente</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: SORRY / FEEDBACK -->
+  <div class="screen" id="screen-feedback">
+    <div class="rating-container">
+      <h2>Ayúdanos a Mejorar</h2>
+      <p class="subtitle">Lamentamos no haber cumplido el 100% tus expectativas. ¿En qué fallamos o qué podemos hacer mejor?</p>
+      
+      <div class="feedback-form">
+        <textarea id="feedback-text" placeholder="Ej. La comida tardó mucho, le faltó sal a mi platillo..."></textarea>
+        <button class="submit-btn" id="submit-feedback">Enviar Opinión</button>
+      </div>
+      <button class="back-btn" id="btn-back">← Volver atrás</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: SUCCESS FEEDBACK -->
+  <div class="screen" id="screen-thanks-feedback">
+    <div class="rating-container">
+      <div class="success-icon">🙌</div>
+      <h2>¡Muchas Gracias!</h2>
+      <p class="subtitle">Agradecemos tu sinceridad. Tomaremos en cuenta tus comentarios para ser mejores en tu próxima visita.</p>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: SUCCESS REDIRECT (10 RATING) -->
+  <div class="screen" id="screen-redirect">
+    <div class="rating-container">
+      <div class="success-icon">⭐</div>
+      <h2>¡Excelente!</h2>
+      <p class="subtitle">Nos alegra muchísimo que hayas disfrutado tu visita.</p>
+      <div class="loader"></div>
+      <p style="font-size:12px; color:var(--cream-dim);">Redirigiendo para que nos dejes una reseña...</p>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbw9xaJEdzJnt2Q0iUmh8iEeRENieFGT5zF_akIrIxEYKpeG9Hi3h7rii3J9UsOZmdJr/exec";
+
+    const el = document.getElementById;
+    const sRating = document.getElementById('screen-rating');
+    const sFeedback = document.getElementById('screen-feedback');
+    const sThanks = document.getElementById('screen-thanks-feedback');
+    const sRedirect = document.getElementById('screen-redirect');
+    const rb = document.getElementById('rating-buttons');
+
+    let selectedScore = 0;
+
+    // Create buttons 1-10
+    for(let i=1; i<=10; i++) {
+      let btn = document.createElement('button');
+      btn.className = 'rating-btn';
+      btn.textContent = i;
+      btn.onclick = () => handleRating(i);
+      rb.appendChild(btn);
+    }
+
+    function showScreen(screen) {
+      sRating.classList.remove('active');
+      sFeedback.classList.remove('active');
+      sThanks.classList.remove('active');
+      sRedirect.classList.remove('active');
+      screen.classList.add('active');
+    }
+
+    // Fire-and-forget POST to Google Sheets
+    function logToSheet(score, comment) {
+      fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score, comment, source: 'rating.html' })
+      }).catch(() => {}); // silent fail
+    }
+
+    function handleRating(score) {
+      selectedScore = score;
+      if(score === 10) {
+        showScreen(sRedirect);
+        logToSheet(10, 'Experiencia perfecta — redirigido a Google Maps');
+        // Direct to Google Maps "Write a Review" popup
+        setTimeout(() => {
+          window.location.href = "https://search.google.com/local/writereview?placeid=ChIJX5FpqIsV64YRLJIqnH0Czx0";
+        }, 1200);
+      } else {
+        showScreen(sFeedback);
+      }
+    }
+
+    document.getElementById('submit-feedback').onclick = () => {
+      const text = document.getElementById('feedback-text').value.trim();
+      logToSheet(selectedScore, text || '(sin comentario)');
+      showScreen(sThanks);
+    };
+
+    document.getElementById('btn-back').onclick = () => {
+      showScreen(sRating);
+    };
+  </script>
+</body>
+</html>

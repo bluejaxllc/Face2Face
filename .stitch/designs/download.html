@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Download Face 2 Face - Meet Someone. For Real.</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #0D0D1A;
+            color: #f5dddb;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.02;
+            pointer-events: none;
+        }
+        .coral-gradient {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffb3b0 100%);
+        }
+        .coral-glow {
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.4);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffb3b0 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#72fbbd",
+                    "surface-container": "#291c1c",
+                    "on-secondary-container": "#a8afff",
+                    "surface-container-lowest": "#160b0b",
+                    "on-primary-fixed-variant": "#8c1520",
+                    "secondary": "#bdc2ff",
+                    "on-primary": "#68000f",
+                    "on-secondary-fixed-variant": "#1425d5",
+                    "inverse-on-surface": "#3b2d2c",
+                    "tertiary-fixed-dim": "#52dea2",
+                    "secondary-fixed-dim": "#bdc2ff",
+                    "on-primary-container": "#6d0010",
+                    "on-tertiary-container": "#003b26",
+                    "on-error-container": "#ffdad6",
+                    "on-surface-variant": "#e0bfbd",
+                    "background": "#1c1010",
+                    "inverse-surface": "#f5dddb",
+                    "surface-container-high": "#352726",
+                    "on-primary-fixed": "#410006",
+                    "inverse-primary": "#ae2f34",
+                    "secondary-container": "#1425d5",
+                    "on-error": "#690005",
+                    "surface-bright": "#453635",
+                    "primary-fixed-dim": "#ffb3b0",
+                    "surface-container-low": "#251818",
+                    "surface-dim": "#1c1010",
+                    "secondary-fixed": "#e0e0ff",
+                    "on-background": "#f5dddb",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "on-tertiary": "#003824",
+                    "on-secondary-fixed": "#000668",
+                    "on-tertiary-fixed": "#002113",
+                    "outline-variant": "#584140",
+                    "primary-fixed": "#ffdad8",
+                    "primary": "#ffb3b0",
+                    "error-container": "#93000a",
+                    "on-surface": "#f5dddb",
+                    "tertiary-container": "#01b179",
+                    "surface-container-highest": "#403130",
+                    "outline": "#a78a88",
+                    "tertiary": "#52dea2",
+                    "surface-variant": "#403130",
+                    "error": "#ffb4ab",
+                    "surface": "#1c1010",
+                    "primary-container": "#ff6b6b",
+                    "surface-tint": "#ffb3b0",
+                    "on-secondary": "#000ea4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "container-padding": "24px",
+                    "unit": "8px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "h3": ["Plus Jakarta Sans"],
+                    "label-sm": ["Inter"],
+                    "h1": ["Plus Jakarta Sans"],
+                    "h2": ["Plus Jakarta Sans"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h1": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "h2": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="antialiased overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+<nav class="flex items-center justify-between px-8 md:px-12 h-20 max-w-7xl mx-auto">
+<div class="text-2xl font-black text-slate-50 tracking-tighter font-['Plus_Jakarta_Sans']">Face 2 Face</div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="text-rose-400 border-b-2 border-rose-400 pb-1 font-['Plus_Jakarta_Sans'] font-medium tracking-tight" href="#">Features</a>
+<a class="text-slate-300 hover:text-rose-300 transition-colors duration-300 font-['Plus_Jakarta_Sans'] font-medium tracking-tight" href="#">Safety</a>
+<a class="text-slate-300 hover:text-rose-300 transition-colors duration-300 font-['Plus_Jakarta_Sans'] font-medium tracking-tight" href="#">Reviews</a>
+<a class="text-slate-300 hover:text-rose-300 transition-colors duration-300 font-['Plus_Jakarta_Sans'] font-medium tracking-tight" href="#">Support</a>
+</div>
+<button class="coral-gradient text-white font-['Plus_Jakarta_Sans'] font-bold px-6 py-3 rounded-full coral-glow active:scale-95 transition-all duration-150">
+                Download Now
+            </button>
+</nav>
+</header>
+<!-- Hero Section -->
+<section class="min-h-screen flex flex-col items-center justify-center pt-20 px-gutter relative overflow-hidden">
+<div class="absolute -top-40 -left-40 w-96 h-96 bg-primary-container/20 rounded-full blur-[120px]"></div>
+<div class="absolute top-1/2 -right-40 w-80 h-80 bg-secondary-container/20 rounded-full blur-[100px]"></div>
+<div class="text-center z-10 max-w-4xl mx-auto mb-16">
+<h1 class="text-[72px] font-['Plus_Jakarta_Sans'] font-extrabold tracking-tighter text-gradient leading-none mb-6">
+                Face 2 Face
+            </h1>
+<h2 class="font-h2 text-white mb-4">Meet Someone. For Real.</h2>
+<p class="font-body-lg text-on-surface-variant max-w-lg mx-auto">
+                Available on iOS and Android. Free to download. Experience intimacy that goes beyond the screen.
+            </p>
+</div>
+<div class="relative z-10 flex flex-col md:flex-row items-center gap-12 w-full max-w-6xl">
+<!-- Left Mockup -->
+<div class="hidden lg:block w-72 h-[580px] glass-card rounded-[3rem] p-4 rotate-[-6deg] shadow-2xl">
+<div class="w-full h-full rounded-[2.5rem] overflow-hidden bg-slate-900 border border-white/5 relative">
+<img class="w-full h-full object-cover opacity-80" data-alt="A futuristic map interface on a high-end smartphone screen, showcasing glowing location pins in a dark deep space aesthetic. The user interface features electric blue and coral accents, indicating potential matches nearby in a cinematic, minimalist city layout." data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWmjeXjmaxocNqdWf_68tFRRPjYCvJjb2Zu3NEe7lYUQmAIzwXliwEBoF21ZXFHKOWZe1MhROaXCwrOk7ghGV9DD9WPp84GXnfqzvusLxrIui6yGXmr68GfIyHZiq_zwW63pmyVpTcCNd1lEnW3Hbhm66eEl47v8KVYfCOpmk6dRlat3MT1tPfwtFml21GYwjwYQFzpNj5WymwrcapRY47mFlflWHPJpCqc9QWbVMCOMR11D0ko4nuEDrvy8CzOx0nuTqJSZgbkiA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-6 text-white font-['Plus_Jakarta_Sans']">
+<div class="text-sm opacity-60">Nearby in</div>
+<div class="text-xl font-bold">The Mission</div>
+</div>
+</div>
+</div>
+<!-- Central QR Download -->
+<div class="glass-card p-10 rounded-[2.5rem] flex flex-col items-center gap-8 w-full max-w-md mx-auto border-white/20 shadow-2xl">
+<div class="bg-white p-4 rounded-3xl">
+<img class="w-48 h-48" data-alt="A stylized, modern QR code displayed on a clean white background with a subtle coral gradient logo in the center. The QR code is surrounded by a sleek, minimalistic border that fits the futuristic deep space aesthetic of the application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw1laLJQa7PBYFMG_vUXfAM46l0uH_lMU9RhgTba-xesXov6nL1zNHdViMh00oekEZdpVNQmr_bWfRGHQx6oJaR1-BDErzMqhWEFKtqVPGE6zTWsQH8Es8HWUfjSu74L-QrvqErn0PmER5XLm_LZw8wxyAZ39Y1-v23y-sZtZniWQoQV3CnOC18Cwh9WIFR9vuXutxD84l9xkIY2AegeXRwXPoPQIssxxwWa8vmKMw8v49M3HbhCu7bOci7UJVreqOhuTWrJvFj90"/>
+</div>
+<div class="text-center">
+<p class="font-h3 text-white mb-6">Scan to download</p>
+<div class="flex gap-4">
+<img class="h-12 cursor-pointer hover:scale-105 transition-transform" data-alt="Official Apple App Store download badge with a high-gloss finish, displayed against a dark cinematic background with subtle coral lens flares." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDl1Lz1Ppq3T5JLUTQt1LBSBJHLc_S94dz2mGhutD3_A5OEp-50zt-qrXeGl8DKYmBW1lpP8F9FOYtWN7FfCAqbcPCoJ3GJnRsFIYHfDX5ixzzjUUxIiNCX7Jr_kdKnRK1VMTqzVQlBkM5rGRs_J7IpmjQnkb_Ut-_9yJeopTR9_1Ty1LWBqhn_H2IjLhO13_J9vCfNjEMMI0hS4sdoGoGA3vb2BG9DLeETlHqcJSbml-Qz5s2p9O21h3pQ1zKq9rBH0DROr9rU0JY"/>
+<img class="h-12 cursor-pointer hover:scale-105 transition-transform" data-alt="Official Google Play Store download badge with a sharp, vibrant design, positioned on a dark background to emphasize the premium dating app ecosystem." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8yx-yaAUEQMrLJoK-zPlMcYcE_yQwXYbCghXzliepO5nPuJhfg0oOJ-AEfExZajAco0vuDDfDmlYLIooVTeHbvlktY8brACRe37y9k4_lVd76LdyIkm6TCFCMzohL1wdX_FYZj7VnKM9as-ITSLT-RgexwsYBhfpxZbkBmMn_I-N1FqgFQ-yBuLQFsx2IuLThWt9v1660SiAArrDa-hBAPJRn79n7UUjjDA8ahPOnXCpf_OWAXWveK1aRp6J-cMzunA2gG0jasSo"/>
+</div>
+</div>
+</div>
+<!-- Right Mockup -->
+<div class="hidden lg:block w-72 h-[580px] glass-card rounded-[3rem] p-4 rotate-[6deg] shadow-2xl">
+<div class="w-full h-full rounded-[2.5rem] overflow-hidden bg-slate-900 border border-white/5 relative">
+<img class="w-full h-full object-cover" data-alt="A premium dating profile view on a smartphone, featuring a stunning portrait of a smiling woman in soft, warm lighting. The UI includes glassmorphic overlays with name and age, and a vibrant coral heart icon with a subtle glow against the dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv7cu79fHGM2FL-JNWjgycZghYziaHR7iV6zs1ixhApoQqzIVVl6zHkqMPcLtmm-3d_jKKi4xyNrOtqfQmZbvAYwnfnv3k9tqSEMa_G6aTsGXnvy9cGdJ2YxbGGRU9i9meAGQMR69tWi5JroArN007oJRxCq2uwcSj6GbMKhKsLou63YmVaoEXhsZz5KVhSFWmp5qqWCD9TaokjslzxVA6qthR7vxHAevhZpM_uo5TAE9UZR0-2Ru-4tLFomtxDhcTFK0yz5gBYsQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-6 text-white font-['Plus_Jakarta_Sans']">
+<div class="text-xl font-bold">Sophia, 24</div>
+<div class="flex items-center gap-2 text-sm text-tertiary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                            Identity Verified
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- App Screenshots Carousel -->
+<section class="py-24 px-8 overflow-hidden">
+<div class="max-w-7xl mx-auto mb-16">
+<h2 class="font-h1 text-center text-gradient">Take a Peek Inside</h2>
+</div>
+<div class="flex flex-nowrap gap-8 overflow-x-auto pb-12 scrollbar-hide snap-x px-4">
+<!-- Screen 1 -->
+<div class="flex-none w-64 h-[500px] glass-card rounded-[2.5rem] p-3 snap-center">
+<div class="w-full h-full rounded-[2rem] bg-slate-800 flex flex-col items-center justify-center p-6 text-center border border-white/5">
+<span class="material-symbols-outlined text-rose-400 text-6xl mb-4">login</span>
+<h3 class="font-h3 text-lg mb-2">Seamless Entry</h3>
+<p class="text-xs text-on-surface-variant">Sign up in seconds, find connections for a lifetime.</p>
+</div>
+</div>
+<!-- Screen 2 -->
+<div class="flex-none w-64 h-[500px] glass-card rounded-[2.5rem] p-3 snap-center">
+<div class="w-full h-full rounded-[2rem] overflow-hidden bg-slate-800 border border-white/5 relative">
+<img class="w-full h-full object-cover grayscale-[0.5]" data-alt="A sophisticated map-based dating interface showing user clusters with glowing coral hotspots in a dark mode environment. The map details are stylized with deep blues and purples, emphasizing a futuristic discovery experience." data-location="New York" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYwzknP6fgekAsdAhKZM4HgyNjhNB6k0vMWtObR-4YBM0gHBig6oA7lpsvsqAahDATTmQYZC8ga3KzalpAdZi7P8wWITwHbsNXLpPBdlNZAsbc6kcqj-97kBynQIOQMx9_1kwYUrIJKRcpZNeOxgM4br90yU0RnAKWMLFNamY7ao1C2oo1F9YZt43r_ymknVas8-2BSMp5oeAy-4qBvuFlhoajH7LPjVZ2sOxeTYno5KoJ4SM4Geu0dmzElrbvlqJg_ilBu8cTPSs"/>
+<div class="absolute inset-0 bg-black/40"></div>
+<div class="absolute bottom-6 inset-x-4 text-center">
+<p class="font-h3 text-white text-lg">Discovery Map</p>
+</div>
+</div>
+</div>
+<!-- Screen 3 -->
+<div class="flex-none w-64 h-[500px] glass-card rounded-[2.5rem] p-3 snap-center">
+<div class="w-full h-full rounded-[2rem] overflow-hidden bg-slate-800 border border-white/5 relative">
+<img class="w-full h-full object-cover" data-alt="A clean bento-grid style explore interface on a mobile app, showing various high-quality profile photos with minimal text overlays. The design is airy and modern, utilizing glassmorphism for info tags and glowing electric blue active states." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2vIsEGrdF-mH4KRN8h4GTxNB5-rb9IkzAHhXIf2s78ho-UsyfWLbajEjB-amxZ60M202_i1G_E5KyX1zk1HFRHbqLLjrw5Pvg0q8uOcMPAWqEOMHX5_m1nanpoy4PJysGzxJSFy7bSy1ombJng0_LSJ86y8z9RuIXgzvwWlRSdOSP9is-9hc_nEkucsmOyWh5XhmQY557uDNxDeusivtQO52OojIJPhqXKRrP2psTifoVNr1KGMUTceV1PoFRWUkGmKOlLLodE8A"/>
+<div class="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-black/80 to-transparent"></div>
+</div>
+</div>
+<!-- Screen 4 -->
+<div class="flex-none w-64 h-[500px] glass-card rounded-[2.5rem] p-3 snap-center">
+<div class="w-full h-full rounded-[2rem] overflow-hidden bg-slate-800 border border-white/5 relative">
+<img class="w-full h-full object-cover" data-alt="A male user's profile card in a dark UI, highlighting interests like 'Photography' and 'Jazz' in small coral-bordered chips. The image is crisp and professional, set against a blurred background that creates depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMNrGGz-G1IC4p8Dbexj_Oh3QOU1jYYz3rC9n5t_7DFD_M4phHuwQZW82fXI1IafbRE74U6x9ElkJOKkz8v9yH9Y8GOxgc5o3fojNvIWskPYX366vRTxj5zU-fi2zNk0iDPzvkplh644mszXbVDgFPuyiZPdv-KG_HWCpxYRnNYKOIYRgfxf3QlKzc7Wts3CgleoJs_t9hVhIRLzFcwsEcIs4jsXRm2WZAdo06qTXgUPBiZePadN7Gle-o5jkh0bVFZsp3tTdAbbI"/>
+</div>
+</div>
+<!-- Screen 5 -->
+<div class="flex-none w-64 h-[500px] glass-card rounded-[2.5rem] p-3 snap-center">
+<div class="w-full h-full rounded-[2rem] bg-slate-800 flex flex-col justify-end p-6 border border-white/5">
+<div class="flex flex-col gap-3 mb-6">
+<div class="bg-rose-500/20 self-start p-3 rounded-2xl rounded-bl-none text-xs text-white max-w-[80%] border border-rose-500/30">Hey! Loved your photo from the gallery.</div>
+<div class="bg-slate-700/50 self-end p-3 rounded-2xl rounded-br-none text-xs text-slate-200 max-w-[80%]">Thanks! It was such a great night.</div>
+</div>
+<div class="h-10 bg-white/5 rounded-full flex items-center px-4">
+<span class="text-white/30 text-xs">Type a message...</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials -->
+<section class="py-24 px-8 bg-slate-950/50">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-h2 text-white mb-16 text-center">What People Are Saying</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Testimonial 1 -->
+<div class="glass-card p-8 rounded-3xl">
+<div class="flex items-center gap-4 mb-6">
+<img class="w-14 h-14 rounded-full object-cover border-2 border-rose-400" data-alt="A portrait of a young woman with a warm, genuine smile, Sarah M., against a softly blurred urban sunset. The lighting is golden and flattering, conveying happiness and trust in the premium dating service." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1dQEzqqhBOBQL0pCLwlXYtipDd9e3pcDM1tHJGQHV7nkjGGVPVCZjji9nV9JQzl4sTBmOygfP6Uhsn1XPiQ3opFPL7SKiGbOdQWxu6A_i8WmlDPKQlJxD4wgE2AGS_wsxixbkkKFGHH97t42R6M66AwVdBBzIc1BD7tlYaxZTekAtYCtAhQZMFCl_WRIkJ3vEWqZfwx5Ev0BEfafkjiVvbToVhhf-cLuCIc7p4KQtXMiA2lrmr857pJRNhwejMUwOyGOHBYBpn28"/>
+<div>
+<p class="font-bold text-white">Sarah M.</p>
+<div class="flex text-rose-400">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="font-body-md text-on-surface-variant italic">"I've tried every app, but Face 2 Face is the first one that feels truly human. The video features are game-changers."</p>
+</div>
+<!-- Testimonial 2 -->
+<div class="glass-card p-8 rounded-3xl">
+<div class="flex items-center gap-4 mb-6">
+<img class="w-14 h-14 rounded-full object-cover border-2 border-rose-400" data-alt="A professional portrait of a confident man, Marcus J., in a stylish dark jacket. The background is a modern minimalist office with cool electric blue lighting, reflecting the tech-forward nature of the app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjfeadfPQmPwG21MUvp_fds9qX4kJbwZmAn1AApX-x2F9KyduEN4ziUWf-iomQxFjUZyQSrW9BsdT8ZfvFWqC8zJJlK-9-OMRhV3NJ0GpEddNIk6CEpLC5AXvBoKTnjSm4Tk1a2jmD2WxYdRNW6rMJbylvU52nFJEWSW43bbRgxk0mzH6RGcUje-gQJKKBFkMs_cTj-PVIPLho6JlzyH5Otvi9-fq6t4oNGfSItHKHPm-oTM_hlif5FBfSYW8PItHGpbjiCfMXaOQ"/>
+<div>
+<p class="font-bold text-white">Marcus J.</p>
+<div class="flex text-rose-400">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="font-body-md text-on-surface-variant italic">"The map view makes it so easy to see who's around for a quick coffee. Met my current partner within two weeks!"</p>
+</div>
+<!-- Testimonial 3 -->
+<div class="glass-card p-8 rounded-3xl">
+<div class="flex items-center gap-4 mb-6">
+<img class="w-14 h-14 rounded-full object-cover border-2 border-rose-400" data-alt="A portrait of a thoughtful young woman, Emily R., with soft studio lighting that creates a sophisticated and approachable mood. The aesthetic is clean and high-end, matching the app's visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUnbBo0jT-3aDI8T7jjZMyL6axIHKwRMe7PpXoBn6o9iJkN8oFRWGZIlO_2cmV9ZA2YTqtDc1tfIY8FS-WIFu5_wf8K0Zwsw1eSh7BaVkZzj2Ww-GZ_8VDqxsA9JCf_21TbwSx29Eh2QFfTclN_QF_xf1frcA8X0o0cgsIQ7FnZCmd86mxm6KBW07xvUDWQ2grSj-C3naLeg1aS4Jbpop-ImQsgd8o--UJr8y9-T8p6_54Kw6rui3pGm-rLyCZuXEHqVUMaojOMlU"/>
+<div>
+<p class="font-bold text-white">Emily R.</p>
+<div class="flex text-rose-400">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<p class="font-body-md text-on-surface-variant italic">"Security is my #1 priority and Face 2 Face takes it seriously. The verification process is thorough and fast."</p>
+</div>
+</div>
+</div>
+</section>
+<!-- App Info Section -->
+<section class="py-24 px-8 border-t border-white/5">
+<div class="max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+<div>
+<h4 class="font-label-sm text-secondary mb-4 uppercase tracking-widest">Requirements</h4>
+<p class="font-body-md text-white">iOS 15.0 or later</p>
+<p class="font-body-md text-white">Android 10.0 or later</p>
+</div>
+<div>
+<h4 class="font-label-sm text-secondary mb-4 uppercase tracking-widest">Size &amp; Category</h4>
+<p class="font-body-md text-white">45.2 MB</p>
+<p class="font-body-md text-white">Social, Dating, Connections</p>
+</div>
+<div>
+<h4 class="font-label-sm text-secondary mb-4 uppercase tracking-widest">Release Info</h4>
+<p class="font-body-md text-white">Version 2.1.0</p>
+<p class="font-body-md text-on-surface-variant">Last updated: April 2026</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-32 px-8">
+<div class="max-w-5xl mx-auto coral-gradient rounded-[3rem] p-16 text-center coral-glow relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+<h2 class="text-white text-5xl font-extrabold font-['Plus_Jakarta_Sans'] mb-8">Ready to Meet Someone?</h2>
+<p class="text-white/90 font-body-lg mb-12 max-w-xl mx-auto">Join thousands of others finding real, meaningful connections every day on Face 2 Face.</p>
+<button class="bg-white text-rose-500 font-h3 px-12 py-5 rounded-full hover:shadow-2xl transition-all hover:scale-105 active:scale-95">
+                Download Now
+            </button>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full py-16 border-t border-white/5 bg-slate-950">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="flex flex-col gap-4">
+<div class="text-xl font-bold text-slate-50 font-['Plus_Jakarta_Sans']">Face 2 Face</div>
+<p class="text-slate-500 font-['Plus_Jakarta_Sans'] text-sm tracking-wide">© 2024 Face 2 Face. Experience Deep Space Intimacy.</p>
+</div>
+<div class="flex flex-wrap gap-x-12 gap-y-6">
+<a class="text-slate-500 hover:text-slate-200 transition-colors font-['Plus_Jakarta_Sans'] text-sm tracking-wide" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors font-['Plus_Jakarta_Sans'] text-sm tracking-wide" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors font-['Plus_Jakarta_Sans'] text-sm tracking-wide" href="#">Cookie Policy</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors font-['Plus_Jakarta_Sans'] text-sm tracking-wide" href="#">Safety Center</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors font-['Plus_Jakarta_Sans'] text-sm tracking-wide" href="#">Contact Us</a>
+</div>
+</div>
+</footer>
+</body></html>

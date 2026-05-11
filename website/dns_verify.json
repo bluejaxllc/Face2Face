@@ -1,0 +1,49 @@
+{
+  "s": 200,
+  "d": [
+    {
+      "name": "_railway-verify",
+      "records": [
+        {
+          "content": "\"railway-verify=5ed5b5191f945963c17f70ba0b00a6e34c0ec5cd2027f27a1e683ea29e3eb672\"",
+          "is_disabled": false
+        }
+      ],
+      "ttl": 300,
+      "type": "TXT"
+    },
+    {
+      "name": "www",
+      "records": [
+        {
+          "content": "cname.vercel-dns.com.",
+          "is_disabled": false
+        }
+      ],
+      "ttl": 300,
+      "type": "CNAME"
+    },
+    {
+      "name": "@",
+      "records": [
+        {
+          "content": "m38jw7ph.up.railway.app.",
+          "is_disabled": false
+        }
+      ],
+      "ttl": 300,
+      "type": "ALIAS"
+    },
+    {
+      "name": "@",
+      "records": [
+        {
+          "content": "76.76.21.21",
+          "is_disabled": false
+        }
+      ],
+      "ttl": 300,
+      "type": "A"
+    }
+  ]
+}

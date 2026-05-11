@@ -1,0 +1,8 @@
+﻿55	12205MB	Antigravity*
+49	3416MB	node
+4	1516MB	language_server*
+5	2404MB	java
+2	497MB	pyrefly
+25	157MB	cmd
+41	355MB	conhost
+14	1432MB	powershell

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menú — Merendero Don Raúl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Montserrat:wght@300;400;500;600&family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: letter; margin: 0; }
+
+    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
+
+    .page {
+      width: 8.5in;
+      height: 11in;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background: #0b0f14;
+      color: #e8e0d4;
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ═══════════════════════
+       HERO IMAGE BAR
+    ═══════════════════════ */
+    .hero {
+      width: 100%;
+      height: 210px;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 60%;
+      filter: brightness(0.65) saturate(1.1);
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(11,15,20,0.2) 0%,
+        rgba(11,15,20,0) 30%,
+        rgba(11,15,20,0) 50%,
+        rgba(11,15,20,0.95) 100%
+      );
+    }
+
+    /* ═══════════════════════
+       TITLE BLOCK
+    ═══════════════════════ */
+    .title-block {
+      text-align: center;
+      padding: 14px 0 10px;
+      position: relative;
+      z-index: 2;
+      margin-top: -32px;
+    }
+    .title-pre {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 7px;
+      font-weight: 500;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: #8a7d6b;
+    }
+    .title-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 46px;
+      font-weight: 300;
+      color: #d4c5a0;
+      line-height: 1;
+      letter-spacing: 4px;
+    }
+    .title-tag {
+      font-family: 'Dancing Script', cursive;
+      font-size: 15px;
+      color: #5a9e9e;
+      margin-top: 1px;
+    }
+
+    /* thin rule */
+    .rule {
+      width: 80px;
+      height: 1px;
+      margin: 8px auto;
+      background: linear-gradient(90deg, transparent, #8a7d6b, transparent);
+    }
+
+    /* ═══════════════════════
+       MENU CONTENT
+    ═══════════════════════ */
+    .menu-body {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      gap: 0;
+      padding: 0 32px;
+    }
+    .col { padding: 0 18px; }
+    .col-divider {
+      background: linear-gradient(to bottom, transparent, rgba(138,125,107,0.2) 20%, rgba(138,125,107,0.2) 80%, transparent);
+    }
+
+    /* ── CATEGORY ── */
+    .cat {
+      margin-bottom: 22px;
+    }
+    .cat-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #d4c5a0;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(138,125,107,0.2);
+      margin-bottom: 6px;
+    }
+    .cat-name span {
+      font-size: 14px;
+      margin-right: 3px;
+    }
+    .cat-desc {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 9px;
+      font-style: italic;
+      color: #8a7d6b;
+      margin-bottom: 4px;
+      margin-top: -2px;
+    }
+
+    /* size headers */
+    .sizes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+    .sz {
+      font-size: 6px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #8a7d6b;
+      min-width: 38px;
+      text-align: right;
+    }
+
+    /* ── ITEM ── */
+    .item {
+      display: flex;
+      align-items: baseline;
+      padding: 5px 0;
+    }
+    .item-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #e8e0d4;
+      white-space: nowrap;
+    }
+    .dots {
+      flex: 1;
+      border-bottom: 1px dotted rgba(138,125,107,0.15);
+      margin: 0 6px;
+      min-width: 8px;
+      align-self: end;
+      margin-bottom: 4px;
+    }
+    .prices {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .p {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: #d4c5a0;
+      min-width: 38px;
+      text-align: right;
+    }
+    .p.s {
+      color: #6b6052;
+      font-size: 9px;
+      font-weight: 400;
+    }
+
+    /* badges */
+    .badge {
+      display: inline-block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 1.5px 5px;
+      border-radius: 2px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .b-hot {
+      background: rgba(180,60,50,0.2);
+      color: #d47a72;
+    }
+    .b-wk {
+      background: rgba(90,158,158,0.15);
+      color: #5a9e9e;
+    }
+    .b-kg {
+      background: rgba(138,125,107,0.15);
+      color: #a09585;
+    }
+
+    .note {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 8px;
+      color: #6b6052;
+      font-style: italic;
+      margin-top: -1px;
+      margin-bottom: 2px;
+    }
+
+    /* ═══════════════════════
+       FOOTER BAR
+    ═══════════════════════ */
+    .footer {
+      flex-shrink: 0;
+      margin-top: auto;
+      padding: 24px 32px 20px;
+      border-top: 1px solid rgba(138,125,107,0.15);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* qr */
+    .qr {
+      width: 80px; height: 80px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .qr img { width: 100%; height: 100%; }
+    .qr-info { margin-top: 2px; }
+    .qr-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #d4c5a0;
+    }
+    .qr-sub {
+      font-size: 9px;
+      color: #6b6052;
+      line-height: 1.4;
+    }
+
+    /* contact */
+    .f-contact {
+      flex: 1;
+      text-align: center;
+    }
+    .f-addr {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      color: #8a7d6b;
+      line-height: 1.5;
+    }
+    .f-addr strong { color: #c8bfb0; font-weight: 600; }
+    .f-hours {
+      font-size: 10px;
+      font-weight: 500;
+      color: #5a9e9e;
+      margin-top: 3px;
+      letter-spacing: 0.5px;
+    }
+    .f-wa {
+      font-size: 9px;
+      font-weight: 600;
+      color: #4caf50;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* provecho */
+    .f-provecho {
+      font-family: 'Dancing Script', cursive;
+      font-size: 24px;
+      color: #d4c5a0;
+      margin-bottom: 2px;
+    }
+    
+    /* ═══════════════════════
+       SCREEN / PRINT
+    ═══════════════════════ */
+    .print-btn {
+      position: fixed;
+      bottom: 20px; right: 20px;
+      padding: 12px 24px;
+      background: #d4c5a0;
+      color: #0b0f14;
+      border: none; border-radius: 4px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      z-index: 999;
+    }
+    .print-btn:hover { background: #e8d5a8; }
+
+    @media print {
+      .print-btn { display: none !important; }
+      body { background: none; }
+      .page { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    @media screen {
+      body { background: #222; padding: 20px; }
+      .page { box-shadow: 0 10px 60px rgba(0,0,0,0.5); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="layout">
+
+      <!-- HERO -->
+      <div class="hero">
+        <img src="hero.webp" alt="">
+      </div>
+
+      <!-- TITLE -->
+      <div class="title-block">
+        <p class="title-pre">Merendero</p>
+        <h1 class="title-main">Don Raúl</h1>
+        <p class="title-tag">De la Presa a Su Mesa!</p>
+      </div>
+
+      <div class="rule"></div>
+
+      <!-- MENU -->
+      <div class="menu-body">
+
+        <!-- LEFT -->
+        <div class="col">
+
+          <div class="cat">
+            <div class="cat-name"><span>🐟</span> Pescado</div>
+            <div class="sizes">
+              <span class="sz">Completo</span>
+              <span class="sz">Medio</span>
+            </div>
+            <div class="item">
+              <span class="item-name">Black Bass Frito <span class="badge b-kg">por kg</span></span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$300</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Filete Empanizado</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$150</span><span class="p s">$110</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Tiras de Pescado</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$150</span><span class="p s">$110</span></div>
+            </div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-name"><span>🦐</span> Camarones</div>
+            <div class="cat-desc">Orden completa o media</div>
+            <div class="sizes">
+              <span class="sz">Completa</span>
+              <span class="sz">Media</span>
+            </div>
+            <div class="item">
+              <span class="item-name">A la Diabla <span class="badge b-hot">🌶 picoso</span></span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$220</span><span class="p s">$160</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Fiesta</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$290</span><span class="p s">$260</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Empanizados</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$220</span><span class="p s">$160</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Luisiana <span class="badge b-wk">Sáb & Dom</span></span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$300</span><span class="p s">$270</span></div>
+            </div>
+            <div class="note">Disponible solo sábados y domingos</div>
+            <div class="item">
+              <span class="item-name">Búfalo</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$280</span><span class="p s">$200</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Empanizados a la Diabla <span class="badge b-hot">🌶</span></span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$280</span><span class="p s">$190</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Coctel de Camarones</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$140</span><span class="p s">$130</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="col-divider"></div>
+
+        <!-- RIGHT -->
+        <div class="col">
+
+          <div class="cat">
+            <div class="cat-name"><span>🍲</span> Caldos</div>
+            <div class="cat-desc">Calientitos y reconfortantes</div>
+            <div class="sizes">
+              <span class="sz">Grande</span>
+              <span class="sz">Chico</span>
+            </div>
+            <div class="item">
+              <span class="item-name">Caldo de Pescado</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$90</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Caldo de Camarón</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$150</span><span class="p s">$110</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Caldo Mixto</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$150</span><span class="p s">$100</span></div>
+            </div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-name"><span>🥑</span> Extras</div>
+            <div class="item">
+              <span class="item-name">Papas</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$50</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Orden de Arroz</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$25</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Ensalada</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$65</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Papas a la Francesa</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$60</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Orden de Aguacate</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$45</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Orden de Ajos</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$50</span></div>
+            </div>
+          </div>
+
+          <div class="cat">
+            <div class="cat-name"><span>🍋</span> Bebidas</div>
+            <div class="item">
+              <span class="item-name">Refresco</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$30</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Limonada Mineral</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$45</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Limonada Natural</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$40</span></div>
+            </div>
+            <div class="item">
+              <span class="item-name">Agua Natural 1 Lt</span>
+              <span class="dots"></span>
+              <div class="prices"><span class="p">$30</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        <div class="qr">
+          <img id="qrImage" src="" alt="QR">
+        </div>
+        <div class="qr-info">
+          <div class="qr-title">Menú Digital</div>
+          <div class="qr-sub">Escanea para ver el<br>menú interactivo</div>
+        </div>
+
+        <div class="f-contact">
+          <div class="f-provecho">¡Buen Provecho!</div>
+          <div class="f-addr"><strong>Av. 1a. Pte. 104A, Poniente</strong> · 33000 Delicias, Chihuahua</div>
+          <div class="f-addr">Tel: <strong>639 688 1231</strong></div>
+          <div class="f-hours">Viernes a Domingo · 11:00 AM en adelante</div>
+          <div class="f-wa">WhatsApp: 614 184 5530</div>
+        </div>
+
+        <div class="qr-info" style="text-align: right;">
+          <div class="qr-title">Califícanos</div>
+          <div class="qr-sub">Escanea y cuéntanos<br>tu experiencia</div>
+        </div>
+        <div class="qr">
+          <img id="qrRatingImage" src="" alt="QR Rating">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨️ Imprimir Menú</button>
+
+  <script>
+    const qr = document.getElementById('qrImage');
+    const qrRating = document.getElementById('qrRatingImage');
+    
+    // Digital Menu QR
+    qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('https://menu-don-raul.vercel.app') + '&bgcolor=ffffff&color=0b0f14&margin=8';
+    
+    // Rating Page QR
+    qrRating.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('https://menu-don-raul.vercel.app/rating.html') + '&bgcolor=ffffff&color=0b0f14&margin=8';
+  </script>
+</body>
+</html>

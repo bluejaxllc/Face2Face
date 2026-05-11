@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-dim": "#1c1010",
+                      "on-background": "#f5dddb",
+                      "surface": "#1c1010",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "primary": "#ffb3b0",
+                      "tertiary-fixed": "#72fbbd",
+                      "surface-tint": "#ffb3b0",
+                      "surface-container-lowest": "#160b0b",
+                      "secondary-fixed": "#e0e0ff",
+                      "on-primary-fixed": "#410006",
+                      "inverse-surface": "#f5dddb",
+                      "primary-fixed-dim": "#ffb3b0",
+                      "surface-variant": "#403130",
+                      "on-primary-fixed-variant": "#8c1520",
+                      "error": "#ffb4ab",
+                      "surface-container": "#291c1c",
+                      "inverse-primary": "#ae2f34",
+                      "inverse-on-surface": "#3b2d2c",
+                      "tertiary-fixed-dim": "#52dea2",
+                      "on-secondary-fixed": "#000668",
+                      "on-surface": "#f5dddb",
+                      "tertiary": "#52dea2",
+                      "on-secondary-fixed-variant": "#1425d5",
+                      "on-tertiary-fixed": "#002113",
+                      "on-tertiary-container": "#003b26",
+                      "on-surface-variant": "#e0bfbd",
+                      "on-secondary": "#000ea4",
+                      "on-error-container": "#ffdad6",
+                      "background": "#1c1010",
+                      "on-tertiary": "#003824",
+                      "surface-container-low": "#251818",
+                      "primary-fixed": "#ffdad8",
+                      "on-primary-container": "#6d0010",
+                      "error-container": "#93000a",
+                      "surface-container-high": "#352726",
+                      "secondary-container": "#1425d5",
+                      "secondary-fixed-dim": "#bdc2ff",
+                      "on-secondary-container": "#a8afff",
+                      "secondary": "#bdc2ff",
+                      "outline": "#a78a88",
+                      "tertiary-container": "#01b179",
+                      "on-primary": "#68000f",
+                      "on-error": "#690005",
+                      "surface-bright": "#453635",
+                      "primary-container": "#ff6b6b",
+                      "outline-variant": "#584140",
+                      "surface-container-highest": "#403130"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "stack-sm": "8px",
+                      "gutter": "16px",
+                      "stack-md": "16px",
+                      "container-padding": "24px",
+                      "stack-lg": "32px"
+              },
+              "fontFamily": {
+                      "label-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "h3": ["Plus Jakarta Sans"],
+                      "h2": ["Plus Jakarta Sans"],
+                      "h1": ["Plus Jakarta Sans"],
+                      "body-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                      "h2": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "h1": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0D0D1A;
+            color: #f5dddb;
+        }
+        .glass-card {
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.02;
+            pointer-events: none;
+        }
+        .coral-gradient {
+            background: linear-gradient(135deg, #FF6B6B 0%, #ff8e8e 100%);
+        }
+        .coral-text-gradient {
+            background: linear-gradient(135deg, #FF6B6B 0%, #ff8e8e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glow-coral {
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(78, 93, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="font-body-md antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 border-b border-white/10 bg-slate-900/60 backdrop-blur-xl">
+<nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-black text-rose-500 tracking-tighter font-h1">Face 2 Face</div>
+<div class="hidden md:flex items-center gap-8 font-['Plus_Jakarta_Sans'] font-medium tracking-tight">
+<a class="text-rose-500 font-bold border-b-2 border-rose-500 pb-1" href="#">Features</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">The Bump</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Safety</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Premium</a>
+</div>
+<button class="coral-gradient text-white px-6 py-2 rounded-full font-bold active:scale-95 transform transition-transform glow-coral">
+                Download App
+            </button>
+</nav>
+</header>
+<main class="pt-32">
+<!-- Hero Section -->
+<section class="max-w-4xl mx-auto text-center px-6 mb-32">
+<span class="font-label-sm text-rose-500 tracking-[0.2em] mb-4 block uppercase">FEATURES</span>
+<h1 class="font-h1 text-white text-5xl md:text-6xl mb-6">Built for Real Connections</h1>
+<p class="font-body-lg text-slate-400 max-w-2xl mx-auto">
+                Every feature in Face 2 Face is designed to get you off your phone and into the real world. Experience dating as it should be.
+            </p>
+</section>
+<!-- Showcase 1: Proximity -->
+<section class="max-w-7xl mx-auto px-6 mb-32 grid md:grid-cols-2 gap-16 items-center">
+<div class="relative group">
+<div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-50 group-hover:opacity-70 transition-opacity"></div>
+<div class="glass-card rounded-[3rem] p-4 aspect-[9/19] max-w-[320px] mx-auto border-white/20">
+<img class="w-full h-full object-cover rounded-[2.5rem]" data-alt="A high-end mobile interface displaying a stylized dark-mode map of a vibrant city like Los Angeles. Glowing coral proximity dots pulse softly across the grid-like streets, indicating user locations within a 25-mile radius. The visual style is cinematic and sleek, with neon accents and deep space shadows, emphasizing a futuristic and premium digital experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu9WNBEIDy_e03brG2QckmLyIiGZf_G3TwFZnePAMZ8am-_0b3BeS5cZBK8cfES-S1dBylfSa5Oy2_IIDUBZlaHPiim0dbZ1cv7JmvAsi8QK0kwcYPvSilQTu9jckZZHkRYQXI96hcKrmThJQ9bZN8kAGSR4mOFkoliY_yxOgVYIq9YXyI_zXSws_j1v434O05-5yuC2MNwvEZbAXHdGLGK5X-7-eDHXnqDKm4H9NJJa_82KG2umJmdpbbQ-UIbjVnmmVAwQZZz7Y"/>
+</div>
+</div>
+<div>
+<h2 class="font-h2 text-4xl mb-6 coral-text-gradient">Real-Time Proximity</h2>
+<p class="font-body-lg text-slate-400 mb-8 leading-relaxed">
+                    Never miss a chance encounter. Our proximity engine alerts you when a compatible match is nearby, turning your daily commute or coffee run into a potential date.
+                </p>
+<ul class="space-y-6">
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-rose-500 bg-rose-500/10 p-2 rounded-lg">map</span>
+<div>
+<p class="text-white font-bold">25 mile radius</p>
+<p class="text-slate-500 text-sm">Configurable range to find locals in your immediate area.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-rose-500 bg-rose-500/10 p-2 rounded-lg">speed</span>
+<div>
+<p class="text-white font-bold">Live updates every second</p>
+<p class="text-slate-500 text-sm">Ultra-fast positioning for accurate real-time meetings.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-rose-500 bg-rose-500/10 p-2 rounded-lg">battery_charging_full</span>
+<div>
+<p class="text-white font-bold">Battery-friendly GPS</p>
+<p class="text-slate-500 text-sm">Proprietary technology that saves power while staying active.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<!-- Showcase 2: The Bump -->
+<section class="max-w-7xl mx-auto px-6 mb-32 grid md:grid-cols-2 gap-16 items-center">
+<div class="order-2 md:order-1">
+<h2 class="font-h2 text-4xl mb-6 coral-text-gradient">The Bump</h2>
+<p class="font-body-lg text-slate-400 mb-8 leading-relaxed">
+                    Saying hello shouldn't be hard. "The Bump" allows you to send an instant, playful icebreaker message when you're within physical reach of a match. It’s the digital nudge for real-world intimacy.
+                </p>
+<div class="glass-card p-6 rounded-2xl border-rose-500/30">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-white">bolt</span>
+</div>
+<span class="text-white font-bold text-lg">Instant Icebreaker</span>
+</div>
+<p class="text-slate-400 text-sm italic">"I think we're both in the same coffee shop. Your profile mentioned you love jazz—they're playing Miles Davis right now."</p>
+</div>
+</div>
+<div class="order-1 md:order-2 relative group">
+<div class="absolute -inset-4 bg-secondary/20 blur-3xl rounded-full opacity-50 group-hover:opacity-70 transition-opacity"></div>
+<div class="glass-card rounded-[3rem] p-4 aspect-[9/19] max-w-[320px] mx-auto border-white/20">
+<img class="w-full h-full object-cover rounded-[2.5rem]" data-alt="A close-up shot of a smartphone screen showing a stylish 'Bump' notification overlay. The background is a blurred image of a moody, upscale lounge. The notification card features a vibrant coral header with a bolt icon, displaying a personalized message preview from a profile named 'Maya'. The design is elegant, with semi-transparent glass textures and crisp white typography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA84IDyT7_BH6V3jIimjeAkQAHEcBNNSllPdmjQyLqOUmu39e1OVQ_GSuw5MxXqP73LjnfKZ6MlFWTUJNEze5b63dfxuThjrC_VNSOJH8QNHgDIZLUAR0QXLwmAZ4ltaq1Pke6hOMhMg8FqzbOd01BmRI_LKnBARlHRgCZQ3YW0Lc3D46YxIVmcyEfT-goYGDQIgHzh0cK3LJQpfPorjSeVjJ8k9jB8Nl0nvrvms9c-x87cCnWOUP3K0Ui7BRv9ukcub5pgI7uK280"/>
+</div>
+</div>
+</section>
+<!-- Showcase 3: Verified -->
+<section class="max-w-7xl mx-auto px-6 mb-32 grid md:grid-cols-2 gap-16 items-center">
+<div class="relative group">
+<div class="absolute -inset-4 bg-secondary-container/30 blur-3xl rounded-full opacity-50 group-hover:opacity-70 transition-opacity"></div>
+<div class="glass-card rounded-[3rem] p-4 aspect-[9/19] max-w-[320px] mx-auto border-white/20">
+<img class="w-full h-full object-cover rounded-[2.5rem]" data-alt="A portrait of a young woman with a confident expression, her profile page visible on a digital interface. Overlaid on the image is a prominent, glowing electric blue 'Verified' shield badge. The lighting is dramatic, highlighting the blue accents against a deep navy background. Trust indicators like 'Phone Verified' and 'Photo Match' are displayed in clean, modern icons with soft blue halos." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwS0TyCz5tqXyRg-YOcyjHagJ6cOdYtdL-gM9qTR1bi946DZ86Dh2VgTO9KLDp9VaAhV7DgN9S7i9eLedPZZaV9qbQsEc0R3WcFioZTa4JQHkr3F9R9AqbmZ-EJOcLoxQwbe8ylKOe4tQliU2wjlIYAhdPzyM71v_pQ4LJ9iKb7IZe7T1_faGNjiqtHgnW-lIygXCSl3Oeblzcpiz17JDxv6QITVPYlelWmVuYZbRPihaAUrvQQhPc5QqTYZI9n5L22DUMu3LXWPQ"/>
+</div>
+</div>
+<div>
+<h2 class="font-h2 text-4xl mb-6 text-secondary">100% Real People</h2>
+<p class="font-body-lg text-slate-400 mb-8 leading-relaxed">
+                    Safety and authenticity are the pillars of Face 2 Face. Every profile goes through a mandatory multi-step verification process to ensure the person you see is the person you meet.
+                </p>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 group hover:border-secondary transition-colors">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="text-white font-medium">Phone &amp; Email Verified</span>
+</div>
+<div class="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 group hover:border-secondary transition-colors">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">face</span>
+<span class="text-white font-medium">AI Photo Matching</span>
+</div>
+<div class="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 group hover:border-secondary transition-colors">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+<span class="text-white font-medium">24/7 Safety Check</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Grid (Bento) -->
+<section class="max-w-7xl mx-auto px-6 mb-32">
+<h2 class="font-h2 text-3xl text-center mb-16 text-white">More Ways to Connect</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Smart Matching -->
+<div class="glass-card p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-300">
+<span class="material-symbols-outlined text-rose-400 mb-4 text-3xl">psychology</span>
+<h3 class="font-h3 text-xl text-white mb-2">Smart Matching</h3>
+<p class="text-slate-400 text-sm">AI-driven algorithms that learn your preferences from real-world interactions.</p>
+</div>
+<!-- Instant Chat -->
+<div class="glass-card p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-300">
+<span class="material-symbols-outlined text-rose-400 mb-4 text-3xl">chat_bubble</span>
+<h3 class="font-h3 text-xl text-white mb-2">Instant Chat</h3>
+<p class="text-slate-400 text-sm">Low-latency messaging with built-in icebreaker prompts for every mood.</p>
+</div>
+<!-- Self Rating -->
+<div class="glass-card p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-300">
+<span class="material-symbols-outlined text-rose-400 mb-4 text-3xl">grade</span>
+<h3 class="font-h3 text-xl text-white mb-2">Self Rating</h3>
+<p class="text-slate-400 text-sm">A transparent feedback loop where users can boost their visibility through high activity.</p>
+</div>
+<!-- Category Modes -->
+<div class="glass-card p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-300">
+<span class="material-symbols-outlined text-rose-400 mb-4 text-3xl">category</span>
+<h3 class="font-h3 text-xl text-white mb-2">Category Modes</h3>
+<p class="text-slate-400 text-sm">Filter matches by intent: from coffee dates to deep dinner conversations.</p>
+</div>
+<!-- Photo Gallery -->
+<div class="glass-card p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-300">
+<span class="material-symbols-outlined text-rose-400 mb-4 text-3xl">photo_library</span>
+<h3 class="font-h3 text-xl text-white mb-2">Photo Gallery</h3>
+<p class="text-slate-400 text-sm">High-resolution profile displays with gesture-based navigation for deep viewing.</p>
+</div>
+<!-- Activity Status -->
+<div class="glass-card p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-300">
+<span class="material-symbols-outlined text-rose-400 mb-4 text-3xl">sensors</span>
+<h3 class="font-h3 text-xl text-white mb-2">Activity Status</h3>
+<p class="text-slate-400 text-sm">Know exactly who is currently out and looking to meet in real-time.</p>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="max-w-7xl mx-auto px-6 mb-32">
+<div class="glass-card p-16 rounded-[4rem] text-center bg-gradient-to-br from-slate-900 via-[#1A1A2E] to-black border-rose-500/20">
+<h2 class="font-h2 text-4xl md:text-5xl text-white mb-4">Ready to Meet Someone?</h2>
+<p class="font-body-lg text-slate-400 mb-12">Download Face 2 Face and discover the world of deep space intimacy.</p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center">
+<button class="bg-black border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined text-3xl text-white">ios</span>
+<div class="text-left">
+<p class="text-[10px] text-slate-400 leading-none">Download on the</p>
+<p class="text-lg font-bold text-white leading-tight">App Store</p>
+</div>
+</button>
+<button class="bg-black border border-white/20 px-8 py-4 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined text-3xl text-white">play_store_installed</span>
+<div class="text-left">
+<p class="text-[10px] text-slate-400 leading-none">GET IT ON</p>
+<p class="text-lg font-bold text-white leading-tight">Google Play</p>
+</div>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-6 border-t border-white/5 bg-[#0D0D1A]">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8 max-w-7xl mx-auto">
+<div class="text-xl font-bold text-white/90">Face 2 Face</div>
+<div class="font-['Plus_Jakarta_Sans'] text-sm text-slate-400 text-center">
+                © 2024 Face 2 Face. Engineered for Deep Space Intimacy.
+            </div>
+<div class="flex gap-6">
+<a class="text-slate-500 hover:text-rose-400 transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-rose-400 transition-colors" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-rose-400 transition-colors" href="#">Safety Center</a>
+<a class="text-slate-500 hover:text-rose-400 transition-colors" href="#">Contact Us</a>
+</div>
+</div>
+</footer>
+</body></html>
