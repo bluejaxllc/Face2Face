@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face 2 Face — Strategic Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050a14;
+            --bg-primary: #0a1628;
+            --bg-card: #0f1d35;
+            --bg-elevated: #152340;
+            --border: rgba(56,130,246,0.15);
+            --border-bright: rgba(56,130,246,0.35);
+            --accent: #3b82f6;
+            --accent-glow: rgba(59,130,246,0.25);
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #f0f4f8;
+            --text-secondary: #8ba4c4;
+            --text-muted: #5a7396;
+            --gold: #fbbf24;
+            --teal: #14b8a6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(59,130,246,0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(139,92,246,0.04) 0%, transparent 50%);
+            animation: ambientDrift 25s ease-in-out infinite alternate;
+            pointer-events: none; z-index: 0;
+        }
+        @keyframes ambientDrift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-3%, 2%) rotate(2deg); }
+        }
+
+        /* ═══════════════ HEADER ═══════════════ */
+        .header {
+            position: relative; z-index: 10;
+            padding: 2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(10,22,40,0.95) 0%, rgba(5,10,20,0.98) 100%);
+            backdrop-filter: blur(20px);
+        }
+        .header-inner {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand { display: flex; align-items: center; gap: 1.25rem; }
+        .brand-icon {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800; color: #fff;
+            box-shadow: 0 0 30px var(--accent-glow);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+        @keyframes iconPulse {
+            0%, 100% { box-shadow: 0 0 30px var(--accent-glow); }
+            50% { box-shadow: 0 0 50px rgba(59,130,246,0.4); }
+        }
+        .brand-text h1 {
+            font-size: 1.6rem; font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a5c4f0 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+        .brand-text p { font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 2px; }
+        .header-meta { display: flex; gap: 2rem; align-items: center; }
+        .header-stat {
+            text-align: center; padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .header-stat .val { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+        .header-stat .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+        /* ═══════════════ NAV TABS ═══════════════ */
+        .tab-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(5,10,20,0.92);
+            backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 3rem;
+        }
+        .tab-list {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; gap: 0; list-style: none;
+        }
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            font-family: inherit; font-size: 0.85rem; font-weight: 600;
+            color: var(--text-muted); background: none; border: none;
+            cursor: pointer; position: relative;
+            transition: color 0.3s;
+            letter-spacing: 0.02em;
+        }
+        .tab-btn:hover { color: var(--text-secondary); }
+        .tab-btn.active { color: var(--accent); }
+        .tab-btn.active::after {
+            content: ''; position: absolute;
+            bottom: 0; left: 0.5rem; right: 0.5rem;
+            height: 2px; background: var(--accent);
+            border-radius: 2px 2px 0 0;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        /* ═══════════════ MAIN ═══════════════ */
+        .main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 2rem 3rem 4rem; }
+
+        .tab-panel { display: none; animation: fadeIn 0.4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+        /* ═══════════════ SECTION HEADERS ═══════════════ */
+        .section-header {
+            margin-bottom: 2rem; padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-header h2 {
+            font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff, #8ba4c4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .section-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; }
+
+        /* ═══════════════ CARDS ═══════════════ */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            border-color: var(--border-bright);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 20px var(--accent-glow);
+        }
+        .card h3 {
+            font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 0.75rem;
+        }
+        .card h3 .emoji { font-size: 1.3rem; }
+        .card p, .card li { color: var(--text-secondary); line-height: 1.75; font-size: 0.92rem; }
+
+        /* ═══════════════ GRID ═══════════════ */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+        /* ═══════════════ TAGS ═══════════════ */
+        .tag {
+            display: inline-block; padding: 0.3rem 0.75rem;
+            background: rgba(59,130,246,0.12);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+            color: var(--accent); margin: 0.2rem;
+        }
+        .tag.danger { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.2); color: var(--danger); }
+        .tag.success { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.2); color: var(--success); }
+        .tag.warning { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.2); color: var(--warning); }
+        .tag.purple { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.2); color: var(--accent-secondary); }
+
+        /* ═══════════════ CASE CARDS ═══════════════ */
+        .case-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.75rem;
+            border-left: 4px solid var(--danger);
+        }
+        .case-card .case-name { font-weight: 700; color: var(--text-primary); font-size: 1rem; }
+        .case-card .case-num { font-family: monospace; font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .case-card .case-detail { color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.75rem; line-height: 1.7; }
+        .case-card .case-meta {
+            display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;
+        }
+        .case-card .case-meta span {
+            font-size: 0.78rem; color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.35rem;
+        }
+
+        /* ═══════════════ LOGO SHOWCASE ═══════════════ */
+        .logo-showcase {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        .logo-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s;
+        }
+        .logo-card:hover {
+            border-color: var(--border-bright);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px var(--accent-glow);
+            transform: translateY(-5px);
+        }
+        .logo-card img {
+            width: 200px; height: 200px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            margin-bottom: 1.25rem;
+        }
+        .logo-card h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .logo-card p { color: var(--text-muted); font-size: 0.85rem; }
+
+        /* ═══════════════ INFLUENCER TABLE ═══════════════ */
+        .inf-table {
+            width: 100%; border-collapse: collapse;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .inf-table th {
+            text-align: left; padding: 1rem 1.25rem;
+            background: var(--bg-elevated);
+            font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .inf-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(56,130,246,0.08);
+            font-size: 0.9rem; color: var(--text-secondary);
+        }
+        .inf-table tr:last-child td { border-bottom: none; }
+        .inf-table tr:hover td { background: rgba(59,130,246,0.04); }
+        .handle { color: var(--accent); font-weight: 600; font-size: 0.85rem; }
+
+        /* ═══════════════ TIMELINE ═══════════════ */
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before {
+            content: ''; position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 2px; background: linear-gradient(to bottom, var(--accent), var(--accent-secondary));
+            border-radius: 2px;
+        }
+        .timeline-item { position: relative; margin-bottom: 2rem; padding-left: 1.5rem; }
+        .timeline-item::before {
+            content: ''; position: absolute;
+            left: -2rem; top: 0.5rem;
+            width: 12px; height: 12px;
+            background: var(--accent); border-radius: 50%;
+            border: 3px solid var(--bg-deep);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .timeline-item h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .timeline-item p { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; }
+        .timeline-item .phase-tag {
+            display: inline-block; padding: 0.2rem 0.6rem;
+            border-radius: 4px; font-size: 0.7rem; font-weight: 700;
+            margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em;
+        }
+
+        /* ═══════════════ PROGRESS BAR ═══════════════ */
+        .progress-container { margin: 1.5rem 0; }
+        .progress-label {
+            display: flex; justify-content: space-between;
+            font-size: 0.82rem; margin-bottom: 0.5rem;
+        }
+        .progress-label span:first-child { color: var(--text-secondary); font-weight: 600; }
+        .progress-label span:last-child { color: var(--accent); font-weight: 700; }
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            transition: width 1s ease;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        /* ═══════════════ STAT BLOCKS ═══════════════ */
+        .stat-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-block .stat-val {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--teal));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .stat-block .stat-lbl {
+            font-size: 0.75rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem;
+        }
+
+        /* ═══════════════ KPI ROW ═══════════════ */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        @media (max-width: 800px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
+        /* ═══════════════ BULLET LISTS ═══════════════ */
+        .card ul { padding-left: 1.25rem; margin-top: 0.5rem; }
+        .card li { margin-bottom: 0.5rem; }
+
+        /* ═══════════════ QUESTIONNAIRE EMBED ═══════════════ */
+        .q-link {
+            display: inline-flex; align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1.75rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: #fff; font-weight: 700; font-size: 0.9rem;
+            border-radius: 10px; text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .q-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59,130,246,0.4);
+        }
+
+        .footer {
+            text-align: center; padding: 3rem;
+            color: var(--text-muted); font-size: 0.78rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+    <div class="header-inner">
+        <div class="brand">
+            <div class="brand-icon">F2F</div>
+            <div class="brand-text">
+                <h1>Face 2 Face</h1>
+                <p>Strategic Command Center</p>
+            </div>
+        </div>
+        <div class="header-meta">
+            <div class="header-stat">
+                <div class="val">50</div>
+                <div class="lbl">Questions</div>
+            </div>
+            <div class="header-stat">
+                <div class="val">8</div>
+                <div class="lbl">Influencers</div>
+            </div>
+            <div class="header-stat">
+                <div class="val">3</div>
+                <div class="lbl">Legal Cases</div>
+            </div>
+            <div class="header-stat">
+                <div class="val">2</div>
+                <div class="lbl">Logo Concepts</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════ TAB NAV ═══════════ -->
+<nav class="tab-nav">
+    <ul class="tab-list">
+        <li><button class="tab-btn active" data-tab="overview">Overview</button></li>
+        <li><button class="tab-btn" data-tab="research">Competitor Intel</button></li>
+        <li><button class="tab-btn" data-tab="strategy">Growth Strategy</button></li>
+        <li><button class="tab-btn" data-tab="influencers">Influencer Targets</button></li>
+        <li><button class="tab-btn" data-tab="logos">Brand Assets</button></li>
+        <li><button class="tab-btn" data-tab="questionnaire">Questionnaire</button></li>
+    </ul>
+</nav>
+
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
+<main class="main">
+
+    <!-- ═════ OVERVIEW TAB ═════ -->
+    <div class="tab-panel active" id="tab-overview">
+        <div class="section-header">
+            <h2>Mission Control</h2>
+            <p>Real-time status of all Face 2 Face strategic workstreams</p>
+        </div>
+
+        <div class="kpi-row">
+            <div class="stat-block">
+                <div class="stat-val">$575M</div>
+                <div class="stat-lbl">POF Exit Benchmark</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-val">3</div>
+                <div class="stat-lbl">Modules (Social · Biz · Love)</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-val">15M</div>
+                <div class="stat-lbl">POF Users Pre-Hire</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-val">$0</div>
+                <div class="stat-lbl">VC Raised (Bootstrapped)</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3><span class="emoji">🎯</span> Core Thesis</h3>
+                <p>Face 2 Face is the <strong>antidote to the dating app</strong>. It restores traditional rules of engagement — walking up to someone, shaking hands, speaking face to face — in a digital format. No swipes. No paywalls. No algorithmic gatekeeping. Just a live map of real people around you, and the freedom to approach them directly.</p>
+            </div>
+            <div class="card">
+                <h3><span class="emoji">⚡</span> Competitive Edge</h3>
+                <ul>
+                    <li><strong>Three Pillars:</strong> Social, Business, and Love — not just dating</li>
+                    <li><strong>Open Communication:</strong> No match-gating. Direct interaction</li>
+                    <li><strong>Live Map:</strong> Real-time geographic proximity, not algorithmic feeds</li>
+                    <li><strong>"Pass By":</strong> Graceful rejection without confrontation</li>
+                    <li><strong>Group Function:</strong> Squad-based virality loop</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3 style="margin: 2rem 0 1rem; font-size: 1.1rem; color: var(--text-secondary);">Strategic Progress</h3>
+        <div class="card">
+            <div class="progress-container">
+                <div class="progress-label"><span>Competitor Research</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>User Acquisition Strategy</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Prospect Questionnaire (50 Questions)</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Brand Logo Concepts</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Influencer Outreach List</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Questionnaire Deployment (Vercel)</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Strategic Dashboard Consolidation</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Influencer Outreach (Execution)</span><span>0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Burning Man / Festival Activations</span><span>0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═════ RESEARCH TAB ═════ -->
+    <div class="tab-panel" id="tab-research">
+        <div class="section-header">
+            <h2>Competitor Intelligence & Legal Analysis</h2>
+            <p>Active lawsuits, regulatory exposure, and exploitable weaknesses</p>
+        </div>
+
+        <!-- Match Group -->
+        <div class="card" style="border-left: 4px solid var(--danger);">
+            <h3><span class="emoji">⚖️</span> Match Group — Predatory Design Litigation</h3>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+                <span class="tag danger">Class Action</span>
+                <span class="tag warning">FTC Settlement</span>
+                <span class="tag">Tinder</span><span class="tag">Hinge</span><span class="tag">OkCupid</span>
+            </div>
+            <p style="margin-bottom:0.5rem;"><strong>HQ:</strong> 8750 N. Central Expressway, Dallas, TX &nbsp;·&nbsp; <strong>CEO:</strong> Spencer Rascoff (2025)</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="case-card">
+                <div class="case-name">Oksayan v. Match Group, Inc.</div>
+                <div class="case-num">3:24-cv-00888 (N.D. Cal.)</div>
+                <div class="case-meta">
+                    <span>📅 Filed: Feb 14, 2024</span>
+                    <span>👨‍⚖️ Magistrate Judge Laurel Beeler</span>
+                </div>
+                <div class="case-detail">Federal class action alleging Match Group apps are designed to be <strong>addictive</strong>, prioritizing high-engagement loops and monetization over dating success. Match Group attempted to compel arbitration.</div>
+            </div>
+            <div class="case-card">
+                <div class="case-name">FTC v. Match Group, Inc.</div>
+                <div class="case-num">3:19-cv-02281-K (N.D. Tex.)</div>
+                <div class="case-meta">
+                    <span>📅 Filed: Sep 25, 2019</span>
+                    <span>👨‍⚖️ Judge Ed Kinkeade</span>
+                </div>
+                <div class="case-detail">FTC sued for using <strong>fraudulent "love interest" advertisements</strong> — notifications from flagged scammer accounts to induce subscriptions. Also cited cumbersome cancellation policies.</div>
+            </div>
+        </div>
+
+        <!-- Facebook Dating -->
+        <div class="card" style="border-left: 4px solid var(--warning); margin-top: 2rem;">
+            <h3><span class="emoji">📘</span> Facebook Dating — Unmoderated Toxicity</h3>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+                <span class="tag warning">Section 230 Shield</span>
+                <span class="tag danger">Defamation Risk</span>
+                <span class="tag purple">Meta Platforms</span>
+            </div>
+            <p><strong>HQ:</strong> Menlo Park, CA &nbsp;·&nbsp; <strong>Parent:</strong> Meta Platforms, Inc.</p>
+        </div>
+
+        <div class="case-card" style="margin-top:1rem;">
+            <div class="case-name">D'Ambrosio v. Rajala, et al.</div>
+            <div class="case-num">1:24-cv-00678 (N.D. Ill.)</div>
+            <div class="case-meta">
+                <span>📅 Dismissed: May 13, 2025</span>
+                <span>👨‍⚖️ Judge Sunil R. Harjani</span>
+            </div>
+            <div class="case-detail">Plaintiff sued Meta and several women over defamation in a Chicago "Are We Dating the Same Guy?" group. Dismissed — comments classified as "subjective opinions." Meta protected under <strong>Section 230</strong>. <em>Takeaway: Facebook groups harbor intense toxicity with zero legal recourse for victims.</em></div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3><span class="emoji">🔑</span> Exploitable Weaknesses — Summary</h3>
+            <div class="grid-3" style="margin-top:1rem;">
+                <div class="stat-block" style="border-left: 3px solid var(--danger);">
+                    <div class="stat-val" style="font-size:1.4rem;">Addiction</div>
+                    <div class="stat-lbl">Active federal class action</div>
+                </div>
+                <div class="stat-block" style="border-left: 3px solid var(--warning);">
+                    <div class="stat-val" style="font-size:1.4rem;">Fraud</div>
+                    <div class="stat-lbl">FTC scammer notification suit</div>
+                </div>
+                <div class="stat-block" style="border-left: 3px solid var(--accent-secondary);">
+                    <div class="stat-val" style="font-size:1.4rem;">Toxicity</div>
+                    <div class="stat-lbl">Zero moderation on FB groups</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═════ STRATEGY TAB ═════ -->
+    <div class="tab-panel" id="tab-strategy">
+        <div class="section-header">
+            <h2>User Acquisition Strategy</h2>
+            <p>Three-phase go-to-market anchored in real-world utility and viral squad dynamics</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--success);">
+            <h3><span class="emoji">💡</span> Primary Selling Proposition</h3>
+            <p>Position Face 2 Face as the <strong>ultimate utility app for genuine, real-world interactions</strong> across all pillars of life: Social, Business, and Love. It counters algorithmic manipulation and digital isolation with geographic, organic connection.</p>
+        </div>
+
+        <div class="timeline" style="margin-top: 2rem;">
+            <div class="timeline-item">
+                <div class="phase-tag" style="background:rgba(16,185,129,0.15); color:var(--success);">Phase 1</div>
+                <h4>Guerrilla Festival & Event Activations</h4>
+                <p>By targeting high-density, real-world events, F2F immediately demonstrates its core location-centric utility.</p>
+                <div style="margin-top: 1rem;">
+                    <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">🔥</span> Burning Man & Transformational Festivals</h3>
+                        <p style="font-size: 0.85rem;">Emphasize the app as a "camp finder" and organic connection tool. The off-the-grid, communal mentality aligns with minimizing screen time and maximizing face-to-face interaction.</p>
+                    </div>
+                    <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">🏰</span> Renaissance Festivals & Niche Conventions</h3>
+                        <p style="font-size: 0.85rem;">Tap into interactive, tightly-knit communities that prefer face-to-face interaction and organic community building.</p>
+                    </div>
+                    <div class="card" style="padding: 1rem 1.25rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">🤝</span> Trade Shows & Networking Events</h3>
+                        <p style="font-size: 0.85rem;">Leverage the Business module for instant deal-making and LinkedIn-style networking. F2F becomes a digital business card on the exhibition floor.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="phase-tag" style="background:rgba(59,130,246,0.15); color:var(--accent);">Phase 2</div>
+                <h4>Group Function for Virality</h4>
+                <p>Instead of acquiring users one-by-one, F2F acquires friend groups simultaneously — significantly lowering user acquisition costs.</p>
+                <div style="margin-top: 1rem;">
+                    <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">🦸</span> Wingman/Wingwoman Functionality</h3>
+                        <p style="font-size: 0.85rem;">A social safety net where friends share locations, vet matches together, and facilitate group meetups.</p>
+                    </div>
+                    <div class="card" style="padding: 1rem 1.25rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">👥</span> Squad Dynamics</h3>
+                        <p style="font-size: 0.85rem;">Market the utility of finding other groups: <em>"Two friends looking for another duo at this festival."</em> This lowers the intimidation factor, replacing it with low-pressure socializing.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="phase-tag" style="background:rgba(139,92,246,0.15); color:var(--accent-secondary);">Phase 3</div>
+                <h4>Influencer Partnerships & Outreach</h4>
+                <p>Convert rational, mature influencers (therapists, psychologists, authentic coaches) into deeply invested brand ambassadors.</p>
+                <div style="margin-top: 1rem;">
+                    <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 0.75rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">🧪</span> Product Development Input</h3>
+                        <p style="font-size: 0.85rem;">Offer early beta access and solicit professional feedback on app mechanics. Give them a voice to solve the dating issues they critique daily.</p>
+                    </div>
+                    <div class="card" style="padding: 1rem 1.25rem;">
+                        <h3 style="font-size: 0.95rem;"><span class="emoji">💊</span> "Antidote" Positioning</h3>
+                        <p style="font-size: 0.85rem;">Position F2F as the <em>"antidote to the dating app"</em> — reducing swipe fatigue, emphasizing face-to-face communication, preventing ghosting, and destroying the Match Group monopoly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem; border-left: 4px solid var(--gold);">
+            <h3><span class="emoji">📖</span> The POF Blueprint</h3>
+            <p>Markus Frind built Plenty of Fish as a solo founder. He managed the entire site from his Vancouver apartment for <strong>5 years with zero employees</strong>. By 2008 when he finally began hiring, the site had grown to <strong>15M users</strong> generating <strong>$10M annual revenue</strong> — all from Google AdSense on a completely free platform. He maintained 100% equity and sold to Match Group in 2015 for <strong>$575M in cash</strong>.</p>
+        </div>
+    </div>
+
+    <!-- ═════ INFLUENCERS TAB ═════ -->
+    <div class="tab-panel" id="tab-influencers">
+        <div class="section-header">
+            <h2>Influencer Outreach Targets</h2>
+            <p>Curated list of rational, mature professionals — no superficial "dating hack" creators</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3><span class="emoji">🎯</span> Selection Criteria</h3>
+            <p>Therapists, psychologists, and relationship coaches who focus on <strong>intentionality, healthy relationship dynamics, attachment styles, and realistic modern dating</strong>. These are primary targets for partnerships and early product feedback.</p>
+        </div>
+
+        <table class="inf-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Handle</th>
+                    <th>Focus</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Dr. Nicole LePera</strong></td>
+                    <td><span class="handle">@the.holistic.psychologist</span></td>
+                    <td>Boundaries, attachment styles, deep self-work</td>
+                    <td><span class="tag success">Tier 1</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Nedra Glover Tawwab</strong></td>
+                    <td><span class="handle">@nedratawwab</span></td>
+                    <td>NYT bestselling author, healthy boundaries & communication</td>
+                    <td><span class="tag success">Tier 1</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Julie Menanno</strong></td>
+                    <td><span class="handle">@thesecurerelationship</span></td>
+                    <td>Attachment theory specialist</td>
+                    <td><span class="tag success">Tier 1</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Vienna Pharaon</strong></td>
+                    <td><span class="handle">@mindfulmft</span></td>
+                    <td>Avoiding toxic patterns, family systems</td>
+                    <td><span class="tag">Tier 2</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Dr. Lauren Fogel Mersy</strong></td>
+                    <td><span class="handle">@drlaurenfogelmersy</span></td>
+                    <td>Emotional intelligence, modern communication</td>
+                    <td><span class="tag">Tier 2</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Blaine Anderson</strong></td>
+                    <td><span class="handle">@datingbyblaine</span></td>
+                    <td>Men's self-improvement, healthy confidence, authentic connections</td>
+                    <td><span class="tag success">Tier 1</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Sabrina Zohar</strong></td>
+                    <td><span class="handle">@sabrinazohar</span></td>
+                    <td>Hyper-realistic modern dating, anxiety, dispelling toxic trends</td>
+                    <td><span class="tag">Tier 2</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Matthew Hussey</strong></td>
+                    <td><span class="handle">@thematthewhussey</span></td>
+                    <td>Value-driven dating over games (mainstream reach)</td>
+                    <td><span class="tag success">Tier 1</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ═════ LOGOS TAB ═════ -->
+    <div class="tab-panel" id="tab-logos">
+        <div class="section-header">
+            <h2>Brand Assets</h2>
+            <p>Logo concepts for core app modules</p>
+        </div>
+
+        <div class="logo-showcase">
+            <div class="logo-card">
+                <img src="business_logo.png" alt="Business Module Logo — Deal">
+                <h4>Business Module — "Deal"</h4>
+                <p>Two professionals shaking hands inside a glowing circle. Deep blue with orange accent. Represents the Business networking pillar of Face 2 Face.</p>
+                <div style="margin-top: 1rem;">
+                    <span class="tag">Handshake</span>
+                    <span class="tag">Networking</span>
+                    <span class="tag">Professional</span>
+                </div>
+            </div>
+            <div class="logo-card">
+                <img src="friendship_logo.png" alt="Friendship Module Logo — Squad">
+                <h4>Social Module — "Squad"</h4>
+                <p>A diverse group of friends in a celebration pose — selfies, sports, and energy. Teal silhouette style. Represents the Social/Friendship pillar.</p>
+                <div style="margin-top: 1rem;">
+                    <span class="tag purple">Group</span>
+                    <span class="tag purple">Social</span>
+                    <span class="tag purple">Vibes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═════ QUESTIONNAIRE TAB ═════ -->
+    <div class="tab-panel" id="tab-questionnaire">
+        <div class="section-header">
+            <h2>Prospect Questionnaire</h2>
+            <p>50-question strategic questionnaire deployed across two phases</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3><span class="emoji">📋</span> Phase 1: General Public</h3>
+                <p>40 questions across 5 sections designed to uncover frustrations with traditional swipe-based dating apps and validate the F2F philosophy.</p>
+                <div style="margin-top:1rem;">
+                    <span class="tag">Algorithmic Match Critique</span>
+                    <span class="tag">Psychological Impact</span>
+                    <span class="tag danger">Competitor Dark Side</span>
+                    <span class="tag success">Direct Interaction</span>
+                    <span class="tag purple">Profile Authenticity</span>
+                </div>
+            </div>
+            <div class="card">
+                <h3><span class="emoji">🧪</span> Phase 2: In-App Test Users</h3>
+                <p>10 questions including scales, multiple choice, and open-ended feedback for users who have actively tested the Face 2 Face map &amp; direct interaction features.</p>
+                <div style="margin-top:1rem;">
+                    <span class="tag">Map Intuitiveness</span>
+                    <span class="tag">Direct Interaction UX</span>
+                    <span class="tag">Privacy Confidence</span>
+                    <span class="tag success">Open Feedback</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+            <h3><span class="emoji">🚀</span> Deployment</h3>
+            <p>The questionnaire is deployed as a standalone HTML page with dark mode UI, interactive radio/checkbox inputs, and scale conntrols.</p>
+            <div style="margin-top: 1.25rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="face2face_questionnaire.html" class="q-link" target="_blank">📄 Open Questionnaire (Local)</a>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+            <h3><span class="emoji">📊</span> Question Breakdown</h3>
+            <div class="grid-3" style="margin-top:1rem;">
+                <div class="stat-block">
+                    <div class="stat-val">18</div>
+                    <div class="stat-lbl">Yes / No</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val">13</div>
+                    <div class="stat-lbl">True / False</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val">11</div>
+                    <div class="stat-lbl">Multiple Choice</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val">4</div>
+                    <div class="stat-lbl">Scales (1-5 / 1-10)</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val">2</div>
+                    <div class="stat-lbl">Open Ended</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-val">2</div>
+                    <div class="stat-lbl">Phases</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    Face 2 Face Strategic Command Center &nbsp;·&nbsp; Built by BlueJax LLC &nbsp;·&nbsp; Last Updated: May 11, 2026
+</footer>
+
+<script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Animate progress bars on load
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.progress-fill').forEach(bar => {
+            const w = bar.style.width;
+            bar.style.width = '0%';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => { bar.style.width = w; });
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

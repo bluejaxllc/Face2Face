@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face 2 Face | Prospect Questionnaire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f43f5e;
+            --primary-hover: #e11d48;
+            --bg-grad-start: #0f172a;
+            --bg-grad-end: #1e1b4b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
+            background-attachment: fixed;
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fb7185, #f43f5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .section-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .section-goal {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .question-block {
+            margin-bottom: 35px;
+        }
+
+        .question-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 400;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label.option-label {
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        label.option-label:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: var(--primary);
+        }
+
+        input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--text-muted);
+            border-radius: 50%;
+            margin-right: 15px;
+            outline: none;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        input[type="radio"]:checked {
+            border-color: var(--primary);
+        }
+
+        input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background-color: var(--primary);
+            border-radius: 50%;
+        }
+
+        button.submit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.4);
+            align-self: center;
+            margin-top: 20px;
+            margin-bottom: 50px;
+        }
+
+        button.submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.5);
+        }
+
+        button.submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        #success-message {
+            display: none;
+            text-align: center;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            padding: 40px;
+            border-radius: 24px;
+            margin-top: 40px;
+        }
+
+        #success-message h2 {
+            color: #10b981;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .section-card {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .question-text {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Face 2 Face</h1>
+            <p class="subtitle">Help us shape the future of real-world connections. We want to hear your thoughts on current dating apps and the "Match Wall."</p>
+        </header>
+
+        <form id="questionnaire-form" onsubmit="submitForm(event)">
+            
+            <!-- Section 1 -->
+            <div class="section-card">
+                <h2 class="section-title">1. Swiping Fatigue & The "Match Wall"</h2>
+                <p class="section-goal">Your experience with the current status quo.</p>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>1. Yes/No:</strong> I feel exhausted or burned out by the endless swiping mechanics on apps like Tinder, Bumble, or Hinge.</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q1" value="Yes" required> Yes</label>
+                        <label class="option-label"><input type="radio" name="q1" value="No"> No</label>
+                    </div>
+                </div>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>2. True/False:</strong> I have missed out on a potential connection because the app required us to "mutually match" before either of us could send a message.</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q2" value="True" required> True</label>
+                        <label class="option-label"><input type="radio" name="q2" value="False"> False</label>
+                    </div>
+                </div>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>3. Multiple Choice:</strong> What is your biggest frustration when trying to start a conversation on traditional dating apps?</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q3" value="A" required> A) I can't message someone unless we both happen to swipe right on each other.</label>
+                        <label class="option-label"><input type="radio" name="q3" value="B"> B) Conversations feel unnatural and forced once a match finally happens.</label>
+                        <label class="option-label"><input type="radio" name="q3" value="C"> C) It feels like a numbers game rather than a real-life connection.</label>
+                        <label class="option-label"><input type="radio" name="q3" value="D"> D) All of the above.</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="section-card">
+                <h2 class="section-title">2. Real-World Map vs. Profile Decks</h2>
+                <p class="section-goal">Reimagining how we discover people.</p>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>4. True/False:</strong> I would prefer to see prospects around me on a live, real-world map rather than flipping through a stack of isolated profiles.</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q4" value="True" required> True</label>
+                        <label class="option-label"><input type="radio" name="q4" value="False"> False</label>
+                    </div>
+                </div>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>5. Yes/No:</strong> Do you feel that traditional dating apps isolate you from the real world, rather than connecting you to it?</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q5" value="Yes" required> Yes</label>
+                        <label class="option-label"><input type="radio" name="q5" value="No"> No</label>
+                    </div>
+                </div>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>6. Multiple Choice:</strong> How would you prefer to discover new people in your area?</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q6" value="A" required> A) Swiping left or right on a curated list of profiles.</label>
+                        <label class="option-label"><input type="radio" name="q6" value="B"> B) Exploring a real-time map to see who is actually hanging out nearby right now.</label>
+                        <label class="option-label"><input type="radio" name="q6" value="C"> C) Using heavy search filters (height, job, etc.) presented in a static grid.</label>
+                        <label class="option-label"><input type="radio" name="q6" value="D"> D) I prefer not to discover people through apps.</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="section-card">
+                <h2 class="section-title">3. The "Bump" Direct Interaction</h2>
+                <p class="section-goal">Breaking the communication block.</p>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>7. Yes/No:</strong> If you saw someone interesting on an app, would you prefer the ability to directly grab their attention without waiting for a mutual match?</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q7" value="Yes" required> Yes</label>
+                        <label class="option-label"><input type="radio" name="q7" value="No"> No</label>
+                    </div>
+                </div>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>8. True/False:</strong> Being forced to wait for a mutual match before saying "hello" prevents genuine, spontaneous interactions.</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q8" value="True" required> True</label>
+                        <label class="option-label"><input type="radio" name="q8" value="False"> False</label>
+                    </div>
+                </div>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>9. Multiple Choice:</strong> Imagine an app allows you to bypass the "mutual match wall" by sending a direct "Bump" to someone nearby to instantly break the ice. How would you view this feature?</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q9" value="A" required> A) Highly positive – It gets rid of the communication block and encourages real action.</label>
+                        <label class="option-label"><input type="radio" name="q9" value="B"> B) Neutral – It sounds interesting, but I'm used to the swiping way.</label>
+                        <label class="option-label"><input type="radio" name="q9" value="C"> C) Negative – I prefer the safety wall of mutual matches before someone can reach out.</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="section-card">
+                <h2 class="section-title">4. Wrapping Up</h2>
+                <p class="section-goal">Your ideal model.</p>
+
+                <div class="question-block">
+                    <p class="question-text"><strong>10. Multiple Choice:</strong> If you had to choose your ideal social connection app, which model would you choose?</p>
+                    <div class="options-group">
+                        <label class="option-label"><input type="radio" name="q10" value="A" required> A) A swiping app where interactions are strictly gated behind mutual matches (like Tinder/Bumble).</label>
+                        <label class="option-label"><input type="radio" name="q10" value="B"> B) A map-based app where you can explore who is in the real world around you and directly "Bump" them to start a conversation (like Face 2 Face).</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-button">Submit Answers</button>
+        </form>
+
+        <div id="success-message">
+            <h2>Thank You!</h2>
+            <p>Your feedback is invaluable to building the future of real-world social connections.</p>
+        </div>
+
+    </div>
+
+    <script>
+        function submitForm(e) {
+            e.preventDefault();
+            // Optional: you can gather the form data here to send to a backend API/Supabase/etc
+            
+            // UI feedback
+            document.getElementById('questionnaire-form').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
