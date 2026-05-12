@@ -1,0 +1,7 @@
+﻿{
+  "domains": [
+    "https://face2face-production-11ee.up.railway.app",
+    "https://facet2face.icu",
+    "https://face2face.icu"
+  ]
+}

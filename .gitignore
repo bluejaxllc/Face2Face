@@ -1,11 +1,16 @@
 node_modules/
+dist/
 .env
 *.db
 *.db-shm
 *.db-wal
 *.log
-dist/
 .expo/
 android/.gradle/
 ios/Pods/
 .next/
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+.vercel

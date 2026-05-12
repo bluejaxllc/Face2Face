@@ -1,0 +1,26 @@
+﻿Connection = keep-alive
+access-control-allow-credentials = true
+permissions-policy = geolocation=(self), camera=(), microphone=()
+ratelimit-limit = 300
+ratelimit-policy = 300;w=900
+ratelimit-remaining = 299
+ratelimit-reset = 900
+referrer-policy = strict-origin-when-cross-origin
+vary = Origin, Accept-Encoding
+x-content-type-options = nosniff
+x-frame-options = DENY
+x-railway-edge = railway/us-east4-eqdc4a
+x-railway-request-id = Rtt77_ppTrWeV8e9Aax-fw
+x-railway-cdn-edge = fastly/cache-dfw-kdal2120069-DFW
+x-cache = MISS
+x-cache-hits = 0
+x-served-by = cache-dfw-kdal2120069-DFW
+transfer-encoding = chunked
+Accept-Ranges = bytes
+Cache-Control = no-cache, must-revalidate
+Content-Type = text/html; charset=UTF-8
+Date = Thu, 09 Apr 2026 02:27:25 GMT
+ETag = W/"16c9-19d700dbdd0"
+Last-Modified = Thu, 09 Apr 2026 02:24:02 GMT
+Server = railway-edge
+X-Powered-By = Express

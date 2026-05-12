@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -345,7 +345,43 @@
             border-top: 1px solid var(--border);
             margin-top: 3rem;
         }
-    </style>
+    
+        /* ======= COURT CASES ======= */
+        .case-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--danger);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .case-card:hover {
+            border-color: var(--border-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .case-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .case-num {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'SF Mono', 'Cascadia Code', monospace;
+        }
+        .case-meta {
+            display: flex; gap: 1.25rem; flex-wrap: wrap;
+            font-size: 0.8rem; color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+        .case-detail {
+            font-size: 0.88rem;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+        </style>
 </head>
 <body>
 
@@ -391,6 +427,7 @@
         <li><button class="tab-btn" data-tab="strategy">Growth Strategy</button></li>
         <li><button class="tab-btn" data-tab="influencers">Influencer Targets</button></li>
         <li><button class="tab-btn" data-tab="logos">Brand Assets</button></li>
+        <li><button class="tab-btn" data-tab="courtcases">Court Cases</button></li>
         <li><button class="tab-btn" data-tab="questionnaire">Questionnaire</button></li>
     </ul>
 </nav>
@@ -815,6 +852,298 @@
                 <p>The questionnaire is deployed as a standalone HTML page with dark mode UI, interactive inputs, and analytics readouts.</p>
             </div>
             <a href="face2face_questionnaire.html" class="btn-primary" target="_blank">📄 Open Live Form</a>
+        </div>
+    </div>
+
+
+    <!-- COURT CASES TAB -->
+    <div class="tab-panel" id="tab-courtcases">
+        <div class="section-header">
+            <h2>Dating App Court Cases & Legal Exposure</h2>
+            <p>10 landmark lawsuits that expose the systemic failures Face 2 Face is designed to eliminate</p>
+        </div>
+
+        <div class="kpi-row">
+            <div class="stat-block" style="border-left: 3px solid var(--danger);">
+                <div class="stat-val">$114.5M</div>
+                <div class="stat-lbl">Total Settlements</div>
+            </div>
+            <div class="stat-block" style="border-left: 3px solid var(--warning);">
+                <div class="stat-val">5</div>
+                <div class="stat-lbl">Companies Sued</div>
+            </div>
+            <div class="stat-block" style="border-left: 3px solid var(--accent);">
+                <div class="stat-val">6</div>
+                <div class="stat-lbl">Case Categories</div>
+            </div>
+            <div class="stat-block" style="border-left: 3px solid var(--accent-secondary);">
+                <div class="stat-val">4</div>
+                <div class="stat-lbl">Countries Affected</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="tag danger">Addictive Design</span>
+            <span class="tag warning">FTC / Regulatory</span>
+            <span class="tag" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); color:#f87171;">Sexual Assault</span>
+            <span class="tag purple">Age Discrimination</span>
+            <span class="tag" style="background:rgba(20,184,166,0.12); border-color:rgba(20,184,166,0.2); color:var(--teal);">Biometric Privacy</span>
+            <span class="tag" style="background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.2); color:var(--gold);">Data Breach</span>
+        </div>
+
+        <!-- MATCH GROUP -->
+        <div class="card" style="border-left: 4px solid var(--danger); margin-bottom: 1rem;">
+            <h3>Match Group (Tinder / Hinge / OkCupid / Match.com)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Parent company of the world's largest dating app portfolio - 4 active/settled cases</p>
+        </div>
+        <div class="grid-2">
+            <div class="case-card">
+                <div class="case-name">Oksayan v. Match Group, Inc.</div>
+                <div class="case-num">3:24-cv-00888 (N.D. Cal.)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag danger">Addictive Design</span>
+                    <span class="tag danger">Class Action</span>
+                </div>
+                <div class="case-meta">
+                    <span>Filed: Feb 14, 2024</span>
+                    <span>Judge Laurel Beeler</span>
+                </div>
+                <div class="case-detail">
+                    Federal class action alleging Tinder, Hinge and The League use <strong>dopamine-manipulating, game-like features</strong> to foster addiction rather than help users form relationships. Claims a "perpetual pay-to-play loop" designed to keep users subscribing. <em>Court granted Match's motion to compel arbitration.</em>
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> Zero addictive loops - no swiping, no algorithmic feed, no gamification. Users connect and leave.</span>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-name">FTC v. Match Group, Inc.</div>
+                <div class="case-num">3:19-cv-02281-K (N.D. Tex.)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag warning">FTC Enforcement</span>
+                    <span class="tag warning">$14M Settlement</span>
+                </div>
+                <div class="case-meta">
+                    <span>Filed: Sep 2019 / Settled: Aug 2025</span>
+                    <span>Judge Ed Kinkeade</span>
+                </div>
+                <div class="case-detail">
+                    FTC sued Match Group for using <strong>fake "love interest" notifications from known scammer accounts</strong> to induce non-subscribers into buying paid subscriptions. Also cited deceptive "6-month guarantee" terms. <em>Settled for $14M in consumer refunds.</em>
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> No fake notifications. No subscription traps. Real people on a real-time map - what you see is what's there.</span>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-name">Doe et al. v. Match Group (Denver Serial Rapist)</div>
+                <div class="case-num">Colorado State Court (Dec 2025)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); color:#f87171;">Sexual Assault</span>
+                    <span class="tag danger">Negligence</span>
+                </div>
+                <div class="case-meta">
+                    <span>Filed: Dec 2025</span>
+                    <span>Colorado State Court</span>
+                </div>
+                <div class="case-detail">
+                    Six women sued Match Group after convicted serial rapist <strong>Stephen Matthews used Tinder and Hinge to target victims</strong>. The apps continued allowing him access - even recommending him as a "Most Compatible" match - after multiple assault reports.
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> Geographic proximity + group/squad dynamics = built-in safety net. No anonymous catfishing.</span>
+                </div>
+            </div>
+            <div class="case-card">
+                <div class="case-name">Candelore v. Tinder, Inc. (Age Discrimination)</div>
+                <div class="case-num">Los Angeles Superior Court (2015-2026)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag purple">Age Discrimination</span>
+                    <span class="tag purple">$60.5M Settlement</span>
+                </div>
+                <div class="case-meta">
+                    <span>Filed: 2015 / Settlement: Jan 2026</span>
+                    <span>CA Unruh Civil Rights Act</span>
+                </div>
+                <div class="case-detail">
+                    Class action alleging Tinder violated California's civil rights law by charging users <strong>over 30 significantly more</strong> for Tinder Plus and Gold subscriptions. <em>$60.5M settlement - the largest dating app settlement in history.</em>
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> No tiered pricing based on age. No paywalls. Core features are free and equal for all users.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUMBLE -->
+        <div class="card" style="border-left: 4px solid var(--gold); margin: 2rem 0 1rem;">
+            <h3>Bumble Inc. (Bumble / Badoo)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">$40M biometric settlement + data breach class action - 3 active/settled cases</p>
+        </div>
+        <div class="grid-2">
+            <div class="case-card" style="border-left-color: var(--gold);">
+                <div class="case-name">Howell et al. v. Bumble Trading L.L.C.</div>
+                <div class="case-num">N.D. Ill. (BIPA Settlement)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag" style="background:rgba(20,184,166,0.12); border-color:rgba(20,184,166,0.2); color:var(--teal);">Biometric Privacy</span>
+                    <span class="tag" style="background:rgba(20,184,166,0.12); border-color:rgba(20,184,166,0.2); color:var(--teal);">$40M Settlement</span>
+                </div>
+                <div class="case-meta">
+                    <span>Approved: Oct 24, 2024</span>
+                    <span>Illinois BIPA</span>
+                </div>
+                <div class="case-detail">
+                    Class action alleging Bumble and Badoo violated Illinois's <strong>Biometric Information Privacy Act (BIPA)</strong> by collecting facial scan data from photographs without consent. <em>$40M settlement - payments began Aug 2025.</em>
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> No facial recognition. No biometric data collection. User photos stay on their profile.</span>
+                </div>
+            </div>
+            <div class="case-card" style="border-left-color: var(--gold);">
+                <div class="case-name">Omirin v. Bumble Inc. (Data Breach)</div>
+                <div class="case-num">W.D. Tex. (2026)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag" style="background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.2); color:var(--gold);">Data Breach</span>
+                    <span class="tag danger">ShinyHunters Hack</span>
+                </div>
+                <div class="case-meta">
+                    <span>Filed: Jan 2026</span>
+                    <span>W.D. Texas</span>
+                </div>
+                <div class="case-detail">
+                    After a massive data breach by the <strong>ShinyHunters hacking group</strong>, this class action alleges Bumble failed to implement reasonable cybersecurity standards, resulting in exfiltration of sensitive user data.
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> Minimal data footprint by design. No message history stored server-side.</span>
+                </div>
+            </div>
+            <div class="case-card" style="border-left-color: var(--gold);">
+                <div class="case-name">Bumble Securities Class Action (Investor Fraud)</div>
+                <div class="case-num">Multiple Filings (2024)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag warning">Securities Fraud</span>
+                    <span class="tag">Investor Misleading</span>
+                </div>
+                <div class="case-meta">
+                    <span>Class Period: Nov 2023 - Aug 2024</span>
+                    <span>Multiple Federal Courts</span>
+                </div>
+                <div class="case-detail">
+                    Investors alleged Bumble executives made <strong>materially false statements about the "Premium Plus" relaunch strategy</strong> causing stock to be purchased at artificially inflated prices.
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> Bootstrapped. No investor pressure to inflate metrics.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRINDR -->
+        <div class="card" style="border-left: 4px solid var(--accent-secondary); margin: 2rem 0 1rem;">
+            <h3>Grindr LLC</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">HIV status data sharing scandal - UK High Court + Norwegian GDPR fine</p>
+        </div>
+        <div class="grid-2">
+            <div class="case-card" style="border-left-color: var(--accent-secondary);">
+                <div class="case-name">Grindr UK High Court Privacy Lawsuit</div>
+                <div class="case-num">London High Court (2024)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag" style="background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.2); color:var(--gold);">HIV Data Sharing</span>
+                    <span class="tag" style="background:rgba(20,184,166,0.12); border-color:rgba(20,184,166,0.2); color:var(--teal);">GDPR Violation</span>
+                </div>
+                <div class="case-meta">
+                    <span>Filed: Apr 2024</span>
+                    <span>London High Court</span>
+                </div>
+                <div class="case-detail">
+                    Hundreds of users allege Grindr shared <strong>HIV status, location data, sexual orientation, race, and personal details</strong> with third-party ad companies without consent.
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> Zero third-party data sharing. No health data collected. No ad-tech partnerships.</span>
+                </div>
+            </div>
+            <div class="case-card" style="border-left-color: var(--accent-secondary);">
+                <div class="case-name">Norwegian DPA v. Grindr (GDPR Fine)</div>
+                <div class="case-num">Datatilsynet (Norwegian Data Protection Authority)</div>
+                <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag warning">Regulatory Fine</span>
+                    <span class="tag" style="background:rgba(20,184,166,0.12); border-color:rgba(20,184,166,0.2); color:var(--teal);">6.5M EUR GDPR Fine</span>
+                </div>
+                <div class="case-meta">
+                    <span>Finalized: 2021</span>
+                    <span>Norway / EU GDPR</span>
+                </div>
+                <div class="case-detail">
+                    Norwegian authorities fined Grindr <strong>6.5M EUR for illegal data sharing</strong> with advertising partners. The app transmitted GPS location, IP address, and personal data to at least five ad companies without valid consent.
+                </div>
+                <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                    <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);"> GDPR-compliant by architecture. Location is ephemeral. No advertising SDKs.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TINDER CANADA -->
+        <div class="card" style="border-left: 4px solid var(--teal); margin: 2rem 0 1rem;">
+            <h3>Tinder (Canada - BC Supreme Court)</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">International expansion of age discrimination + algorithmic manipulation claims</p>
+        </div>
+        <div class="case-card" style="border-left-color: var(--teal);">
+            <div class="case-name">Tinder Age Discrimination - BC Class Action</div>
+            <div class="case-num">British Columbia Supreme Court (2026)</div>
+            <div style="margin: 0.75rem 0; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <span class="tag purple">Age Discrimination</span>
+                <span class="tag">Algorithmic Manipulation</span>
+            </div>
+            <div class="case-meta">
+                <span>Certified: Apr 2026</span>
+                <span>BC Supreme Court, Canada</span>
+            </div>
+            <div class="case-detail">
+                BC Supreme Court certified a class action alleging Match Group charges users <strong>30+ higher subscription fees</strong> and uses <strong>algorithmic manipulation to reduce visibility</strong> for non-paying users.
+            </div>
+            <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(16,185,129,0.06); border-radius: 8px; border-left: 3px solid var(--success);">
+                <strong style="color: var(--success); font-size: 0.8rem;">F2F ADVANTAGE:</strong>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);"> No algorithm controls who sees you. Everyone nearby is visible equally. The map doesn't discriminate.</span>
+            </div>
+        </div>
+
+        <!-- STRATEGIC ANALYSIS -->
+        <div class="card" style="margin-top: 2.5rem; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.04);">
+            <h3>Strategic Takeaway - Why This Matters for Face 2 Face</h3>
+            <div class="grid-2" style="margin-top: 1.25rem;">
+                <div>
+                    <h4 style="font-size: 0.95rem; color: var(--danger); margin-bottom: 0.75rem;">Industry Pattern (Their Weakness)</h4>
+                    <ul style="padding-left: 1.25rem;">
+                        <li>Addictive design prioritizes engagement over connection</li>
+                        <li>Fake notifications used to manipulate purchasing</li>
+                        <li>Known predators allowed to re-create accounts</li>
+                        <li>Age-based pricing violates civil rights laws</li>
+                        <li>Biometric data harvested without consent</li>
+                        <li>Sensitive health data sold to advertisers</li>
+                        <li>Data breaches expose millions of users</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.95rem; color: var(--success); margin-bottom: 0.75rem;">F2F Counter-Position (Our Strength)</h4>
+                    <ul style="padding-left: 1.25rem;">
+                        <li>No swiping, no gamification, no dopamine loops</li>
+                        <li>Real people on a real map - no fake interactions</li>
+                        <li>Squad/group dynamics provide physical safety</li>
+                        <li>Equal pricing for all ages - core features free</li>
+                        <li>Zero facial recognition or biometric collection</li>
+                        <li>No ad-tech partnerships or data monetization</li>
+                        <li>Minimal data footprint - location is ephemeral</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(59,130,246,0.08); border-radius: 10px; text-align: center;">
+                <p style="font-size: 1rem; font-weight: 700; color: var(--accent);">Every lawsuit above represents a problem Face 2 Face was architecturally designed to prevent.</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">This isn't marketing spin - it's structural differentiation baked into the product from day one.</p>
+            </div>
         </div>
     </div>
 

@@ -1,0 +1,100 @@
+﻿1:37:35 AM [express] GET /api/users/nearby 200 in 17ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:35 AM [express] GET /api/bumps/received 200 in 16ms :: []
+1:37:35 AM [express] GET /api/bumps/received 200 in 15ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:37:37 AM [express] GET /api/notifications 200 in 13ms :: [{"id":1,"userId":2,"type":"bump","relateΓÇª
+1:37:38 AM [express] GET /api/notifications 200 in 13ms :: [{"id":3,"userId":8,"type":"bump","relateΓÇª
+1:37:39 AM [express] GET /api/bumps/received 200 in 16ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:37:39 AM [express] GET /api/users/nearby 200 in 19ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:40 AM [express] GET /api/bumps/received 200 in 12ms :: []
+1:37:40 AM [express] GET /api/users/nearby 200 in 19ms :: [{"id":2,"username":"testuser_alpha","firsΓÇª
+1:37:40 AM [express] GET /api/notifications 200 in 13ms :: []
+1:37:40 AM [express] GET /api/bumps/users 500 in 19ms :: {"message":"Failed to get bumps"}
+1:37:41 AM [express] GET /api/bumps/received 200 in 19ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:37:44 AM [express] GET /api/bumps/received 200 in 26ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:37:44 AM [express] GET /api/bumps/users 500 in 10ms :: {"message":"Failed to get bumps"}
+1:37:44 AM [express] GET /api/users/nearby 200 in 40ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:44 AM [express] POST /api/users/location 200 in 33ms :: {"message":"Location updated successfulΓÇª
+1:37:44 AM [express] POST /api/users/location 200 in 17ms :: {"message":"Location updated successfulΓÇª
+1:37:45 AM [express] GET /api/users/nearby 200 in 23ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:45 AM [express] GET /api/bumps/received 200 in 11ms :: []
+1:37:46 AM [express] GET /api/bumps/received 200 in 18ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:37:48 AM [express] GET /api/notifications 200 in 53ms :: [{"id":1,"userId":2,"type":"bump","relateΓÇª
+1:37:48 AM [express] GET /api/bumps/received 200 in 15ms :: []
+1:37:48 AM [express] GET /api/users/nearby 200 in 23ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:48 AM [express] GET /api/notifications 200 in 13ms :: []
+1:37:49 AM [express] GET /api/bumps/received 200 in 20ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:37:50 AM [express] POST /api/users/location 200 in 25ms :: {"message":"Location updated successfulΓÇª
+1:37:50 AM [express] GET /api/users/nearby 200 in 26ms :: [{"id":4,"username":"admin","firstName":"EΓÇª
+1:37:51 AM [express] GET /api/bumps/received 200 in 17ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:37:52 AM [express] GET /api/notifications 200 in 9ms :: [{"id":1,"userId":2,"type":"bump","relatedΓÇª
+1:37:53 AM [express] POST /api/users/location 200 in 21ms :: {"message":"Location updated successfulΓÇª
+1:37:54 AM [express] GET /api/bumps/received 200 in 20ms :: []
+1:37:54 AM [express] GET /api/notifications 200 in 26ms :: [{"id":3,"userId":8,"type":"bump","relateΓÇª
+1:37:54 AM [express] GET /api/bumps/users 500 in 14ms :: {"message":"Failed to get bumps"}
+1:37:55 AM [express] GET /api/bumps/received 200 in 18ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:37:56 AM [express] GET /api/notifications 200 in 14ms :: []
+1:37:56 AM [express] GET /api/bumps/users 500 in 10ms :: {"message":"Failed to get bumps"}
+1:37:55 AM [express] GET /api/users/nearby 200 in 33ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:56 AM [express] GET /api/bumps/received 200 in 22ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:37:59 AM [express] GET /api/users/nearby 200 in 30ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:37:59 AM [express] GET /api/bumps/received 200 in 30ms :: []
+1:37:59 AM [express] POST /api/users/location 200 in 17ms :: {"message":"Location updated successfulΓÇª
+1:38:00 AM [express] POST /api/users/location 200 in 21ms :: {"message":"Location updated successfulΓÇª
+1:38:01 AM [express] GET /api/users/nearby 200 in 24ms :: [{"id":2,"username":"testuser_alpha","firsΓÇª
+1:38:01 AM [express] GET /api/bumps/received 200 in 22ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:38:03 AM [express] GET /api/notifications 200 in 14ms :: [{"id":1,"userId":2,"type":"bump","relateΓÇª
+1:38:03 AM [express] POST /api/users/location 200 in 17ms :: {"message":"Location updated successfulΓÇª
+1:38:04 AM [express] GET /api/notifications 200 in 15ms :: []
+1:38:04 AM [express] GET /api/bumps/received 200 in 15ms :: []
+1:38:04 AM [express] GET /api/bumps/users 500 in 24ms :: {"message":"Failed to get bumps"}
+1:38:04 AM [express] GET /api/users/nearby 200 in 20ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:04 AM [express] POST /api/users/location 200 in 16ms :: {"message":"Location updated successfulΓÇª
+1:38:05 AM [express] GET /api/users/nearby 200 in 18ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:05 AM [express] GET /api/bumps/received 200 in 26ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:38:07 AM [express] GET /api/notifications 200 in 13ms :: [{"id":1,"userId":2,"type":"bump","relateΓÇª
+1:38:09 AM [express] GET /api/users/nearby 200 in 21ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:09 AM [express] GET /api/bumps/received 200 in 11ms :: []
+1:38:09 AM [express] POST /api/users/location 200 in 15ms :: {"message":"Location updated successfulΓÇª
+1:38:09 AM [express] GET /api/notifications 200 in 13ms :: [{"id":3,"userId":8,"type":"bump","relateΓÇª
+1:38:10 AM [express] GET /api/bumps/received 200 in 30ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:38:11 AM [express] GET /api/notifications 200 in 14ms :: []
+1:38:11 AM [express] GET /api/bumps/users 500 in 19ms :: {"message":"Failed to get bumps"}
+1:38:14 AM [express] GET /api/bumps/received 200 in 18ms :: []
+1:38:14 AM [express] GET /api/bumps/users 500 in 13ms :: {"message":"Failed to get bumps"}
+1:38:14 AM [express] GET /api/users/nearby 200 in 39ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:15 AM [express] GET /api/users/nearby 200 in 19ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:15 AM [express] POST /api/users/location 200 in 18ms :: {"message":"Location updated successfulΓÇª
+1:38:16 AM [express] GET /api/bumps/received 200 in 21ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:38:16 AM [express] GET /api/bumps/received 200 in 17ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:38:18 AM [express] GET /api/notifications 200 in 12ms :: [{"id":1,"userId":2,"type":"bump","relateΓÇª
+1:38:19 AM [express] GET /api/notifications 200 in 11ms :: []
+1:38:19 AM [express] GET /api/users/nearby 200 in 21ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:20 AM [express] POST /api/users/location 200 in 16ms :: {"message":"Location updated successfulΓÇª
+1:38:21 AM [express] POST /api/users/location 200 in 19ms :: {"message":"Location updated successfulΓÇª
+1:38:21 AM [express] GET /api/users/nearby 200 in 19ms :: [{"id":2,"username":"testuser_alpha","firsΓÇª
+1:38:21 AM [express] GET /api/bumps/received 200 in 26ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:38:22 AM [express] GET /api/bumps/received 200 in 28ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:38:24 AM [express] GET /api/users/nearby 200 in 20ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:24 AM [express] GET /api/notifications 200 in 13ms :: [{"id":3,"userId":8,"type":"bump","relateΓÇª
+1:38:24 AM [express] GET /api/bumps/received 200 in 13ms :: []
+1:38:24 AM [express] GET /api/bumps/users 500 in 8ms :: {"message":"Failed to get bumps"}
+1:38:26 AM [express] GET /api/bumps/users 500 in 21ms :: {"message":"Failed to get bumps"}
+1:38:27 AM [express] GET /api/bumps/received 200 in 24ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:38:27 AM [express] GET /api/bumps/received 200 in 29ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:38:29 AM [express] GET /api/users/nearby 200 in 28ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:29 AM [express] GET /api/bumps/received 200 in 11ms :: []
+1:38:31 AM [express] GET /api/users/nearby 200 in 18ms :: [{"id":2,"username":"testuser_alpha","firsΓÇª
+1:38:32 AM [express] GET /api/bumps/received 200 in 24ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:38:32 AM [express] POST /api/users/location 200 in 18ms :: {"message":"Location updated successfulΓÇª
+1:38:32 AM [express] POST /api/users/location 200 in 20ms :: {"message":"Location updated successfulΓÇª
+1:38:32 AM [express] GET /api/bumps/received 200 in 21ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª
+1:38:32 AM [express] POST /api/users/location 200 in 18ms :: {"message":"Location updated successfulΓÇª
+1:38:33 AM [express] POST /api/users/location 200 in 17ms :: {"message":"Location updated successfulΓÇª
+1:38:33 AM [express] GET /api/notifications 200 in 9ms :: [{"id":1,"userId":2,"type":"bump","relatedΓÇª
+1:38:34 AM [express] GET /api/notifications 200 in 13ms :: []
+1:38:34 AM [express] GET /api/bumps/received 200 in 10ms :: []
+1:38:35 AM [express] GET /api/bumps 200 in 14ms
+1:38:35 AM [express] GET /api/users/nearby 200 in 17ms :: [{"id":8,"username":"alex_test","firstNameΓÇª
+1:38:37 AM [express] GET /api/bumps/received 200 in 29ms :: [{"id":1,"userId":8,"bumpedUserId":2,"tiΓÇª
+1:38:37 AM [express] GET /api/notifications 200 in 10ms :: [{"id":1,"userId":2,"type":"bump","relateΓÇª
+1:38:37 AM [express] GET /api/bumps/received 200 in 28ms :: [{"id":3,"userId":2,"bumpedUserId":8,"tiΓÇª

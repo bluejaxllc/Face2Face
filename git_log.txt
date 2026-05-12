@@ -1,0 +1,10 @@
+﻿7d3a2c1 fix(ios): force framer-motion into main bundle to prevent Safari chunk race
+7f91b97 perf: remove framer-motion from PageTransition, use CSS animation
+dffa64b debug: show error details in ErrorBoundary for iPhone debugging
+64c2d2b fix: remove invalid JSX comment causing parse error in ternary branch
+1bc0b3d fix: wrap non-auth path with LocationProvider(enabled=false) to prevent useLocation crash
+7cb5857 perf(ios): strip framer-motion from main bundle, pure CSS gate animations
+e6003c1 perf(ios): lazy-load pages, defer GPS until sensor gate passed, reduce polling
+5b40dfd fix(ios): prevent map and app rendering underneath sensor gate to stop memory crash
+2c62a07 fix(ios): reduce polling, fix sensor gate blocking login, move Leaflet config out of render
+2710c93 fix: use SPA navigation for /dev link to preserve session

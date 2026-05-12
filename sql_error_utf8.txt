@@ -1,0 +1,5 @@
+﻿SUCCESS: SELECT CAST(latitude AS DOUBLE PRECISION) FROM users LIMIT 1
+FAILED: SELECT CAST(NULLIF(latitude, '') AS DOUBLE PRECISION) FROM users LIMIT 1 => invalid input syntax for type numeric: ""
+SUCCESS: SELECT CAST(inactive_timeout AS integer) FROM users LIMIT 1
+SUCCESS: SELECT NOW() - (CAST(inactive_timeout AS integer) || ' minutes')::interval FROM users LIMIT 1
+FAILED: SELECT NULLIF(latitude, '') FROM users LIMIT 1 => invalid input syntax for type numeric: ""

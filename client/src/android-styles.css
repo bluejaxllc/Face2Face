@@ -1,0 +1,93 @@
+/* Android-specific styles to fix layout issues */
+
+/* Fix for bottom navigation */
+nav.safe-area-bottom {
+  height: 40px !important;
+  padding: 2px 4px !important;
+  z-index: 9999 !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  box-shadow: 0 -1px 5px rgba(0,0,0,0.2) !important;
+  background-color: white !important;
+}
+
+nav.safe-area-bottom > div {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+nav.safe-area-bottom svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+nav.safe-area-bottom span {
+  font-size: 8px !important;
+  margin-top: 0 !important;
+}
+
+/* For forcing a repaint to fix position issues */
+.force-fixed {
+  position: fixed !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* Fix for header */
+header {
+  height: 40px !important;
+  padding: 0 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: fixed !important;
+  top: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+  background-color: white !important;
+}
+
+/* Fix for map container */
+.map-view {
+  padding-bottom: 50px !important;
+  padding-top: 40px !important;
+}
+
+/* Basic Android fixes for map UI */
+.leaflet-control-container .leaflet-top.leaflet-right {
+  top: 46px !important;
+  right: 10px !important;
+}
+
+.leaflet-control-container .leaflet-bottom.leaflet-right {
+  bottom: 60px !important;
+}
+
+/* Make Leaflet controls more tap-friendly on Android */
+.leaflet-control-zoom a {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  font-size: 18px !important;
+}
+
+/* Ensure radius controls are properly spaced */
+.absolute.bottom-\[50px\] button {
+  width: 20px !important;
+  height: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.absolute.bottom-\[50px\] button svg {
+  width: 10px !important;
+  height: 10px !important;
+}

@@ -1,0 +1,1348 @@
+/* Import Leaflet CSS - directly included rather than @import to ensure it loads */
+/* Leaflet CSS */
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane>svg,
+.leaflet-pane>canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.leaflet-container {
+  overflow: hidden;
+}
+
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.leaflet-tile::selection {
+  background: transparent;
+}
+
+.leaflet-safari .leaflet-tile {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.leaflet-safari .leaflet-tile-container {
+  width: 1600px;
+  height: 1600px;
+  -webkit-transform-origin: 0 0;
+}
+
+.leaflet-control {
+  position: relative;
+  z-index: 800;
+  pointer-events: auto;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.leaflet-top {
+  top: 0;
+}
+
+.leaflet-right {
+  right: 0;
+}
+
+.leaflet-bottom {
+  bottom: 0;
+}
+
+.leaflet-left {
+  left: 0;
+}
+
+.leaflet-zoom-box {
+  width: 0;
+  height: 0;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  z-index: 800;
+}
+
+.leaflet-overlay-pane svg,
+.leaflet-marker-pane svg,
+.leaflet-shadow-pane svg,
+.leaflet-tooltip-pane svg,
+.leaflet-popup-pane svg {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* Override: allow custom marker SVGs to render at their natural size */
+.leaflet-marker-pane .custom-div-icon svg {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
+.leaflet-container {
+  background: #0B0F19;
+  outline-offset: 1px;
+}
+
+.leaflet-zoom-animation {
+  -webkit-transition: -webkit-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  -moz-transition: -moz-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  -o-transition: -o-transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+  transition: transform 0.25s cubic-bezier(0, 0, 0.25, 1);
+}
+
+/* MarkerCluster CSS — light Google Maps theme */
+.marker-cluster-small {
+  background-color: rgba(66, 133, 244, 0.15);
+}
+
+.marker-cluster-small div {
+  background-color: rgba(66, 133, 244, 0.4);
+}
+
+.marker-cluster-medium {
+  background-color: rgba(66, 133, 244, 0.2);
+}
+
+.marker-cluster-medium div {
+  background-color: rgba(66, 133, 244, 0.5);
+}
+
+.marker-cluster-large {
+  background-color: rgba(234, 67, 53, 0.2);
+}
+
+.marker-cluster-large div {
+  background-color: rgba(234, 67, 53, 0.5);
+}
+
+.marker-cluster {
+  background-clip: padding-box;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.marker-cluster div {
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  margin-top: 5px;
+  text-align: center;
+  border-radius: 15px;
+  font: 12px "Inter", "Helvetica Neue", Arial, sans-serif;
+  color: #1a73e8;
+  font-weight: 700;
+}
+
+.marker-cluster span {
+  line-height: 30px;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 329 100% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 100% 65%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 224.3 76.3% 48%;
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-heading {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  /* Root app container - this is where scrolling happens */
+  .app-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    z-index: 1;
+  }
+
+  /* Improve mobile form styles */
+  input,
+  textarea,
+  select,
+  button {
+    font-size: 16px !important;
+    /* Prevent iOS zoom on focus */
+    @apply appearance-none;
+  }
+
+  .logo-text .casual {
+    @apply text-secondary;
+  }
+
+  .logo-text .and {
+    @apply text-slate-500;
+  }
+
+  .logo-text .intimate {
+    @apply text-primary;
+  }
+
+  .status-active {
+    @apply bg-green-500;
+  }
+
+  .status-inactive {
+    @apply bg-red-500;
+  }
+
+  .status-alert {
+    @apply bg-yellow-500;
+  }
+
+  .notification-dot {
+    @apply absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full;
+  }
+
+  .user-marker {
+    @apply w-10 h-10 rounded-full border-2 flex justify-center items-center cursor-pointer absolute;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  }
+
+  .user-marker:hover {
+    @apply transform scale-125;
+  }
+
+  .casual-marker {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    border-color: rgba(96, 165, 250, 0.5);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+  }
+
+  .casual-marker:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .casual-marker::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    animation: markerPulse 2s ease-out infinite;
+  }
+
+  .intimate-marker {
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    border-color: rgba(244, 114, 182, 0.5);
+    box-shadow: 0 0 12px rgba(236, 72, 153, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: white;
+  }
+
+  .intimate-marker:hover {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .intimate-marker::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(236, 72, 153, 0.3);
+    animation: markerPulse 2s ease-out infinite;
+  }
+
+  @keyframes markerPulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+
+    70% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  .settings-overlay {
+    background-color: rgba(2, 6, 23, 0.8);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .map-container {
+    @apply w-full h-full min-h-[300px] relative bg-slate-900;
+    background-image:
+      linear-gradient(to right,
+        rgba(124, 58, 237, 0.1) 1px,
+        transparent 1px),
+      linear-gradient(to bottom,
+        rgba(124, 58, 237, 0.1) 1px,
+        transparent 1px);
+    background-size: 20px 20px;
+    background-position: center;
+  }
+
+  /* Fix for Leaflet map */
+  .leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1;
+    display: block !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  /* Force display of tiles */
+  .leaflet-tile-pane {
+    z-index: 10 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .leaflet-tile-container {
+    opacity: 1 !important;
+    visibility: visible !important;
+    /* NEVER override transform here — Leaflet uses translate3d for tile positioning.
+       Stripping it causes tiles to stack at 0,0 and glitch on iOS Safari. */
+  }
+
+  .leaflet-tile {
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 256px !important;
+    height: 256px !important;
+  }
+
+  /* Ensure all layers are visible */
+  .leaflet-overlay-pane,
+  .leaflet-marker-pane,
+  .leaflet-shadow-pane,
+  .leaflet-popup-pane {
+    z-index: 20 !important;
+    visibility: visible !important;
+  }
+
+  .text-status-active {
+    @apply text-emerald-400;
+  }
+
+  .text-status-inactive {
+    @apply text-red-400;
+  }
+
+  /* Location error styling */
+  .location-error-container {
+    @apply flex-1 flex items-center justify-center p-6;
+    background: #0f172a;
+  }
+
+  /* Leaflet Map Marker Pin Styles */
+  .custom-div-icon,
+  .custom-div-icon.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .marker-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+
+  .marker-pin.casual-marker {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  }
+
+  .marker-pin.intimate-marker {
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+  }
+
+  /* marker-pin ::after removed — was causing dark circle overlay on SVG icons */
+
+  .pulse {
+    width: 14px;
+    height: 14px;
+    background-color: #4caf50;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .pulse:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #4caf50;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    z-index: -1;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+
+  @keyframes wiggle {
+
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+
+    25% {
+      transform: rotate(-5deg);
+    }
+
+    50% {
+      transform: rotate(0deg);
+    }
+
+    75% {
+      transform: rotate(5deg);
+    }
+  }
+
+  .animate-wiggle {
+    animation: wiggle 0.3s ease-in-out infinite;
+  }
+
+  .cluster-marker {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Bottom safe area for mobile devices */
+  .safe-area-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+  }
+
+  /* Fix for iOS safari 100vh issue */
+  .full-height {
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+
+  /* Mobile scrolling fixes */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    /* For smooth scrolling on iOS */
+    overflow-y: auto;
+    max-height: 100vh;
+    scrollbar-width: thin;
+    /* For Firefox */
+    scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+    /* For Firefox */
+    overscroll-behavior-y: contain;
+    /* Prevent overscroll on Android */
+    overflow-scrolling: touch;
+    /* Android fallback */
+  }
+
+  /* Android specific scrolling fixes */
+  @supports (-webkit-touch-callout: none) and (not (-webkit-overflow-scrolling: touch)) {
+
+    html,
+    body,
+    #root,
+    .scroll-container,
+    [style*="overflow"] {
+      -webkit-overflow-scrolling: auto;
+      overflow-y: scroll !important;
+      overscroll-behavior-y: none;
+    }
+  }
+
+  .scroll-container::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.2);
+    border-radius: 3px;
+  }
+
+  /* Enhanced mobile styles */
+  @media (max-width: 640px) {
+    .mobile-card {
+      @apply rounded-none border-x-0 w-full mx-0 shadow-none;
+    }
+
+    .mobile-fullscreen {
+      @apply fixed top-0 left-0 right-0 bottom-0 z-50 m-0 rounded-none;
+    }
+
+    .mobile-content {
+      @apply p-3;
+    }
+
+    .mobile-pb-safe {
+      padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 4rem);
+    }
+
+    .form-container {
+      @apply px-4;
+    }
+
+    /* Add extra spacing for inputs on mobile to make them more tappable */
+    input,
+    textarea,
+    select,
+    button {
+      @apply py-3;
+    }
+
+    /* Ensure buttons are visible and accessible */
+    button[type="submit"] {
+      @apply mt-6 py-4 text-base;
+    }
+  }
+
+  /* Android specific fixes */
+  .android-device .scroll-container {
+    position: relative;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: auto;
+  }
+
+  .android-device input:focus,
+  .android-device textarea:focus,
+  .android-device select:focus {
+    font-size: 16px !important;
+  }
+
+  /* Bottom navigation enhancements */
+  .bottom-nav {
+    background: rgba(15, 23, 42, 0.95);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Mobile layout fixes - these are !important to ensure they override other styles */
+header {
+  height: 40px !important;
+  padding: 0 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+header .logo-text {
+  font-size: 16px !important;
+}
+
+header button {
+  padding: 4px !important;
+}
+
+header svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+nav.safe-area-bottom {
+  height: 40px !important;
+  padding: 2px 4px !important;
+  z-index: 9999 !important;
+}
+
+nav.safe-area-bottom svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+nav.safe-area-bottom span {
+  font-size: 8px !important;
+  margin-top: 0 !important;
+}
+
+.absolute.top-2.left-2.z-\[1000\] {
+  top: 46px !important;
+}
+
+.absolute.top-2.right-2 {
+  top: 46px !important;
+}
+
+.absolute.top-12.left-1\/2 {
+  top: 46px !important;
+}
+
+.absolute.bottom-\[50px\] {
+  bottom: 46px !important;
+}
+
+/* Position zoom controls */
+.leaflet-control-container .leaflet-bottom.leaflet-right {
+  bottom: 60px !important;
+}
+
+.leaflet-control-zoom {
+  margin-bottom: 0 !important;
+}
+
+/* Fix for the bottom navigation on mobile */
+@media (max-width: 640px) {
+  .leaflet-control-container .leaflet-bottom.leaflet-right {
+    bottom: 60px !important;
+  }
+
+  .bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    z-index: 9999 !important;
+    width: 100% !important;
+  }
+}
+
+/* ===== Capacitor Native App Styles ===== */
+body.capacitor-native {
+  /* Disable text selection for app-like feel */
+  -webkit-user-select: none;
+  user-select: none;
+
+  /* Allow text selection in input fields */
+  input,
+  textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Safe area insets for notched devices */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+body.capacitor-native .app-container {
+  /* Account for safe areas */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+body.capacitor-native nav.safe-area-bottom {
+  height: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+body.capacitor-native .leaflet-control-container .leaflet-bottom.leaflet-right {
+  bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* ===== Premium Dark Theme Design System ===== */
+
+/* Auth page background */
+.auth-page {
+  background: #0B0F19; /* Solid fallback */
+  background: linear-gradient(135deg, #0B0F19 0%, #1e293b 100%);
+  position: relative;
+}
+
+/* Logo breathing animation - static for iOS Safari performance */
+.logo-breathe {
+  /* Removed drop-shadow animation */
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
+/* Title shimmer animation - static for performance */
+.title-shimmer {
+  background-size: 100% auto;
+}
+
+/* Glassmorphism auth card */
+.auth-card {
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.auth-card:hover {
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 4px 6px -1px rgba(0, 0, 0, 0.5),
+    0 0 100px -20px rgba(59, 130, 246, 0.12);
+}
+
+/* Auth input styling */
+.auth-input {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  border-radius: 0.75rem !important;
+  color: #e2e8f0 !important;
+  height: 2.75rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.auth-input:focus {
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 0 20px -5px rgba(59, 130, 246, 0.15) !important;
+  background: rgba(30, 41, 59, 0.8) !important;
+}
+
+.auth-input::placeholder {
+  color: rgba(148, 163, 184, 0.5) !important;
+}
+
+/* Feature pills with shimmer */
+.feature-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-pill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  transition: left 0.5s ease;
+}
+
+.feature-pill:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.7);
+}
+
+.feature-pill:hover::before {
+  left: 100%;
+}
+
+/* Premium header */
+.app-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Premium profile header */
+.profile-hero {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 40%, #1e1b4b 70%, #0f172a 100%);
+  background-size: 300% 300%;
+  animation: heroGradientShift 8s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes heroGradientShift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.profile-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(59, 130, 246, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+}
+
+/* Premium avatar ring */
+.avatar-ring {
+  background: linear-gradient(135deg, #3b82f6, #a78bfa, #ec4899);
+  background-size: 200% 200%;
+  animation: avatarRingShift 3s ease-in-out infinite;
+  padding: 3px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+@keyframes avatarRingShift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.avatar-ring>* {
+  border: 2px solid #0f172a;
+  border-radius: 50%;
+}
+
+/* Stat card styling */
+.stat-card {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Premium page background */
+.page-dark {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+/* Category badge */
+.badge-casual {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.badge-intimate {
+  background: linear-gradient(135deg, #ec4899, #db2777);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+}
+
+.badge-active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-inactive {
+  background: rgba(100, 116, 139, 0.5);
+  color: #94a3b8;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Premium bottom navigation — NO backdrop-filter, it kills iOS Safari perf over the map */
+.bottom-nav-premium {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-top: 1px solid rgba(148, 163, 184, 0.1) !important;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Messages dark theme */
+.message-bubble-sent {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.message-bubble-received {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+  border-radius: 1rem 1rem 1rem 0.25rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Message input dark */
+.message-input {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  color: #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+}
+
+.message-input:focus {
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Page transitions */
+.page-enter {
+  animation: pageIn 0.3s ease-out;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════ 2026 Map Overlay System ═══════ */
+
+/* Neon live pulse */
+@keyframes livePulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(52, 211, 153, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.7), 0 0 24px rgba(52, 211, 153, 0.3);
+  }
+}
+
+.map-live-active {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* User position glow on the map */
+.current-location-marker .pulse {
+  background: radial-gradient(circle, #6366f1 0%, #4f46e5 60%, transparent 100%);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+}
+
+/* Custom Leaflet popup dark theme */
+.leaflet-popup-content-wrapper {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(148, 163, 184, 0.15) !important;
+  border-radius: 1rem !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px !important;
+  color: #e2e8f0 !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  font-size: 20px !important;
+  padding: 4px 8px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #fff !important;
+}
+
+/* Hide default leaflet zoom controls (we use custom ones) */
+.leaflet-control-zoom {
+  display: none !important;
+}
+
+/* Leaflet attribution dark */
+.leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.7) !important;
+  color: #475569 !important;
+  font-size: 9px !important;
+  border: none !important;
+}
+
+.leaflet-control-attribution a {
+  color: #64748b !important;
+}
+
+/* ═══════ Premium Extras ═══════ */
+
+/* Thin dark scrollbar globally */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.25) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.25);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.4);
+}
+
+/* Cluster marker borders — light theme */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  border: 2px solid rgba(66, 133, 244, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom cluster icon transitions */
+.custom-cluster-icon {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+}
+
+/* Cluster pulse animation */
+@keyframes clusterPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+/* Override Leaflet cluster default styles without breaking Leaflet's translate3d positioning */
+.leaflet-marker-icon.custom-cluster-icon {
+  cursor: pointer;
+}
+
+/* Target the inner div for scaling so we don't wipe out Leaflet's inline transform positioning */
+.custom-cluster-icon:hover>div,
+.custom-cluster-icon.leaflet-interactive:focus>div {
+  transform: scale(1.15) !important;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.custom-cluster-icon>div {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  transform-origin: center;
+}
+
+/* Shimmer loading skeleton */
+.shimmer {
+  background: linear-gradient(90deg,
+      rgba(30, 41, 59, 0.6) 25%,
+      rgba(51, 65, 85, 0.6) 37%,
+      rgba(30, 41, 59, 0.6) 63%);
+  background-size: 400% 100%;
+  animation: shimmerSlide 1.4s ease infinite;
+}
+
+@keyframes shimmerSlide {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Logo heart pulse */
+.logo-heart-pulse {
+  transform-origin: center;
+  animation: heartBeat 1.8s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+
+  14% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+
+  28% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+
+  42% {
+    transform: scale(1.1);
+    opacity: 0.95;
+  }
+
+  56% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+}
+
+/* Connect overlay pulse rings */
+.connect-pulse-ring {
+  position: absolute;
+  inset: -12px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
+  animation: connectPulse 2s ease-out infinite;
+}
+
+.connect-pulse-ring:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.connect-pulse-ring:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+@keyframes connectPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Radar Sweep Animation */
+.radar-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.radar-sweep {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 50%;
+  transform-origin: 0 100%;
+  background: conic-gradient(from 0deg,
+      rgba(59, 130, 246, 0.4) 0deg,
+      rgba(59, 130, 246, 0.05) 60deg,
+      transparent 120deg);
+  animation: radarScan 3s linear infinite;
+}
+
+.radar-grid {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-image:
+    radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at center, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center center;
+}
+
+.radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(59, 130, 246, 0.2);
+}
+
+.radar-ring-1 {
+  width: 33%;
+  height: 33%;
+}
+
+.radar-ring-2 {
+  width: 66%;
+  height: 66%;
+}
+
+.radar-ring-3 {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes radarScan {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

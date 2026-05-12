@@ -1,0 +1,1 @@
+import { db } from './server/db.ts'; import { verificationCodes } from './shared/schema.ts'; import { desc, eq } from 'drizzle-orm'; const getOTP = async () => { const res = await db.select().from(verificationCodes).where(eq(verificationCodes.phoneNumber, '5551239999')).orderBy(desc(verificationCodes.id)).limit(1); console.log('OTP:', res[0].code); process.exit(0); }; getOTP();
