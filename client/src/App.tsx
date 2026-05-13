@@ -4,7 +4,6 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
-import Register from "@/pages/Register";
 import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
@@ -49,10 +48,8 @@ function AppRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch location={location}>
         <Route path="/">
-          {isAuthenticated ? <MapView /> : <Register />}
+          <MapView />
         </Route>
-        <Route path="/register" component={Register} />
-        <Route path="/auth" component={Register} />
         <Route path="/map">
           <MapView />
         </Route>

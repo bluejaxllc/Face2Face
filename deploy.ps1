@@ -1,4 +1,4 @@
-$token = "nfp_gqw8jxRX5LPYSVqHUEj83Qziudoetp1Q5f91"
+$token = "nfp_chTiD2k5eVWrBPZD158ov5maYRbxgLcSbfb2"
 $headers = @{
     "Authorization" = "Bearer $token"
 }

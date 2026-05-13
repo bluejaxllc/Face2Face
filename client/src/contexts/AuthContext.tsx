@@ -66,22 +66,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { isLoading, refetch, data: userData } = useQuery<User | null>({
     queryKey: ["/api/auth/me"],
     retry: false,
-    staleTime: 0, // Always fetch from network
-    queryFn: async ({ queryKey }) => {
-      const fullUrl = buildApiUrl(queryKey[0] as string);
-      const res = await fetch(fullUrl, {
-        credentials: "include",
-      });
-
-      if (res.status === 401) {
-        return null;
-      }
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      return res.json();
+    staleTime: Infinity, 
+    queryFn: async () => {
+      // Mock user to bypass login screen
+      return {
+        id: 1,
+        username: "demo_user",
+        firstName: "Demo",
+        lastName: "User",
+        email: "demo@example.com",
+        gender: "other",
+        age: 25,
+        height: null,
+        weight: null,
+        selfRating: 5,
+        category: "friendships",
+        bio: null,
+        datingPreference: "all",
+        favoriteColor: null,
+        favoriteSong: null,
+        fieldOfStudy: null,
+        interests: null,
+        seeking: null,
+        isActive: true,
+        inactiveTimeout: 30,
+        latitude: null,
+        longitude: null,
+        lastLocation: new Date(),
+        profileCompleted: true,
+        profilePhoto: null,
+        phoneNumber: "5550000000",
+        isPhoneVerified: true,
+        safetyAcknowledged: true
+      };
     }
   });
 

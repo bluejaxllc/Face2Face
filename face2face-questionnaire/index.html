@@ -1,712 +1,435 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face 2 Face Prospect Questionnaire</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Face 2 Face - Beta Waitlist</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --surface: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --border: #334155;
-            --success: #10b981;
+            --bg-dark: #0a0f1d;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --primary-accent: #3b82f6; /* blue-500 */
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary-accent: #a855f7; /* purple-500 */
+            --secondary-glow: rgba(168, 85, 247, 0.4);
+            --pink-accent: #ec4899; /* pink-500 */
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-glow: rgba(148, 163, 184, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.6;
-            padding: 2rem;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 3rem;
-        }
-
-        h2 {
-            font-size: 1.75rem;
-            color: var(--accent);
-            margin-top: 3rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--border);
-            letter-spacing: -0.01em;
-        }
-
-        h3 {
-            font-size: 1.35rem;
-            color: #e2e8f0;
-            margin-top: 2rem;
-        }
-
-        .goal {
-            font-style: italic;
-            display: inline-block;
-            padding: 0.75rem 1.25rem;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent);
-            margin-bottom: 2rem;
-            color: #bae6fd;
-            font-size: 0.95rem;
-        }
-
-        .question-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease, border-color 0.2s ease;
-        }
-
-        .question-card:hover {
-            border-color: rgba(59, 130, 246, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .q-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #f1f5f9;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .q-number {
-            background: var(--accent);
-            color: white;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-            margin-top: 0.15rem;
+            position: relative;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--primary-glow) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, var(--secondary-glow) 0%, transparent 25%);
+            animation: bgShift 20s ease-in-out infinite alternate;
         }
 
-        .q-type {
-            color: var(--success);
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-left: 2.75rem;
-            margin-top: 0.25rem;
-            margin-bottom: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        @keyframes bgShift {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
         }
 
-        .options-list {
-            list-style: none;
-            padding-left: 2.75rem;
-            margin-top: 0.5rem;
-            margin-bottom: 0;
+        /* Glassmorphism background circles */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 10s ease-in-out infinite;
         }
 
-        .options-list li {
-            margin-bottom: 0.5rem;
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary-accent);
+            top: -100px;
+            left: -100px;
+            opacity: 0.3;
+            animation-delay: 0s;
         }
 
-        .option-label {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
-            color: var(--text-secondary);
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--secondary-accent);
+            bottom: -150px;
+            right: -100px;
+            opacity: 0.2;
+            animation-delay: -5s;
         }
 
-        .option-label:hover {
-            border-color: var(--border);
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--text-primary);
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
         }
 
-        input[type="radio"], input[type="checkbox"] {
-            accent-color: var(--accent);
-            width: 1.1rem;
-            height: 1.1rem;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        textarea, input[type="text"] {
+        .container {
             width: 100%;
-            box-sizing: border-box;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            color: #f8fafc;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            margin-left: 2.75rem;
-            width: calc(100% - 2.75rem);
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
+            max-width: 500px;
+            padding: 2rem;
+            z-index: 10;
         }
 
-        textarea:focus, input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        
-        .scale-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1rem;
-            margin-left: 2.75rem;
-            padding: 1rem 0;
-            border-top: 1px dashed var(--border);
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        
-        .scale-point {
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(168, 85, 247, 0.2));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        .logo-icon i {
+            color: #fff;
+            width: 32px;
+            height: 32px;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); transform: scale(1); }
+            100% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.5); transform: scale(1.05); }
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.5;
+            max-width: 90%;
+            margin: 0 auto;
+        }
+
+        form {
             display: flex;
             flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 20px;
+            height: 20px;
+            transition: color 0.3s ease;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 1rem 1rem 3rem;
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(148, 163, 184, 0.5);
+        }
+
+        input:focus {
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        input:focus + i, input:focus ~ i {
+            color: var(--primary-accent);
+        }
+
+        .submit-btn {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(147, 51, 234, 0.5);
+            background: linear-gradient(to right, #3b82f6, #a855f7);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        .submit-btn .arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .submit-btn:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: -0.5rem;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .error-message.show {
+            opacity: 1;
+        }
+
+        /* Success state */
+        .success-state {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
         }
 
     </style>
 </head>
 <body>
 
-    <h1>Face 2 Face Prospect Questionnaire</h1>
-    <p class="subtitle">This comprehensive questionnaire is designed to uncover the deep frustrations users experience with traditional swipe-based dating apps and to validate the real-world, open-communication philosophy of Face 2 Face.</p>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <!-- PHASE 1 -->
-    <h2>Phase 1: General Public Questionnaire</h2>
+    <div class="container">
+        <div class="glass-panel" id="form-panel">
+            <div class="header">
+                <div class="logo-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <h1>Face 2 Face Beta</h1>
+                <p class="subtitle">Join the waitlist to test our revolutionary real-world matching platform.</p>
+            </div>
 
-    <h3>Section 1: The Illusion of the "Algorithmic Match" & Restrictive Barriers</h3>
-    <div class="goal">Goal: Dismantle the comfort of mutual matching and expose how algorithmic barriers restrict genuine human interaction.</div>
+            <form id="waitlist-form">
+                <div class="input-group">
+                    <i data-lucide="user"></i>
+                    <input type="text" id="name" placeholder="Full Name (Required)" required autocomplete="name">
+                </div>
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">1</div> Do you feel forced to rely on an "algorithmic match" rather than your own intuition when trying to connect with someone?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q1" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q1" value="no"> No</label></li>
-        </ul>
-    </div>
+                <div class="input-group">
+                    <i data-lucide="mail"></i>
+                    <input type="email" id="email" placeholder="Email Address (Required)" required autocomplete="email">
+                </div>
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">2</div> The requirement to "mutually match" feels more like a restrictive barrier than a safety measure.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q2" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q2" value="false"> False</label></li>
-        </ul>
-    </div>
+                <div class="input-group">
+                    <i data-lucide="phone"></i>
+                    <input type="tel" id="phone" placeholder="Phone Number (Optional)" autocomplete="tel">
+                </div>
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">3</div> When an app dictates who you can talk to based on an AI match or statistical match, it feels:</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q3" value="a"> A) Cold and calculated.</label></li>
-            <li><label class="option-label"><input type="radio" name="q3" value="b"> B) Restrictive and frustrating.</label></li>
-            <li><label class="option-label"><input type="radio" name="q3" value="c"> C) Like the app is playing moral guide.</label></li>
-            <li><label class="option-label"><input type="radio" name="q3" value="d"> D) All of the above.</label></li>
-        </ul>
-    </div>
+                <div class="input-group">
+                    <i data-lucide="link"></i>
+                    <input type="url" id="socialLink" placeholder="Social Media Link (Optional)">
+                </div>
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">4</div> Rank your frustration with paywalled communication.</div>
-        <div class="q-type">Scale 1-5</div>
-        <div class="scale-container">
-            <label class="scale-point"><input type="radio" name="q4" value="1"> 1<br>(Not frustrated)</label>
-            <label class="scale-point"><input type="radio" name="q4" value="2"> 2</label>
-            <label class="scale-point"><input type="radio" name="q4" value="3"> 3</label>
-            <label class="scale-point"><input type="radio" name="q4" value="4"> 4</label>
-            <label class="scale-point"><input type="radio" name="q4" value="5"> 5<br>(Extremely frustrated)</label>
+                <div id="error-alert" class="error-message"></div>
+
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    <span class="btn-text">Apply Now</span>
+                    <i data-lucide="arrow-right" class="arrow"></i>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </form>
+        </div>
+
+        <div class="glass-panel success-state" id="success-panel">
+            <div class="success-icon">
+                <i data-lucide="check" style="width: 40px; height: 40px;"></i>
+            </div>
+            <h1>You're on the list!</h1>
+            <p class="subtitle" style="margin-bottom: 2rem;">Thank you for applying. Please complete the quick questionnaire to secure your spot.</p>
+            <div class="loader" style="display: block; margin: 0 auto;"></div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem;">Redirecting...</p>
         </div>
     </div>
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">5</div> Would you prefer an environment that restores traditional ways of finding someone by allowing open communication instantly?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q5" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q5" value="no"> No</label></li>
-        </ul>
-    </div>
+    <script>
+        // Initialize icons
+        lucide.createIcons();
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">6</div> I have missed out on genuine connections because a restrictive barrier prevented me from sending the first message.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q6" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q6" value="false"> False</label></li>
-        </ul>
-    </div>
+        const form = document.getElementById('waitlist-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.querySelector('.btn-text');
+        const arrow = document.querySelector('.arrow');
+        const loader = document.getElementById('loader');
+        const errorAlert = document.getElementById('error-alert');
+        const formPanel = document.getElementById('form-panel');
+        const successPanel = document.getElementById('success-panel');
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">7</div> How do you feel about algorithms controlling your social visibility?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q7" value="a"> A) It ruins the organic nature of meeting people.</label></li>
-            <li><label class="option-label"><input type="radio" name="q7" value="b"> B) It feels like constant manipulation.</label></li>
-            <li><label class="option-label"><input type="radio" name="q7" value="c"> C) It's acceptable but annoying.</label></li>
-        </ul>
-    </div>
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // UI Loading state
+            btnText.style.display = 'none';
+            arrow.style.display = 'none';
+            loader.style.display = 'block';
+            submitBtn.disabled = true;
+            errorAlert.classList.remove('show');
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">8</div> Do you believe dating apps act as gatekeepers rather than facilitators?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q8" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q8" value="no"> No</label></li>
-        </ul>
-    </div>
+            const payload = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                socialLink: document.getElementById('socialLink').value
+            };
 
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">9</div> Open communication without an arbitrary algorithmic match would lead to more honest interactions.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q9" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q9" value="false"> False</label></li>
-        </ul>
-    </div>
+            try {
+                const response = await fetch('https://face2face-production-11ee.up.railway.app/api/waitlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-
-    <h3>Section 2: Psychological Impact & The Addiction Cycle</h3>
-    <div class="goal">Goal: Highlight the negative psychological effects of continuous swiping and the delete/re-download cycle.</div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">10</div> Have you ever deleted a dating app out of frustration, only to re-download it a few days or weeks later?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q10" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q10" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">11</div> The endless swiping mechanic feels designed to foster addiction rather than help me find a partner.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q11" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q11" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">12</div> How does the continuous cycle of swiping affect your mental health?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q12" value="a"> A) Breeds confusion and exhaustion.</label></li>
-            <li><label class="option-label"><input type="radio" name="q12" value="b"> B) Creates a false sense of self-worth (e.g., matching with hundreds but connecting with none).</label></li>
-            <li><label class="option-label"><input type="radio" name="q12" value="c"> C) Destroys self-esteem due to low interaction rates.</label></li>
-            <li><label class="option-label"><input type="radio" name="q12" value="d"> D) Creates a numbing effect toward real people.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">13</div> For Women: Do you feel that possessing hundreds of unanswered matches gives a false sense of validation without yielding real-world results?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q13" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q13" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">14</div> For Men: Does the low algorithmic match count on traditional apps negatively impact your self-esteem?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q14" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q14" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">15</div> The gamification of dating apps strips away the humanity of the people on the screen.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q15" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q15" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">16</div> What is the primary emotion you feel after 15 minutes of continuous swiping?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q16" value="a"> A) Burnout.</label></li>
-            <li><label class="option-label"><input type="radio" name="q16" value="b"> B) Anxiety.</label></li>
-            <li><label class="option-label"><input type="radio" name="q16" value="c"> C) Boredom.</label></li>
-            <li><label class="option-label"><input type="radio" name="q16" value="d"> D) Hopeful.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">17</div> Do you feel that traditional apps use your loneliness against you to keep you swiping?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q17" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q17" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">18</div> The isolation of profile decks makes me feel less connected to my local community.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q18" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q18" value="false"> False</label></li>
-        </ul>
-    </div>
-
-
-    <h3>Section 3: The Dark Side of Competitors (Scams, Data, Exploitation)</h3>
-    <div class="goal">Goal: Tear down competitor apps (Tinder, Bumble, Hinge) by exposing their failures in privacy and safety.</div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">19</div> Are you aware that many traditional dating apps retain your personal data for extended periods even after you delete your account?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q19" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q19" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">20</div> I frequently encounter scammers, bots, or fake profiles on apps like Tinder or Bumble.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q20" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q20" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">21</div> How concerned are you that dating apps sell user data (including biometric data from facial verification) to third parties?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q21" value="a"> A) Extremely concerned.</label></li>
-            <li><label class="option-label"><input type="radio" name="q21" value="b"> B) Somewhat concerned.</label></li>
-            <li><label class="option-label"><input type="radio" name="q21" value="c"> C) Not concerned.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">22</div> Do you trust how major dating corporations handle your private photos?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q22" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q22" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">23</div> It feels like major dating apps exploit user photos to populate their ecosystems or train AI models without explicit consent.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q23" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q23" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">24</div> What is the most egregious failure of current mainstream dating apps?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q24" value="a"> A) Profiting off prolonged singleness.</label></li>
-            <li><label class="option-label"><input type="radio" name="q24" value="b"> B) Failing to protect users from professional scammers.</label></li>
-            <li><label class="option-label"><input type="radio" name="q24" value="c"> C) Shady data retention and privacy policies.</label></li>
-            <li><label class="option-label"><input type="radio" name="q24" value="d"> D) All of the above.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">25</div> If an app guaranteed your data was permanently erased upon deletion, would you be more likely to use it?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q25" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q25" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">26</div> The so-called "safety features" of Bumble and Tinder fail to actually keep bad actors off the platform.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q26" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q26" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">27</div> Do you feel exploited when apps put basic communication features behind expensive paywalls?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q27" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q27" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <h3>Section 4: Direct Interaction & App Philosophy</h3>
-    <div class="goal">Goal: Validate the Face 2 Face approach of open communication and passing by.</div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">28</div> If you saw someone interesting on a map, would you prefer the ability to initiate a "direct interaction" rather than hoping for a statistical match?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q28" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q28" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">29</div> If someone reaches out and I am not interested, I prefer to simply "pass by" them rather than actively rejecting or ignoring them.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q29" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q29" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">30</div> Instead of playing matchmaker, an app should:</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q30" value="a"> A) Simply show you who is around and get out of the way.</label></li>
-            <li><label class="option-label"><input type="radio" name="q30" value="b"> B) Carefully curate your feed based on extensive personality algorithms.</label></li>
-            <li><label class="option-label"><input type="radio" name="q30" value="c"> C) Act as a strict moral guide on how you interact.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">31</div> Do you prefer an app that restores traditional rules of engagement (e.g., walking up to someone) in a digital format?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q31" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q31" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">32</div> Direct messaging someone in your vicinity feels more authentic than swiping right on a static profile from miles away.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q32" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q32" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">33</div> How should a platform handle unwanted attention?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q33" value="a"> A) Allow users to quickly "pass by" and remove the person from their map.</label></li>
-            <li><label class="option-label"><input type="radio" name="q33" value="b"> B) Prevent anyone from messaging without mutual permission first.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">34</div> Does waiting for a mutual swipe kill the spontaneity of a real-life encounter?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q34" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q34" value="no"> No</label></li>
-        </ul>
-    </div>
-
-
-    <h3>Section 5: Profile Authenticity & Diverse Expression</h3>
-    <div class="goal">Goal: Gauge interest in unique profile identifiers that cater to individual and traditional standards.</div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">35</div> Standard profile fields (height, job, gym habits) fail to capture who I really am.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q35" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q35" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">36</div> Would you utilize optional fields to express unique aspects of your personality or traditional values?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q36" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q36" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">37</div> Which of the following optional fields would you find most useful on a profile?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="checkbox" name="q37" value="a"> A) Detailed Personality Type (e.g., Myers-Briggs, Enneagram).</label></li>
-            <li><label class="option-label"><input type="checkbox" name="q37" value="b"> B) Western Zodiac Sign.</label></li>
-            <li><label class="option-label"><input type="checkbox" name="q37" value="c"> C) Chinese Zodiac Sign.</label></li>
-            <li><label class="option-label"><input type="checkbox" name="q37" value="d"> D) All of the above.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">38</div> Do you feel that modern dating apps discourage traditional dating standards?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q38" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q38" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">39</div> I would appreciate specific tags (e.g., "Virgin Bride", "Traditional Values", "Courtship") to clearly signal my intentions and standards.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q39" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q39" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">40</div> How should an app handle highly specific or traditional lifestyle tags?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q40" value="a"> A) Offer them as optional badges for those who want to use them.</label></li>
-            <li><label class="option-label"><input type="radio" name="q40" value="b"> B) Make them mandatory for better filtering.</label></li>
-            <li><label class="option-label"><input type="radio" name="q40" value="c"> C) Keep profiles strictly generic.</label></li>
-        </ul>
-    </div>
-
-    <!-- PHASE 2 -->
-    <h2>Phase 2: In-App Test User Questionnaire</h2>
-    <div class="goal">Goal: Gather specific UX and feedback metrics from users who have actively tested the Face 2 Face map and direct interaction features.</div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">41</div> How intuitive was the process of locating users on the real-world map?</div>
-        <div class="q-type">Scale 1-10</div>
-        <div class="scale-container">
-            <label class="scale-point"><input type="radio" name="q41" value="1"> 1<br>(Not Intuitive)</label>
-            <label class="scale-point"><input type="radio" name="q41" value="2"> 2</label>
-            <label class="scale-point"><input type="radio" name="q41" value="3"> 3</label>
-            <label class="scale-point"><input type="radio" name="q41" value="4"> 4</label>
-            <label class="scale-point"><input type="radio" name="q41" value="5"> 5</label>
-            <label class="scale-point"><input type="radio" name="q41" value="6"> 6</label>
-            <label class="scale-point"><input type="radio" name="q41" value="7"> 7</label>
-            <label class="scale-point"><input type="radio" name="q41" value="8"> 8</label>
-            <label class="scale-point"><input type="radio" name="q41" value="9"> 9</label>
-            <label class="scale-point"><input type="radio" name="q41" value="10"> 10<br>(Very Intuitive)</label>
-        </div>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">42</div> Did initiating a "direct interaction" (bypassing an algorithmic match) feel more natural than swiping?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q42" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q42" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">43</div> When an interaction wasn't a fit, using the "pass by" function felt seamless and less confrontational.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q43" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q43" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">44</div> What was the most refreshing aspect of using Face 2 Face compared to traditional apps?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q44" value="a"> A) The lack of restrictive match barriers.</label></li>
-            <li><label class="option-label"><input type="radio" name="q44" value="b"> B) The absence of paywalls for basic communication.</label></li>
-            <li><label class="option-label"><input type="radio" name="q44" value="c"> C) The visual layout of the live map.</label></li>
-            <li><label class="option-label"><input type="radio" name="q44" value="d"> D) The authenticity of the profiles (zodiac, personality types, traditional tags).</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">45</div> Did you notice a difference in the quality of conversation when you didn't have to wait for an AI match?</div>
-        <div class="q-type">Yes / No</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q45" value="yes"> Yes</label></li>
-            <li><label class="option-label"><input type="radio" name="q45" value="no"> No</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">46</div> How confident did you feel about your privacy and data security while using the app?</div>
-        <div class="q-type">Scale 1-10</div>
-        <div class="scale-container">
-            <label class="scale-point"><input type="radio" name="q46" value="1"> 1<br>(Not Confident)</label>
-            <label class="scale-point"><input type="radio" name="q46" value="2"> 2</label>
-            <label class="scale-point"><input type="radio" name="q46" value="3"> 3</label>
-            <label class="scale-point"><input type="radio" name="q46" value="4"> 4</label>
-            <label class="scale-point"><input type="radio" name="q46" value="5"> 5</label>
-            <label class="scale-point"><input type="radio" name="q46" value="6"> 6</label>
-            <label class="scale-point"><input type="radio" name="q46" value="7"> 7</label>
-            <label class="scale-point"><input type="radio" name="q46" value="8"> 8</label>
-            <label class="scale-point"><input type="radio" name="q46" value="9"> 9</label>
-            <label class="scale-point"><input type="radio" name="q46" value="10"> 10<br>(Very Confident)</label>
-        </div>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">47</div> Seeing people in real-time geographic context made me feel more connected to my physical surroundings.</div>
-        <div class="q-type">True / False</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q47" value="true"> True</label></li>
-            <li><label class="option-label"><input type="radio" name="q47" value="false"> False</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">48</div> Which profile tag or feature did you find most helpful in determining compatibility?</div>
-        <div class="q-type">Multiple Choice</div>
-        <ul class="options-list">
-            <li><label class="option-label"><input type="radio" name="q48" value="a"> A) Traditional tags / Values.</label></li>
-            <li><label class="option-label"><input type="radio" name="q48" value="b"> B) Personality indicators.</label></li>
-            <li><label class="option-label"><input type="radio" name="q48" value="c"> C) Zodiac signs.</label></li>
-            <li><label class="option-label"><input type="radio" name="q48" value="d"> D) Just the direct interaction itself.</label></li>
-        </ul>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">49</div> How did the psychological experience of using Face 2 Face differ from the fatigue of traditional swipe apps?</div>
-        <div class="q-type">Short Answer</div>
-        <textarea name="q49" placeholder="Type your answer here..."></textarea>
-    </div>
-
-    <div class="question-card">
-        <div class="q-title"><div class="q-number">50</div> Please share any additional thoughts, feature requests, or critiques about your experience with Face 2 Face.</div>
-        <div class="q-type">Open Feedback</div>
-        <textarea name="q50" placeholder="Type your response here..."></textarea>
-    </div>
-
+                if (response.ok) {
+                    // Show success state
+                    formPanel.style.display = 'none';
+                    successPanel.style.display = 'block';
+                    
+                    // Delay and redirect to questionnaire
+                    setTimeout(() => {
+                        window.location.href = 'questionnaire.html';
+                    }, 2500);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Failed to join the waitlist.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorAlert.textContent = error.message === 'Failed to fetch' 
+                    ? 'Network error. Please try again later.' 
+                    : error.message;
+                errorAlert.classList.add('show');
+                
+                // Reset button
+                btnText.style.display = 'block';
+                arrow.style.display = 'block';
+                loader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>

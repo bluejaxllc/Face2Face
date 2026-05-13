@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useLocation as useRouteLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/contexts/LocationContext";
@@ -10,6 +10,8 @@ import SafetyModal from "@/components/SafetyModal";
 import { PageTransition } from "@/components/PageTransition";
 import { useToast } from "@/hooks/use-toast";
 
+const TurfWars = lazy(() => import("@/components/TurfWars"));
+
 export default function MapView() {
   const [, setLocation] = useRouteLocation();
   const { user, updateProfile } = useAuth();
@@ -20,6 +22,7 @@ export default function MapView() {
   const [showSafety, setShowSafety] = useState(false);
   const [isUpdatingSafety, setIsUpdatingSafety] = useState(false);
   const [hasCheckedModals, setHasCheckedModals] = useState(false);
+  const [showGame, setShowGame] = useState(false);
 
   useEffect(() => {
     // Only check modal conditions once per component mount after user is loaded
@@ -70,7 +73,37 @@ export default function MapView() {
       <Header />
       <div className="fixed left-0 right-0" style={{ top: "48px", bottom: "52px" }}>
         <Map />
+        {/* Turf Wars Game Overlay */}
+        {showGame && (
+          <Suspense fallback={null}>
+            <TurfWars />
+          </Suspense>
+        )}
       </div>
+      {/* Turf Wars Toggle FAB */}
+      <button
+        onClick={() => setShowGame(g => !g)}
+        className="fixed z-[9998] flex items-center gap-2 shadow-2xl transition-all duration-300"
+        style={{
+          bottom: "90px",
+          right: "16px",
+          padding: showGame ? "8px 16px" : "10px 18px",
+          borderRadius: "24px",
+          background: showGame
+            ? "linear-gradient(135deg, #ef4444, #dc2626)"
+            : "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+          color: "#fff",
+          fontWeight: 700,
+          fontSize: "13px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: showGame
+            ? "0 4px 20px rgba(239,68,68,0.4)"
+            : "0 4px 20px rgba(139,92,246,0.4)",
+        }}
+      >
+        <span style={{ fontSize: "16px" }}>{showGame ? "✕" : "🏴"}</span>
+        {showGame ? "Exit Game" : "Turf Wars"}
+      </button>
       <BottomNavigation />
       <WelcomeModal isOpen={showWelcome} onClose={handleCloseWelcome} />
       <SafetyModal isOpen={showSafety} onAccept={handleAcceptSafety} isUpdating={isUpdatingSafety} />
