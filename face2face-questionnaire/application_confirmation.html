@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face 2 Face - Application Received</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --pink-accent: #ec4899;
+            --purple-accent: #a855f7;
+            --border: rgba(51, 65, 85, 0.5);
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 15% 5% , var(--accent-glow) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.2) 0%, transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .confirmation-card {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--success);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confirmation-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--success), #34d399);
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .icon-wrapper svg {
+            width: 40px;
+            height: 40px;
+            color: var(--success);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .details-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #f8fafc;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .status-message {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .links-title {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .btn-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-ambassador {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #bae6fd;
+        }
+
+        .btn-ambassador:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(168, 85, 247, 0.2));
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .btn-individual {
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            color: #fbcfe8;
+        }
+
+        .btn-individual:hover {
+            background: rgba(236, 72, 153, 0.2);
+            transform: translateY(-2px);
+            border-color: var(--pink-accent);
+        }
+
+        .btn-business {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #a7f3d0;
+        }
+
+        .btn-business:hover {
+            background: rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
+            border-color: var(--success);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="confirmation-card">
+        <div class="icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        
+        <h1>Application Received!</h1>
+        <p class="subtitle">Thank you for submitting your application. Our team will review your details, and you will hear from us soon regarding the next steps.</p>
+
+        <div class="status-message">
+            ✓ Successfully submitted for review and acceptance
+        </div>
+
+        <div class="details-box">
+            <div class="detail-row">
+                <span class="detail-label">Name</span>
+                <span class="detail-value" id="res-name">Applicant Name</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Contact</span>
+                <span class="detail-value" id="res-contact">Not provided</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date</span>
+                <span class="detail-value" id="res-date">...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Time</span>
+                <span class="detail-value" id="res-time">...</span>
+            </div>
+        </div>
+
+        <div class="links-container">
+            <div class="links-title">Explore Other Integrations</div>
+            <div class="action-buttons">
+                <a href="/ambassador_questionnaire.html" target="_blank" class="btn-link btn-ambassador">Sign up to be a brand ambassador</a>
+                <a href="/index.html" target="_blank" class="btn-link btn-individual">Sign up for individuals</a>
+                <a href="/business.html" target="_blank" class="btn-link btn-business">Sign up for business</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Extract data from URL params or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const name = urlParams.get('name') || localStorage.getItem('f2f_appName') || 'Anonymous Applicant';
+        const contact = urlParams.get('contact') || localStorage.getItem('f2f_appContact') || 'N/A';
+        
+        const now = new Date();
+        const dateString = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        document.getElementById('res-name').textContent = name;
+        document.getElementById('res-contact').textContent = contact;
+        document.getElementById('res-date').textContent = dateString;
+        document.getElementById('res-time').textContent = timeString;
+    </script>
+</body>
+</html>
