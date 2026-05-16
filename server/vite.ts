@@ -58,38 +58,8 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
-
-  if (!fs.existsSync(distPath)) {
-    throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
-    );
-  }
-
-  app.use(express.static(distPath, {
-    setHeaders: (res, path) => {
-      if (path.endsWith('.html')) {
-        // CRITICAL: Force CDNs and browsers to NEVER cache the HTML file
-        // Surrogate-Control specifically targets Fastly (Railway's CDN edge)
-        res.set('Surrogate-Control', 'no-store');
-        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-        res.set('Pragma', 'no-cache');
-        res.set('Expires', '0');
-      } else {
-        // Assets can be cached but must revalidate
-        res.set('Cache-Control', 'no-cache, must-revalidate');
-      }
-    }
-  }));
-
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    // CRITICAL: Surrogate-Control tells Fastly (Railway's CDN) to NEVER cache this
-    // Cache-Control alone is NOT enough — Fastly ignores it for edge caching
-    res.set('Surrogate-Control', 'no-store');
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // Deprecating the Railway layout: redirect all non-API frontend traffic to Vercel
+  app.use("*", (req, res) => {
+    res.redirect(301, `https://bump.bluejax.ai${req.originalUrl || '/'}`);
   });
 }
