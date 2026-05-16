@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "@/contexts/LocationContext";
 import { useAuth } from "@/contexts/AuthContext";
-import Header from "@/components/Header";
+import TopToolbar from "@/components/TopToolbar";
 import BottomNavigation from "@/components/BottomNavigation";
 import { calculateDistance } from "@/lib/distance";
 import { Loader2, Search, Ruler, Weight, ShieldCheck, Star } from "lucide-react";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
+import { FilterOptions } from "@/components/FilterDrawer";
 
 export default function Dating() {
     const { currentLocation } = useLocation();
@@ -64,10 +65,33 @@ export default function Dating() {
         return { icon: 'âš¥', color: 'text-purple-400' };
     };
 
+    const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
+    const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
+        const saved = localStorage.getItem('face2face_filterOptions');
+        if (saved) { try { return JSON.parse(saved); } catch (e) { } }
+        return { datingPreference: 'any', showDating: true, showBusiness: true, showFriendships: true, showMen: true, showWomen: true, ageRange: [18, 50], radius: 25000, minRating: 1 };
+    });
+
+    const handleToggleActive = useCallback(async (active: boolean) => {
+        try { await (useAuth as any).updateProfile?.({ isActive: active }); } catch (e) { }
+    }, []);
+
+    const handleFilterChange = useCallback((options: FilterOptions) => {
+        setFilterOptions(options);
+        localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
+    }, []);
+
     return (
         <PageTransition className="h-screen w-full page-dark">
-            <Header />
-            <div className="fixed left-0 right-0 overflow-y-auto px-4" style={{ top: "40px", bottom: "64px" }}>
+            <TopToolbar
+                isActive={isActive}
+                onToggleActive={handleToggleActive}
+                filterOptions={filterOptions}
+                onFilterChange={handleFilterChange}
+                mapStyle={mapStyle}
+                onToggleMapStyle={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
+            />
+            <div className="fixed left-0 right-0 overflow-y-auto px-4" style={{ top: "44px", bottom: "56px" }}>
                 <div className="w-full max-w-md mx-auto">
                     <div className="flex items-center justify-between pt-4 mb-4">
                         <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
@@ -82,7 +106,7 @@ export default function Dating() {
 
                     {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
                     <div className="flex justify-center mb-6">
-                        <div className="flex bg-slate-900/80 backdrop-blur-md border border-white/10 p-1 rounded-full shadow-2xl gap-1.5 items-center">
+                        <div className="flex bg-white/90 border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
                             <button
                                 onClick={() => {
                                     if (showMen && !showWomen) return; // Prevent both false
