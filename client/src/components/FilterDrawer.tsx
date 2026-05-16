@@ -168,7 +168,7 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
                     updateOption('radius', Math.min(25000, Math.max(1, parseInt(val) || 1)));
                   }
                 }}
-                className="w-28 bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-2 text-white font-bold text-center outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 transition-colors"
+                className="w-20 bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-2 text-white font-bold text-center outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 transition-colors"
                 style={{ fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
               />
               <span className="text-slate-400 font-semibold text-xs">MI</span>
