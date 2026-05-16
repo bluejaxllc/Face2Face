@@ -1,0 +1,184 @@
+﻿82fb5b6 fix(UI): Restore flat bottom layout from D drive and apply correct UI styling
+40b821a style(UI): Permanently restore correct floating pill layout and distance input
+736d83c feat: restore approved 6-item layout with Games and centered distance
+d1962c2 style: finalize navigation UI tweaks per user request
+cb59a5a Revert back to 4-item pill navigation layout
+38bbfd9 style: final UI polish for distance filter and legacy layout deprecation
+cdf4885 Fix 404 for /games by adding placeholder Games route
+78d0bd3 UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster
+b6912ee Deprecate Railway frontend layout, redirect to bump.bluejax.ai
+a5b219e Restore Turf Wars Navigation and Finalize Luxury UI Aesthetics
+95694a4 Revert "feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)"
+ed17f00 feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)
+3e94216 fix: flawlessly unify 5-item Dating layout (3b91347) with recent questionnaires
+23988c4 fix: restore 4b31197 clean state, keep 4-item nav, remove Mode Toggles
+4b31197 feat: Add TrueSocial, LinkedIn priority, location, form navigation links
+00686eb feat: most traveled leaderboard mobile UI and cron
+001275e Add and integrate Phase 3 content scripts and influencer outreach strategy into Strategic Command Center
+c51d5b9 Expand influencer list with sociologists and tech critics
+4d9db06 Update strategic dashboard with influencer research
+b8111d4 chore: expand influencer outreach list
+8e1438d chore: resolve merge conflicts with other agent
+bdbf098 feat(dashboard): massively expanded strategic dashboard with competitor and market research
+0fe49f1 Initial backup commit
+bf168ca fix(interaction): removed proximity bypass for bumps so physical connection motion is always required
+d72dd71 fix(ios): restore sensor functionality, removed temporary mock values and eruda debugger
+4d1936c fix(ios): strip leaflet marker clustering engine, disable preferCanvas hardware acceleration, remove synchronous resize reflows to stop map memory crash
+70af0fc fix(ios): bypass all native system sensors (GPS polling, DeviceMotion permission prompts) to test iOS Safari renderer crash bypass
+37d2284 fix(ios): remove heavy css masks and animations from register page, inject eruda for on-device mobile debugging
+4e4b87c fix(ios): restore lazy load on map and remove route remount keys to stop double-mounting memory crash on iOS Safari
+2f94c11 fix(ios): remove lazy loading of MapView to prevent slow network sequential bundle download delay taking 10 seconds
+568bb8c fix(ios): nuke all continuous auth screen animations and heavy blur filters causing massive GPU strain
+8c7bfe4 fix(ios): disable map animations, fix invalidateSize timing, remove duplicate leaflet CSS
+4e6bf49 perf(ios): code-split all routes + fix leaflet CSS SRI failure - Initial JS 941KB->583KB, map loads lazily after login
+c59131e fix(ios): nuke all backdrop-filter blur + fix leaflet tile positioning
+5f5d281 fix: eradicate all backdrop-blur classes from shadcn ui to prevent iOS Safari OOM crash
+b787588 fix: react-leaflet auto-center bug and map invalidation sizing glitch
+8bd0090 fix: remove all instances of backdrop-filter to prevent iOS Safari WebGL memory exhaustion crashes from transparent overlays
+47639a2 fix: resolve LocationService UI heartbeat starvation causing map load hang; disable React-Leaflet chunked loading causing Safari drag lag
+0c3c73e fix: resolve critical map drag lag by memoizing MapEventHandler, throttling capacitor GPS UI updates to 2s, and memoizing Marker clusters to prevent DOM tearing
+78c53f4 perf: strip iOS-crashing backdrop-blur filters from UI overlays. Safari OOM crashes when rendering blur over dragging Leaflet maps
+6d97774 fix: break infinite render/API loop in MapView caused by unmemoized updateServerLocation, strict cast coords to Numbers in Map to prevent Leaflet crash
+1880cc0 fix: stop global error handlers from nuking app on Capacitor web plugin rejections
+af3d7b7 fix: use cross-platform haptics service, remove all debug diagnostics
+146874d fix: add face2face.icu to CORS allowed origins - ROOT CAUSE of black screen
+4f8b9d0 debug: add fetch-based diagnostic to catch silent module script failures
+2cf58ca fix: add Surrogate-Control no-store to bypass Fastly CDN edge caching
+18c7cf7 debug: add onscreen console interceptor to catch silent script errors
+172517c build: force brand new hash for JS chunk to bypass Safari strict CORS failure cache
+6983b4a debug: add script tag onerror
+4e958df fix: kill stale service workers that hijack requests
+dfc1d3b fix(cache): force no-store proxy-revalidate on index.html to bust iOS Safari and Fastly CDN caching that breaks JS chunk URLs
+ae3d8e8 debug: add App is loading text inside root div
+1a97ff1 debug: add aggressive inline HTML error catcher to figure out why face2face.icu black screens
+6cd911d fix: skip sensor gate for non-auth users, fixes black screen on custom domain
+6fa7964 fix: strip crossorigin from script tags ΓÇö fixes white screen on custom domain behind CDN
+f2998f1 debug: global error handler to show crash instead of white screen
+7384814 fix: add no-cache headers to static assets to bust stale iPhone JS cache
+e78c60a revert to working state + reduce GPS accuracy and polling interval
+ad3dcfd fix: use SPA navigation for /dev link to preserve session
+6a0f4dc feat: add /dev diagnostics page for sensor, vibration, and GPS testing
+25f2d84 spec audit: hide photos pre-reveal, heartbeat haptic fix, GO LIVE labels, bump greeting, show-on-map, inactive timeout, bump-back prep
+3078bd5 fix: iOS freeze on welcome/safety modals + incoming bump vibration
+8e5e109 feat: bump arrow thrust animation + password eye toggle
+12e77be fix(mobile): stabilize touch freeze, fix topbar overlap, restore profile PATCH endpoint to fix AuthContext modal hang
+232aa08 fix: correct frontend API payload dropping when sending bumps
+1d99fa7 fix: correct express router parameter interception breaking bumps endpoint
+87fb731 fix: add tap:false to Leaflet globals to fix iOS touchend freeze, and move filter toggle to bottom center to fix overlapping buttons on mobile
+1b3ce42 fix: remove position:fixed from body to fix Leaflet touch coordinate resolution on iOS Safari
+272b753 feat: add haptic vibrations on new bumps and explicit inbox indicators
+8c5839c fix: add overscroll-behavior: none to prevent Safari rubber-banding map drag conflicts, remove unneeded pb-[50px] from Map.tsx
+1dab998 fix: replace deprecated -webkit-fill-available hack and 100vh with 100dvh to prevent iOS Safari jumping and glitching
+ff88f30 fix: ensure API call matches GET /messages/:userId to avoid 404, automatically send user.bumpMessage when initiating a bump
+ba1e3e8 feat: only show nearby users active within the last 30 minutes
+df0104b fix: restore missing /messages route to App.tsx causing 404
+5bf0589 fix: enforce maximumAge 0 on all location requests to prevent cached low-accuracy fixes
+e652e29 feat: restore messages UI, database schema, and api endpoints for post-bump chatting
+c03a91d fix: remove map rebuilding 5-sec loop to fix mobile map jitter/glitches
+b8486a2 fix: stop custom-cluster-icon hover from overriding leaflet translate3d transform
+2b4c48a fix: override Leaflet CSS that collapsed SVG markers to 0x0 - shows blue triangles and pink circles
+a59874c fix: replace all Connect/Message text with Bump in ConnectInteraction dialogs
+3fecc00 Fix black marker icons (remove ::after overlay), restore filter logic, spread demo accounts
+0a22397 style: gradient gender icons in ProfileCard
+2e63f11 fix: strip Leaflet default .leaflet-div-icon background/border + remove legacy marker-pin transforms that distorted SVG icons
+08bd474 fix: update ProfileCard gender icons to gradient style
+76d52aa style: larger bolder map icons - blue triangles (male) pink circles (female)
+d1d79b0 feat: cross-platform IMU and haptics - replace Capacitor with web APIs, add iOS 17.4+ haptic hack, add SensorPermissionGate
+d6bd0c9 perf: major mobile map optimization - memoize icons, remove SVG drop-shadows, disable cluster animations, optimize TileLayer loading, reduce backdrop-blur-xl to sm
+8eab6dc feat: implement Phases 4-5 ΓÇö ReceivedBumpsSheet with Bump Back/Ignore/Reply Later, mutual profile Reveal with dual opt-in, Add Contact button
+9e40d7a refactor: replace Casual/Intimate with Dating/Business/Friendships categories, remove messages/connections, add Bump interaction model
+c6eef2a feat: implement Phases 2-3 of Bump system - DirectionalArrow with compass/accelerometer gesture, BeenBumpedBadge with heartbeat haptics, received bumps + respond server endpoints, getBump/updateBump storage methods
+6bf1f3a fix: premium gradient gender toggles + fix hover jitter on bottom nav
+c541c17 Fix map gender filtering and add demo accounts script
+b7ee832 feat(client): rewrite ProfileCard with public profile view + BUMP message composer, update Map.tsx bump handler and toggle logic
+b3b3b14 feat(client): replace Dating Preference radio group with visual triangle/circle symbol toggles in FilterDrawer
+6bde492 feat(client): refactor geolocation to aggressively use watchPosition on web for near-instant tracking, rather than 1s polling intervals
+cfeb841 fix(client): increase maxClusterRadius to 120 for more aggressive marker clustering and add custom spiderfy styles
+2d5ff9b feat(map): rewrite top center map toggles to control Men/Women visibility dynamically
+1925eb3 feat(map): restore category toggles on map header and add localStorage persistence for filter settings
+3df0f32 fix(client): definitively prevent MapView initialization sweeps from triggering multiple modal loops by using hasCheckedModals state flag
+1982862 style: remove radar sweeping animation per user request
+215ef73 fix(map): prevent map from auto-snapping to center on poll
+6c10206 style: remove loading spinners from app initialization and map loading
+f4a2e65 fix(client): prevent Welcome and Safety modals from infinitely looping in MapView using sessionStorage and conditional redirects
+1ebe8c7 feat: redirect users to profile page instead of map after welcome/safety modals
+ba96c49 fix: increase map update frequency for realtime presence
+360051d fix(client): handle network fetch errors without crashing Response constructor; fix AuthContext silent failures on 401s
+7725306 fix: resolve bottom nav zero-rendering bug and button misalignment
+f5fae56 refactor: remove non-binary gender/preference options from schema and UI
+bef3e6d feat: inject floating glassmorphic nav bar, CartoDB Dark Matter map tiles, and sweeping sci-fi radar animation on user location
+a25b240 polish: add trust badge to Messages view
+c553435 polish: upgrade Explore cards with star ratings and glass-card CSS
+4028bc5 UI: apply dark glassmorphism to card, tabs, slider
+5636429 feat: Implement SMS Verification via GHL
+b23ceaa polish: add OG tags to index.html, heart beat animation to Logo, connect pulse ring CSS
+f4ef977 lower password min to 6 chars for test accounts
+55487bf polish: premium CSS additions - glass hover lift, dark scrollbars, cluster glow, shimmer skeletons, focus rings
+bac3acf mobile: dark theme-color, dark leaflet/clusters, dark select, dark scrollbars
+e2288d4 Polish ProfileCard with category-aware gradients, enhanced NotificationsModal indicators, info card hover effects
+87c8d31 audit: comprehensive UI upgrade - star ratings, backdrop-blur modals, star selector in filters
+ab04b00 remove Connect/Grind category toggle from map
+bdff072 Micro-interaction polish: animated profile hero gradient, logo in WelcomeModal, avatar ring glow, enhanced message bubbles
+6587a7f upgrade UI primitives: dark toast, dark sheet, emerald switch, blur overlays
+46f581d Polish settings/explore: fix Grind/Connect labels, gradient explore heading, category-colored cards, motion-service comment cleanup
+c30b04c Visual polish: gradient logo with heart, map markers with pulse glow, fixed page margins for updated nav heights
+f56cac3 polish: dark SettingsModal, rounded-2xl dialog base, backdrop-blur overlay, SongΓåÆMusic
+7705371 Deep cleanup: rename all bump variables to connect/connected, fix Intimate label, clean error messages
+bc03fd6 2026 map UI: neon glow LIVE toggle, dark leaflet popups, custom zoom, design system polish
+f00d3b6 polish: star ratings in ProfileCard, trust badge on Explore empty state, card hover effects
+535fad5 redesign map controls: fix Go Live overlap, vertical tool strip, cleaner layout
+03671dd copy: replace Real-Life Connects with Connect with Real People, spam-free messaging
+53175d4 Polish app-wide branding: header logo+gradient, nav glow effects, connect overlay modernized, removed remaining bump text
+6fc0d5b feat: add 'no bots, no inactive profiles' trust messaging across landing and welcome
+42e547e Enhanced auth page animations: floating particles, logo breathing, title shimmer, improved glassmorphism
+ecacae5 update slogan to Meet Someone
+752cedf polish: dark-themed map with glowing markers, improved popups, and cleaner UI controls
+6364bb7 deep CSS polish: remove all light-mode remnants, dark markers, dark map bg, dark scrollbars
+5207978 dark-theme LocationError and 404 pages, complete UI consistency
+721c81c Rebrand to Face2Face - replace bump/grind with casual/intimate, rename components, update logo
+8b8b83a refine communications: dark ConnectInteraction, polished Messages chat, better empty states
+d0d94b7 feat: add satellite view toggle and fix hook order crash in Map.tsx
+998b54e remove bumpMessage templating, rename Favorite Song to Music
+83a0e18 refine modals: dark theme for Welcome, Settings, Notifications, FilterDrawer
+d8e26e2 refine UI: premium dark glassmorphism, framer-motion animations, remove live badge
+6282dfa Add direct messaging functionality to bump interactions
+2b882ff Fix Android map UI issues
+4da0d2e Improve map controls and location button styling on Android.
+22373fe Improve mobile experience by fixing layout issues and ensuring consistent positioning of UI elements.
+397fc79 Update UI to improve mobile responsiveness and fix layout issues on Android.
+9f599be Reduce UI element sizes and padding in the map view to improve layout on mobile.
+05fdc20 Update UI elements to improve visual consistency and reduce clutter
+79e6891 Fix layout issues on registration page
+266b514 Improve mobile device support and scrolling behavior
+b17d56d Enhance registration process with multi-step mobile-friendly form
+005ecf7 Fix scrolling issues and improve register page layout on mobile
+ce277a9 Fix scrolling and display issues on Android and iOS
+c7efaac Fix mobile scrolling issues on login, registration, and home pages.  Added scrollbars and addressed text truncation.
+aab68b3 Improve mobile responsiveness by enhancing viewport settings and styling for phones and tablets.
+0650e34 Fix login/register page scrolling issues by adjusting container dimensions and overflow settings.
+3debca8 Enhance mobile experience by improving viewport settings and UI adjustments.
+726ff87 Add bump interaction feature with motion detection
+787fe23 Improve API request handling and add CORS support.  Fixes inconsistencies between development and deployment environments.
+85f7202 Implement user authentication with password hashing and session management.
+f15ca8a Fix location sync refresh issue by implementing debouncing and throttling location updates.
+b5a19a4 Improve error handling and user experience for location services.
+136aa36 Checkpoint
+722c791 Fix map display issues by adjusting map component styling and Leaflet CSS inclusion.
+2649a8a Add advanced user filtering options to the map view
+a1e3090 Improve map loading reliability by adding a timeout and refresh mechanism.
+0667ded Improve map loading experience by adding a loading indicator and fallback tile provider
+0fe08f4 Fix map display issues and improve dating preference matching logic.
+6a963b4 Enhance map functionality by integrating Leaflet library for improved location display and user interaction.
+c57bff4 Add map display with mock user data for debugging.
+c3b1d01 Fix broken explore page and map display
+8fac4f2 Fix location update error by refactoring location handling
+7f14fd9 Fix location update error by restructuring location update logic
+d3e8190 Improve navigation and user experience by replacing links with buttons and optimizing location updates.
+88fd8c2 Fix login redirect issue by improving authentication state management and adding a delay before navigation.
+02e89b4 Fix: Resolved login redirection issue.  Improved loading indicator and added redirect to registration for unauthenticated users.
+0695e77 Improve location handling by adding error handling and user guidance.
+c83a78c Improve user positioning and active status handling on the map.
+a1360df Implement user accounts and persistent sessions using a PostgreSQL database.
+2214d40 Fix 401 error by separating location updates into browser-only and server updates.
+08db232 Implement initial app structure and core features.
+80344a2 Initial commit

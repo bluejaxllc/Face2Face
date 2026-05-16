@@ -1,0 +1,7 @@
+﻿82fb5b6 fix(UI): Restore flat bottom layout from D drive and apply correct UI styling
+40b821a style(UI): Permanently restore correct floating pill layout and distance input
+736d83c feat: restore approved 6-item layout with Games and centered distance
+d1962c2 style: finalize navigation UI tweaks per user request
+cb59a5a Revert back to 4-item pill navigation layout
+cdf4885 Fix 404 for /games by adding placeholder Games route
+78d0bd3 UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster

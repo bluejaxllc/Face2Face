@@ -1,0 +1,29 @@
+﻿commit d1962c2a8fad3a90e80db2d79da55f08ffdcdd14
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 02:27:49 2026 -0600
+
+    style: finalize navigation UI tweaks per user request
+
+commit cb59a5a4366e5de8089c7ca61ee9ca8c55068a2d
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 01:37:55 2026 -0600
+
+    Revert back to 4-item pill navigation layout
+
+commit 38bbfd981c79807bfb2c58ad880543215ce1093e
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 01:23:18 2026 -0600
+
+    style: final UI polish for distance filter and legacy layout deprecation
+
+commit cdf4885510753efc942b11be47e6d484b910dc3e
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 01:16:14 2026 -0600
+
+    Fix 404 for /games by adding placeholder Games route
+
+commit 78d0bd33914c60d1edaaa6318fa0b650ba53e2e0
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 00:44:20 2026 -0600
+
+    UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster

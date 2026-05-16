@@ -1,0 +1,18 @@
+﻿ build_err.txt                              |  15 +
+ build_err2.txt                             |  15 +
+ build_err3.txt                             | Bin 0 -> 2249 bytes
+ client/.gitignore                          |   1 +
+ client/index.html                          |  95 -----
+ client/src/components/BottomNavigation.tsx |  59 +--
+ client/src/components/FilterDrawer.tsx     |   2 +-
+ client/src/components/Map.tsx              |  52 +--
+ client/src/components/TopToolbar.tsx       | 200 ++++++++++
+ client/src/pages/Dating.tsx                |  34 +-
+ client/src/pages/Games.tsx                 | Bin 502 -> 248 bytes
+ diff.txt                                   | Bin 0 -> 22228 bytes
+ git_log_history.txt                        | Bin 0 -> 2708 bytes
+ good_nav.txt                               |  89 +++++
+ nav_diff.txt                               | Bin 0 -> 35314 bytes
+ nav_head1.txt                              |  89 +++++
+ nav_log.txt                                | 575 +++++++++++++++++++++++++++++
+ 17 files changed, 1074 insertions(+), 152 deletions(-)

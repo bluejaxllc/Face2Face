@@ -1,0 +1,723 @@
+﻿commit 82fb5b6108dad634f9e27b463a6e4ef6ce2b5c68
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 15:45:13 2026 -0600
+
+    fix(UI): Restore flat bottom layout from D drive and apply correct UI styling
+
+diff --git a/client/src/components/TopToolbar.tsx b/client/src/components/TopToolbar.tsx
+index 53b807b..71d8d86 100644
+--- a/client/src/components/TopToolbar.tsx
++++ b/client/src/components/TopToolbar.tsx
+@@ -75,53 +75,51 @@ export default function TopToolbar({
+   return (
+     <>
+       <div
+-        className="fixed top-4 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center"
++        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 border-b border-slate-800/50 backdrop-blur-md pointer-events-auto"
+         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+       >
+-        <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "44px", padding: "4px 8px" }}>
+-          <div className="flex justify-around items-center h-full w-full">
+-            {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
+-              <button
+-                key={id}
+-                onClick={onClick}
+-                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
+-                  active ? "opacity-100" : "opacity-70 hover:opacity-100"
++        <div className="flex justify-around items-center w-full max-w-lg mx-auto" style={{ height: "44px" }}>
++          {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
++            <button
++              key={id}
++              onClick={onClick}
++              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
++                active ? "opacity-100" : "opacity-70 hover:opacity-100"
++              }`}
++            >
++              <Icon
++                className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
++                style={{ width: "16px", height: "16px" }}
++                strokeWidth={active ? 2.5 : 1.5}
++              />
++              <span
++                className={`font-semibold tracking-wider uppercase ${
++                  active ? activeColor : "text-slate-400"
+                 }`}
++                style={{ fontSize: "9px" }}
+               >
+-                <Icon
+-                  className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
+-                  style={{ width: "16px", height: "16px" }}
+-                  strokeWidth={active ? 2.5 : 1.5}
++                {label}
++              </span>
++              {hasDropdown && (
++                <ChevronDown
++                  className="text-slate-500"
++                  style={{ width: "10px", height: "10px" }}
+                 />
+-                <span
+-                  className={`font-semibold tracking-wider uppercase ${
+-                    active ? activeColor : "text-slate-400"
+-                  }`}
+-                  style={{ fontSize: "9px" }}
+-                >
+-                  {label}
+-                </span>
+-                {hasDropdown && (
+-                  <ChevronDown
+-                    className="text-slate-500"
+-                    style={{ width: "10px", height: "10px" }}
+-                  />
+-                )}
+-              </button>
+-            ))}
+-          </div>
+-        </nav>
++              )}
++            </button>
++          ))}
++        </div>
+       </div>
+ 
+       {/* Distance dropdown */}
+       {showDistance && (
+         <div
+           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "64px", left: "50%", transform: "translateX(-50%)", minWidth: "160px" }}
++          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "160px" }}
+         >
+           <div className="flex flex-col gap-2 items-center">
+             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
+-            <div className="flex items-center gap-1.5 bg-slate-950/80 border border-white/10 rounded-full shadow-inner px-3 py-1">
++            <div className="flex items-center gap-1.5 bg-slate-950/80 border border-white/10 rounded-md shadow-inner px-2 py-1">
+               <input
+                 type="number"
+                 value={filterOptions.radius >= 25000 ? "" : filterOptions.radius}
+@@ -131,7 +129,6 @@ export default function TopToolbar({
+                 aria-label="Search radius in miles"
+                 onChange={(e) => {
+                   const val = e.target.value;
+-                  // Limit the input field string length to 5 digits essentially matching the 25000 max bound visually 
+                   if (val.length > 5) return;
+                   if (val === "" || val === "0") {
+                     onFilterChange({ ...filterOptions, radius: 25000 });
+@@ -139,10 +136,10 @@ export default function TopToolbar({
+                     onFilterChange({ ...filterOptions, radius: Math.min(25000, Math.max(1, parseInt(val) || 1)) });
+                   }
+                 }}
+-                className="bg-transparent text-white font-black text-center outline-none border-none placeholder:text-slate-500"
+-                style={{ width: "48px", fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
++                className="bg-transparent text-white font-bold text-center outline-none border-none placeholder:text-slate-500"
++                style={{ width: "6ch", fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+               />
+-              <span className="text-slate-400 font-bold" style={{ fontSize: "10px", letterSpacing: "1px" }}>MI</span>
++              <span className="text-slate-400 font-bold" style={{ fontSize: "10px" }}>MI</span>
+             </div>
+             
+             <button
+@@ -165,7 +162,7 @@ export default function TopToolbar({
+       {showFilters && (
+         <div
+           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "64px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
++          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
+         >
+           <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">Show Users</span>
+           <div className="flex flex-col gap-2">
+
+commit 40b821a3d76bda39137eaf2d9073825918411122
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 15:38:02 2026 -0600
+
+    style(UI): Permanently restore correct floating pill layout and distance input
+
+diff --git a/client/src/components/TopToolbar.tsx b/client/src/components/TopToolbar.tsx
+index 552efa9..53b807b 100644
+--- a/client/src/components/TopToolbar.tsx
++++ b/client/src/components/TopToolbar.tsx
+@@ -75,70 +75,86 @@ export default function TopToolbar({
+   return (
+     <>
+       <div
+-        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 border-b border-slate-800/50 backdrop-blur-md pointer-events-auto"
++        className="fixed top-4 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center"
+         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+       >
+-        <div className="flex justify-around items-center w-full max-w-lg mx-auto" style={{ height: "44px" }}>
+-          {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
+-            <button
+-              key={id}
+-              onClick={onClick}
+-              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
+-                active ? "opacity-100" : "opacity-70 hover:opacity-100"
+-              }`}
+-            >
+-              <Icon
+-                className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
+-                style={{ width: "16px", height: "16px" }}
+-                strokeWidth={active ? 2.5 : 1.5}
+-              />
+-              <span
+-                className={`font-semibold tracking-wider uppercase ${
+-                  active ? activeColor : "text-slate-400"
++        <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "44px", padding: "4px 8px" }}>
++          <div className="flex justify-around items-center h-full w-full">
++            {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
++              <button
++                key={id}
++                onClick={onClick}
++                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
++                  active ? "opacity-100" : "opacity-70 hover:opacity-100"
+                 }`}
+-                style={{ fontSize: "9px" }}
+               >
+-                {label}
+-              </span>
+-              {hasDropdown && (
+-                <ChevronDown
+-                  className="text-slate-500"
+-                  style={{ width: "10px", height: "10px" }}
++                <Icon
++                  className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
++                  style={{ width: "16px", height: "16px" }}
++                  strokeWidth={active ? 2.5 : 1.5}
+                 />
+-              )}
+-            </button>
+-          ))}
+-        </div>
++                <span
++                  className={`font-semibold tracking-wider uppercase ${
++                    active ? activeColor : "text-slate-400"
++                  }`}
++                  style={{ fontSize: "9px" }}
++                >
++                  {label}
++                </span>
++                {hasDropdown && (
++                  <ChevronDown
++                    className="text-slate-500"
++                    style={{ width: "10px", height: "10px" }}
++                  />
++                )}
++              </button>
++            ))}
++          </div>
++        </nav>
+       </div>
+ 
+       {/* Distance dropdown */}
+       {showDistance && (
+         <div
+           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "200px" }}
++          style={{ top: "64px", left: "50%", transform: "translateX(-50%)", minWidth: "160px" }}
+         >
+-          <div className="flex flex-col gap-2">
++          <div className="flex flex-col gap-2 items-center">
+             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
+-            <div className="flex items-center gap-2">
++            <div className="flex items-center gap-1.5 bg-slate-950/80 border border-white/10 rounded-full shadow-inner px-3 py-1">
+               <input
+-                type="range"
++                type="number"
++                value={filterOptions.radius >= 25000 ? "" : filterOptions.radius}
++                placeholder="Γê₧"
+                 min={1}
+-                max={100}
+-                value={filterOptions.radius >= 25000 ? 100 : filterOptions.radius}
++                max={25000}
++                aria-label="Search radius in miles"
+                 onChange={(e) => {
+-                  const val = parseInt(e.target.value);
+-                  onFilterChange({ ...filterOptions, radius: val >= 100 ? 25000 : val });
++                  const val = e.target.value;
++                  // Limit the input field string length to 5 digits essentially matching the 25000 max bound visually 
++                  if (val.length > 5) return;
++                  if (val === "" || val === "0") {
++                    onFilterChange({ ...filterOptions, radius: 25000 });
++                  } else {
++                    onFilterChange({ ...filterOptions, radius: Math.min(25000, Math.max(1, parseInt(val) || 1)) });
++                  }
+                 }}
+-                className="flex-1 accent-indigo-500"
++                className="bg-transparent text-white font-black text-center outline-none border-none placeholder:text-slate-500"
++                style={{ width: "48px", fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+               />
+-              <span className="text-white font-bold text-sm min-w-[40px] text-right">
+-                {filterOptions.radius >= 25000 ? "Γê₧" : `${filterOptions.radius}mi`}
+-              </span>
++              <span className="text-slate-400 font-bold" style={{ fontSize: "10px", letterSpacing: "1px" }}>MI</span>
+             </div>
++            
++            <button
++               onClick={() => onFilterChange({ ...filterOptions, radius: 25000 })}
++               className="mt-1 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300"
++            >
++              Set Unlimited
++            </button>
+           </div>
+           <button
+             onClick={() => setShowDistance(false)}
+-            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
++            className="mt-3 w-full text-center text-xs text-slate-500 hover:text-slate-300"
+           >
+             Close
+           </button>
+@@ -149,7 +165,7 @@ export default function TopToolbar({
+       {showFilters && (
+         <div
+           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
++          style={{ top: "64px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
+         >
+           <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">Show Users</span>
+           <div className="flex flex-col gap-2">
+
+commit 736d83c46b1eb1e9501658b1fbb8880fea3c1f35
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 15:18:08 2026 -0600
+
+    feat: restore approved 6-item layout with Games and centered distance
+
+diff --git a/client/src/components/TopToolbar.tsx b/client/src/components/TopToolbar.tsx
+index 463a790..552efa9 100644
+--- a/client/src/components/TopToolbar.tsx
++++ b/client/src/components/TopToolbar.tsx
+@@ -115,7 +115,7 @@ export default function TopToolbar({
+       {showDistance && (
+         <div
+           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "50px", left: "30%", transform: "translateX(-50%)", minWidth: "200px" }}
++          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "200px" }}
+         >
+           <div className="flex flex-col gap-2">
+             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
+
+commit d1962c2a8fad3a90e80db2d79da55f08ffdcdd14
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 02:27:49 2026 -0600
+
+    style: finalize navigation UI tweaks per user request
+
+diff --git a/client/src/components/TopToolbar.tsx b/client/src/components/TopToolbar.tsx
+new file mode 100644
+index 0000000..463a790
+--- /dev/null
++++ b/client/src/components/TopToolbar.tsx
+@@ -0,0 +1,200 @@
++import { useState } from "react";
++import { Flame, MapPin, Eye, Layers, Settings, ChevronDown } from "lucide-react";
++import SettingsModal from "./SettingsModal";
++import FilterDrawer, { FilterOptions } from "./FilterDrawer";
++
++interface TopToolbarProps {
++  isActive: boolean;
++  onToggleActive: (active: boolean) => void;
++  filterOptions: FilterOptions;
++  onFilterChange: (options: FilterOptions) => void;
++  mapStyle: 'street' | 'satellite';
++  onToggleMapStyle: () => void;
++}
++
++export default function TopToolbar({
++  isActive,
++  onToggleActive,
++  filterOptions,
++  onFilterChange,
++  mapStyle,
++  onToggleMapStyle,
++}: TopToolbarProps) {
++  const [showSettings, setShowSettings] = useState(false);
++  const [showDistance, setShowDistance] = useState(false);
++  const [showFilters, setShowFilters] = useState(false);
++
++  const toolbarItems = [
++    {
++      id: "live",
++      icon: Flame,
++      label: "LIVE",
++      active: isActive,
++      hasDropdown: false,
++      onClick: () => onToggleActive(!isActive),
++      activeColor: "text-red-400",
++    },
++    {
++      id: "distance",
++      icon: MapPin,
++      label: "DISTANCE",
++      active: false,
++      hasDropdown: true,
++      onClick: () => setShowDistance(!showDistance),
++      activeColor: "text-slate-300",
++    },
++    {
++      id: "show",
++      icon: Eye,
++      label: "SHOW",
++      active: false,
++      hasDropdown: true,
++      onClick: () => setShowFilters(!showFilters),
++      activeColor: "text-slate-300",
++    },
++    {
++      id: "layers",
++      icon: Layers,
++      label: "LAYERS",
++      active: mapStyle === "satellite",
++      hasDropdown: false,
++      onClick: onToggleMapStyle,
++      activeColor: "text-emerald-400",
++    },
++    {
++      id: "settings",
++      icon: Settings,
++      label: "SETTINGS",
++      active: false,
++      hasDropdown: false,
++      onClick: () => setShowSettings(true),
++      activeColor: "text-slate-300",
++    },
++  ];
++
++  return (
++    <>
++      <div
++        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 border-b border-slate-800/50 backdrop-blur-md pointer-events-auto"
++        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
++      >
++        <div className="flex justify-around items-center w-full max-w-lg mx-auto" style={{ height: "44px" }}>
++          {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
++            <button
++              key={id}
++              onClick={onClick}
++              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
++                active ? "opacity-100" : "opacity-70 hover:opacity-100"
++              }`}
++            >
++              <Icon
++                className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
++                style={{ width: "16px", height: "16px" }}
++                strokeWidth={active ? 2.5 : 1.5}
++              />
++              <span
++                className={`font-semibold tracking-wider uppercase ${
++                  active ? activeColor : "text-slate-400"
++                }`}
++                style={{ fontSize: "9px" }}
++              >
++                {label}
++              </span>
++              {hasDropdown && (
++                <ChevronDown
++                  className="text-slate-500"
++                  style={{ width: "10px", height: "10px" }}
++                />
++              )}
++            </button>
++          ))}
++        </div>
++      </div>
++
++      {/* Distance dropdown */}
++      {showDistance && (
++        <div
++          className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
++          style={{ top: "50px", left: "30%", transform: "translateX(-50%)", minWidth: "200px" }}
++        >
++          <div className="flex flex-col gap-2">
++            <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
++            <div className="flex items-center gap-2">
++              <input
++                type="range"
++                min={1}
++                max={100}
++                value={filterOptions.radius >= 25000 ? 100 : filterOptions.radius}
++                onChange={(e) => {
++                  const val = parseInt(e.target.value);
++                  onFilterChange({ ...filterOptions, radius: val >= 100 ? 25000 : val });
++                }}
++                className="flex-1 accent-indigo-500"
++              />
++              <span className="text-white font-bold text-sm min-w-[40px] text-right">
++                {filterOptions.radius >= 25000 ? "Γê₧" : `${filterOptions.radius}mi`}
++              </span>
++            </div>
++          </div>
++          <button
++            onClick={() => setShowDistance(false)}
++            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
++          >
++            Close
++          </button>
++        </div>
++      )}
++
++      {/* Show/Filter dropdown */}
++      {showFilters && (
++        <div
++          className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
++          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
++        >
++          <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">Show Users</span>
++          <div className="flex flex-col gap-2">
++            {[
++              { key: "showDating", label: "≡ƒÆò Dating", checked: filterOptions.showDating },
++              { key: "showBusiness", label: "≡ƒÆ╝ Business", checked: filterOptions.showBusiness },
++              { key: "showFriendships", label: "≡ƒñ¥ Friends", checked: filterOptions.showFriendships },
++            ].map(({ key, label, checked }) => (
++              <label key={key} className="flex items-center gap-2 cursor-pointer">
++                <input
++                  type="checkbox"
++                  checked={checked}
++                  onChange={() => onFilterChange({ ...filterOptions, [key]: !checked })}
++                  className="accent-indigo-500 w-4 h-4"
++                />
++                <span className="text-slate-200 text-sm">{label}</span>
++              </label>
++            ))}
++            <div className="border-t border-slate-700 pt-2 mt-1">
++              {[
++                { key: "showMen", label: "ΓÖé Men", checked: filterOptions.showMen ?? true },
++                { key: "showWomen", label: "ΓÖÇ Women", checked: filterOptions.showWomen ?? true },
++              ].map(({ key, label, checked }) => (
++                <label key={key} className="flex items-center gap-2 cursor-pointer mb-1">
++                  <input
++                    type="checkbox"
++                    checked={checked}
++                    onChange={() => onFilterChange({ ...filterOptions, [key]: !checked })}
++                    className="accent-indigo-500 w-4 h-4"
++                  />
++                  <span className="text-slate-200 text-sm">{label}</span>
++                </label>
++              ))}
++            </div>
++          </div>
++          <button
++            onClick={() => setShowFilters(false)}
++            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
++          >
++            Close
++          </button>
++        </div>
++      )}
++
++      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
++    </>
++  );
++}
+
+commit 95694a43238ea181acfd6ebf9c836f69fc7b464b
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 21:00:47 2026 -0600
+
+    Revert "feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)"
+    
+    This reverts commit ed17f00f7dffda0ca91ebfe8fe12cb4709def2fd.
+
+diff --git a/client/src/components/TopToolbar.tsx b/client/src/components/TopToolbar.tsx
+deleted file mode 100644
+index e14eea8..0000000
+--- a/client/src/components/TopToolbar.tsx
++++ /dev/null
+@@ -1,200 +0,0 @@
+-import { useState } from "react";
+-import { Flame, MapPin, Eye, Layers, Settings, ChevronDown } from "lucide-react";
+-import SettingsModal from "./SettingsModal";
+-import FilterDrawer, { FilterOptions } from "./FilterDrawer";
+-
+-interface TopToolbarProps {
+-  isActive: boolean;
+-  onToggleActive: (active: boolean) => void;
+-  filterOptions: FilterOptions;
+-  onFilterChange: (options: FilterOptions) => void;
+-  mapStyle: 'street' | 'satellite';
+-  onToggleMapStyle: () => void;
+-}
+-
+-export default function TopToolbar({
+-  isActive,
+-  onToggleActive,
+-  filterOptions,
+-  onFilterChange,
+-  mapStyle,
+-  onToggleMapStyle,
+-}: TopToolbarProps) {
+-  const [showSettings, setShowSettings] = useState(false);
+-  const [showDistance, setShowDistance] = useState(false);
+-  const [showFilters, setShowFilters] = useState(false);
+-
+-  const toolbarItems = [
+-    {
+-      id: "live",
+-      icon: Flame,
+-      label: "LIVE",
+-      active: isActive,
+-      hasDropdown: false,
+-      onClick: () => onToggleActive(!isActive),
+-      activeColor: "text-red-400",
+-    },
+-    {
+-      id: "distance",
+-      icon: MapPin,
+-      label: "DISTANCE",
+-      active: false,
+-      hasDropdown: true,
+-      onClick: () => setShowDistance(!showDistance),
+-      activeColor: "text-slate-300",
+-    },
+-    {
+-      id: "show",
+-      icon: Eye,
+-      label: "SHOW",
+-      active: false,
+-      hasDropdown: true,
+-      onClick: () => setShowFilters(!showFilters),
+-      activeColor: "text-slate-300",
+-    },
+-    {
+-      id: "layers",
+-      icon: Layers,
+-      label: "LAYERS",
+-      active: mapStyle === "satellite",
+-      hasDropdown: true,
+-      onClick: onToggleMapStyle,
+-      activeColor: "text-emerald-400",
+-    },
+-    {
+-      id: "settings",
+-      icon: Settings,
+-      label: "SETTINGS",
+-      active: false,
+-      hasDropdown: false,
+-      onClick: () => setShowSettings(true),
+-      activeColor: "text-slate-300",
+-    },
+-  ];
+-
+-  return (
+-    <>
+-      <div
+-        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 border-b border-slate-800/50 backdrop-blur-md pointer-events-auto"
+-        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+-      >
+-        <div className="flex justify-around items-center w-full max-w-lg mx-auto" style={{ height: "44px" }}>
+-          {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
+-            <button
+-              key={id}
+-              onClick={onClick}
+-              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
+-                active ? "opacity-100" : "opacity-70 hover:opacity-100"
+-              }`}
+-            >
+-              <Icon
+-                className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
+-                style={{ width: "16px", height: "16px" }}
+-                strokeWidth={active ? 2.5 : 1.5}
+-              />
+-              <span
+-                className={`font-semibold tracking-wider uppercase ${
+-                  active ? activeColor : "text-slate-400"
+-                }`}
+-                style={{ fontSize: "9px" }}
+-              >
+-                {label}
+-              </span>
+-              {hasDropdown && (
+-                <ChevronDown
+-                  className="text-slate-500"
+-                  style={{ width: "10px", height: "10px" }}
+-                />
+-              )}
+-            </button>
+-          ))}
+-        </div>
+-      </div>
+-
+-      {/* Distance dropdown */}
+-      {showDistance && (
+-        <div
+-          className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "200px" }}
+-        >
+-          <div className="flex flex-col gap-2">
+-            <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
+-            <div className="flex items-center gap-2">
+-              <input
+-                type="range"
+-                min={1}
+-                max={100}
+-                value={filterOptions.radius >= 25000 ? 100 : filterOptions.radius}
+-                onChange={(e) => {
+-                  const val = parseInt(e.target.value);
+-                  onFilterChange({ ...filterOptions, radius: val >= 100 ? 25000 : val });
+-                }}
+-                className="flex-1 accent-indigo-500"
+-              />
+-              <span className="text-white font-bold text-sm min-w-[40px] text-right">
+-                {filterOptions.radius >= 25000 ? "Γê₧" : `${filterOptions.radius}mi`}
+-              </span>
+-            </div>
+-          </div>
+-          <button
+-            onClick={() => setShowDistance(false)}
+-            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
+-          >
+-            Close
+-          </button>
+-        </div>
+-      )}
+-
+-      {/* Show/Filter dropdown */}
+-      {showFilters && (
+-        <div
+-          className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
+-          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
+-        >
+-          <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">Show Users</span>
+-          <div className="flex flex-col gap-2">
+-            {[
+-              { key: "showDating", label: "≡ƒÆò Dating", checked: filterOptions.showDating },
+-              { key: "showBusiness", label: "≡ƒÆ╝ Business", checked: filterOptions.showBusiness },
+-              { key: "showFriendships", label: "≡ƒñ¥ Friends", checked: filterOptions.showFriendships },
+-            ].map(({ key, label, checked }) => (
+-              <label key={key} className="flex items-center gap-2 cursor-pointer">
+-                <input
+-                  type="checkbox"
+-                  checked={checked}
+-                  onChange={() => onFilterChange({ ...filterOptions, [key]: !checked })}
+-                  className="accent-indigo-500 w-4 h-4"
+-                />
+-                <span className="text-slate-200 text-sm">{label}</span>
+-              </label>
+-            ))}
+-            <div className="border-t border-slate-700 pt-2 mt-1">
+-              {[
+-                { key: "showMen", label: "ΓÖé Men", checked: filterOptions.showMen ?? true },
+-                { key: "showWomen", label: "ΓÖÇ Women", checked: filterOptions.showWomen ?? true },
+-              ].map(({ key, label, checked }) => (
+-                <label key={key} className="flex items-center gap-2 cursor-pointer mb-1">
+-                  <input
+-                    type="checkbox"
+-                    checked={checked}
+-                    onChange={() => onFilterChange({ ...filterOptions, [key]: !checked })}
+-                    className="accent-indigo-500 w-4 h-4"
+-                  />
+-                  <span className="text-slate-200 text-sm">{label}</span>
+-                </label>
+-              ))}
+-            </div>
+-          </div>
+-          <button
+-            onClick={() => setShowFilters(false)}
+-            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
+-          >
+-            Close
+-          </button>
+-        </div>
+-      )}
+-
+-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+-    </>
+-  );
+-}

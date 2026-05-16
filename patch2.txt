@@ -1,0 +1,1468 @@
+commit d1962c2a8fad3a90e80db2d79da55f08ffdcdd14
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 02:27:49 2026 -0600
+
+    style: finalize navigation UI tweaks per user request
+
+diff --git a/build_err.txt b/build_err.txt
+new file mode 100644
+index 0000000..12a9cce
+--- /dev/null
++++ b/build_err.txt
+@@ -0,0 +1,15 @@
++
++> rest-express@1.0.0 build
++> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && esbuild server/api.ts --platform=node --packages=external --bundle --format=esm --outfile=api/index.mjs
++
++[36mvite v5.4.21 [32mbuilding for production...[36m[39m
++transforming...
++[32m✓[39m 1 modules transformed.
++[31mx[39m Build failed in 56ms
++[31merror during build:
++[31m[vite:html-inline-proxy] Could not load D:/Repository/Face 2 Face/client/index.html?html-proxy&inline-css&index=0.css (imported by client/index.html): No matching HTML proxy module found from D:/Repository/Face 2 Face/client/index.html?html-proxy&inline-css&index=0.css[31m
++    at Object.load (file:///d:/Repository/Face%202%20Face/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:35045:17)
++    at file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:22626:40
++    at async PluginDriver.hookFirstAndGetPlugin (file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:22508:28)
++    at async file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:21492:33
++    at async Queue.work (file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:22736:32)[39m
+diff --git a/build_err2.txt b/build_err2.txt
+new file mode 100644
+index 0000000..580b1b6
+--- /dev/null
++++ b/build_err2.txt
+@@ -0,0 +1,15 @@
++
++> rest-express@1.0.0 build
++> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && esbuild server/api.ts --platform=node --packages=external --bundle --format=esm --outfile=api/index.mjs
++
++[36mvite v5.4.21 [32mbuilding for production...[36m[39m
++transforming...
++[32m✓[39m 1 modules transformed.
++[31mx[39m Build failed in 51ms
++[31merror during build:
++[31m[vite:html-inline-proxy] Could not load D:/Repository/Face 2 Face/client/index.html?html-proxy&inline-css&index=0.css (imported by client/index.html): No matching HTML proxy module found from D:/Repository/Face 2 Face/client/index.html?html-proxy&inline-css&index=0.css[31m
++    at Object.load (file:///d:/Repository/Face%202%20Face/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:35045:17)
++    at file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:22626:40
++    at async PluginDriver.hookFirstAndGetPlugin (file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:22508:28)
++    at async file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:21492:33
++    at async Queue.work (file:///d:/Repository/Face%202%20Face/node_modules/rollup/dist/es/shared/node-entry.js:22736:32)[39m
+diff --git a/build_err3.txt b/build_err3.txt
+new file mode 100644
+index 0000000..44090d6
+Binary files /dev/null and b/build_err3.txt differ
+diff --git a/client/.gitignore b/client/.gitignore
+new file mode 100644
+index 0000000..e985853
+--- /dev/null
++++ b/client/.gitignore
+@@ -0,0 +1 @@
++.vercel
+diff --git a/client/index.html b/client/index.html
+index 62998b0..25b6a79 100644
+--- a/client/index.html
++++ b/client/index.html
+@@ -34,102 +34,7 @@
+   <meta name="twitter:description" content="Meet real people nearby. No bots, no fake profiles." />
+   <link rel="icon" type="image/svg+xml"
+     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='28' font-size='28'%3E👥%3C/text%3E%3C/svg%3E" />
+-  <style>
+-    /* Critical styles in head to avoid FOUC */
+-    html,
+-    body {
+-      height: 100dvh;
+-      margin: 0;
+-      padding: 0;
+-      width: 100%;
+-    }
+-
+-    .auth-page {
+-      overflow-y: auto;
+-      -webkit-overflow-scrolling: touch;
+-      position: relative;
+-      height: 100dvh;
+-      min-height: 100dvh;
+-    }
+-
+-    .map-view {
+-      overflow: hidden;
+-      position: fixed;
+-      width: 100%;
+-      height: 100dvh;
+-      top: 0;
+-      left: 0;
+-      right: 0;
+-      bottom: 0;
+-    }
+-
+-    #root {
+-      width: 100%;
+-      height: 100dvh;
+-    }
+-
+-    /* Root inherits fixed positioning for map view */
+-    .map-view #root {
+-      position: fixed;
+-      top: 0;
+-      left: 0;
+-      right: 0;
+-      bottom: 0;
+-      overflow: hidden;
+-    }
+-
+-    /* Root allows scrolling for auth pages */
+-    .auth-page #root {
+-      position: relative;
+-      overflow-y: auto;
+-      -webkit-overflow-scrolling: touch;
+-    }
+-
+-    /* Basic scroll bar visibility */
+-    ::-webkit-scrollbar {
+-      width: 4px;
+-      height: 4px;
+-    }
+ 
+-    ::-webkit-scrollbar-track {
+-      background: transparent;
+-    }
+-
+-    ::-webkit-scrollbar-thumb {
+-      background: rgba(148, 163, 184, 0.2);
+-      border-radius: 10px;
+-    }
+-
+-    /* For Firefox */
+-    * {
+-      scrollbar-width: thin;
+-      scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+-    }
+-
+-    /* Prevent content from being hidden under keyboard on mobile */
+-    @media (max-width: 640px) {
+-      html {
+-        height: 100dvh;
+-      }
+-
+-      body {
+-        width: 100%;
+-        height: 100dvh;
+-        min-height: 100dvh;
+-        overflow: hidden;
+-      }
+-
+-      body.ios-device #root,
+-      body.android-device #root {
+-        position: fixed;
+-        top: 0;
+-        left: 0;
+-        right: 0;
+-        bottom: 0;
+-        overflow: hidden;
+-      }
+-    }
+-  </style>
+ </head>
+ 
+ <body>
+diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
+index 8139bf3..b3828e6 100644
+--- a/client/src/components/BottomNavigation.tsx
++++ b/client/src/components/BottomNavigation.tsx
+@@ -1,7 +1,7 @@
+ import { useLocation } from "wouter";
+ import { useQuery } from "@tanstack/react-query";
+ import { useAuth } from "@/contexts/AuthContext";
+-import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
++import { Calendar, Map, Gamepad2, MessageSquare, Users, User } from "lucide-react";
+ import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
+ import { useEffect, useRef } from "react";
+ 
+@@ -20,9 +20,7 @@ export default function BottomNavigation() {
+   const previousNotifCount = useRef(notifCount);
+ 
+   useEffect(() => {
+-    // If the unread notification count INCREASES, it means we got a new bump/message
+     if (notifCount > previousNotifCount.current) {
+-      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
+       triggerHaptic(100);
+       setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
+     }
+@@ -34,49 +32,60 @@ export default function BottomNavigation() {
+   };
+ 
+   const navItems = [
+-    { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
+-    { path: "/map", icon: Map, label: "Map" },
+-    { path: "/messages", icon: MessageSquare, label: "Messages" },
+-    { path: "/profile", icon: User, label: "Profile" },
++    { path: "/dating", icon: Calendar, label: "DATING" },
++    { path: "/map", icon: Map, label: "MAP" },
++    { path: "/games", icon: Gamepad2, label: "GAMES" },
++    { path: "/messages", icon: MessageSquare, label: "BUMP/MES...", badge: notifCount },
++    { path: "/explore", icon: Users, label: "GROUP/LIST" },
++    { path: "/profile", icon: User, label: "PROFILE" },
+   ];
+ 
+   return (
+-    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+-      <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+-        <div className="flex justify-around items-center h-full relative">
++    <div
++      className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-700/50 pointer-events-auto flex justify-center backdrop-blur-md"
++      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
++    >
++      <nav className="w-full max-w-lg mx-auto" style={{ height: "56px" }}>
++        <div className="flex justify-around items-center h-full relative px-1">
+           {navItems.map(({ path, icon: Icon, label, badge }) => {
+-            const isActive = location === path;
++            const isActive = location === path || (path === "/map" && location === "/");
+             return (
+               <div
+                 key={path}
+                 onClick={navigateTo(path)}
+-                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
+-                style={{ minWidth: "56px", padding: "4px 8px" }}
++                className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative ${
++                  isActive ? "opacity-100" : "opacity-60 hover:opacity-80"
++                }`}
++                style={{ minWidth: "48px", padding: "4px 2px" }}
+               >
+-                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
++                <div className="relative">
++                  {isActive && (
++                    <div className="absolute -inset-3 bg-indigo-500/15 rounded-xl -z-10" />
++                  )}
+                   <Icon
+-                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
+-                    style={{ width: "22px", height: "22px" }}
++                    className={`transition-colors duration-200 ${
++                      isActive ? "text-indigo-400" : "text-slate-400"
++                    }`}
++                    style={{ width: "20px", height: "20px" }}
+                     strokeWidth={isActive ? 2.5 : 1.5}
+                   />
+-                  {isActive && (
+-                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
+-                  )}
+                   {(badge !== undefined && badge > 0) && (
+-                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
++                    <span
++                      className="absolute -top-1 -right-2 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30"
++                      style={{ fontSize: "7px", height: "14px", width: "14px" }}
++                    >
+                       {badge > 9 ? "9+" : badge}
+                     </span>
+                   )}
+                 </div>
+                 <span
+-                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
+-                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
++                  className={`font-semibold tracking-wider uppercase transition-colors duration-200 ${
++                    isActive ? "text-indigo-400" : "text-slate-500"
++                  }`}
++                  style={{ fontSize: "8px", marginTop: "3px", lineHeight: "1", whiteSpace: "nowrap" }}
+                 >
+                   {label}
+                 </span>
+-                {isActive && (
+-                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
+-                )}
+               </div>
+             );
+           })}
+diff --git a/client/src/components/FilterDrawer.tsx b/client/src/components/FilterDrawer.tsx
+index a2cdcf8..744136d 100644
+--- a/client/src/components/FilterDrawer.tsx
++++ b/client/src/components/FilterDrawer.tsx
+@@ -168,7 +168,7 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
+                     updateOption('radius', Math.min(25000, Math.max(1, parseInt(val) || 1)));
+                   }
+                 }}
+-                className="w-20 bg-slate-800/50 border border-slate-700/50 rounded-xl px-3 py-2 text-white font-bold text-center outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 transition-colors"
++                className="w-16 max-w-[4.5rem] bg-slate-800/50 border border-slate-700/50 rounded-xl px-2 py-2 text-white font-bold text-center outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 transition-colors"
+                 style={{ fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+               />
+               <span className="text-slate-400 font-semibold text-xs">MI</span>
+diff --git a/client/src/components/Map.tsx b/client/src/components/Map.tsx
+index ac8ac4f..94e5a8f 100644
+--- a/client/src/components/Map.tsx
++++ b/client/src/components/Map.tsx
+@@ -481,13 +481,13 @@ function Map() {
+             onChange={handleFilterChange}
+           />
+           {/* Mini status pill */}
+-          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full px-3 shadow-xl"
++          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full px-3 shadow-md"
+             style={{ height: "32px" }}>
+-            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.5)]'}`} />
+-            <span className="text-white font-bold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
++            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
++            <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+               {filteredUsers.length}
+             </span>
+-            <Users style={{ width: "11px", height: "11px" }} className="text-slate-400" />
++            <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
+           </div>
+         </div>
+ 
+@@ -498,13 +498,13 @@ function Map() {
+ 
+         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
+         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
+-          <div className={`flex items-center gap-2 border shadow-xl transition-all duration-500 rounded-full ${isActive
+-            ? "bg-emerald-500/10 border-emerald-500/50 backdrop-blur-md shadow-emerald-500/10"
+-            : "bg-slate-900/80 border-white/10 backdrop-blur-md"
+-            }`} style={{ padding: "4px 12px", height: "34px" }}>
+-            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-emerald-400 animate-pulse" : "text-slate-400"}`} />
+-            <span className={`font-black tracking-widest ${isActive ? "text-emerald-400" : "text-slate-400"}`} style={{ fontSize: "9px" }}>
+-              {isActive ? "LIVE" : "OFFLINE"}
++          <div className={`flex items-center gap-2  border rounded-full shadow-md transition-all duration-300 ${isActive
++            ? "bg-green-50/90 border-green-300 map-live-active"
++            : "bg-white/90 border-gray-200"
++            }`} style={{ padding: "4px 12px", height: "32px" }}>
++            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-green-500 animate-pulse" : "text-gray-400"}`} />
++            <span className={`font-bold tracking-wider ${isActive ? "text-green-600" : "text-gray-400"}`} style={{ fontSize: "9px" }}>
++              {isActive ? "GO LIVE" : "LEAVE MAP"}
+             </span>
+             <Switch
+               checked={isActive}
+@@ -519,16 +519,16 @@ function Map() {
+         <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
+           {/* Map style toggle */}
+           <button
+-            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all duration-300 group"
++            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+             onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
+             aria-label="Toggle map style"
+           >
+-            <Layers style={{ width: "16px", height: "16px" }} className={`transition-colors duration-300 ${mapStyle === 'satellite' ? "text-emerald-400" : "text-slate-400 group-hover:text-white"}`} />
++            <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-green-500" : "text-gray-500"} />
+           </button>
+ 
+           {/* Current location */}
+           <button
+-            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all duration-300 group"
++            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+             onClick={async () => {
+               userHasInteracted.current = false;
+               await updateLocation();
+@@ -542,20 +542,20 @@ function Map() {
+             }}
+             aria-label="Get current location"
+           >
+-            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
++            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-500" />
+           </button>
+ 
+           {/* Zoom controls */}
+-          <div className="flex flex-col bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-xl overflow-hidden">
++          <div className="flex flex-col bg-white/90  border border-gray-200 rounded-xl shadow-md overflow-hidden">
+             <button
+-              className="w-10 h-10 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-400 hover:text-white border-b border-white/5"
++              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600 border-b border-gray-200"
+               onClick={() => mapRef.current?.zoomIn()}
+               aria-label="Zoom in"
+             >
+               <Plus style={{ width: "14px", height: "14px" }} />
+             </button>
+             <button
+-              className="w-10 h-10 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-400 hover:text-white"
++              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
+               onClick={() => mapRef.current?.zoomOut()}
+               aria-label="Zoom out"
+             >
+@@ -566,8 +566,8 @@ function Map() {
+ 
+         {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
+         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
+-          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full shadow-xl"
+-            style={{ padding: "3px 8px 3px 12px", height: "36px" }}>
++          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full shadow-md"
++            style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
+             <input
+               type="number"
+               value={radius >= 25000 ? "" : radius}
+@@ -583,17 +583,17 @@ function Map() {
+                   setRadius(Math.min(25000, Math.max(1, parseInt(val) || 1)));
+                 }
+               }}
+-              className="bg-transparent text-white font-black text-center outline-none border-none placeholder:text-slate-500"
++              className="bg-transparent text-gray-800 font-bold text-center outline-none border-none"
+               style={{ width: "48px", fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+             />
+-            <span className="text-slate-400 font-bold" style={{ fontSize: "9px", letterSpacing: "1px" }}>MI</span>
++            <span className="text-gray-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
+             <button
+               onClick={() => setRadius(25000)}
+-              className={`ml-1 rounded-full flex items-center justify-center transition-all duration-300 font-black active:scale-90 ${radius >= 25000
+-                ? "bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)]"
+-                : "text-slate-400 hover:text-white hover:bg-white/5"
++              className={`ml-0.5 rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${radius >= 25000
++                ? "bg-blue-500 text-white shadow-sm"
++                : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                 }`}
+-              style={{ height: "26px", width: "26px", fontSize: "14px" }}
++              style={{ height: "26px", width: "26px", fontSize: "13px" }}
+               title="Unlimited radius"
+               aria-label="Unlimited radius"
+             >
+diff --git a/client/src/components/TopToolbar.tsx b/client/src/components/TopToolbar.tsx
+new file mode 100644
+index 0000000..463a790
+--- /dev/null
++++ b/client/src/components/TopToolbar.tsx
+@@ -0,0 +1,200 @@
++import { useState } from "react";
++import { Flame, MapPin, Eye, Layers, Settings, ChevronDown } from "lucide-react";
++import SettingsModal from "./SettingsModal";
++import FilterDrawer, { FilterOptions } from "./FilterDrawer";
++
++interface TopToolbarProps {
++  isActive: boolean;
++  onToggleActive: (active: boolean) => void;
++  filterOptions: FilterOptions;
++  onFilterChange: (options: FilterOptions) => void;
++  mapStyle: 'street' | 'satellite';
++  onToggleMapStyle: () => void;
++}
++
++export default function TopToolbar({
++  isActive,
++  onToggleActive,
++  filterOptions,
++  onFilterChange,
++  mapStyle,
++  onToggleMapStyle,
++}: TopToolbarProps) {
++  const [showSettings, setShowSettings] = useState(false);
++  const [showDistance, setShowDistance] = useState(false);
++  const [showFilters, setShowFilters] = useState(false);
++
++  const toolbarItems = [
++    {
++      id: "live",
++      icon: Flame,
++      label: "LIVE",
++      active: isActive,
++      hasDropdown: false,
++      onClick: () => onToggleActive(!isActive),
++      activeColor: "text-red-400",
++    },
++    {
++      id: "distance",
++      icon: MapPin,
++      label: "DISTANCE",
++      active: false,
++      hasDropdown: true,
++      onClick: () => setShowDistance(!showDistance),
++      activeColor: "text-slate-300",
++    },
++    {
++      id: "show",
++      icon: Eye,
++      label: "SHOW",
++      active: false,
++      hasDropdown: true,
++      onClick: () => setShowFilters(!showFilters),
++      activeColor: "text-slate-300",
++    },
++    {
++      id: "layers",
++      icon: Layers,
++      label: "LAYERS",
++      active: mapStyle === "satellite",
++      hasDropdown: false,
++      onClick: onToggleMapStyle,
++      activeColor: "text-emerald-400",
++    },
++    {
++      id: "settings",
++      icon: Settings,
++      label: "SETTINGS",
++      active: false,
++      hasDropdown: false,
++      onClick: () => setShowSettings(true),
++      activeColor: "text-slate-300",
++    },
++  ];
++
++  return (
++    <>
++      <div
++        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 border-b border-slate-800/50 backdrop-blur-md pointer-events-auto"
++        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
++      >
++        <div className="flex justify-around items-center w-full max-w-lg mx-auto" style={{ height: "44px" }}>
++          {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
++            <button
++              key={id}
++              onClick={onClick}
++              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
++                active ? "opacity-100" : "opacity-70 hover:opacity-100"
++              }`}
++            >
++              <Icon
++                className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
++                style={{ width: "16px", height: "16px" }}
++                strokeWidth={active ? 2.5 : 1.5}
++              />
++              <span
++                className={`font-semibold tracking-wider uppercase ${
++                  active ? activeColor : "text-slate-400"
++                }`}
++                style={{ fontSize: "9px" }}
++              >
++                {label}
++              </span>
++              {hasDropdown && (
++                <ChevronDown
++                  className="text-slate-500"
++                  style={{ width: "10px", height: "10px" }}
++                />
++              )}
++            </button>
++          ))}
++        </div>
++      </div>
++
++      {/* Distance dropdown */}
++      {showDistance && (
++        <div
++          className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
++          style={{ top: "50px", left: "30%", transform: "translateX(-50%)", minWidth: "200px" }}
++        >
++          <div className="flex flex-col gap-2">
++            <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
++            <div className="flex items-center gap-2">
++              <input
++                type="range"
++                min={1}
++                max={100}
++                value={filterOptions.radius >= 25000 ? 100 : filterOptions.radius}
++                onChange={(e) => {
++                  const val = parseInt(e.target.value);
++                  onFilterChange({ ...filterOptions, radius: val >= 100 ? 25000 : val });
++                }}
++                className="flex-1 accent-indigo-500"
++              />
++              <span className="text-white font-bold text-sm min-w-[40px] text-right">
++                {filterOptions.radius >= 25000 ? "∞" : `${filterOptions.radius}mi`}
++              </span>
++            </div>
++          </div>
++          <button
++            onClick={() => setShowDistance(false)}
++            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
++          >
++            Close
++          </button>
++        </div>
++      )}
++
++      {/* Show/Filter dropdown */}
++      {showFilters && (
++        <div
++          className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
++          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
++        >
++          <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">Show Users</span>
++          <div className="flex flex-col gap-2">
++            {[
++              { key: "showDating", label: "💕 Dating", checked: filterOptions.showDating },
++              { key: "showBusiness", label: "💼 Business", checked: filterOptions.showBusiness },
++              { key: "showFriendships", label: "🤝 Friends", checked: filterOptions.showFriendships },
++            ].map(({ key, label, checked }) => (
++              <label key={key} className="flex items-center gap-2 cursor-pointer">
++                <input
++                  type="checkbox"
++                  checked={checked}
++                  onChange={() => onFilterChange({ ...filterOptions, [key]: !checked })}
++                  className="accent-indigo-500 w-4 h-4"
++                />
++                <span className="text-slate-200 text-sm">{label}</span>
++              </label>
++            ))}
++            <div className="border-t border-slate-700 pt-2 mt-1">
++              {[
++                { key: "showMen", label: "♂ Men", checked: filterOptions.showMen ?? true },
++                { key: "showWomen", label: "♀ Women", checked: filterOptions.showWomen ?? true },
++              ].map(({ key, label, checked }) => (
++                <label key={key} className="flex items-center gap-2 cursor-pointer mb-1">
++                  <input
++                    type="checkbox"
++                    checked={checked}
++                    onChange={() => onFilterChange({ ...filterOptions, [key]: !checked })}
++                    className="accent-indigo-500 w-4 h-4"
++                  />
++                  <span className="text-slate-200 text-sm">{label}</span>
++                </label>
++              ))}
++            </div>
++          </div>
++          <button
++            onClick={() => setShowFilters(false)}
++            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
++          >
++            Close
++          </button>
++        </div>
++      )}
++
++      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
++    </>
++  );
++}
+diff --git a/client/src/pages/Dating.tsx b/client/src/pages/Dating.tsx
+index 076f4ca..a58c4d7 100644
+--- a/client/src/pages/Dating.tsx
++++ b/client/src/pages/Dating.tsx
+@@ -1,8 +1,8 @@
+-import { useState, useMemo } from "react";
++import { useState, useMemo, useCallback } from "react";
+ import { useQuery } from "@tanstack/react-query";
+ import { useLocation } from "@/contexts/LocationContext";
+ import { useAuth } from "@/contexts/AuthContext";
+-import Header from "@/components/Header";
++import TopToolbar from "@/components/TopToolbar";
+ import BottomNavigation from "@/components/BottomNavigation";
+ import { calculateDistance } from "@/lib/distance";
+ import { Loader2, Search, Ruler, Weight, ShieldCheck, Star } from "lucide-react";
+@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+ import { motion } from "framer-motion";
+ import { PageTransition } from "@/components/PageTransition";
++import { FilterOptions } from "@/components/FilterDrawer";
+ 
+ export default function Dating() {
+     const { currentLocation } = useLocation();
+@@ -64,10 +65,33 @@ export default function Dating() {
+         return { icon: 'âš¥', color: 'text-purple-400' };
+     };
+ 
++    const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
++    const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
++        const saved = localStorage.getItem('face2face_filterOptions');
++        if (saved) { try { return JSON.parse(saved); } catch (e) { } }
++        return { datingPreference: 'any', showDating: true, showBusiness: true, showFriendships: true, showMen: true, showWomen: true, ageRange: [18, 50], radius: 25000, minRating: 1 };
++    });
++
++    const handleToggleActive = useCallback(async (active: boolean) => {
++        try { await (useAuth as any).updateProfile?.({ isActive: active }); } catch (e) { }
++    }, []);
++
++    const handleFilterChange = useCallback((options: FilterOptions) => {
++        setFilterOptions(options);
++        localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
++    }, []);
++
+     return (
+         <PageTransition className="h-screen w-full page-dark">
+-            <Header />
+-            <div className="fixed left-0 right-0 overflow-y-auto px-4" style={{ top: "40px", bottom: "64px" }}>
++            <TopToolbar
++                isActive={isActive}
++                onToggleActive={handleToggleActive}
++                filterOptions={filterOptions}
++                onFilterChange={handleFilterChange}
++                mapStyle={mapStyle}
++                onToggleMapStyle={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
++            />
++            <div className="fixed left-0 right-0 overflow-y-auto px-4" style={{ top: "44px", bottom: "56px" }}>
+                 <div className="w-full max-w-md mx-auto">
+                     <div className="flex items-center justify-between pt-4 mb-4">
+                         <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
+@@ -82,7 +106,7 @@ export default function Dating() {
+ 
+                     {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
+                     <div className="flex justify-center mb-6">
+-                        <div className="flex bg-slate-900/80 backdrop-blur-md border border-white/10 p-1 rounded-full shadow-2xl gap-1.5 items-center">
++                        <div className="flex bg-white/90 border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
+                             <button
+                                 onClick={() => {
+                                     if (showMen && !showWomen) return; // Prevent both false
+diff --git a/client/src/pages/Games.tsx b/client/src/pages/Games.tsx
+index 9cf7afa..a89da39 100644
+Binary files a/client/src/pages/Games.tsx and b/client/src/pages/Games.tsx differ
+diff --git a/diff.txt b/diff.txt
+new file mode 100644
+index 0000000..650e87d
+Binary files /dev/null and b/diff.txt differ
+diff --git a/git_log_history.txt b/git_log_history.txt
+new file mode 100644
+index 0000000..0716a7d
+Binary files /dev/null and b/git_log_history.txt differ
+diff --git a/good_nav.txt b/good_nav.txt
+new file mode 100644
+index 0000000..7ff936a
+--- /dev/null
++++ b/good_nav.txt
+@@ -0,0 +1,89 @@
++import { useLocation } from "wouter";
++import { useQuery } from "@tanstack/react-query";
++import { useAuth } from "@/contexts/AuthContext";
++import { Map, User, Compass, Bell, MessageSquare, Heart, Users, Gamepad2 } from "lucide-react";
++import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++import { useEffect, useRef } from "react";
++
++export default function BottomNavigation() {
++  const [location, navigate] = useLocation();
++  const { user } = useAuth();
++
++  // Fetch unread notifications
++  const { data: notifications = [] } = useQuery<any[]>({
++    queryKey: ["/api/notifications"],
++    enabled: !!user,
++    refetchInterval: 15000,
++  });
++  const notifCount = notifications.filter((n: any) => !n.isRead).length;
++
++  const previousNotifCount = useRef(notifCount);
++
++  useEffect(() => {
++    // If the unread notification count INCREASES, it means we got a new bump/message
++    if (notifCount > previousNotifCount.current) {
++      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
++      triggerHaptic(100);
++      setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
++    }
++    previousNotifCount.current = notifCount;
++  }, [notifCount]);
++
++  const navigateTo = (path: string) => () => {
++    navigate(path);
++  };
++
++  const navItems = [
++    { path: "/games", icon: Gamepad2, label: "Games" },
++    { path: "/explore", icon: Users, label: "Groups & Lists" },
++    { path: "/dating", icon: Heart, label: "Dating" },
++    { path: "/map", icon: Map, label: "Map" },
++    { path: "/messages", icon: MessageSquare, label: "Bumps & Messages", badge: notifCount },
++    { path: "/profile", icon: User, label: "Profile" },
++  ];
++
++  return (
++    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
++      <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
++        <div className="flex justify-around items-center h-full relative">
++          {navItems.map(({ path, icon: Icon, label, badge }) => {
++            const isActive = location === path;
++            return (
++              <div
++                key={path}
++                onClick={navigateTo(path)}
++                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
++                style={{ minWidth: "64px", padding: "4px 2px" }}
++              >
++                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
++                  <Icon
++                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
++                    style={{ width: "20px", height: "20px" }}
++                    strokeWidth={isActive ? 2.5 : 1.5}
++                  />
++                  {isActive && (
++                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
++                  )}
++                  {(badge !== undefined && badge > 0) && (
++                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
++                      {badge > 9 ? "9+" : badge}
++                    </span>
++                  )}
++                </div>
++                <span
++                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
++                  style={{ fontSize: "9px", marginTop: "4px", minHeight: "14px" }}
++                >
++                  {label}
++                </span>
++                {isActive && (
++                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
++                )}
++              </div>
++            );
++          })}
++        </div>
++      </nav>
++    </div>
++  );
++}
+diff --git a/nav_diff.txt b/nav_diff.txt
+new file mode 100644
+index 0000000..7bb92d4
+Binary files /dev/null and b/nav_diff.txt differ
+diff --git a/nav_head1.txt b/nav_head1.txt
+new file mode 100644
+index 0000000..3f15ae6
+--- /dev/null
++++ b/nav_head1.txt
+@@ -0,0 +1,89 @@
++﻿import { useLocation } from "wouter";
++import { useQuery } from "@tanstack/react-query";
++import { useAuth } from "@/contexts/AuthContext";
++import { Map, User, Compass, Bell, MessageSquare, Heart, Users, Gamepad2 } from "lucide-react";
++import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++import { useEffect, useRef } from "react";
++
++export default function BottomNavigation() {
++  const [location, navigate] = useLocation();
++  const { user } = useAuth();
++
++  // Fetch unread notifications
++  const { data: notifications = [] } = useQuery<any[]>({
++    queryKey: ["/api/notifications"],
++    enabled: !!user,
++    refetchInterval: 15000,
++  });
++  const notifCount = notifications.filter((n: any) => !n.isRead).length;
++
++  const previousNotifCount = useRef(notifCount);
++
++  useEffect(() => {
++    // If the unread notification count INCREASES, it means we got a new bump/message
++    if (notifCount > previousNotifCount.current) {
++      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
++      triggerHaptic(100);
++      setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
++    }
++    previousNotifCount.current = notifCount;
++  }, [notifCount]);
++
++  const navigateTo = (path: string) => () => {
++    navigate(path);
++  };
++
++  const navItems = [
++    { path: "/games", icon: Gamepad2, label: "Games" },
++    { path: "/explore", icon: Users, label: "Groups & Lists" },
++    { path: "/dating", icon: Heart, label: "Dating" },
++    { path: "/map", icon: Map, label: "Map" },
++    { path: "/messages", icon: MessageSquare, label: "Bumps & Messages", badge: notifCount },
++    { path: "/profile", icon: User, label: "Profile" },
++  ];
++
++  return (
++    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
++      <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
++        <div className="flex justify-around items-center h-full relative">
++          {navItems.map(({ path, icon: Icon, label, badge }) => {
++            const isActive = location === path;
++            return (
++              <div
++                key={path}
++                onClick={navigateTo(path)}
++                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
++                style={{ minWidth: "64px", padding: "4px 2px" }}
++              >
++                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
++                  <Icon
++                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
++                    style={{ width: "20px", height: "20px" }}
++                    strokeWidth={isActive ? 2.5 : 1.5}
++                  />
++                  {isActive && (
++                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
++                  )}
++                  {(badge !== undefined && badge > 0) && (
++                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
++                      {badge > 9 ? "9+" : badge}
++                    </span>
++                  )}
++                </div>
++                <span
++                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
++                  style={{ fontSize: "9px", marginTop: "4px", minHeight: "14px" }}
++                >
++                  {label}
++                </span>
++                {isActive && (
++                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
++                )}
++              </div>
++            );
++          })}
++        </div>
++      </nav>
++    </div>
++  );
++}
+diff --git a/nav_log.txt b/nav_log.txt
+new file mode 100644
+index 0000000..fc354cf
+--- /dev/null
++++ b/nav_log.txt
+@@ -0,0 +1,575 @@
++commit 78d0bd33914c60d1edaaa6318fa0b650ba53e2e0
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Sat May 16 00:44:20 2026 -0600
++
++    UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index a2b839b..7ff936a 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -1,7 +1,7 @@
++ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++-import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
+++import { Map, User, Compass, Bell, MessageSquare, Heart, Users, Gamepad2 } from "lucide-react";
++ import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++ import { useEffect, useRef } from "react";
++ 
++@@ -34,10 +34,11 @@ export default function BottomNavigation() {
++   };
++ 
++   const navItems = [
+++    { path: "/games", icon: Gamepad2, label: "Games" },
++     { path: "/explore", icon: Users, label: "Groups & Lists" },
++     { path: "/dating", icon: Heart, label: "Dating" },
++     { path: "/map", icon: Map, label: "Map" },
++-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
+++    { path: "/messages", icon: MessageSquare, label: "Bumps & Messages", badge: notifCount },
++     { path: "/profile", icon: User, label: "Profile" },
++   ];
++ 
++
++commit a5b219ed19bca776e9db064b99bb65a4a91d07bf
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Fri May 15 23:23:45 2026 -0600
++
++    Restore Turf Wars Navigation and Finalize Luxury UI Aesthetics
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 0e2d541..a2b839b 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -42,9 +42,9 @@ export default function BottomNavigation() {
++   ];
++ 
++   return (
++-    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
++-      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
++-        <div className="flex justify-around items-center h-full relative px-2">
+++    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+++      <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+++        <div className="flex justify-around items-center h-full relative">
++           {navItems.map(({ path, icon: Icon, label, badge }) => {
++             const isActive = location === path;
++             return (
++@@ -52,12 +52,12 @@ export default function BottomNavigation() {
++                 key={path}
++                 onClick={navigateTo(path)}
++                 className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
++-                style={{ minWidth: "56px", padding: "4px 8px" }}
+++                style={{ minWidth: "64px", padding: "4px 2px" }}
++               >
++                 <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
++                   <Icon
++                     className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
++-                    style={{ width: "22px", height: "22px" }}
+++                    style={{ width: "20px", height: "20px" }}
++                     strokeWidth={isActive ? 2.5 : 1.5}
++                   />
++                   {isActive && (
++@@ -71,7 +71,7 @@ export default function BottomNavigation() {
++                 </div>
++                 <span
++                   className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
++-                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
+++                  style={{ fontSize: "9px", marginTop: "4px", minHeight: "14px" }}
++                 >
++                   {label}
++                 </span>
++
++commit 95694a43238ea181acfd6ebf9c836f69fc7b464b
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Fri May 15 21:00:47 2026 -0600
++
++    Revert "feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)"
++    
++    This reverts commit ed17f00f7dffda0ca91ebfe8fe12cb4709def2fd.
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index ade0d96..0e2d541 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -1,7 +1,7 @@
++ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++-import { Calendar, Map, Flame, MessageSquare, Users, User } from "lucide-react";
+++import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
++ import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++ import { useEffect, useRef } from "react";
++ 
++@@ -20,7 +20,9 @@ export default function BottomNavigation() {
++   const previousNotifCount = useRef(notifCount);
++ 
++   useEffect(() => {
+++    // If the unread notification count INCREASES, it means we got a new bump/message
++     if (notifCount > previousNotifCount.current) {
+++      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
++       triggerHaptic(100);
++       setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
++     }
++@@ -32,60 +34,50 @@ export default function BottomNavigation() {
++   };
++ 
++   const navItems = [
++-    { path: "/dating", icon: Calendar, label: "DATING" },
++-    { path: "/map", icon: Map, label: "MAP" },
++-    { path: "/bumps", icon: Flame, label: "BUMPS" },
++-    { path: "/messages", icon: MessageSquare, label: "BUMP/MES...", badge: notifCount },
++-    { path: "/explore", icon: Users, label: "GROUP/LIST" },
++-    { path: "/profile", icon: User, label: "PROFILE" },
+++    { path: "/explore", icon: Users, label: "Groups & Lists" },
+++    { path: "/dating", icon: Heart, label: "Dating" },
+++    { path: "/map", icon: Map, label: "Map" },
+++    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
+++    { path: "/profile", icon: User, label: "Profile" },
++   ];
++ 
++   return (
++-    <div
++-      className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-700/50 pointer-events-auto flex justify-center backdrop-blur-md"
++-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
++-    >
++-      <nav className="w-full max-w-lg mx-auto" style={{ height: "56px" }}>
++-        <div className="flex justify-around items-center h-full relative px-1">
+++    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+++      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
+++        <div className="flex justify-around items-center h-full relative px-2">
++           {navItems.map(({ path, icon: Icon, label, badge }) => {
++-            const isActive = location === path || (path === "/map" && location === "/");
+++            const isActive = location === path;
++             return (
++               <div
++                 key={path}
++                 onClick={navigateTo(path)}
++-                className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative ${
++-                  isActive ? "opacity-100" : "opacity-60 hover:opacity-80"
++-                }`}
++-                style={{ minWidth: "48px", padding: "4px 2px" }}
+++                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
+++                style={{ minWidth: "56px", padding: "4px 8px" }}
++               >
++-                <div className="relative">
++-                  {isActive && (
++-                    <div className="absolute -inset-3 bg-indigo-500/15 rounded-xl -z-10" />
++-                  )}
+++                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
++                   <Icon
++-                    className={`transition-colors duration-200 ${
++-                      isActive ? "text-indigo-400" : "text-slate-400"
++-                    }`}
++-                    style={{ width: "20px", height: "20px" }}
+++                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
+++                    style={{ width: "22px", height: "22px" }}
++                     strokeWidth={isActive ? 2.5 : 1.5}
++                   />
+++                  {isActive && (
+++                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
+++                  )}
++                   {(badge !== undefined && badge > 0) && (
++-                    <span
++-                      className="absolute -top-1 -right-2 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30"
++-                      style={{ fontSize: "7px", height: "14px", width: "14px" }}
++-                    >
+++                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
++                       {badge > 9 ? "9+" : badge}
++                     </span>
++                   )}
++                 </div>
++                 <span
++-                  className={`font-semibold tracking-wider uppercase transition-colors duration-200 ${
++-                    isActive ? "text-indigo-400" : "text-slate-500"
++-                  }`}
++-                  style={{ fontSize: "8px", marginTop: "3px", lineHeight: "1", whiteSpace: "nowrap" }}
+++                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
+++                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
++                 >
++                   {label}
++                 </span>
+++                {isActive && (
+++                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
+++                )}
++               </div>
++             );
++           })}
++
++commit ed17f00f7dffda0ca91ebfe8fe12cb4709def2fd
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Fri May 15 20:50:41 2026 -0600
++
++    feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 0e2d541..ade0d96 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -1,7 +1,7 @@
++ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++-import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
+++import { Calendar, Map, Flame, MessageSquare, Users, User } from "lucide-react";
++ import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++ import { useEffect, useRef } from "react";
++ 
++@@ -20,9 +20,7 @@ export default function BottomNavigation() {
++   const previousNotifCount = useRef(notifCount);
++ 
++   useEffect(() => {
++-    // If the unread notification count INCREASES, it means we got a new bump/message
++     if (notifCount > previousNotifCount.current) {
++-      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
++       triggerHaptic(100);
++       setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
++     }
++@@ -34,50 +32,60 @@ export default function BottomNavigation() {
++   };
++ 
++   const navItems = [
++-    { path: "/explore", icon: Users, label: "Groups & Lists" },
++-    { path: "/dating", icon: Heart, label: "Dating" },
++-    { path: "/map", icon: Map, label: "Map" },
++-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
++-    { path: "/profile", icon: User, label: "Profile" },
+++    { path: "/dating", icon: Calendar, label: "DATING" },
+++    { path: "/map", icon: Map, label: "MAP" },
+++    { path: "/bumps", icon: Flame, label: "BUMPS" },
+++    { path: "/messages", icon: MessageSquare, label: "BUMP/MES...", badge: notifCount },
+++    { path: "/explore", icon: Users, label: "GROUP/LIST" },
+++    { path: "/profile", icon: User, label: "PROFILE" },
++   ];
++ 
++   return (
++-    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
++-      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
++-        <div className="flex justify-around items-center h-full relative px-2">
+++    <div
+++      className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-700/50 pointer-events-auto flex justify-center backdrop-blur-md"
+++      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+++    >
+++      <nav className="w-full max-w-lg mx-auto" style={{ height: "56px" }}>
+++        <div className="flex justify-around items-center h-full relative px-1">
++           {navItems.map(({ path, icon: Icon, label, badge }) => {
++-            const isActive = location === path;
+++            const isActive = location === path || (path === "/map" && location === "/");
++             return (
++               <div
++                 key={path}
++                 onClick={navigateTo(path)}
++-                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
++-                style={{ minWidth: "56px", padding: "4px 8px" }}
+++                className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative ${
+++                  isActive ? "opacity-100" : "opacity-60 hover:opacity-80"
+++                }`}
+++                style={{ minWidth: "48px", padding: "4px 2px" }}
++               >
++-                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
+++                <div className="relative">
+++                  {isActive && (
+++                    <div className="absolute -inset-3 bg-indigo-500/15 rounded-xl -z-10" />
+++                  )}
++                   <Icon
++-                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
++-                    style={{ width: "22px", height: "22px" }}
+++                    className={`transition-colors duration-200 ${
+++                      isActive ? "text-indigo-400" : "text-slate-400"
+++                    }`}
+++                    style={{ width: "20px", height: "20px" }}
++                     strokeWidth={isActive ? 2.5 : 1.5}
++                   />
++-                  {isActive && (
++-                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
++-                  )}
++                   {(badge !== undefined && badge > 0) && (
++-                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
+++                    <span
+++                      className="absolute -top-1 -right-2 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30"
+++                      style={{ fontSize: "7px", height: "14px", width: "14px" }}
+++                    >
++                       {badge > 9 ? "9+" : badge}
++                     </span>
++                   )}
++                 </div>
++                 <span
++-                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
++-                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
+++                  className={`font-semibold tracking-wider uppercase transition-colors duration-200 ${
+++                    isActive ? "text-indigo-400" : "text-slate-500"
+++                  }`}
+++                  style={{ fontSize: "8px", marginTop: "3px", lineHeight: "1", whiteSpace: "nowrap" }}
++                 >
++                   {label}
++                 </span>
++-                {isActive && (
++-                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
++-                )}
++               </div>
++             );
++           })}
++
++commit 3e94216dedf3930821b275ec2923c6969b03ae66
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Fri May 15 19:42:52 2026 -0600
++
++    fix: flawlessly unify 5-item Dating layout (3b91347) with recent questionnaires
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 8139bf3..0e2d541 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -1,7 +1,7 @@
++ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++-import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
+++import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
++ import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++ import { useEffect, useRef } from "react";
++ 
++@@ -34,16 +34,17 @@ export default function BottomNavigation() {
++   };
++ 
++   const navItems = [
++-    { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
+++    { path: "/explore", icon: Users, label: "Groups & Lists" },
+++    { path: "/dating", icon: Heart, label: "Dating" },
++     { path: "/map", icon: Map, label: "Map" },
++-    { path: "/messages", icon: MessageSquare, label: "Messages" },
+++    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
++     { path: "/profile", icon: User, label: "Profile" },
++   ];
++ 
++   return (
++-    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
++-      <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
++-        <div className="flex justify-around items-center h-full relative">
+++    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+++      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
+++        <div className="flex justify-around items-center h-full relative px-2">
++           {navItems.map(({ path, icon: Icon, label, badge }) => {
++             const isActive = location === path;
++             return (
++
++commit c59131e3b5e3baf4fe2a5af904f73ac0eb5d0662
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Thu Apr 9 14:16:58 2026 -0600
++
++    fix(ios): nuke all backdrop-filter blur + fix leaflet tile positioning
++    
++    - Remove ALL backdrop-filter blur effects (40px auth card, 20px bottom nav,
++      12px glass-card, 8px stat-card/feature-pill) — these create GPU compositing
++      layers that exhaust iOS Safari memory over the Leaflet map canvas
++    - Replace blur effects with higher-opacity solid backgrounds (visually identical)
++    - CRITICAL: Remove 'transform: none !important' on .leaflet-tile-container —
++      this was stripping Leaflet's translate3d tile positioning, causing tiles to
++      stack at 0,0 and glitch/flicker on pan/zoom (the 'unstable map' bug)
++    - Remove will-change: transform,opacity on 500px auth glow orbs
++    - Reduce auth glow blur from 120px to 80px
++    - Remove blur-md from bottom navigation active indicator glow
++    - Remove translateZ(0) forced compositing on bottom-nav
++    - Enable chunkedLoading on MarkerClusterGroup (previous commit)
++    - Disable fadeAnimation + markerZoomAnimation on MapContainer (previous commit)
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 2e05b37..8139bf3 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -60,7 +60,7 @@ export default function BottomNavigation() {
++                     strokeWidth={isActive ? 2.5 : 1.5}
++                   />
++                   {isActive && (
++-                    <div className="absolute -inset-2 bg-blue-500/20 rounded-full blur-md -z-10" />
+++                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
++                   )}
++                   {(badge !== undefined && badge > 0) && (
++                     <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
++
++commit 78c53f480c63889302fa9db01aa76a766d4a7ddc
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Wed Apr 8 23:43:37 2026 -0600
++
++    perf: strip iOS-crashing backdrop-blur filters from UI overlays. Safari OOM crashes when rendering blur over dragging Leaflet maps
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index b3679a7..2e05b37 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -42,7 +42,7 @@ export default function BottomNavigation() {
++ 
++   return (
++     <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
++-      <nav className="bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+++      <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
++         <div className="flex justify-around items-center h-full relative">
++           {navItems.map(({ path, icon: Icon, label, badge }) => {
++             const isActive = location === path;
++
++commit af3d7b7fd7c43636894ed6d5059f33cf777e23db
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Wed Apr 8 23:04:37 2026 -0600
++
++    fix: use cross-platform haptics service, remove all debug diagnostics
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 3a7707f..b3679a7 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++ import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
++-import { Haptics, ImpactStyle } from "@capacitor/haptics";
+++import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
++ import { useEffect, useRef } from "react";
++ 
++ export default function BottomNavigation() {
++@@ -22,13 +22,9 @@ export default function BottomNavigation() {
++   useEffect(() => {
++     // If the unread notification count INCREASES, it means we got a new bump/message
++     if (notifCount > previousNotifCount.current) {
++-      try {
++-        // Trigger a heavy haptic vibration
++-        Haptics.vibrate();
++-        setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 200);
++-      } catch (err) {
++-        console.warn("Haptics not available on this device", err);
++-      }
+++      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
+++      triggerHaptic(100);
+++      setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
++     }
++     previousNotifCount.current = notifCount;
++   }, [notifCount]);
++
++commit 272b753b7f5d7be3ce42beec3f8140ddf296deb4
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Sun Mar 29 19:28:57 2026 -0600
++
++    feat: add haptic vibrations on new bumps and explicit inbox indicators
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 491f4b0..3a7707f 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -2,6 +2,8 @@ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++ import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
+++import { Haptics, ImpactStyle } from "@capacitor/haptics";
+++import { useEffect, useRef } from "react";
++ 
++ export default function BottomNavigation() {
++   const [location, navigate] = useLocation();
++@@ -15,6 +17,22 @@ export default function BottomNavigation() {
++   });
++   const notifCount = notifications.filter((n: any) => !n.isRead).length;
++ 
+++  const previousNotifCount = useRef(notifCount);
+++
+++  useEffect(() => {
+++    // If the unread notification count INCREASES, it means we got a new bump/message
+++    if (notifCount > previousNotifCount.current) {
+++      try {
+++        // Trigger a heavy haptic vibration
+++        Haptics.vibrate();
+++        setTimeout(() => Haptics.impact({ style: ImpactStyle.Heavy }), 200);
+++      } catch (err) {
+++        console.warn("Haptics not available on this device", err);
+++      }
+++    }
+++    previousNotifCount.current = notifCount;
+++  }, [notifCount]);
+++
++   const navigateTo = (path: string) => () => {
++     navigate(path);
++   };
++
++commit e652e29802555dbf95bc340b1f0460ada610a95f
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Sun Mar 29 18:51:51 2026 -0600
++
++    feat: restore messages UI, database schema, and api endpoints for post-bump chatting
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index ef84d8c..491f4b0 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -1,7 +1,7 @@
++ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++-import { Map, User, Compass, Bell } from "lucide-react";
+++import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
++ 
++ export default function BottomNavigation() {
++   const [location, navigate] = useLocation();
++@@ -22,6 +22,7 @@ export default function BottomNavigation() {
++   const navItems = [
++     { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
++     { path: "/map", icon: Map, label: "Map" },
+++    { path: "/messages", icon: MessageSquare, label: "Messages" },
++     { path: "/profile", icon: User, label: "Profile" },
++   ];
++ 
++
++commit c6eef2a2c74b90c3bd6b7b5c03b03f81eb1e803a
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Sun Mar 29 17:46:00 2026 -0600
++
++    feat: implement Phases 2-3 of Bump system - DirectionalArrow with compass/accelerometer gesture, BeenBumpedBadge with heartbeat haptics, received bumps + respond server endpoints, getBump/updateBump storage methods
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index a4e54ea..ef84d8c 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -1,19 +1,12 @@
++ import { useLocation } from "wouter";
++ import { useQuery } from "@tanstack/react-query";
++ import { useAuth } from "@/contexts/AuthContext";
++-import { Map, MessageSquare, User, Compass, Bell } from "lucide-react";
+++import { Map, User, Compass, Bell } from "lucide-react";
++ 
++ export default function BottomNavigation() {
++   const [location, navigate] = useLocation();
++   const { user } = useAuth();
++ 
++-  // Fetch connected users to get total unread count
++-  const { data: connectedUsers = [] } = useQuery<any[]>({
++-    queryKey: ["/api/bumps/users"],
++-    enabled: !!user,
++-    refetchInterval: 15000, // poll every 15s for new messages
++-  });
++-  const unreadCount = connectedUsers.reduce((sum, u) => sum + (u.unreadCount || 0), 0);
++   // Fetch unread notifications
++   const { data: notifications = [] } = useQuery<any[]>({
++     queryKey: ["/api/notifications"],
++@@ -29,7 +22,6 @@ export default function BottomNavigation() {
++   const navItems = [
++     { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
++     { path: "/map", icon: Map, label: "Map" },
++-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: unreadCount },
++     { path: "/profile", icon: User, label: "Profile" },
++   ];
++ 
++
++commit 6bf1f3aa86b915e85237c261b96fc041dcd6fa6b
++Author: bluejaxllc <edgar@bluejax.ai>
++Date:   Sun Mar 29 17:44:10 2026 -0600
++
++    fix: premium gradient gender toggles + fix hover jitter on bottom nav
++
++diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
++index 855aeb5..a4e54ea 100644
++--- a/client/src/components/BottomNavigation.tsx
+++++ b/client/src/components/BottomNavigation.tsx
++@@ -46,7 +46,7 @@ export default function BottomNavigation() {
++                 className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
++                 style={{ minWidth: "56px", padding: "4px 8px" }}
++               >
++-                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : 'hover:scale-105'}`}>
+++                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
++                   <Icon
++                     className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
++                     style={{ width: "22px", height: "22px" }}

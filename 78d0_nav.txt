@@ -1,7 +1,7 @@
-import { useLocation } from "wouter";
+﻿import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, Heart, Gamepad2, MessageSquare, Users, User } from "lucide-react";
+import { Map, User, Compass, Bell, MessageSquare, Heart, Users, Gamepad2 } from "lucide-react";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef } from "react";
 
@@ -20,7 +20,9 @@ export default function BottomNavigation() {
   const previousNotifCount = useRef(notifCount);
 
   useEffect(() => {
+    // If the unread notification count INCREASES, it means we got a new bump/message
     if (notifCount > previousNotifCount.current) {
+      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
       triggerHaptic(100);
       setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
     }
@@ -45,13 +47,13 @@ export default function BottomNavigation() {
       <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
         <div className="flex justify-around items-center h-full relative">
           {navItems.map(({ path, icon: Icon, label, badge }) => {
-            const isActive = location === path || (path === "/map" && location === "/");
+            const isActive = location === path;
             return (
               <div
                 key={path}
                 onClick={navigateTo(path)}
                 className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
-                style={{ minWidth: "56px", padding: "4px 2px" }}
+                style={{ minWidth: "64px", padding: "4px 2px" }}
               >
                 <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
                   <Icon
@@ -70,12 +72,12 @@ export default function BottomNavigation() {
                 </div>
                 <span
                   className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
-                  style={{ fontSize: "8px", marginTop: "4px", minHeight: "12px", whiteSpace: "nowrap" }}
+                  style={{ fontSize: "9px", marginTop: "4px", minHeight: "14px" }}
                 >
                   {label}
                 </span>
                 {isActive && (
-                  <div className="absolute -bottom-2 w-8 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
+                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
                 )}
               </div>
             );
