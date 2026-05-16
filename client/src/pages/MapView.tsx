@@ -1,15 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useLocation as useRouteLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/contexts/LocationContext";
-import TopToolbar from "@/components/TopToolbar";
+import Header from "@/components/Header";
 import Map from "@/components/Map";
 import BottomNavigation from "@/components/BottomNavigation";
 import WelcomeModal from "@/components/WelcomeModal";
 import SafetyModal from "@/components/SafetyModal";
 import { PageTransition } from "@/components/PageTransition";
 import { useToast } from "@/hooks/use-toast";
-import { FilterOptions } from "@/components/FilterDrawer";
 
 export default function MapView() {
   const [, setLocation] = useRouteLocation();
@@ -21,50 +20,9 @@ export default function MapView() {
   const [showSafety, setShowSafety] = useState(false);
   const [isUpdatingSafety, setIsUpdatingSafety] = useState(false);
   const [hasCheckedModals, setHasCheckedModals] = useState(false);
-  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
-
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
-    const saved = localStorage.getItem('face2face_filterOptions');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { }
-    }
-    return {
-      datingPreference: 'any',
-      showDating: true,
-      showBusiness: true,
-      showFriendships: true,
-      showMen: true,
-      showWomen: true,
-      ageRange: [18, 50],
-      radius: 25000,
-      minRating: 1
-    };
-  });
-
-  const isActive = user?.isActive ?? true;
-
-  const handleToggleActive = useCallback(async (active: boolean) => {
-    try {
-      await updateProfile({ isActive: active });
-      toast({
-        title: "Status updated",
-        description: `You are now ${active ? 'active' : 'inactive'}`,
-      });
-    } catch (error) {
-      toast({
-        title: "Status update failed",
-        description: "Failed to update your active status",
-        variant: "destructive",
-      });
-    }
-  }, [updateProfile, toast]);
-
-  const handleFilterChange = useCallback((options: FilterOptions) => {
-    setFilterOptions(options);
-    localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
-  }, []);
 
   useEffect(() => {
+    // Only check modal conditions once per component mount after user is loaded
     if (user && !hasCheckedModals) {
       if (!user.profileCompleted && !sessionStorage.getItem('welcomeShown')) {
         setShowWelcome(true);
@@ -77,8 +35,12 @@ export default function MapView() {
     }
   }, [user, hasCheckedModals]);
 
+  // Note: LocationService implicitly updates the server location internally
+  // when a location change is detected, using debounced syncing.
+
   const handleCloseWelcome = () => {
     setShowWelcome(false);
+    // If they close the welcome modal and haven't accepted safety, show it next
     if (user && !user.safetyAcknowledged) {
       setShowSafety(true);
       sessionStorage.setItem('safetyShown', 'true');
@@ -105,15 +67,8 @@ export default function MapView() {
 
   return (
     <PageTransition className="h-screen w-full page-dark map-view">
-      <TopToolbar
-        isActive={isActive}
-        onToggleActive={handleToggleActive}
-        filterOptions={filterOptions}
-        onFilterChange={handleFilterChange}
-        mapStyle={mapStyle}
-        onToggleMapStyle={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
-      />
-      <div className="fixed left-0 right-0" style={{ top: "44px", bottom: "56px" }}>
+      <Header />
+      <div className="fixed left-0 right-0" style={{ top: "40px", bottom: "64px" }}>
         <Map />
       </div>
       <BottomNavigation />
