@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, User, Compass, Bell, MessageSquare, Heart, Users, Gamepad2 } from "lucide-react";
+import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef } from "react";
 
@@ -34,17 +34,15 @@ export default function BottomNavigation() {
   };
 
   const navItems = [
-    { path: "/games", icon: Gamepad2, label: "Games" },
-    { path: "/explore", icon: Users, label: "Groups & Lists" },
-    { path: "/dating", icon: Heart, label: "Dating" },
+    { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
     { path: "/map", icon: Map, label: "Map" },
-    { path: "/messages", icon: MessageSquare, label: "Bumps & Messages", badge: notifCount },
+    { path: "/messages", icon: MessageSquare, label: "Messages" },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 
   return (
     <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+      <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
         <div className="flex justify-around items-center h-full relative">
           {navItems.map(({ path, icon: Icon, label, badge }) => {
             const isActive = location === path;
@@ -53,12 +51,12 @@ export default function BottomNavigation() {
                 key={path}
                 onClick={navigateTo(path)}
                 className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
-                style={{ minWidth: "64px", padding: "4px 2px" }}
+                style={{ minWidth: "56px", padding: "4px 8px" }}
               >
                 <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
                   <Icon
                     className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
-                    style={{ width: "20px", height: "20px" }}
+                    style={{ width: "22px", height: "22px" }}
                     strokeWidth={isActive ? 2.5 : 1.5}
                   />
                   {isActive && (
@@ -72,7 +70,7 @@ export default function BottomNavigation() {
                 </div>
                 <span
                   className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
-                  style={{ fontSize: "9px", marginTop: "4px", minHeight: "14px" }}
+                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
                 >
                   {label}
                 </span>
