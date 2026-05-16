@@ -82,7 +82,7 @@ export default function Dating() {
 
                     {/* ═══════ TOP CENTER: Mode Toggles ═══════ */}
                     <div className="flex justify-center mb-6">
-                        <div className="flex bg-white/90 border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
+                        <div className="flex bg-slate-900/80 backdrop-blur-md border border-white/10 p-1 rounded-full shadow-2xl gap-1.5 items-center">
                             <button
                                 onClick={() => {
                                     if (showMen && !showWomen) return; // Prevent both false

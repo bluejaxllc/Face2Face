@@ -481,13 +481,13 @@ function Map() {
             onChange={handleFilterChange}
           />
           {/* Mini status pill */}
-          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full px-3 shadow-md"
+          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full px-3 shadow-xl"
             style={{ height: "32px" }}>
-            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
-            <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
+            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.5)]'}`} />
+            <span className="text-white font-bold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
               {filteredUsers.length}
             </span>
-            <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
+            <Users style={{ width: "11px", height: "11px" }} className="text-slate-400" />
           </div>
           <BeenBumpedBadge onClick={() => setShowReceivedBumps(true)} />
         </div>
@@ -499,13 +499,13 @@ function Map() {
 
         {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
         <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
-          <div className={`flex items-center gap-2  border rounded-full shadow-md transition-all duration-300 ${isActive
-            ? "bg-green-50/90 border-green-300 map-live-active"
-            : "bg-white/90 border-gray-200"
-            }`} style={{ padding: "4px 12px", height: "32px" }}>
-            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-green-500 animate-pulse" : "text-gray-400"}`} />
-            <span className={`font-bold tracking-wider ${isActive ? "text-green-600" : "text-gray-400"}`} style={{ fontSize: "9px" }}>
-              {isActive ? "GO LIVE" : "LEAVE MAP"}
+          <div className={`flex items-center gap-2 border shadow-xl transition-all duration-500 rounded-full ${isActive
+            ? "bg-emerald-500/10 border-emerald-500/50 backdrop-blur-md shadow-emerald-500/10"
+            : "bg-slate-900/80 border-white/10 backdrop-blur-md"
+            }`} style={{ padding: "4px 12px", height: "34px" }}>
+            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-emerald-400 animate-pulse" : "text-slate-400"}`} />
+            <span className={`font-black tracking-widest ${isActive ? "text-emerald-400" : "text-slate-400"}`} style={{ fontSize: "9px" }}>
+              {isActive ? "LIVE" : "OFFLINE"}
             </span>
             <Switch
               checked={isActive}
@@ -520,16 +520,16 @@ function Map() {
         <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
           {/* Map style toggle */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all duration-300 group"
             onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
             aria-label="Toggle map style"
           >
-            <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-green-500" : "text-gray-500"} />
+            <Layers style={{ width: "16px", height: "16px" }} className={`transition-colors duration-300 ${mapStyle === 'satellite' ? "text-emerald-400" : "text-slate-400 group-hover:text-white"}`} />
           </button>
 
           {/* Current location */}
           <button
-            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/10 shadow-xl flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all duration-300 group"
             onClick={async () => {
               userHasInteracted.current = false;
               await updateLocation();
@@ -543,20 +543,20 @@ function Map() {
             }}
             aria-label="Get current location"
           >
-            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-500" />
+            <Locate style={{ width: "16px", height: "16px" }} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
           </button>
 
           {/* Zoom controls */}
-          <div className="flex flex-col bg-white/90  border border-gray-200 rounded-xl shadow-md overflow-hidden">
+          <div className="flex flex-col bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-xl shadow-xl overflow-hidden">
             <button
-              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600 border-b border-gray-200"
+              className="w-10 h-10 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-400 hover:text-white border-b border-white/5"
               onClick={() => mapRef.current?.zoomIn()}
               aria-label="Zoom in"
             >
               <Plus style={{ width: "14px", height: "14px" }} />
             </button>
             <button
-              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
+              className="w-10 h-10 flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all text-slate-400 hover:text-white"
               onClick={() => mapRef.current?.zoomOut()}
               aria-label="Zoom out"
             >
@@ -567,8 +567,8 @@ function Map() {
 
         {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
         <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full shadow-md"
-            style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
+          <div className="flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md border border-white/10 rounded-full shadow-xl"
+            style={{ padding: "3px 8px 3px 12px", height: "36px" }}>
             <input
               type="number"
               value={radius >= 25000 ? "" : radius}
@@ -584,17 +584,17 @@ function Map() {
                   setRadius(Math.min(25000, Math.max(1, parseInt(val) || 1)));
                 }
               }}
-              className="bg-transparent text-gray-800 font-bold text-center outline-none border-none"
+              className="bg-transparent text-white font-black text-center outline-none border-none placeholder:text-slate-500"
               style={{ width: "48px", fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
             />
-            <span className="text-gray-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
+            <span className="text-slate-400 font-bold" style={{ fontSize: "9px", letterSpacing: "1px" }}>MI</span>
             <button
               onClick={() => setRadius(25000)}
-              className={`ml-0.5 rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${radius >= 25000
-                ? "bg-blue-500 text-white shadow-sm"
-                : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+              className={`ml-1 rounded-full flex items-center justify-center transition-all duration-300 font-black active:scale-90 ${radius >= 25000
+                ? "bg-blue-500 text-white shadow-[0_0_12px_rgba(59,130,246,0.4)]"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
                 }`}
-              style={{ height: "26px", width: "26px", fontSize: "13px" }}
+              style={{ height: "26px", width: "26px", fontSize: "14px" }}
               title="Unlimited radius"
               aria-label="Unlimited radius"
             >
