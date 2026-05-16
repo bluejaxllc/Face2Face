@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
+import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef } from "react";
 
@@ -34,16 +34,17 @@ export default function BottomNavigation() {
   };
 
   const navItems = [
-    { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
+    { path: "/explore", icon: Users, label: "Groups & Lists" },
+    { path: "/dating", icon: Heart, label: "Dating" },
     { path: "/map", icon: Map, label: "Map" },
-    { path: "/messages", icon: MessageSquare, label: "Messages" },
+    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
-        <div className="flex justify-around items-center h-full relative">
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
+        <div className="flex justify-around items-center h-full relative px-2">
           {navItems.map(({ path, icon: Icon, label, badge }) => {
             const isActive = location === path;
             return (

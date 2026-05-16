@@ -376,48 +376,16 @@
     background-position: center;
   }
 
-  /* Fix for Leaflet map */
+  /* Fix for Leaflet map container */
   .leaflet-container {
     width: 100% !important;
     height: 100% !important;
     z-index: 1;
-    display: block !important;
     position: absolute !important;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-  }
-
-  /* Force display of tiles */
-  .leaflet-tile-pane {
-    z-index: 10 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-  }
-
-  .leaflet-tile-container {
-    opacity: 1 !important;
-    visibility: visible !important;
-    /* NEVER override transform here — Leaflet uses translate3d for tile positioning.
-       Stripping it causes tiles to stack at 0,0 and glitch on iOS Safari. */
-  }
-
-  .leaflet-tile {
-    opacity: 1 !important;
-    visibility: visible !important;
-    width: 256px !important;
-    height: 256px !important;
-  }
-
-  /* Ensure all layers are visible */
-  .leaflet-overlay-pane,
-  .leaflet-marker-pane,
-  .leaflet-shadow-pane,
-  .leaflet-popup-pane {
-    z-index: 20 !important;
-    visibility: visible !important;
   }
 
   .text-status-active {

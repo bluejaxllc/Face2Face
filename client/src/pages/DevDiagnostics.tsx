@@ -300,7 +300,7 @@ export default function DevDiagnostics() {
   return (
     <PageTransition className="h-screen w-full page-dark flex flex-col">
       <Header />
-      <div className="flex-1 overflow-y-auto pb-20 pt-[52px]">
+      <div className="flex-1 overflow-y-auto pb-[64px] pt-[40px]">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-3">
           {/* Title */}
           <div className="text-center mb-4">

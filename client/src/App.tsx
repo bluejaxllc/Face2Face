@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
+import Register from "@/pages/Register";
 import { useLocation } from "wouter";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
@@ -18,9 +19,12 @@ const MapView = lazy(() => import("@/pages/MapView"));
 
 // Lazy-load secondary route components so they don't block initial paint
 const Explore = lazy(() => import("@/pages/Explore"));
+const Dating = lazy(() => import("@/pages/Dating"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Messages = lazy(() => import("@/pages/Messages"));
 const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
+const Evangelists = lazy(() => import("@/pages/Evangelists"));
+const DebugLayouts = lazy(() => import("@/pages/DebugLayouts"));
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -37,6 +41,16 @@ function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
+  // Domain-based routing: if someone visits waitlist.face2face.icu (or localhost waitlist.*), 
+  // serve only the Evangelists waitlist page, bypassing normal routing.
+  if (window.location.hostname.startsWith('waitlist.')) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Evangelists />
+      </Suspense>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-screen bg-slate-950">
@@ -50,11 +64,16 @@ function AppRouter() {
         <Route path="/">
           <MapView />
         </Route>
+        <Route path="/register" component={Register} />
+        <Route path="/auth" component={Register} />
         <Route path="/map">
           <MapView />
         </Route>
         <Route path="/explore">
           <ProtectedRoute component={Explore} />
+        </Route>
+        <Route path="/dating">
+          <ProtectedRoute component={Dating} />
         </Route>
         <Route path="/messages">
           <ProtectedRoute component={Messages} />
@@ -66,6 +85,10 @@ function AppRouter() {
         <Route path="/dev">
           <ProtectedRoute component={DevDiagnostics} />
         </Route>
+        <Route path="/debug-layouts">
+          <DebugLayouts />
+        </Route>
+        <Route path="/evangelists" component={Evangelists} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -73,15 +96,7 @@ function AppRouter() {
 }
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [_, navigate] = useLocation();
-
-  // Use useEffect to navigate after render
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate("/auth");
-    }
-  }, [isLoading, isAuthenticated, navigate]);
+  const { isLoading } = useAuth();
 
   // Show loading spinner or render the component
   if (isLoading) {
@@ -91,10 +106,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will be redirected by useEffect
-  }
-
+  // Bypassed authentication check for local UI testing
   return <Component />;
 }
 

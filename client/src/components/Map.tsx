@@ -194,7 +194,10 @@ function Map() {
   const [showReceivedBumps, setShowReceivedBumps] = useState(false);
 
   const isActive = user?.isActive ?? true;
-  const [zoom, setZoom] = useState(14);
+  const [zoom, setZoom] = useState(() => {
+    // If we only have the default USA fallback, zoom out to see the continent
+    return (currentLocation || (user?.latitude && Number(user.latitude) !== 0)) ? 15 : 4;
+  });
   const mapRef = useRef<L.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapKey, setMapKey] = useState(Date.now());
@@ -327,7 +330,7 @@ function Map() {
     if (user?.latitude && user?.longitude && Number(user.latitude) !== 0 && Number(user.longitude) !== 0) {
       return [Number(user.latitude), Number(user.longitude)];
     }
-    return [32.8728576, -96.5312512]; // Default: Dallas
+    return [39.8283, -98.5795]; // Default: Geographic Center of contiguous US
   }, [currentLocation, user?.latitude, user?.longitude]);
 
   const handleZoomChange = useCallback((newZoom: number) => {
@@ -343,7 +346,7 @@ function Map() {
       // a CSS transition on the tile container that corrupts rendering.
       mapRef.current.setView(
         [currentLocation.latitude, currentLocation.longitude], 
-        mapRef.current.getZoom() || 15, 
+        15, // Force zoom in when GPS locks
         { animate: false }
       );
       hasCenteredInitially.current = true;
@@ -489,7 +492,7 @@ function Map() {
           <BeenBumpedBadge onClick={() => setShowReceivedBumps(true)} />
         </div>
 
-
+        {/* Mode Toggles removed and moved to Dating.tsx */}
 
 
 
@@ -640,6 +643,16 @@ function Map() {
           }
         }}
       />
+      {/* GPS Loading Overlay */}
+      {!currentLocation && (!user?.latitude || Number(user.latitude) === 0) && !isError && (
+        <div className="absolute inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500">
+          <div className="bg-white/10 p-6 rounded-3xl border border-white/20 flex flex-col items-center shadow-2xl">
+            <Locate className="w-12 h-12 text-blue-400 animate-pulse mb-4 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
+            <h3 className="text-white font-bold text-lg tracking-wide">Acquiring Signal</h3>
+            <p className="text-blue-200/80 text-xs font-medium mt-1 uppercase tracking-widest">Locating nearby users</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

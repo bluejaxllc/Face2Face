@@ -110,7 +110,7 @@ export default function Messages() {
     <PageTransition className="h-screen page-dark">
       <Header />
 
-      <div className="fixed left-0 right-0 flex overflow-hidden lg:bottom-0" style={{ top: "48px", bottom: "96px" }}>
+      <div className="fixed left-0 right-0 flex overflow-hidden lg:bottom-0" style={{ top: "40px", bottom: "64px" }}>
         {/* Contacts sidebar */}
         <motion.div
           className={`w-full md:w-80 lg:w-96 md:border-r border-slate-800 flex flex-col ${showChat ? 'hidden md:flex' : 'flex'}`}
