@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
+import { Calendar, Map, Flame, MessageSquare, Users, User } from "lucide-react";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef } from "react";
 
@@ -20,9 +20,7 @@ export default function BottomNavigation() {
   const previousNotifCount = useRef(notifCount);
 
   useEffect(() => {
-    // If the unread notification count INCREASES, it means we got a new bump/message
     if (notifCount > previousNotifCount.current) {
-      // Cross-platform haptics: works on Android (vibrate API) and iOS Safari 17.4+
       triggerHaptic(100);
       setTimeout(() => triggerHapticPattern([50, 100, 50]), 200);
     }
@@ -34,50 +32,60 @@ export default function BottomNavigation() {
   };
 
   const navItems = [
-    { path: "/explore", icon: Users, label: "Groups & Lists" },
-    { path: "/dating", icon: Heart, label: "Dating" },
-    { path: "/map", icon: Map, label: "Map" },
-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
-    { path: "/profile", icon: User, label: "Profile" },
+    { path: "/dating", icon: Calendar, label: "DATING" },
+    { path: "/map", icon: Map, label: "MAP" },
+    { path: "/bumps", icon: Flame, label: "BUMPS" },
+    { path: "/messages", icon: MessageSquare, label: "BUMP/MES...", badge: notifCount },
+    { path: "/explore", icon: Users, label: "GROUP/LIST" },
+    { path: "/profile", icon: User, label: "PROFILE" },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
-        <div className="flex justify-around items-center h-full relative px-2">
+    <div
+      className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-700/50 pointer-events-auto flex justify-center backdrop-blur-md"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      <nav className="w-full max-w-lg mx-auto" style={{ height: "56px" }}>
+        <div className="flex justify-around items-center h-full relative px-1">
           {navItems.map(({ path, icon: Icon, label, badge }) => {
-            const isActive = location === path;
+            const isActive = location === path || (path === "/map" && location === "/");
             return (
               <div
                 key={path}
                 onClick={navigateTo(path)}
-                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
-                style={{ minWidth: "56px", padding: "4px 8px" }}
+                className={`flex flex-col items-center justify-center cursor-pointer transition-all duration-200 relative ${
+                  isActive ? "opacity-100" : "opacity-60 hover:opacity-80"
+                }`}
+                style={{ minWidth: "48px", padding: "4px 2px" }}
               >
-                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
+                <div className="relative">
+                  {isActive && (
+                    <div className="absolute -inset-3 bg-indigo-500/15 rounded-xl -z-10" />
+                  )}
                   <Icon
-                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
-                    style={{ width: "22px", height: "22px" }}
+                    className={`transition-colors duration-200 ${
+                      isActive ? "text-indigo-400" : "text-slate-400"
+                    }`}
+                    style={{ width: "20px", height: "20px" }}
                     strokeWidth={isActive ? 2.5 : 1.5}
                   />
-                  {isActive && (
-                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
-                  )}
                   {(badge !== undefined && badge > 0) && (
-                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
+                    <span
+                      className="absolute -top-1 -right-2 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30"
+                      style={{ fontSize: "7px", height: "14px", width: "14px" }}
+                    >
                       {badge > 9 ? "9+" : badge}
                     </span>
                   )}
                 </div>
                 <span
-                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
-                  style={{ fontSize: "10px", marginTop: "4px", minHeight: "15px" }}
+                  className={`font-semibold tracking-wider uppercase transition-colors duration-200 ${
+                    isActive ? "text-indigo-400" : "text-slate-500"
+                  }`}
+                  style={{ fontSize: "8px", marginTop: "3px", lineHeight: "1", whiteSpace: "nowrap" }}
                 >
                   {label}
                 </span>
-                {isActive && (
-                  <div className="absolute -bottom-2 w-10 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
-                )}
               </div>
             );
           })}

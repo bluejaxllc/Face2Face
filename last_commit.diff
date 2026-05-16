@@ -1,0 +1,2516 @@
+commit 85cb798e7f3609eee85664bbbd7a2712e09a9271
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Thu May 14 20:35:24 2026 -0600
+
+    fix: resolve massive merge conflicts and restore 4-item pill navigation layout
+
+diff --git a/Bump-and-Grind b/Bump-and-Grind
+index a98a994..59ee64e 160000
+--- a/Bump-and-Grind
++++ b/Bump-and-Grind
+@@ -1 +1 @@
+-Subproject commit a98a9941e6a3a583b91f51c24db834924e51ce8c
++Subproject commit 59ee64e4593ff86e1c6c33383e5d159105ab9915
+diff --git a/client/src/App.tsx b/client/src/App.tsx
+index 322c26c..ba64607 100644
+--- a/client/src/App.tsx
++++ b/client/src/App.tsx
+@@ -4,10 +4,6 @@ import { queryClient } from "./lib/queryClient";
+ import { QueryClientProvider } from "@tanstack/react-query";
+ import { Toaster } from "@/components/ui/toaster";
+ import NotFound from "@/pages/not-found";
+-<<<<<<< HEAD
+-import Register from "@/pages/Register";
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { useLocation } from "wouter";
+ import { AuthProvider } from "./contexts/AuthContext";
+ import { LocationProvider } from "./contexts/LocationContext";
+@@ -22,18 +18,9 @@ const MapView = lazy(() => import("@/pages/MapView"));
+ 
+ // Lazy-load secondary route components so they don't block initial paint
+ const Explore = lazy(() => import("@/pages/Explore"));
+-<<<<<<< HEAD
+-const Dating = lazy(() => import("@/pages/Dating"));
+ const Profile = lazy(() => import("@/pages/Profile"));
+ const Messages = lazy(() => import("@/pages/Messages"));
+ const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
+-const Evangelists = lazy(() => import("@/pages/Evangelists"));
+-const DebugLayouts = lazy(() => import("@/pages/DebugLayouts"));
+-=======
+-const Profile = lazy(() => import("@/pages/Profile"));
+-const Messages = lazy(() => import("@/pages/Messages"));
+-const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ 
+ // Import the auth context hook but don't use it in App component
+ import { useAuth } from "./contexts/AuthContext";
+@@ -50,19 +37,6 @@ function AppRouter() {
+   const { isAuthenticated, isLoading } = useAuth();
+   const [location] = useLocation();
+ 
+-<<<<<<< HEAD
+-  // Domain-based routing: if someone visits waitlist.face2face.icu (or localhost waitlist.*), 
+-  // serve only the Evangelists waitlist page, bypassing normal routing.
+-  if (window.location.hostname.startsWith('waitlist.')) {
+-    return (
+-      <Suspense fallback={<PageLoader />}>
+-        <Evangelists />
+-      </Suspense>
+-    );
+-  }
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   if (isLoading) {
+     return (
+       <div className="flex items-center justify-center h-full min-h-screen bg-slate-950">
+@@ -76,23 +50,12 @@ function AppRouter() {
+         <Route path="/">
+           <MapView />
+         </Route>
+-<<<<<<< HEAD
+-        <Route path="/register" component={Register} />
+-        <Route path="/auth" component={Register} />
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         <Route path="/map">
+           <MapView />
+         </Route>
+         <Route path="/explore">
+           <ProtectedRoute component={Explore} />
+         </Route>
+-<<<<<<< HEAD
+-        <Route path="/dating">
+-          <ProtectedRoute component={Dating} />
+-        </Route>
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         <Route path="/messages">
+           <ProtectedRoute component={Messages} />
+         </Route>
+@@ -103,13 +66,6 @@ function AppRouter() {
+         <Route path="/dev">
+           <ProtectedRoute component={DevDiagnostics} />
+         </Route>
+-<<<<<<< HEAD
+-        <Route path="/debug-layouts">
+-          <DebugLayouts />
+-        </Route>
+-        <Route path="/evangelists" component={Evangelists} />
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         <Route component={NotFound} />
+       </Switch>
+     </Suspense>
+@@ -117,9 +73,6 @@ function AppRouter() {
+ }
+ 
+ function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+-<<<<<<< HEAD
+-  const { isLoading } = useAuth();
+-=======
+   const { isAuthenticated, isLoading } = useAuth();
+   const [_, navigate] = useLocation();
+ 
+@@ -129,7 +82,6 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
+       navigate("/auth");
+     }
+   }, [isLoading, isAuthenticated, navigate]);
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ 
+   // Show loading spinner or render the component
+   if (isLoading) {
+@@ -139,14 +91,10 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
+     );
+   }
+ 
+-<<<<<<< HEAD
+-  // Bypassed authentication check for local UI testing
+-=======
+   if (!isAuthenticated) {
+     return null; // Will be redirected by useEffect
+   }
+ 
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   return <Component />;
+ }
+ 
+diff --git a/client/src/components/BottomNavigation.tsx b/client/src/components/BottomNavigation.tsx
+index 173151a..8139bf3 100644
+--- a/client/src/components/BottomNavigation.tsx
++++ b/client/src/components/BottomNavigation.tsx
+@@ -1,11 +1,7 @@
+ import { useLocation } from "wouter";
+ import { useQuery } from "@tanstack/react-query";
+ import { useAuth } from "@/contexts/AuthContext";
+-<<<<<<< HEAD
+-import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
+-=======
+ import { Map, User, Compass, Bell, MessageSquare } from "lucide-react";
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
+ import { useEffect, useRef } from "react";
+ 
+@@ -38,29 +34,16 @@ export default function BottomNavigation() {
+   };
+ 
+   const navItems = [
+-<<<<<<< HEAD
+-    { path: "/explore", icon: Users, label: "Groups & Lists" },
+-    { path: "/dating", icon: Heart, label: "Dating" },
+-    { path: "/map", icon: Map, label: "Map" },
+-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
+-=======
+     { path: "/explore", icon: Compass, label: "Explore", badge: notifCount },
+     { path: "/map", icon: Map, label: "Map" },
+     { path: "/messages", icon: MessageSquare, label: "Messages" },
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     { path: "/profile", icon: User, label: "Profile" },
+   ];
+ 
+   return (
+-<<<<<<< HEAD
+-    <div className="fixed bottom-0 left-0 right-0 z-[9999] bg-slate-950/95 border-t border-slate-800 pointer-events-auto flex justify-center backdrop-blur-md" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+-      <nav className="w-full max-w-md mx-auto" style={{ height: "64px" }}>
+-        <div className="flex justify-around items-center h-full relative px-2">
+-=======
+     <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+       <nav className="bg-slate-900/80  border border-slate-700/50 shadow-2xl shadow-blue-900/20 rounded-full w-full max-w-[340px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
+         <div className="flex justify-around items-center h-full relative">
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+           {navItems.map(({ path, icon: Icon, label, badge }) => {
+             const isActive = location === path;
+             return (
+diff --git a/client/src/components/Header.tsx b/client/src/components/Header.tsx
+index 74ed72a..c8a15a0 100644
+--- a/client/src/components/Header.tsx
++++ b/client/src/components/Header.tsx
+@@ -27,11 +27,7 @@ export default function Header() {
+   };
+ 
+   return (
+-<<<<<<< HEAD
+-    <header className="bg-slate-900/90  border-b border-slate-800/50 flex justify-between items-center z-[9999] fixed top-0 left-0 right-0" style={{ height: "40px", padding: "0 14px", borderImage: "linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.2), rgba(236,72,153,0.3)) 1" }}>
+-=======
+     <header className="bg-slate-900/90  border-b border-slate-800/50 flex justify-between items-center z-[9999] fixed top-0 left-0 right-0" style={{ height: "48px", padding: "0 14px", borderImage: "linear-gradient(90deg, rgba(59,130,246,0.3), rgba(139,92,246,0.2), rgba(236,72,153,0.3)) 1" }}>
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       <div className="flex items-center gap-2">
+         <Logo className="w-6 h-5" />
+         <span className="font-black tracking-tight" style={{ fontSize: "16px" }}>
+diff --git a/client/src/components/Map.tsx b/client/src/components/Map.tsx
+index 61cf3be..d0430b4 100644
+--- a/client/src/components/Map.tsx
++++ b/client/src/components/Map.tsx
+@@ -194,14 +194,7 @@ function Map() {
+   const [showReceivedBumps, setShowReceivedBumps] = useState(false);
+ 
+   const isActive = user?.isActive ?? true;
+-<<<<<<< HEAD
+-  const [zoom, setZoom] = useState(() => {
+-    // If we only have the default USA fallback, zoom out to see the continent
+-    return (currentLocation || (user?.latitude && Number(user.latitude) !== 0)) ? 15 : 4;
+-  });
+-=======
+   const [zoom, setZoom] = useState(14);
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   const mapRef = useRef<L.Map | null>(null);
+   const [mapLoaded, setMapLoaded] = useState(false);
+   const [mapKey, setMapKey] = useState(Date.now());
+@@ -334,11 +327,7 @@ function Map() {
+     if (user?.latitude && user?.longitude && Number(user.latitude) !== 0 && Number(user.longitude) !== 0) {
+       return [Number(user.latitude), Number(user.longitude)];
+     }
+-<<<<<<< HEAD
+-    return [39.8283, -98.5795]; // Default: Geographic Center of contiguous US
+-=======
+     return [32.8728576, -96.5312512]; // Default: Dallas
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   }, [currentLocation, user?.latitude, user?.longitude]);
+ 
+   const handleZoomChange = useCallback((newZoom: number) => {
+@@ -354,11 +343,7 @@ function Map() {
+       // a CSS transition on the tile container that corrupts rendering.
+       mapRef.current.setView(
+         [currentLocation.latitude, currentLocation.longitude], 
+-<<<<<<< HEAD
+-        15, // Force zoom in when GPS locks
+-=======
+         mapRef.current.getZoom() || 15, 
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         { animate: false }
+       );
+       hasCenteredInitially.current = true;
+@@ -504,9 +489,6 @@ function Map() {
+           <BeenBumpedBadge onClick={() => setShowReceivedBumps(true)} />
+         </div>
+ 
+-<<<<<<< HEAD
+-        {/* Mode Toggles removed and moved to Dating.tsx */}
+-=======
+         {/* ═══════ BOTTOM CENTER: Mode Toggles ═══════ */}
+         <div className="absolute z-[1000] left-1/2 -translate-x-1/2 pointer-events-auto" style={{ bottom: "24px" }}>
+           <div className="flex bg-white/90  border border-gray-200 p-1 rounded-full shadow-lg gap-1.5 items-center">
+@@ -553,7 +535,6 @@ function Map() {
+             </button>
+           </div>
+         </div>
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ 
+ 
+ 
+@@ -704,19 +685,6 @@ function Map() {
+           }
+         }}
+       />
+-<<<<<<< HEAD
+-      {/* GPS Loading Overlay */}
+-      {!currentLocation && (!user?.latitude || Number(user.latitude) === 0) && !isError && (
+-        <div className="absolute inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500">
+-          <div className="bg-white/10 p-6 rounded-3xl border border-white/20 flex flex-col items-center shadow-2xl">
+-            <Locate className="w-12 h-12 text-blue-400 animate-pulse mb-4 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
+-            <h3 className="text-white font-bold text-lg tracking-wide">Acquiring Signal</h3>
+-            <p className="text-blue-200/80 text-xs font-medium mt-1 uppercase tracking-widest">Locating nearby users</p>
+-          </div>
+-        </div>
+-      )}
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     </div>
+   );
+ }
+diff --git a/client/src/contexts/AuthContext.tsx b/client/src/contexts/AuthContext.tsx
+index 9347bdf..db2596c 100644
+--- a/client/src/contexts/AuthContext.tsx
++++ b/client/src/contexts/AuthContext.tsx
+@@ -66,24 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
+   const { isLoading, refetch, data: userData } = useQuery<User | null>({
+     queryKey: ["/api/auth/me"],
+     retry: false,
+-<<<<<<< HEAD
+-    staleTime: 0, // Always fetch from network
+-    queryFn: async ({ queryKey }) => {
+-      const fullUrl = buildApiUrl(queryKey[0] as string);
+-      const res = await fetch(fullUrl, {
+-        credentials: "include",
+-      });
+-
+-      if (res.status === 401) {
+-        return null;
+-      }
+-
+-      if (!res.ok) {
+-        throw new Error("Failed to fetch user data");
+-      }
+-
+-      return res.json();
+-=======
+     staleTime: Infinity, 
+     queryFn: async () => {
+       // Mock user to bypass login screen
+@@ -117,7 +99,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
+         isPhoneVerified: true,
+         safetyAcknowledged: true
+       };
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     }
+   });
+ 
+diff --git a/client/src/index.css b/client/src/index.css
+index 9c85f5a..bc3c251 100644
+--- a/client/src/index.css
++++ b/client/src/index.css
+@@ -376,19 +376,12 @@
+     background-position: center;
+   }
+ 
+-<<<<<<< HEAD
+-  /* Fix for Leaflet map container */
+-=======
+   /* Fix for Leaflet map */
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   .leaflet-container {
+     width: 100% !important;
+     height: 100% !important;
+     z-index: 1;
+-<<<<<<< HEAD
+-=======
+     display: block !important;
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     position: absolute !important;
+     top: 0;
+     left: 0;
+@@ -396,8 +389,6 @@
+     bottom: 0;
+   }
+ 
+-<<<<<<< HEAD
+-=======
+   /* Force display of tiles */
+   .leaflet-tile-pane {
+     z-index: 10 !important;
+@@ -429,7 +420,6 @@
+     visibility: visible !important;
+   }
+ 
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   .text-status-active {
+     @apply text-emerald-400;
+   }
+diff --git a/client/src/pages/DevDiagnostics.tsx b/client/src/pages/DevDiagnostics.tsx
+index 819099c..4405da4 100644
+--- a/client/src/pages/DevDiagnostics.tsx
++++ b/client/src/pages/DevDiagnostics.tsx
+@@ -300,11 +300,7 @@ export default function DevDiagnostics() {
+   return (
+     <PageTransition className="h-screen w-full page-dark flex flex-col">
+       <Header />
+-<<<<<<< HEAD
+-      <div className="flex-1 overflow-y-auto pb-[64px] pt-[40px]">
+-=======
+       <div className="flex-1 overflow-y-auto pb-20 pt-[52px]">
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         <div className="max-w-lg mx-auto px-4 py-4 space-y-3">
+           {/* Title */}
+           <div className="text-center mb-4">
+diff --git a/client/src/pages/Explore.tsx b/client/src/pages/Explore.tsx
+index d478186..80fb0bc 100644
+--- a/client/src/pages/Explore.tsx
++++ b/client/src/pages/Explore.tsx
+@@ -1,32 +1,3 @@
+-<<<<<<< HEAD
+-import { PageTransition } from "@/components/PageTransition";
+-import Header from "@/components/Header";
+-import BottomNavigation from "@/components/BottomNavigation";
+-import { Users, Search } from "lucide-react";
+-
+-export default function Explore() {
+-    return (
+-        <PageTransition className="h-screen w-full page-dark relative overflow-hidden backdrop-blur-md">
+-            <Header />
+-            <div className="fixed left-0 right-0 overflow-y-auto px-4" style={{ top: "40px", bottom: "64px" }}>
+-                <div className="w-full max-w-md mx-auto h-full flex flex-col pt-4">
+-                    <div className="flex items-center justify-between mb-4">
+-                        <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
+-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">Groups & Lists</span>
+-                        </h1>
+-                    </div>
+-                    
+-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 mt-10">
+-                        <Users className="w-16 h-16 text-slate-600 mb-4" />
+-                        <h2 className="text-xl font-bold text-slate-300">Coming Soon</h2>
+-                        <p className="text-slate-400 mt-2">
+-                            Discover curated groups and lists of interesting people nearby. This feature is currently under development.
+-                        </p>
+-                    </div>
+-                </div>
+-            </div>
+-            
+-=======
+ import { useState, useMemo } from "react";
+ import { useQuery } from "@tanstack/react-query";
+ import { useLocation } from "@/contexts/LocationContext";
+@@ -204,7 +175,6 @@ export default function Explore() {
+                 </div>
+             )}
+ 
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+             <BottomNavigation />
+         </PageTransition>
+     );
+diff --git a/client/src/pages/MapView.tsx b/client/src/pages/MapView.tsx
+index f6847df..e038415 100644
+--- a/client/src/pages/MapView.tsx
++++ b/client/src/pages/MapView.tsx
+@@ -1,8 +1,4 @@
+-<<<<<<< HEAD
+-import { useState, useEffect } from "react";
+-=======
+ import { useState, useEffect, lazy, Suspense } from "react";
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { useLocation as useRouteLocation } from "wouter";
+ import { useAuth } from "@/contexts/AuthContext";
+ import { useLocation } from "@/contexts/LocationContext";
+@@ -14,11 +10,8 @@ import SafetyModal from "@/components/SafetyModal";
+ import { PageTransition } from "@/components/PageTransition";
+ import { useToast } from "@/hooks/use-toast";
+ 
+-<<<<<<< HEAD
+-=======
+ const TurfWars = lazy(() => import("@/components/TurfWars"));
+ 
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ export default function MapView() {
+   const [, setLocation] = useRouteLocation();
+   const { user, updateProfile } = useAuth();
+@@ -29,10 +22,7 @@ export default function MapView() {
+   const [showSafety, setShowSafety] = useState(false);
+   const [isUpdatingSafety, setIsUpdatingSafety] = useState(false);
+   const [hasCheckedModals, setHasCheckedModals] = useState(false);
+-<<<<<<< HEAD
+-=======
+   const [showGame, setShowGame] = useState(false);
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ 
+   useEffect(() => {
+     // Only check modal conditions once per component mount after user is loaded
+@@ -81,11 +71,6 @@ export default function MapView() {
+   return (
+     <PageTransition className="h-screen w-full page-dark map-view">
+       <Header />
+-<<<<<<< HEAD
+-      <div className="fixed left-0 right-0" style={{ top: "40px", bottom: "64px" }}>
+-        <Map />
+-      </div>
+-=======
+       <div className="fixed left-0 right-0" style={{ top: "48px", bottom: "52px" }}>
+         <Map />
+         {/* Turf Wars Game Overlay */}
+@@ -119,7 +104,6 @@ export default function MapView() {
+         <span style={{ fontSize: "16px" }}>{showGame ? "✕" : "🏴"}</span>
+         {showGame ? "Exit Game" : "Turf Wars"}
+       </button>
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       <BottomNavigation />
+       <WelcomeModal isOpen={showWelcome} onClose={handleCloseWelcome} />
+       <SafetyModal isOpen={showSafety} onAccept={handleAcceptSafety} isUpdating={isUpdatingSafety} />
+diff --git a/client/src/pages/Messages.tsx b/client/src/pages/Messages.tsx
+index 3935091..8fd117a 100644
+--- a/client/src/pages/Messages.tsx
++++ b/client/src/pages/Messages.tsx
+@@ -110,11 +110,7 @@ export default function Messages() {
+     <PageTransition className="h-screen page-dark">
+       <Header />
+ 
+-<<<<<<< HEAD
+-      <div className="fixed left-0 right-0 flex overflow-hidden lg:bottom-0" style={{ top: "40px", bottom: "64px" }}>
+-=======
+       <div className="fixed left-0 right-0 flex overflow-hidden lg:bottom-0" style={{ top: "48px", bottom: "96px" }}>
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         {/* Contacts sidebar */}
+         <motion.div
+           className={`w-full md:w-80 lg:w-96 md:border-r border-slate-800 flex flex-col ${showChat ? 'hidden md:flex' : 'flex'}`}
+diff --git a/client/src/pages/Profile.tsx b/client/src/pages/Profile.tsx
+index b77c9fa..30eefdc 100644
+--- a/client/src/pages/Profile.tsx
++++ b/client/src/pages/Profile.tsx
+@@ -158,11 +158,7 @@ export default function Profile() {
+ 
+       <motion.div
+         className="fixed left-0 right-0 overflow-y-auto pb-32 md:pb-6 page-enter"
+-<<<<<<< HEAD
+-        style={{ top: "40px", bottom: "64px" }}
+-=======
+         style={{ top: "48px", bottom: "52px" }}
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         variants={containerVariants}
+         initial="hidden"
+         animate="show"
+diff --git a/drizzle.config.ts b/drizzle.config.ts
+index d12527b..15f407f 100644
+--- a/drizzle.config.ts
++++ b/drizzle.config.ts
+@@ -11,9 +11,5 @@ export default defineConfig({
+   dbCredentials: {
+     url: process.env.DATABASE_URL,
+   },
+-<<<<<<< HEAD
+-  tablesFilter: ["users", "bumps", "messages", "notifications", "verification_codes", "waitlist", "subscriptions", "transactions", "travel_logs"],
+-=======
+   tablesFilter: ["users", "bumps", "messages", "notifications", "verification_codes"],
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ });
+diff --git a/package-lock.json b/package-lock.json
+index 9bf1ceb..31580ba 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -22,6 +22,7 @@
+         "@hookform/resolvers": "^3.9.1",
+         "@jridgewell/trace-mapping": "^0.3.25",
+         "@neondatabase/serverless": "^0.10.4",
++        "@notionhq/client": "^5.21.0",
+         "@radix-ui/react-accordion": "^1.2.1",
+         "@radix-ui/react-alert-dialog": "^1.1.2",
+         "@radix-ui/react-aspect-ratio": "^1.1.0",
+@@ -58,12 +59,10 @@
+         "cmdk": "^1.0.0",
+         "compression": "^1.8.1",
+         "connect-pg-simple": "^10.0.0",
+-<<<<<<< HEAD
+         "cookie-signature": "^1.2.2",
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+         "cors": "^2.8.5",
+         "date-fns": "^3.6.0",
++        "dotenv": "^17.4.2",
+         "drizzle-orm": "^0.39.1",
+         "drizzle-zod": "^0.7.0",
+         "embla-carousel-react": "^8.3.0",
+@@ -177,7 +176,6 @@
+       "integrity": "sha512-i1SLeK+DzNnQ3LL/CswPCa/E5u4lh1k6IAEphON8F+cXt0t9euTshDru0q7/IqMa1PMPz5RnHuHscF8/ZJsStg==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@ampproject/remapping": "^2.2.0",
+         "@babel/code-frame": "^7.26.0",
+@@ -502,7 +500,6 @@
+       "resolved": "https://registry.npmjs.org/@capacitor/core/-/core-8.2.0.tgz",
+       "integrity": "sha512-oKaoNeNtH2iIZMDFVrb1atoyRECDGHcfLMunJ5KWN8DtvpVBeeA4c41e20NTuhMxw1cSYbpq2PV2hb+/9CJxlQ==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "tslib": "^2.1.0"
+       }
+@@ -1808,7 +1805,6 @@
+       "resolved": "https://registry.npmjs.org/@neondatabase/serverless/-/serverless-0.10.4.tgz",
+       "integrity": "sha512-2nZuh3VUO9voBauuh+IGYRhGU/MskWHt1IuZvHcJw6GLjDgtqj/KViKo7SIrLdGLdot7vFbiRRw+BgEy3wT9HA==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@types/pg": "8.11.6"
+       }
+@@ -1848,6 +1844,15 @@
+         "node": ">= 8"
+       }
+     },
++    "node_modules/@notionhq/client": {
++      "version": "5.21.0",
++      "resolved": "https://registry.npmjs.org/@notionhq/client/-/client-5.21.0.tgz",
++      "integrity": "sha512-X+T+hzaQFleOUGm4xUOUm51pOpdZ1+6T4BsRjGlcdEOTJLNkUEv8nZATq9O3ZY4NQEgICc0qwQ0I25OdYprX0w==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      }
++    },
+     "node_modules/@petamoriken/float16": {
+       "version": "3.9.3",
+       "resolved": "https://registry.npmjs.org/@petamoriken/float16/-/float16-3.9.3.tgz",
+@@ -3986,7 +3991,6 @@
+       "integrity": "sha512-D2wOSq/d6Agt28q7rSI3jhU7G6aiuzljDGZ2hTZHIkrTLUI+AF3WMeKkEZ9nN2fkBAlcktT6vcZjDFiIhMYEQw==",
+       "devOptional": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@types/prop-types": "*",
+         "csstype": "^3.0.2"
+@@ -3998,7 +4002,6 @@
+       "integrity": "sha512-qW1Mfv8taImTthu4KoXgDfLuk4bydU6Q/TkADnDWWHwi4NX4BR+LWfTp2sVmTqRrsHvyDDTelgelxJ+SsejKKQ==",
+       "devOptional": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@types/react": "*"
+       }
+@@ -4373,7 +4376,6 @@
+         }
+       ],
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "caniuse-lite": "^1.0.30001669",
+         "electron-to-chromium": "^1.5.41",
+@@ -4403,6 +4405,20 @@
+       "dev": true,
+       "license": "MIT"
+     },
++    "node_modules/bufferutil": {
++      "version": "4.1.0",
++      "resolved": "https://registry.npmjs.org/bufferutil/-/bufferutil-4.1.0.tgz",
++      "integrity": "sha512-ZMANVnAixE6AWWnPzlW2KpUrxhm9woycYvPOo67jWHyFowASTEd9s+QN1EIMsSDtwhIxN4sWE1jotpuDUIgyIw==",
++      "hasInstallScript": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "node-gyp-build": "^4.3.0"
++      },
++      "engines": {
++        "node": ">=6.14.2"
++      }
++    },
+     "node_modules/bytes": {
+       "version": "3.1.2",
+       "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz",
+@@ -4693,7 +4709,6 @@
+       }
+     },
+     "node_modules/cookie-signature": {
+-<<<<<<< HEAD
+       "version": "1.2.2",
+       "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.2.2.tgz",
+       "integrity": "sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg==",
+@@ -4701,12 +4716,6 @@
+       "engines": {
+         "node": ">=6.6.0"
+       }
+-=======
+-      "version": "1.0.6",
+-      "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.6.tgz",
+-      "integrity": "sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==",
+-      "license": "MIT"
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     },
+     "node_modules/cors": {
+       "version": "2.8.5",
+@@ -4879,7 +4888,6 @@
+       "resolved": "https://registry.npmjs.org/date-fns/-/date-fns-3.6.0.tgz",
+       "integrity": "sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==",
+       "license": "MIT",
+-      "peer": true,
+       "funding": {
+         "type": "github",
+         "url": "https://github.com/sponsors/kossnocorp"
+@@ -4964,6 +4972,18 @@
+         "csstype": "^3.0.2"
+       }
+     },
++    "node_modules/dotenv": {
++      "version": "17.4.2",
++      "resolved": "https://registry.npmjs.org/dotenv/-/dotenv-17.4.2.tgz",
++      "integrity": "sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==",
++      "license": "BSD-2-Clause",
++      "engines": {
++        "node": ">=12"
++      },
++      "funding": {
++        "url": "https://dotenvx.com"
++      }
++    },
+     "node_modules/drizzle-kit": {
+       "version": "0.30.6",
+       "resolved": "https://registry.npmjs.org/drizzle-kit/-/drizzle-kit-0.30.6.tgz",
+@@ -5416,7 +5436,6 @@
+       "resolved": "https://registry.npmjs.org/drizzle-orm/-/drizzle-orm-0.39.1.tgz",
+       "integrity": "sha512-2bDHlzTY31IDmrYn8i+ZZrxK8IyBD4mPZ7JmZdVDQj2tpBZXs/gxB/1kK5pSvkjxPUMNOVsTnoGkSltgjuJwcA==",
+       "license": "Apache-2.0",
+-      "peer": true,
+       "peerDependencies": {
+         "@aws-sdk/client-rds-data": ">=3",
+         "@cloudflare/workers-types": ">=4",
+@@ -5596,8 +5615,7 @@
+       "version": "8.3.1",
+       "resolved": "https://registry.npmjs.org/embla-carousel/-/embla-carousel-8.3.1.tgz",
+       "integrity": "sha512-DutFjtEO586XptDn4cwvBJwsR/8fMa4jUk5Jk2g+/elKgu8mdn0Z2sx33g4JskvbLc1/6P8Xg4QlfELGJFcP5A==",
+-      "license": "MIT",
+-      "peer": true
++      "license": "MIT"
+     },
+     "node_modules/embla-carousel-react": {
+       "version": "8.3.1",
+@@ -5682,7 +5700,6 @@
+       "dev": true,
+       "hasInstallScript": true,
+       "license": "MIT",
+-      "peer": true,
+       "bin": {
+         "esbuild": "bin/esbuild"
+       },
+@@ -5878,15 +5895,12 @@
+       "integrity": "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==",
+       "license": "MIT"
+     },
+-<<<<<<< HEAD
+     "node_modules/express/node_modules/cookie-signature": {
+       "version": "1.0.7",
+       "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.7.tgz",
+       "integrity": "sha512-NXdYc3dLr47pBkpUCHtKSwIOQXLVn8dZEuywboCOJY/osA0wFSLlSawr3KN8qXJEyX66FcONTH8EIlVuK0yyFA==",
+       "license": "MIT"
+     },
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     "node_modules/express/node_modules/debug": {
+       "version": "2.6.9",
+       "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+@@ -6610,8 +6624,7 @@
+       "version": "1.9.4",
+       "resolved": "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz",
+       "integrity": "sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==",
+-      "license": "BSD-2-Clause",
+-      "peer": true
++      "license": "BSD-2-Clause"
+     },
+     "node_modules/leaflet.markercluster": {
+       "version": "1.5.3",
+@@ -7129,7 +7142,6 @@
+       "resolved": "https://registry.npmjs.org/pg/-/pg-8.20.0.tgz",
+       "integrity": "sha512-ldhMxz2r8fl/6QkXnBD3CR9/xg694oT6DZQ2s6c/RI28OjtSOpxnPrUCGOBJ46RCUxcWdx3p6kw/xnDHjKvaRA==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "pg-connection-string": "^2.12.0",
+         "pg-pool": "^3.13.0",
+@@ -7349,7 +7361,6 @@
+         }
+       ],
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "nanoid": "^3.3.7",
+         "picocolors": "^1.1.0",
+@@ -7491,7 +7502,6 @@
+       "resolved": "https://registry.npmjs.org/postgres/-/postgres-3.4.5.tgz",
+       "integrity": "sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==",
+       "license": "Unlicense",
+-      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -7699,7 +7709,6 @@
+       "resolved": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+       "integrity": "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "loose-envify": "^1.1.0"
+       },
+@@ -7726,7 +7735,6 @@
+       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+       "integrity": "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "loose-envify": "^1.1.0",
+         "scheduler": "^0.23.2"
+@@ -7740,7 +7748,6 @@
+       "resolved": "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.53.1.tgz",
+       "integrity": "sha512-6aiQeBda4zjcuaugWvim9WsGqisoUk+etmFEsSUMm451/Ic8L/UAb7sRtMj3V+Hdzm6mMjU1VhiSzYUZeBm0Vg==",
+       "license": "MIT",
+-      "peer": true,
+       "engines": {
+         "node": ">=18.0.0"
+       },
+@@ -7772,7 +7779,6 @@
+       "resolved": "https://registry.npmjs.org/react-leaflet/-/react-leaflet-4.2.1.tgz",
+       "integrity": "sha512-p9chkvhcKrWn/H/1FFeVSqLdReGwn2qmiobOQGO3BifX+/vV/39qhY8dGqbdcPh1e6jxh/QHriLXr7a4eLFK4Q==",
+       "license": "Hippocratic-2.1",
+-      "peer": true,
+       "dependencies": {
+         "@react-leaflet/core": "^2.1.0"
+       },
+@@ -8674,7 +8680,6 @@
+       "resolved": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.14.tgz",
+       "integrity": "sha512-IcSvOcTRcUtQQ7ILQL5quRDg7Xs93PdJEk1ZLbhhvJc7uj/OAhYOnruEiwnGgBvUtaUAJ8/mhSw1o8L2jCiENA==",
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "@alloc/quick-lru": "^5.2.0",
+         "arg": "^5.0.2",
+@@ -9526,7 +9531,6 @@
+       "integrity": "sha512-o5a9xKjbtuhY6Bi5S3+HvbRERmouabWbyUcpXXUA1u+GNUKoROi9byOJ8M0nHbHYHkYICiMlqxkg1KkYmm25Sw==",
+       "dev": true,
+       "license": "MIT",
+-      "peer": true,
+       "dependencies": {
+         "esbuild": "^0.21.3",
+         "postcss": "^8.4.43",
+@@ -10228,7 +10232,6 @@
+       "version": "3.23.8",
+       "resolved": "https://registry.npmjs.org/zod/-/zod-3.23.8.tgz",
+       "integrity": "sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==",
+-      "peer": true,
+       "funding": {
+         "url": "https://github.com/sponsors/colinhacks"
+       }
+diff --git a/package.json b/package.json
+index 15e4e12..39b4996 100644
+--- a/package.json
++++ b/package.json
+@@ -24,6 +24,7 @@
+     "@hookform/resolvers": "^3.9.1",
+     "@jridgewell/trace-mapping": "^0.3.25",
+     "@neondatabase/serverless": "^0.10.4",
++    "@notionhq/client": "^5.21.0",
+     "@radix-ui/react-accordion": "^1.2.1",
+     "@radix-ui/react-alert-dialog": "^1.1.2",
+     "@radix-ui/react-aspect-ratio": "^1.1.0",
+@@ -63,6 +64,7 @@
+     "cookie-signature": "^1.2.2",
+     "cors": "^2.8.5",
+     "date-fns": "^3.6.0",
++    "dotenv": "^17.4.2",
+     "drizzle-orm": "^0.39.1",
+     "drizzle-zod": "^0.7.0",
+     "embla-carousel-react": "^8.3.0",
+diff --git a/server/auth.ts b/server/auth.ts
+index c41fb9d..008e54a 100644
+--- a/server/auth.ts
++++ b/server/auth.ts
+@@ -1,8 +1,4 @@
+-<<<<<<< HEAD
+-import { scrypt, randomBytes, timingSafeEqual, createHmac } from "crypto";
+-=======
+ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { promisify } from "util";
+ import session from "express-session";
+ import { Express, Request, Response } from "express";
+@@ -74,34 +70,10 @@ export async function setupAuth(app: Express) {
+         req.session.userId = user.id;
+       }
+ 
+-<<<<<<< HEAD
+-      // Generate the exact signed cookie string for React Native clients
+-      const sessionSecret = process.env.SESSION_SECRET || "face2face-dev-secret";
+-      const hmac = createHmac('sha256', sessionSecret).update(req.sessionID).digest('base64').replace(/=+$/, '');
+-      const signedToken = 's:' + req.sessionID + '.' + hmac;
+-
+-      const sendResponse = () => {
+-        res.status(201).json({
+-          ...userWithoutPassword,
+-          profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null,
+-          sessionToken: `connect.sid=${encodeURIComponent(signedToken)}`
+-        });
+-      };
+-
+-      if (req.session) {
+-        req.session.save((err) => {
+-          if (err) console.error("Session save error:", err);
+-          sendResponse();
+-        });
+-      } else {
+-        sendResponse();
+-      }
+-=======
+       res.status(201).json({
+         ...userWithoutPassword,
+         profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+       });
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     } catch (error) {
+       if (error instanceof z.ZodError) {
+         return res.status(400).json({ message: "Invalid input", errors: error.errors });
+@@ -139,34 +111,10 @@ export async function setupAuth(app: Express) {
+       // Don't return the password in the response
+       const { password: _, ...userWithoutPassword } = user;
+ 
+-<<<<<<< HEAD
+-      // Generate the exact signed cookie string for React Native clients
+-      const sessionSecret = process.env.SESSION_SECRET || "face2face-dev-secret";
+-      const hmac = createHmac('sha256', sessionSecret).update(req.sessionID).digest('base64').replace(/=+$/, '');
+-      const signedToken = 's:' + req.sessionID + '.' + hmac;
+-
+-      const sendResponse = () => {
+-        res.status(200).json({
+-          ...userWithoutPassword,
+-          profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null,
+-          sessionToken: `connect.sid=${encodeURIComponent(signedToken)}`
+-        });
+-      };
+-
+-      if (req.session) {
+-        req.session.save((err) => {
+-          if (err) console.error("Session save error:", err);
+-          sendResponse();
+-        });
+-      } else {
+-        sendResponse();
+-      }
+-=======
+       res.status(200).json({
+         ...userWithoutPassword,
+         profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+       });
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     } catch (error) {
+       console.error("Login error:", error);
+       res.status(500).json({ message: "Login failed" });
+diff --git a/server/db.ts b/server/db.ts
+index 7c9138c..b9e058c 100644
+--- a/server/db.ts
++++ b/server/db.ts
+@@ -1,10 +1,5 @@
+-<<<<<<< HEAD
+-import pg from "pg";
+-import { drizzle } from "drizzle-orm/node-postgres";
+-=======
+ import postgres from "postgres";
+ import { drizzle } from "drizzle-orm/postgres-js";
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import * as schema from "@shared/schema";
+ 
+ if (!process.env.DATABASE_URL) {
+@@ -13,42 +8,5 @@ if (!process.env.DATABASE_URL) {
+   );
+ }
+ 
+-<<<<<<< HEAD
+-console.log("[db] Connecting to Postgres at:", process.env.DATABASE_URL!.replace(/:[^:@]+@/, ':***@'));
+-
+-const pool = new pg.Pool({
+-  connectionString: process.env.DATABASE_URL,
+-  max: 10,
+-  idleTimeoutMillis: 20_000,
+-  connectionTimeoutMillis: 10_000,
+-  ...(process.env.DATABASE_URL.includes("localhost") ? {} : { ssl: { rejectUnauthorized: false } }),
+-});
+-
+-pool.on('error', (err: Error) => {
+-  console.error("[db] Pool background error (non-fatal):", err.message);
+-});
+-
+-export const db = drizzle(pool, { schema });
+-
+-// Eagerly test with retries — Postgres may need a moment after restart
+-(async () => {
+-  for (let attempt = 1; attempt <= 5; attempt++) {
+-    try {
+-      const client = await pool.connect();
+-      const result = await client.query('SELECT 1 AS ok');
+-      client.release();
+-      console.log(`[db] ✅ Postgres ready (attempt ${attempt}):`, JSON.stringify(result.rows));
+-      return;
+-    } catch (err: any) {
+-      console.error(`[db] ❌ Connection attempt ${attempt}/5 failed:`, err.message);
+-      if (attempt < 5) {
+-        await new Promise(r => setTimeout(r, 3000 * attempt)); // exponential delay
+-      }
+-    }
+-  }
+-  console.error("[db] All 5 connection attempts failed. DB queries will error.");
+-})();
+-=======
+ const client = postgres(process.env.DATABASE_URL);
+ export const db = drizzle(client, { schema });
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+diff --git a/server/index.ts b/server/index.ts
+index 28f27fc..1cd6494 100644
+--- a/server/index.ts
++++ b/server/index.ts
+@@ -53,24 +53,16 @@ const allowedOrigins = [
+ app.use(cors({
+   origin: (origin, callback) => {
+     // Allow requests with no origin (mobile apps, curl, server-to-server)
+-<<<<<<< HEAD
+-    if (true) {
+-=======
+     if (!origin || allowedOrigins.includes(origin)) {
+       callback(null, true);
+     } else if (process.env.NODE_ENV !== "production") {
+       // In dev, allow any origin
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       callback(null, true);
+     } else {
+       callback(new Error("Not allowed by CORS"));
+     }
+   },
+   credentials: true,
+-<<<<<<< HEAD
+-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-Token', 'Cookie']
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ }));
+ 
+ // Global rate limiter: only in production
+@@ -97,19 +89,6 @@ if (process.env.NODE_ENV === "production") {
+   app.use("/api/auth/register", authLimiter);
+ }
+ 
+-<<<<<<< HEAD
+-// Allow React Native client to securely bypass native cookie jar dropping
+-app.use((req, res, next) => {
+-  const rnCookie = req.headers['x-session-token'];
+-  if (rnCookie && typeof rnCookie === 'string' && rnCookie.includes('connect.sid')) {
+-    // Strictly override the cookie header with our managed session token.
+-    req.headers.cookie = rnCookie;
+-  }
+-  next();
+-});
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ // Set up session middleware
+ app.use(session({
+   secret: process.env.SESSION_SECRET,
+@@ -162,10 +141,7 @@ app.use((req, res, next) => {
+     const message = err.message || "Internal Server Error";
+ 
+     res.status(status).json({ message });
+-<<<<<<< HEAD
+-=======
+     throw err;
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   });
+ 
+   // importantly only setup vite in development and after
+@@ -187,50 +163,17 @@ app.use((req, res, next) => {
+   }, () => {
+     log(`serving on port ${port}`);
+ 
+-<<<<<<< HEAD
+-    // Self-healing inactive-timeout loop with exponential backoff
+-    // When Postgres is healthy: runs every 60s
+-    // When Postgres is down: backs off to 5 min max, stops stacking connections
+-    let inactiveBackoff = 60_000;    // start at 60s
+-    const INACTIVE_MIN = 60_000;     // normal interval
+-    const INACTIVE_MAX = 5 * 60_000; // max 5 min when DB is down
+-    let consecutiveFailures = 0;
+-
+-    const runInactiveCheck = async () => {
+-=======
+     // Inactive timeout enforcement: every 60 seconds, deactivate users
+     // whose lastLocation exceeds their personal inactiveTimeout setting
+     setInterval(async () => {
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       try {
+         const count = await storage.deactivateInactiveUsers();
+         if (count > 0) {
+           log(`[InactiveTimeout] Deactivated ${count} inactive user(s)`);
+         }
+-<<<<<<< HEAD
+-        // DB is healthy — reset backoff
+-        if (consecutiveFailures > 0) {
+-          log(`[InactiveTimeout] Postgres recovered after ${consecutiveFailures} failures`);
+-        }
+-        consecutiveFailures = 0;
+-        inactiveBackoff = INACTIVE_MIN;
+-      } catch (err: any) {
+-        consecutiveFailures++;
+-        // Exponential backoff: 60s → 120s → 240s → 300s (capped)
+-        inactiveBackoff = Math.min(inactiveBackoff * 2, INACTIVE_MAX);
+-        console.error(`[InactiveTimeout] DB error #${consecutiveFailures}, next retry in ${inactiveBackoff / 1000}s:`, err.message || err);
+-      } finally {
+-        setTimeout(runInactiveCheck, inactiveBackoff);
+-      }
+-    };
+-
+-    // Kick off the first check after 60s
+-    setTimeout(runInactiveCheck, INACTIVE_MIN);
+-=======
+       } catch (err) {
+         console.error('[InactiveTimeout] Error:', err);
+       }
+     }, 60_000);
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   });
+ })();
+diff --git a/server/routes.ts b/server/routes.ts
+index c03c531..db7f29c 100644
+--- a/server/routes.ts
++++ b/server/routes.ts
+@@ -1,26 +1,12 @@
+ import express, { type Express, Request, Response } from "express";
+ import { createServer, type Server } from "http";
+ import { storage } from "./storage";
+-<<<<<<< HEAD
+-import { sendBumpNotification, sendBumpBackNotification } from "./push";
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import {
+   insertUserSchema,
+   updateUserSchema,
+   insertBumpSchema,
+-<<<<<<< HEAD
+-  insertNotificationSchema,
+-  TIER_LIMITS,
+-  BOOST_PACKS,
+-  BOOST_DURATION_MINUTES,
+-  type SubscriptionTier,
+-} from "@shared/schema";
+-import { calculateDistance } from "@shared/distance";
+-=======
+   insertNotificationSchema
+ } from "@shared/schema";
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { z } from "zod";
+ import { setupAuth } from "./auth";
+ import { sendVerificationSMS } from "./ghl";
+@@ -73,11 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
+     }
+   });
+ 
+-<<<<<<< HEAD
+-  // Location update route (with travel distance tracking)
+-=======
+   // Location update route
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   apiRouter.post("/users/location", async (req: Request, res: Response) => {
+     try {
+       if (!req.session || !req.session.userId) {
+@@ -91,46 +73,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
+ 
+       const location = locationSchema.parse(req.body);
+ 
+-<<<<<<< HEAD
+-      // ═══ Travel Distance Tracking ═══
+-      const currentUser = await storage.getUser(req.session.userId);
+-      if (currentUser && currentUser.latitude && currentUser.longitude) {
+-        const prevLat = parseFloat(currentUser.latitude as string);
+-        const prevLon = parseFloat(currentUser.longitude as string);
+-
+-        // Only calculate if previous location is valid (not default 0,0)
+-        if (prevLat !== 0 || prevLon !== 0) {
+-          const distanceMiles = calculateDistance(
+-            prevLat, prevLon,
+-            location.latitude, location.longitude
+-          );
+-
+-          // Anti-cheat: compute speed (mph)
+-          // Location updates come every ~5 seconds, but use actual time delta
+-          const timeDeltaHours = currentUser.lastLocation
+-            ? (Date.now() - new Date(currentUser.lastLocation).getTime()) / 3_600_000
+-            : 0;
+-
+-          const speedMph = timeDeltaHours > 0 ? distanceMiles / timeDeltaHours : 0;
+-
+-          // Only log if:
+-          // - Distance > 0.001 miles (~5 feet) to avoid GPS jitter
+-          // - Speed < 200 mph (anti-GPS-spoof)
+-          // - Time delta > 3 seconds (anti-spam)
+-          const timeDeltaSeconds = timeDeltaHours * 3600;
+-          if (distanceMiles > 0.001 && speedMph < 200 && timeDeltaSeconds > 3) {
+-            await storage.logTravel(
+-              req.session.userId,
+-              prevLat, prevLon,
+-              location.latitude, location.longitude,
+-              distanceMiles
+-            );
+-          }
+-        }
+-      }
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       const updatedUser = await storage.updateUser(req.session.userId, {
+         latitude: String(location.latitude),
+         longitude: String(location.longitude),
+@@ -236,23 +178,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
+   // Nearby users route
+   apiRouter.get("/users/nearby", async (req: Request, res: Response) => {
+     try {
+-<<<<<<< HEAD
+-      let activeUserId = req.session?.userId;
+-      
+-      if (!req.session || !activeUserId) {
+-        // BYPASS: Mock the user ID if the cookie was dropped
+-        console.log("⚠️ [BYPASS] Missing session on /api/users/nearby! Mocking user ID = 1");
+-        activeUserId = 1;
+-      }
+-
+-      const user = await storage.getUser(activeUserId);
+-=======
+       if (!req.session || !req.session.userId) {
+         return res.status(401).json({ message: "Not authenticated" });
+       }
+ 
+       const user = await storage.getUser(req.session.userId);
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ 
+       if (!user) {
+         return res.status(404).json({ message: "User not found" });
+@@ -280,62 +210,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
+         }
+       );
+ 
+-<<<<<<< HEAD
+-      // Filter out stealth mode users
+-      const visibleUsers = nearbyUsers.filter(u => !u.stealthMode);
+-
+-      // Don't return sensitive information about other users
+-      const sanitizedUsers = visibleUsers.map(({ password, email, phoneNumber, ...rest }) => ({
+-        ...rest,
+-        profilePhoto: rest.profilePhoto ? `/api/users/${rest.id}/photo` : null,
+-        // Monetization: expose boost/tier to clients
+-        isBoosted: rest.isBoosted || false,
+-        subscriptionTier: rest.subscriptionTier || "free",
+-      }));
+-
+-      // Sort boosted users to the top
+-      sanitizedUsers.sort((a, b) => {
+-        if (a.isBoosted && !b.isBoosted) return -1;
+-        if (!a.isBoosted && b.isBoosted) return 1;
+-        return 0;
+-      });
+-
+-=======
+       // Don't return sensitive information about other users
+       const sanitizedUsers = nearbyUsers.map(({ password, email, phoneNumber, ...rest }) => ({
+         ...rest,
+         profilePhoto: rest.profilePhoto ? `/api/users/${rest.id}/photo` : null
+       }));
+ 
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       res.status(200).json(sanitizedUsers);
+     } catch (error) {
+       res.status(500).json({ message: "Failed to get nearby users" });
+     }
+   });
+ 
+-<<<<<<< HEAD
+-  // ═══ Push Token Registration ═══
+-  apiRouter.post("/users/push-token", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const { token } = req.body;
+-      if (!token) {
+-        return res.status(400).json({ message: "Push token is required" });
+-      }
+-      await storage.updatePushToken(req.session.userId, token);
+-      console.log(`[Push] Token registered for user ${req.session.userId}`);
+-      res.status(200).json({ success: true });
+-    } catch (error) {
+-      console.error('[Push] Token registration failed:', error);
+-      res.status(500).json({ message: "Failed to register push token" });
+-    }
+-  });
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   // Bump routes
+   apiRouter.post("/bumps", async (req: Request, res: Response) => {
+     try {
+@@ -344,21 +230,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
+       }
+ 
+       const userId = req.session.userId;
+-<<<<<<< HEAD
+-
+-      // ═══ Daily Bump Limit Check ═══
+-      const bumpCheck = await storage.checkAndIncrementBump(userId);
+-      if (!bumpCheck.allowed) {
+-        return res.status(429).json({
+-          message: "Daily bump limit reached",
+-          code: "BUMP_LIMIT_REACHED",
+-          used: bumpCheck.used,
+-          limit: bumpCheck.limit,
+-          upgrade: true,
+-        });
+-      }
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       const { bumpedUserId } = req.body;
+ 
+       if (!bumpedUserId) {
+@@ -381,20 +252,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
+       // For MVP, we'll simulate the distance check (assume they're close enough)
+ 
+       // Prevent duplicate bumps (race condition / spam guard)
+-<<<<<<< HEAD
+-      // DEV OVERRIDE: Temporarily disabled to allow multiple bumps during testing!
+-      // const existingBumps = await storage.getBumpsBetweenUsers(userId, bumpedUserId);
+-      // const isAlreadyBumped = existingBumps.some(b => b.userId === userId);
+-      // if (isAlreadyBumped) {
+-      //  return res.status(400).json({ message: "You have already bumped this user" });
+-      // }
+-=======
+       const existingBumps = await storage.getBumpsBetweenUsers(userId, bumpedUserId);
+       const isAlreadyBumped = existingBumps.some(b => b.userId === userId);
+       if (isAlreadyBumped) {
+         return res.status(400).json({ message: "You have already bumped this user" });
+       }
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ 
+       // Create the bump
+       const bump = await storage.createBump({
+@@ -420,15 +282,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
+         content: `${user.firstName} bumped you!`,
+       });
+ 
+-<<<<<<< HEAD
+-      // 🔔 Send push notification to the bumped user's device
+-      const pushToken = await storage.getPushToken(bumpedUserId);
+-      if (pushToken) {
+-        await sendBumpNotification(pushToken, user.firstName, req.body.message);
+-      }
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       res.status(201).json(bump);
+     } catch (error) {
+       res.status(500).json({ message: "Failed to create bump" });
+@@ -511,15 +364,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
+           relatedId: userId,
+           content,
+         });
+-<<<<<<< HEAD
+-
+-        // 🔔 Send push notification to the original bumper
+-        const senderPushToken = await storage.getPushToken(bump.userId);
+-        if (senderPushToken) {
+-          await sendBumpBackNotification(senderPushToken, user.firstName, action);
+-        }
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       }
+       res.status(200).json({ success: true, action });
+     } catch (error) {
+@@ -673,25 +517,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
+         return res.status(400).json({ message: "Missing receiverId or content" });
+       }
+ 
+-<<<<<<< HEAD
+-      // ═══ Daily Message Limit Check (Free tier: 10/day per convo) ═══
+-      const subStatus = await storage.getSubscriptionStatus(req.session.userId);
+-      const msgLimit = subStatus.limits.dailyMessagesPerConvo;
+-      if (msgLimit !== Infinity) {
+-        const dailyCount = await storage.getDailyMessageCount(req.session.userId, parseInt(receiverId));
+-        if (dailyCount >= msgLimit) {
+-          return res.status(429).json({
+-            message: "Daily message limit reached for this conversation",
+-            code: "MESSAGE_LIMIT_REACHED",
+-            used: dailyCount,
+-            limit: msgLimit,
+-            upgrade: true,
+-          });
+-        }
+-      }
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+       const message = await storage.createMessage({
+         senderId: req.session.userId,
+         receiverId: parseInt(receiverId),
+@@ -836,335 +661,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
+     }
+   });
+ 
+-<<<<<<< HEAD
+-  // ═══════════════════════════════════════════════════════════════
+-  // ═══ WAITLIST ROUTES ═══
+-  // ═══════════════════════════════════════════════════════════════
+-  apiRouter.post("/waitlist", async (req: Request, res: Response) => {
+-    try {
+-      const db = (await import("./db")).db;
+-      const { waitlist } = await import("@shared/schema");
+-      const { eq } = await import("drizzle-orm");
+-
+-      const { name, email, phone, socialLink } = req.body;
+-      
+-      if (!name || !email) {
+-        return res.status(400).json({ message: "Name and email are required" });
+-      }
+-
+-      // Check if email already exists
+-      const existing = await db.select().from(waitlist).where(eq(waitlist.email, email));
+-      if (existing.length > 0) {
+-        return res.status(400).json({ message: "Email already registered" });
+-      }
+-
+-      const [entry] = await db.insert(waitlist).values({
+-        name,
+-        email,
+-        phone: phone || null,
+-        socialLink: socialLink || null,
+-        type: "evangelist"
+-      }).returning();
+-
+-      res.status(201).json(entry);
+-    } catch (error) {
+-      console.error("Waitlist error:", error);
+-      res.status(500).json({ message: "Failed to join waitlist" });
+-    }
+-  });
+-
+-  // ═══════════════════════════════════════════════════════════════
+-  // ═══ WAITLIST EXPORT ═══
+-  // ═══════════════════════════════════════════════════════════════
+-  apiRouter.get("/waitlist/export.csv", async (req: Request, res: Response) => {
+-    try {
+-      const db = (await import("./db")).db;
+-      const { waitlist } = await import("@shared/schema");
+-
+-      const entries = await db.select().from(waitlist);
+-      
+-      const csvLines = [
+-        "ID,Name,Email,Phone,SocialLink,Type,CreatedAt"
+-      ];
+-      
+-      entries.forEach(e => {
+-        const row = [
+-          e.id,
+-          `"${(e.name || "").replace(/"/g, '""')}"`,
+-          `"${(e.email || "").replace(/"/g, '""')}"`,
+-          `"${(e.phone || "").replace(/"/g, '""')}"`,
+-          `"${(e.socialLink || "").replace(/"/g, '""')}"`,
+-          e.type,
+-          e.createdAt ? new Date(e.createdAt).toISOString() : ""
+-        ];
+-        csvLines.push(row.join(","));
+-      });
+-
+-      res.setHeader('Content-Type', 'text/csv');
+-      res.setHeader('Content-Disposition', 'attachment; filename="face2face_waitlist.csv"');
+-      res.status(200).send(csvLines.join("\\n"));
+-    } catch (error) {
+-      console.error("CSV Export error:", error);
+-      res.status(500).json({ message: "Failed to export CSV" });
+-    }
+-  });
+-
+-  // ═══════════════════════════════════════════════════════════════
+-  // ═══ MONETIZATION ROUTES ═══
+-  // ═══════════════════════════════════════════════════════════════
+-
+-  // Get current subscription status (tier, limits, usage, boost info)
+-  apiRouter.get("/subscription/status", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const status = await storage.getSubscriptionStatus(req.session.userId);
+-      // Convert Infinity to -1 for JSON serialization
+-      const serializedLimits = {
+-        ...status.limits,
+-        dailyBumps: status.limits.dailyBumps === Infinity ? -1 : status.limits.dailyBumps,
+-        dailyMessagesPerConvo: status.limits.dailyMessagesPerConvo === Infinity ? -1 : status.limits.dailyMessagesPerConvo,
+-      };
+-      res.status(200).json({ ...status, limits: serializedLimits });
+-    } catch (error) {
+-      console.error("Subscription status error:", error);
+-      res.status(500).json({ message: "Failed to get subscription status" });
+-    }
+-  });
+-
+-  // Upgrade subscription (MOCK — will be replaced with Stripe checkout later)
+-  apiRouter.post("/subscription/upgrade", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const { tier } = req.body; // "premium" or "vip"
+-      if (!tier || !["premium", "vip"].includes(tier)) {
+-        return res.status(400).json({ message: "Invalid tier. Must be 'premium' or 'vip'" });
+-      }
+-
+-      const userId = req.session.userId;
+-
+-      // Set expiration to 30 days from now (mock billing cycle)
+-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+-
+-      await storage.updateUser(userId, {
+-        subscriptionTier: tier,
+-        subscriptionExpiresAt: expiresAt,
+-      });
+-
+-      // Create subscription record
+-      await storage.createSubscription({
+-        userId,
+-        tier,
+-        status: "active",
+-        currentPeriodStart: new Date(),
+-        currentPeriodEnd: expiresAt,
+-      });
+-
+-      // Log transaction (mock — $0 for now)
+-      const priceMap: Record<string, number> = { premium: 499, vip: 999 };
+-      await storage.createTransaction({
+-        userId,
+-        type: "subscription",
+-        amount: priceMap[tier],
+-        status: "completed",
+-        metadata: JSON.stringify({ tier, mock: true }),
+-      });
+-
+-      console.log(`[Monetization] User ${userId} upgraded to ${tier}`);
+-      res.status(200).json({
+-        success: true,
+-        tier,
+-        expiresAt,
+-        message: `Upgraded to ${tier}! (Mock — no real payment processed)`,
+-      });
+-    } catch (error) {
+-      console.error("Subscription upgrade error:", error);
+-      res.status(500).json({ message: "Failed to upgrade subscription" });
+-    }
+-  });
+-
+-  // Cancel subscription
+-  apiRouter.post("/subscription/cancel", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const userId = req.session.userId;
+-      const activeSub = await storage.getActiveSubscription(userId);
+-
+-      if (!activeSub) {
+-        return res.status(400).json({ message: "No active subscription to cancel" });
+-      }
+-
+-      await storage.cancelSubscription(activeSub.id);
+-      await storage.updateUser(userId, { subscriptionTier: "free" });
+-
+-      console.log(`[Monetization] User ${userId} cancelled subscription`);
+-      res.status(200).json({ success: true, message: "Subscription cancelled" });
+-    } catch (error) {
+-      console.error("Subscription cancel error:", error);
+-      res.status(500).json({ message: "Failed to cancel subscription" });
+-    }
+-  });
+-
+-  // ── Boost Routes ──
+-
+-  // Purchase boost pack (MOCK — credits added instantly)
+-  apiRouter.post("/boosts/purchase", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const { pack } = req.body; // "single", "pack5", "pack10"
+-      if (!pack || !BOOST_PACKS[pack as keyof typeof BOOST_PACKS]) {
+-        return res.status(400).json({ message: "Invalid pack. Choose: single, pack5, pack10" });
+-      }
+-
+-      const userId = req.session.userId;
+-      const packInfo = BOOST_PACKS[pack as keyof typeof BOOST_PACKS];
+-      const newCredits = await storage.addBoostCredits(userId, packInfo.credits);
+-
+-      // Log transaction
+-      await storage.createTransaction({
+-        userId,
+-        type: `boost_${pack}`,
+-        amount: packInfo.priceInCents,
+-        status: "completed",
+-        metadata: JSON.stringify({ pack, credits: packInfo.credits, mock: true }),
+-      });
+-
+-      console.log(`[Monetization] User ${userId} purchased ${pack} boost pack (+${packInfo.credits} credits)`);
+-      res.status(200).json({
+-        success: true,
+-        creditsAdded: packInfo.credits,
+-        totalCredits: newCredits,
+-        message: `Added ${packInfo.credits} boost credit(s)! (Mock — no real payment)`,
+-      });
+-    } catch (error) {
+-      console.error("Boost purchase error:", error);
+-      res.status(500).json({ message: "Failed to purchase boost" });
+-    }
+-  });
+-
+-  // Activate a boost (uses 1 credit, lasts 30 min)
+-  apiRouter.post("/boosts/activate", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const userId = req.session.userId;
+-      const result = await storage.activateBoost(userId);
+-
+-      if (!result.success && !result.expiresAt) {
+-        return res.status(400).json({
+-          message: "No boost credits available",
+-          code: "NO_BOOST_CREDITS",
+-          upgrade: true,
+-        });
+-      }
+-
+-      if (!result.success && result.expiresAt) {
+-        return res.status(400).json({
+-          message: "Already boosted",
+-          code: "ALREADY_BOOSTED",
+-          expiresAt: result.expiresAt,
+-        });
+-      }
+-
+-      console.log(`[Monetization] User ${userId} activated boost until ${result.expiresAt}`);
+-      res.status(200).json({
+-        success: true,
+-        expiresAt: result.expiresAt,
+-        durationMinutes: BOOST_DURATION_MINUTES,
+-      });
+-    } catch (error) {
+-      console.error("Boost activate error:", error);
+-      res.status(500).json({ message: "Failed to activate boost" });
+-    }
+-  });
+-
+-  // Get boost status
+-  apiRouter.get("/boosts/status", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const status = await storage.getSubscriptionStatus(req.session.userId);
+-      res.status(200).json({
+-        isBoosted: status.isBoosted,
+-        boostExpiresAt: status.boostExpiresAt,
+-        boostCredits: status.boostCredits,
+-      });
+-    } catch (error) {
+-      res.status(500).json({ message: "Failed to get boost status" });
+-    }
+-  });
+-
+-  // ── Admin/Cron: Reset daily limits ──
+-  apiRouter.post("/admin/reset-daily-limits", async (req: Request, res: Response) => {
+-    try {
+-      // Simple auth check — in production, use a proper admin middleware
+-      const resetCount = await storage.resetDailyLimits();
+-      const boostExpired = await storage.deactivateExpiredBoosts();
+-      console.log(`[Cron] Reset daily limits for ${resetCount} users, expired ${boostExpired} boosts`);
+-      res.status(200).json({ resetCount, boostExpired });
+-    } catch (error) {
+-      res.status(500).json({ message: "Failed to reset daily limits" });
+-    }
+-  });
+-
+-  // ═══════════════════════════════════════════════════════════════
+-  // ═══ TRAVEL LEADERBOARD ROUTES ═══
+-  // ═══════════════════════════════════════════════════════════════
+-
+-  /**
+-   * GET /api/leaderboard — Top 50 travelers.
+-   * Query params: ?timeframe=weekly (default: all-time) &limit=50
+-   */
+-  apiRouter.get("/leaderboard", async (req: Request, res: Response) => {
+-    try {
+-      const timeframe = (req.query.timeframe as string) === 'weekly' ? 'weekly' : 'all-time';
+-      const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+-      const leaderboard = await storage.getLeaderboard(limit, timeframe);
+-      res.status(200).json(leaderboard);
+-    } catch (error) {
+-      console.error('[Leaderboard] Error:', error);
+-      res.status(500).json({ message: "Failed to get leaderboard" });
+-    }
+-  });
+-
+-  /**
+-   * GET /api/leaderboard/me — Current user's travel stats + rank.
+-   */
+-  apiRouter.get("/leaderboard/me", async (req: Request, res: Response) => {
+-    try {
+-      if (!req.session || !req.session.userId) {
+-        return res.status(401).json({ message: "Not authenticated" });
+-      }
+-      const stats = await storage.getUserTravelStats(req.session.userId);
+-      res.status(200).json(stats);
+-    } catch (error) {
+-      console.error('[Leaderboard] Stats error:', error);
+-      res.status(500).json({ message: "Failed to get travel stats" });
+-    }
+-  });
+-
+-  // ── Admin/Cron: Reset weekly travel miles ──
+-  apiRouter.post("/admin/reset-weekly-miles", async (_req: Request, res: Response) => {
+-    try {
+-      const resetCount = await storage.resetWeeklyMiles();
+-      console.log(`[Cron] Reset weekly miles for ${resetCount} users`);
+-      res.status(200).json({ resetCount });
+-    } catch (error) {
+-      res.status(500).json({ message: "Failed to reset weekly miles" });
+-    }
+-  });
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   // Use the API router with prefix
+   app.use("/api", apiRouter);
+ 
+diff --git a/server/storage.ts b/server/storage.ts
+index d3c20da..4df5fca 100644
+--- a/server/storage.ts
++++ b/server/storage.ts
+@@ -14,31 +14,11 @@ import {
+   type InsertMessage,
+   verificationCodes,
+   type VerificationCode,
+-<<<<<<< HEAD
+-  subscriptions,
+-  type Subscription,
+-  type InsertSubscription,
+-  transactions,
+-  type Transaction,
+-  type InsertTransaction,
+-  travelLogs,
+-  type LeaderboardEntry,
+-  TIER_LIMITS,
+-  BOOST_DURATION_MINUTES,
+-  type SubscriptionTier,
+ } from "@shared/schema";
+-import { calculateDistance } from "@shared/distance";
+-=======
+-} from "@shared/schema";
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { eq, or, and, desc, asc, sql, SQL } from "drizzle-orm";
+ import { db } from "./db";
+ import session from "express-session";
+ import connectPg from "connect-pg-simple";
+-<<<<<<< HEAD
+-import pg from "pg";
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ import { log } from "./log";
+ 
+ export interface IStorage {
+@@ -76,13 +56,6 @@ export interface IStorage {
+   markNotificationAsRead(id: number): Promise<void>;
+   markAllNotificationsAsRead(userId: number): Promise<void>;
+ 
+-<<<<<<< HEAD
+-  // Push token operations
+-  updatePushToken(userId: number, token: string): Promise<void>;
+-  getPushToken(userId: number): Promise<string | null>;
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   // Session store
+   sessionStore: session.Store;
+ 
+@@ -93,46 +66,6 @@ export interface IStorage {
+   getRecentCodeCount(phoneNumber: string, sinceMinutes: number): Promise<number>;
+   getUserByPhone(phone: string): Promise<User | undefined>;
+   deactivateInactiveUsers(): Promise<number>;
+-<<<<<<< HEAD
+-
+-  // ═══ Monetization Operations ═══
+-  // Subscription
+-  createSubscription(sub: InsertSubscription): Promise<Subscription>;
+-  getActiveSubscription(userId: number): Promise<Subscription | undefined>;
+-  updateSubscription(id: number, updates: Partial<Subscription>): Promise<Subscription | undefined>;
+-  cancelSubscription(id: number): Promise<void>;
+-
+-  // Transactions
+-  createTransaction(txn: InsertTransaction): Promise<Transaction>;
+-  getTransactionsByUser(userId: number): Promise<Transaction[]>;
+-
+-  // Daily limits
+-  checkAndIncrementBump(userId: number): Promise<{ allowed: boolean; used: number; limit: number }>;
+-  getDailyMessageCount(userId: number, otherUserId: number): Promise<number>;
+-  resetDailyLimits(): Promise<number>;
+-
+-  // Boost
+-  activateBoost(userId: number): Promise<{ success: boolean; expiresAt: Date | null }>;
+-  deactivateExpiredBoosts(): Promise<number>;
+-  addBoostCredits(userId: number, credits: number): Promise<number>;
+-
+-  // Subscription status helper
+-  getSubscriptionStatus(userId: number): Promise<{
+-    tier: SubscriptionTier;
+-    limits: typeof TIER_LIMITS[SubscriptionTier];
+-    dailyBumpsUsed: number;
+-    boostCredits: number;
+-    isBoosted: boolean;
+-    boostExpiresAt: Date | null;
+-  }>;
+-
+-  // ═══ Travel Leaderboard Operations ═══
+-  logTravel(userId: number, fromLat: number, fromLon: number, toLat: number, toLon: number, distanceMiles: number): Promise<void>;
+-  getLeaderboard(limit?: number, timeframe?: 'all-time' | 'weekly'): Promise<LeaderboardEntry[]>;
+-  getUserTravelStats(userId: number): Promise<{ totalMiles: number; weeklyMiles: number; rank: number }>;
+-  resetWeeklyMiles(): Promise<number>;
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ }
+ 
+ export class DatabaseStorage implements IStorage {
+@@ -144,35 +77,9 @@ export class DatabaseStorage implements IStorage {
+     }
+ 
+     const PostgresStore = connectPg(session);
+-<<<<<<< HEAD
+-
+-    // Create a constrained pool for the session store
+-    // CRITICAL: Railway Postgres requires SSL — use rejectUnauthorized: false for self-signed certs
+-    const sessionPool = new pg.Pool({
+-      connectionString: process.env.DATABASE_URL,
+-      max: 5,
+-      idleTimeoutMillis: 20_000,
+-      connectionTimeoutMillis: 10_000,
+-      ...(process.env.DATABASE_URL.includes("localhost") ? {} : { ssl: { rejectUnauthorized: false } }),
+-    });
+-    sessionPool.on('error', (err: Error) => {
+-      console.error("[SessionStore Pool] Background error (non-fatal):", err.message);
+-    });
+-
+-    this.sessionStore = new PostgresStore({
+-      pool: sessionPool,
+-      createTableIfMissing: true,
+-      // Prune expired sessions every 15 min instead of every 60s (default)
+-      pruneSessionInterval: 15 * 60,
+-      // Gracefully handle errors instead of crashing process
+-      errorLog: (...args: any[]) => {
+-        console.error("[SessionStore]", ...args);
+-      },
+-=======
+     this.sessionStore = new PostgresStore({
+       conString: process.env.DATABASE_URL,
+       createTableIfMissing: true,
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     });
+ 
+     log("Database connection established", "storage");
+@@ -238,13 +145,8 @@ export class DatabaseStorage implements IStorage {
+       sql`${users.longitude} IS NOT NULL`,
+       // Exclude users who still have the default 0,0 coordinates (never set location)
+       sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
+-<<<<<<< HEAD
+-      // Only show users who have been active/pinged location in the last 24 hours
+-      sql`${users.lastLocation} > NOW() - INTERVAL '24 hours'`,
+-=======
+       // Only show users who have been active/pinged location in the last 30 minutes
+       sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`,
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+     ];
+ 
+     return await db.select()
+@@ -434,23 +336,6 @@ export class DatabaseStorage implements IStorage {
+       .where(eq(notifications.userId, userId));
+   }
+ 
+-<<<<<<< HEAD
+-  async updatePushToken(userId: number, token: string): Promise<void> {
+-    await db.update(users)
+-      .set({ pushToken: token })
+-      .where(eq(users.id, userId));
+-  }
+-
+-  async getPushToken(userId: number): Promise<string | null> {
+-    const result = await db.select({ pushToken: users.pushToken })
+-      .from(users)
+-      .where(eq(users.id, userId))
+-      .limit(1);
+-    return result[0]?.pushToken || null;
+-  }
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+   // Verification code operations
+   async createVerificationCode(phoneNumber: string, code: string, expiresAt: Date): Promise<VerificationCode> {
+     const result = await db.insert(verificationCodes).values({
+@@ -515,375 +400,6 @@ export class DatabaseStorage implements IStorage {
+       .returning();
+     return result.length;
+   }
+-<<<<<<< HEAD
+-
+-  // ═══════════════════════════════════════════════════════════════
+-  // ═══ MONETIZATION METHODS ═══
+-  // ═══════════════════════════════════════════════════════════════
+-
+-  // ── Subscription CRUD ──
+-
+-  async createSubscription(sub: InsertSubscription): Promise<Subscription> {
+-    const result = await db.insert(subscriptions).values({
+-      ...sub,
+-      createdAt: new Date(),
+-      updatedAt: new Date(),
+-    }).returning();
+-    return result[0];
+-  }
+-
+-  async getActiveSubscription(userId: number): Promise<Subscription | undefined> {
+-    const result = await db.select()
+-      .from(subscriptions)
+-      .where(and(
+-        eq(subscriptions.userId, userId),
+-        eq(subscriptions.status, "active")
+-      ))
+-      .orderBy(desc(subscriptions.createdAt))
+-      .limit(1);
+-    return result[0];
+-  }
+-
+-  async updateSubscription(id: number, updates: Partial<Subscription>): Promise<Subscription | undefined> {
+-    const result = await db.update(subscriptions)
+-      .set({ ...updates, updatedAt: new Date() })
+-      .where(eq(subscriptions.id, id))
+-      .returning();
+-    return result[0];
+-  }
+-
+-  async cancelSubscription(id: number): Promise<void> {
+-    await db.update(subscriptions)
+-      .set({ status: "cancelled", cancelledAt: new Date(), updatedAt: new Date() })
+-      .where(eq(subscriptions.id, id));
+-  }
+-
+-  // ── Transactions ──
+-
+-  async createTransaction(txn: InsertTransaction): Promise<Transaction> {
+-    const result = await db.insert(transactions).values({
+-      ...txn,
+-      createdAt: new Date(),
+-    }).returning();
+-    return result[0];
+-  }
+-
+-  async getTransactionsByUser(userId: number): Promise<Transaction[]> {
+-    return await db.select()
+-      .from(transactions)
+-      .where(eq(transactions.userId, userId))
+-      .orderBy(desc(transactions.createdAt));
+-  }
+-
+-  // ── Daily Limits ──
+-
+-  /**
+-   * Check if user can bump today. If allowed, increments the counter.
+-   * Auto-resets if the reset timestamp is in the past (new day).
+-   */
+-  async checkAndIncrementBump(userId: number): Promise<{ allowed: boolean; used: number; limit: number }> {
+-    const user = await this.getUser(userId);
+-    if (!user) return { allowed: false, used: 0, limit: 0 };
+-
+-    const tier = (user.subscriptionTier || "free") as SubscriptionTier;
+-    const limit = TIER_LIMITS[tier].dailyBumps;
+-
+-    // Premium/VIP have unlimited bumps
+-    if (limit === Infinity) {
+-      await db.update(users)
+-        .set({ dailyBumpsUsed: (user.dailyBumpsUsed || 0) + 1 })
+-        .where(eq(users.id, userId));
+-      return { allowed: true, used: (user.dailyBumpsUsed || 0) + 1, limit: -1 };
+-    }
+-
+-    // Check if we need to reset (new day)
+-    const now = new Date();
+-    const resetAt = user.dailyBumpsResetAt;
+-    let currentUsed = user.dailyBumpsUsed || 0;
+-
+-    if (!resetAt || resetAt < now) {
+-      // Reset — new day
+-      currentUsed = 0;
+-      const tomorrow = new Date(now);
+-      tomorrow.setHours(24, 0, 0, 0); // midnight tonight
+-      await db.update(users)
+-        .set({ dailyBumpsUsed: 1, dailyBumpsResetAt: tomorrow })
+-        .where(eq(users.id, userId));
+-      return { allowed: true, used: 1, limit };
+-    }
+-
+-    if (currentUsed >= limit) {
+-      return { allowed: false, used: currentUsed, limit };
+-    }
+-
+-    // Increment
+-    await db.update(users)
+-      .set({ dailyBumpsUsed: currentUsed + 1 })
+-      .where(eq(users.id, userId));
+-
+-    return { allowed: true, used: currentUsed + 1, limit };
+-  }
+-
+-  /**
+-   * Count messages sent by userId to otherUserId today.
+-   */
+-  async getDailyMessageCount(userId: number, otherUserId: number): Promise<number> {
+-    const result = await db.select({ count: sql<number>`count(*)` })
+-      .from(messages)
+-      .where(and(
+-        eq(messages.senderId, userId),
+-        eq(messages.receiverId, otherUserId),
+-        sql`${messages.timestamp} > CURRENT_DATE`
+-      ));
+-    return Number(result[0]?.count || 0);
+-  }
+-
+-  /**
+-   * Reset daily bump/message counters for all users. Run via cron at midnight.
+-   */
+-  async resetDailyLimits(): Promise<number> {
+-    const result = await db.update(users)
+-      .set({ dailyBumpsUsed: 0, dailyMessagesUsed: 0 })
+-      .where(sql`${users.dailyBumpsUsed} > 0 OR ${users.dailyMessagesUsed} > 0`)
+-      .returning();
+-    return result.length;
+-  }
+-
+-  // ── Boost ──
+-
+-  /**
+-   * Activate a boost for 30 minutes. Deducts 1 boost credit.
+-   */
+-  async activateBoost(userId: number): Promise<{ success: boolean; expiresAt: Date | null }> {
+-    const user = await this.getUser(userId);
+-    if (!user) return { success: false, expiresAt: null };
+-
+-    // Already boosted?
+-    if (user.isBoosted && user.boostExpiresAt && user.boostExpiresAt > new Date()) {
+-      return { success: false, expiresAt: user.boostExpiresAt };
+-    }
+-
+-    // Need credits
+-    if ((user.boostCredits || 0) < 1) {
+-      return { success: false, expiresAt: null };
+-    }
+-
+-    const expiresAt = new Date(Date.now() + BOOST_DURATION_MINUTES * 60 * 1000);
+-
+-    await db.update(users)
+-      .set({
+-        isBoosted: true,
+-        boostExpiresAt: expiresAt,
+-        boostCredits: (user.boostCredits || 0) - 1,
+-      })
+-      .where(eq(users.id, userId));
+-
+-    return { success: true, expiresAt };
+-  }
+-
+-  /**
+-   * Deactivate boosts that have expired.
+-   */
+-  async deactivateExpiredBoosts(): Promise<number> {
+-    const result = await db.update(users)
+-      .set({ isBoosted: false })
+-      .where(and(
+-        eq(users.isBoosted, true),
+-        sql`${users.boostExpiresAt} IS NOT NULL`,
+-        sql`${users.boostExpiresAt} < NOW()`
+-      ))
+-      .returning();
+-    return result.length;
+-  }
+-
+-  /**
+-   * Add boost credits to a user account.
+-   */
+-  async addBoostCredits(userId: number, credits: number): Promise<number> {
+-    const user = await this.getUser(userId);
+-    if (!user) return 0;
+-    const newCredits = (user.boostCredits || 0) + credits;
+-    await db.update(users)
+-      .set({ boostCredits: newCredits })
+-      .where(eq(users.id, userId));
+-    return newCredits;
+-  }
+-
+-  // ── Subscription Status Helper ──
+-
+-  /**
+-   * Get a comprehensive status object for the user's monetization state.
+-   * Used by both the API and internal logic.
+-   */
+-  async getSubscriptionStatus(userId: number): Promise<{
+-    tier: SubscriptionTier;
+-    limits: typeof TIER_LIMITS[SubscriptionTier];
+-    dailyBumpsUsed: number;
+-    boostCredits: number;
+-    isBoosted: boolean;
+-    boostExpiresAt: Date | null;
+-  }> {
+-    const user = await this.getUser(userId);
+-    if (!user) {
+-      return {
+-        tier: "free",
+-        limits: TIER_LIMITS.free,
+-        dailyBumpsUsed: 0,
+-        boostCredits: 0,
+-        isBoosted: false,
+-        boostExpiresAt: null,
+-      };
+-    }
+-
+-    // Check if subscription has expired
+-    let tier = (user.subscriptionTier || "free") as SubscriptionTier;
+-    if (tier !== "free" && user.subscriptionExpiresAt && user.subscriptionExpiresAt < new Date()) {
+-      // Subscription expired — downgrade to free
+-      await db.update(users)
+-        .set({ subscriptionTier: "free" })
+-        .where(eq(users.id, userId));
+-      tier = "free";
+-    }
+-
+-    // Check if boost has expired
+-    let isBoosted = user.isBoosted || false;
+-    if (isBoosted && user.boostExpiresAt && user.boostExpiresAt < new Date()) {
+-      await db.update(users)
+-        .set({ isBoosted: false })
+-        .where(eq(users.id, userId));
+-      isBoosted = false;
+-    }
+-
+-    return {
+-      tier,
+-      limits: TIER_LIMITS[tier],
+-      dailyBumpsUsed: user.dailyBumpsUsed || 0,
+-      boostCredits: user.boostCredits || 0,
+-      isBoosted,
+-      boostExpiresAt: user.boostExpiresAt || null,
+-    };
+-  }
+-
+-  // ═══════════════════════════════════════════════════════════════
+-  // ═══ TRAVEL LEADERBOARD METHODS ═══
+-  // ═══════════════════════════════════════════════════════════════
+-
+-  /**
+-   * Log a travel segment and accumulate miles on the user record.
+-   */
+-  async logTravel(userId: number, fromLat: number, fromLon: number, toLat: number, toLon: number, distanceMiles: number): Promise<void> {
+-    // Insert the log entry
+-    await db.insert(travelLogs).values({
+-      userId,
+-      fromLat: String(fromLat),
+-      fromLon: String(fromLon),
+-      toLat: String(toLat),
+-      toLon: String(toLon),
+-      distanceMiles: String(distanceMiles),
+-    });
+-
+-    // Accumulate on the user record
+-    const user = await this.getUser(userId);
+-    if (!user) return;
+-
+-    const currentTotal = parseFloat(user.totalMilesTraveled as string || "0");
+-    const currentWeekly = parseFloat(user.weeklyMilesTraveled as string || "0");
+-
+-    // Check if weekly counter needs reset
+-    const now = new Date();
+-    let newWeekly = currentWeekly + distanceMiles;
+-    const resetAt = user.weeklyMilesResetAt;
+-    if (!resetAt || resetAt < now) {
+-      // Reset weekly — set next Monday midnight
+-      newWeekly = distanceMiles;
+-      const nextMonday = new Date(now);
+-      nextMonday.setDate(now.getDate() + (8 - now.getDay()) % 7 || 7);
+-      nextMonday.setHours(0, 0, 0, 0);
+-      await db.update(users)
+-        .set({
+-          totalMilesTraveled: String(currentTotal + distanceMiles),
+-          weeklyMilesTraveled: String(newWeekly),
+-          weeklyMilesResetAt: nextMonday,
+-        })
+-        .where(eq(users.id, userId));
+-    } else {
+-      await db.update(users)
+-        .set({
+-          totalMilesTraveled: String(currentTotal + distanceMiles),
+-          weeklyMilesTraveled: String(newWeekly),
+-        })
+-        .where(eq(users.id, userId));
+-    }
+-  }
+-
+-  /**
+-   * Get the top travelers ranked by total miles or weekly miles.
+-   */
+-  async getLeaderboard(limit: number = 50, timeframe: 'all-time' | 'weekly' = 'all-time'): Promise<LeaderboardEntry[]> {
+-    const milesColumn = timeframe === 'weekly' ? users.weeklyMilesTraveled : users.totalMilesTraveled;
+-
+-    const results = await db.select({
+-      id: users.id,
+-      firstName: users.firstName,
+-      lastName: users.lastName,
+-      profilePhoto: users.profilePhoto,
+-      totalMilesTraveled: users.totalMilesTraveled,
+-      weeklyMilesTraveled: users.weeklyMilesTraveled,
+-    })
+-      .from(users)
+-      .where(and(
+-        eq(users.isActive, true),
+-        sql`CAST(${milesColumn} AS DOUBLE PRECISION) > 0`
+-      ))
+-      .orderBy(sql`CAST(${milesColumn} AS DOUBLE PRECISION) DESC`)
+-      .limit(limit);
+-
+-    return results.map((u, idx) => ({
+-      userId: u.id,
+-      firstName: u.firstName,
+-      lastInitial: u.lastName ? u.lastName.charAt(0) + '.' : '',
+-      profilePhoto: u.profilePhoto ? `/api/users/${u.id}/photo` : null,
+-      totalMiles: parseFloat(u.totalMilesTraveled as string || "0"),
+-      weeklyMiles: parseFloat(u.weeklyMilesTraveled as string || "0"),
+-      rank: idx + 1,
+-    }));
+-  }
+-
+-  /**
+-   * Get travel stats for a specific user, including their global rank.
+-   */
+-  async getUserTravelStats(userId: number): Promise<{ totalMiles: number; weeklyMiles: number; rank: number }> {
+-    const user = await this.getUser(userId);
+-    if (!user) return { totalMiles: 0, weeklyMiles: 0, rank: 0 };
+-
+-    const totalMiles = parseFloat(user.totalMilesTraveled as string || "0");
+-    const weeklyMiles = parseFloat(user.weeklyMilesTraveled as string || "0");
+-
+-    // Calculate rank: count how many active users have MORE miles
+-    const rankResult = await db.select({ count: sql<number>`count(*)` })
+-      .from(users)
+-      .where(and(
+-        eq(users.isActive, true),
+-        sql`CAST(${users.totalMilesTraveled} AS DOUBLE PRECISION) > ${totalMiles}`
+-      ));
+-
+-    const rank = (Number(rankResult[0]?.count) || 0) + 1;
+-
+-    return { totalMiles, weeklyMiles, rank };
+-  }
+-
+-  /**
+-   * Reset weekly miles for all users. Run via cron every Monday.
+-   */
+-  async resetWeeklyMiles(): Promise<number> {
+-    const result = await db.update(users)
+-      .set({ weeklyMilesTraveled: "0" })
+-      .where(sql`CAST(${users.weeklyMilesTraveled} AS DOUBLE PRECISION) > 0`)
+-      .returning();
+-    return result.length;
+-  }
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ }
+ 
+ // Always use database storage — DATABASE_URL is required
+diff --git a/shared/schema.ts b/shared/schema.ts
+index 30ff929..92d6126 100644
+--- a/shared/schema.ts
++++ b/shared/schema.ts
+@@ -33,25 +33,6 @@ export const users = pgTable("users", {
+   phoneNumber: text("phone_number").unique(),
+   isPhoneVerified: boolean("is_phone_verified").default(false),
+   safetyAcknowledged: boolean("safety_acknowledged").default(false),
+-<<<<<<< HEAD
+-  pushToken: text("push_token"), // Expo push notification token
+-  // ═══ Monetization Fields ═══
+-  subscriptionTier: text("subscription_tier").default("free"), // "free", "premium", "vip"
+-  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+-  dailyBumpsUsed: integer("daily_bumps_used").default(0),
+-  dailyBumpsResetAt: timestamp("daily_bumps_reset_at"),
+-  dailyMessagesUsed: integer("daily_messages_used").default(0), // per-conversation tracking in separate logic
+-  dailyMessagesResetAt: timestamp("daily_messages_reset_at"),
+-  boostCredits: integer("boost_credits").default(0),
+-  isBoosted: boolean("is_boosted").default(false),
+-  boostExpiresAt: timestamp("boost_expires_at"),
+-  stealthMode: boolean("stealth_mode").default(false),
+-  // ═══ Travel Leaderboard Fields ═══
+-  totalMilesTraveled: numeric("total_miles_traveled").default("0"),
+-  weeklyMilesTraveled: numeric("weekly_miles_traveled").default("0"),
+-  weeklyMilesResetAt: timestamp("weekly_miles_reset_at"),
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ }, (table) => {
+   return {
+     usernameIdx: index("username_idx").on(table.username),
+@@ -61,61 +42,6 @@ export const users = pgTable("users", {
+   };
+ });
+ 
+-<<<<<<< HEAD
+-// ═══ Travel Logs Table ═══
+-export const travelLogs = pgTable("travel_logs", {
+-  id: serial("id").primaryKey(),
+-  userId: integer("user_id").notNull(),
+-  fromLat: numeric("from_lat").notNull(),
+-  fromLon: numeric("from_lon").notNull(),
+-  toLat: numeric("to_lat").notNull(),
+-  toLon: numeric("to_lon").notNull(),
+-  distanceMiles: numeric("distance_miles").notNull(),
+-  timestamp: timestamp("timestamp").defaultNow(),
+-}, (table) => ({
+-  userIdIdx: index("travel_log_user_id_idx").on(table.userId),
+-  timestampIdx: index("travel_log_timestamp_idx").on(table.timestamp),
+-}));
+-
+-// ═══ Subscriptions Table ═══
+-export const subscriptions = pgTable("subscriptions", {
+-  id: serial("id").primaryKey(),
+-  userId: integer("user_id").notNull(),
+-  tier: text("tier").notNull(), // "premium", "vip"
+-  status: text("status").notNull().default("active"), // "active", "cancelled", "expired", "past_due"
+-  stripeCustomerId: text("stripe_customer_id"),
+-  stripeSubscriptionId: text("stripe_subscription_id"),
+-  currentPeriodStart: timestamp("current_period_start"),
+-  currentPeriodEnd: timestamp("current_period_end"),
+-  cancelledAt: timestamp("cancelled_at"),
+-  createdAt: timestamp("created_at").defaultNow(),
+-  updatedAt: timestamp("updated_at").defaultNow(),
+-}, (table) => {
+-  return {
+-    userIdIdx: index("sub_user_id_idx").on(table.userId),
+-    stripeSubIdx: index("stripe_sub_idx").on(table.stripeSubscriptionId),
+-  };
+-});
+-
+-// ═══ Transactions Table ═══
+-export const transactions = pgTable("transactions", {
+-  id: serial("id").primaryKey(),
+-  userId: integer("user_id").notNull(),
+-  type: text("type").notNull(), // "subscription", "boost_single", "boost_5pack", "boost_10pack"
+-  amount: integer("amount").notNull(), // cents (e.g. 499 = $4.99)
+-  currency: text("currency").default("usd"),
+-  stripePaymentIntentId: text("stripe_payment_intent_id"),
+-  status: text("status").default("pending"), // "pending", "completed", "failed", "refunded"
+-  metadata: text("metadata"), // JSON string for details
+-  createdAt: timestamp("created_at").defaultNow(),
+-}, (table) => {
+-  return {
+-    userIdIdx: index("txn_user_id_idx").on(table.userId),
+-  };
+-});
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ export const bumps = pgTable("bumps", {
+   id: serial("id").primaryKey(),
+   userId: integer("user_id").notNull(),
+@@ -172,20 +98,6 @@ export const verificationCodes = pgTable("verification_codes", {
+   };
+ });
+ 
+-<<<<<<< HEAD
+-export const waitlist = pgTable("waitlist", {
+-  id: serial("id").primaryKey(),
+-  name: text("name").notNull(),
+-  email: text("email").notNull().unique(),
+-  phone: text("phone"),
+-  socialLink: text("social_link"),
+-  type: text("type").default("evangelist"), // e.g. "evangelist", "general"
+-  createdAt: timestamp("created_at").defaultNow(),
+-});
+-
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ export const insertUserSchema = createInsertSchema(users).pick({
+   username: true,
+   password: true,
+@@ -222,24 +134,6 @@ export const updateUserSchema = createInsertSchema(users).pick({
+   phoneNumber: true,
+   isPhoneVerified: true,
+   safetyAcknowledged: true,
+-<<<<<<< HEAD
+-  // Monetization fields
+-  subscriptionTier: true,
+-  subscriptionExpiresAt: true,
+-  stealthMode: true,
+-  boostCredits: true,
+-  isBoosted: true,
+-  boostExpiresAt: true,
+-  dailyBumpsUsed: true,
+-  dailyBumpsResetAt: true,
+-  dailyMessagesUsed: true,
+-  dailyMessagesResetAt: true,
+-  // Travel Leaderboard fields
+-  totalMilesTraveled: true,
+-  weeklyMilesTraveled: true,
+-  weeklyMilesResetAt: true,
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ });
+ 
+ export const insertBumpSchema = createInsertSchema(bumps).pick({
+@@ -262,29 +156,6 @@ export const insertNotificationSchema = createInsertSchema(notifications).pick({
+   content: true,
+ });
+ 
+-<<<<<<< HEAD
+-export const insertSubscriptionSchema = createInsertSchema(subscriptions).pick({
+-  userId: true,
+-  tier: true,
+-  status: true,
+-  stripeCustomerId: true,
+-  stripeSubscriptionId: true,
+-  currentPeriodStart: true,
+-  currentPeriodEnd: true,
+-});
+-
+-export const insertTransactionSchema = createInsertSchema(transactions).pick({
+-  userId: true,
+-  type: true,
+-  amount: true,
+-  currency: true,
+-  stripePaymentIntentId: true,
+-  status: true,
+-  metadata: true,
+-});
+-
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ export type InsertUser = z.infer<typeof insertUserSchema>;
+ export type UpdateUser = z.infer<typeof updateUserSchema>;
+ export type User = typeof users.$inferSelect;
+@@ -295,86 +166,9 @@ export type Bump = typeof bumps.$inferSelect;
+ export type InsertMessage = z.infer<typeof insertMessageSchema>;
+ export type Message = typeof messages.$inferSelect;
+ 
+-<<<<<<< HEAD
+-export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+-export type Notification = typeof notifications.$inferSelect;
+-
+-export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+-export type Subscription = typeof subscriptions.$inferSelect;
+-
+-export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+-export type Transaction = typeof transactions.$inferSelect;
+-
+-export const InsertWaitlistSchema = createInsertSchema(waitlist).pick({
+-  name: true,
+-  email: true,
+-  phone: true,
+-  socialLink: true,
+-});
+-
+-export type InsertWaitlist = z.infer<typeof InsertWaitlistSchema>;
+-export type Waitlist = typeof waitlist.$inferSelect;
+-
+-export type VerificationCode = typeof verificationCodes.$inferSelect;
+-export type TravelLog = typeof travelLogs.$inferSelect;
+-
+-// ═══ Leaderboard Types ═══
+-export interface LeaderboardEntry {
+-  userId: number;
+-  firstName: string;
+-  lastInitial: string;
+-  profilePhoto: string | null;
+-  totalMiles: number;
+-  weeklyMiles: number;
+-  rank: number;
+-}
+-
+-// ═══ Monetization Constants ═══
+-export const TIER_LIMITS = {
+-  free: {
+-    dailyBumps: 5,
+-    dailyMessagesPerConvo: 10,
+-    canRevealInstantly: false,
+-    canSuperBump: false,
+-    canStealth: false,
+-    weeklyFreeBoosts: 0,
+-    hasReadReceipts: false,
+-  },
+-  premium: {
+-    dailyBumps: Infinity,
+-    dailyMessagesPerConvo: Infinity,
+-    canRevealInstantly: true,
+-    canSuperBump: false,
+-    canStealth: false,
+-    weeklyFreeBoosts: 1,
+-    hasReadReceipts: true,
+-  },
+-  vip: {
+-    dailyBumps: Infinity,
+-    dailyMessagesPerConvo: Infinity,
+-    canRevealInstantly: true,
+-    canSuperBump: true,
+-    canStealth: true,
+-    weeklyFreeBoosts: 3,
+-    hasReadReceipts: true,
+-  },
+-} as const;
+-
+-export type SubscriptionTier = keyof typeof TIER_LIMITS;
+-
+-export const BOOST_PACKS = {
+-  single: { credits: 1, priceInCents: 99 },
+-  pack5: { credits: 5, priceInCents: 399 },
+-  pack10: { credits: 10, priceInCents: 699 },
+-} as const;
+-
+-export const BOOST_DURATION_MINUTES = 30;
+-
+-=======
+ 
+ 
+ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+ export type Notification = typeof notifications.$inferSelect;
+ 
+ export type VerificationCode = typeof verificationCodes.$inferSelect;
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+diff --git a/vite.config.ts b/vite.config.ts
+index 2cebd55..354480d 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -30,10 +30,4 @@ export default defineConfig({
+     outDir: path.resolve(import.meta.dirname, "dist/public"),
+     emptyOutDir: true,
+   },
+-<<<<<<< HEAD
+-  server: {
+-    allowedHosts: true,
+-  }
+-=======
+->>>>>>> 00686eb898bf23a7485da3665d86fbd8925da3bd
+ });

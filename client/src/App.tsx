@@ -20,6 +20,7 @@ const MapView = lazy(() => import("@/pages/MapView"));
 // Lazy-load secondary route components so they don't block initial paint
 const Explore = lazy(() => import("@/pages/Explore"));
 const Dating = lazy(() => import("@/pages/Dating"));
+const Bumps = lazy(() => import("@/pages/Bumps"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Messages = lazy(() => import("@/pages/Messages"));
 const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
@@ -74,6 +75,9 @@ function AppRouter() {
         </Route>
         <Route path="/dating">
           <ProtectedRoute component={Dating} />
+        </Route>
+        <Route path="/bumps">
+          <ProtectedRoute component={Bumps} />
         </Route>
         <Route path="/messages">
           <ProtectedRoute component={Messages} />
