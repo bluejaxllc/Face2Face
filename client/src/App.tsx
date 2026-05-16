@@ -25,6 +25,7 @@ const Messages = lazy(() => import("@/pages/Messages"));
 const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
 const Evangelists = lazy(() => import("@/pages/Evangelists"));
 const DebugLayouts = lazy(() => import("@/pages/DebugLayouts"));
+const Games = lazy(() => import("@/pages/Games"));
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -77,6 +78,9 @@ function AppRouter() {
         </Route>
         <Route path="/messages">
           <ProtectedRoute component={Messages} />
+        </Route>
+        <Route path="/games">
+          <ProtectedRoute component={Games} />
         </Route>
 
         <Route path="/profile">
