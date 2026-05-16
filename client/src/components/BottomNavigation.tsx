@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, User, Compass, Bell, MessageSquare, Heart, Users } from "lucide-react";
+import { Map, User, Compass, Bell, MessageSquare, Heart, Users, Gamepad2 } from "lucide-react";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef } from "react";
 
@@ -34,10 +34,11 @@ export default function BottomNavigation() {
   };
 
   const navItems = [
+    { path: "/games", icon: Gamepad2, label: "Games" },
     { path: "/explore", icon: Users, label: "Groups & Lists" },
     { path: "/dating", icon: Heart, label: "Dating" },
     { path: "/map", icon: Map, label: "Map" },
-    { path: "/messages", icon: MessageSquare, label: "Messages", badge: notifCount },
+    { path: "/messages", icon: MessageSquare, label: "Bumps & Messages", badge: notifCount },
     { path: "/profile", icon: User, label: "Profile" },
   ];
 

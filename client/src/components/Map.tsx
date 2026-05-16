@@ -489,7 +489,6 @@ function Map() {
             </span>
             <Users style={{ width: "11px", height: "11px" }} className="text-slate-400" />
           </div>
-          <BeenBumpedBadge onClick={() => setShowReceivedBumps(true)} />
         </div>
 
         {/* Mode Toggles removed and moved to Dating.tsx */}
