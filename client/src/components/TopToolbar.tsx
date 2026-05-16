@@ -75,70 +75,86 @@ export default function TopToolbar({
   return (
     <>
       <div
-        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 border-b border-slate-800/50 backdrop-blur-md pointer-events-auto"
+        className="fixed top-4 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
-        <div className="flex justify-around items-center w-full max-w-lg mx-auto" style={{ height: "44px" }}>
-          {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
-            <button
-              key={id}
-              onClick={onClick}
-              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
-                active ? "opacity-100" : "opacity-70 hover:opacity-100"
-              }`}
-            >
-              <Icon
-                className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
-                style={{ width: "16px", height: "16px" }}
-                strokeWidth={active ? 2.5 : 1.5}
-              />
-              <span
-                className={`font-semibold tracking-wider uppercase ${
-                  active ? activeColor : "text-slate-400"
+        <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "44px", padding: "4px 8px" }}>
+          <div className="flex justify-around items-center h-full w-full">
+            {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
+              <button
+                key={id}
+                onClick={onClick}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 ${
+                  active ? "opacity-100" : "opacity-70 hover:opacity-100"
                 }`}
-                style={{ fontSize: "9px" }}
               >
-                {label}
-              </span>
-              {hasDropdown && (
-                <ChevronDown
-                  className="text-slate-500"
-                  style={{ width: "10px", height: "10px" }}
+                <Icon
+                  className={`transition-colors duration-200 ${active ? activeColor : "text-slate-400"}`}
+                  style={{ width: "16px", height: "16px" }}
+                  strokeWidth={active ? 2.5 : 1.5}
                 />
-              )}
-            </button>
-          ))}
-        </div>
+                <span
+                  className={`font-semibold tracking-wider uppercase ${
+                    active ? activeColor : "text-slate-400"
+                  }`}
+                  style={{ fontSize: "9px" }}
+                >
+                  {label}
+                </span>
+                {hasDropdown && (
+                  <ChevronDown
+                    className="text-slate-500"
+                    style={{ width: "10px", height: "10px" }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        </nav>
       </div>
 
       {/* Distance dropdown */}
       {showDistance && (
         <div
           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
-          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "200px" }}
+          style={{ top: "64px", left: "50%", transform: "translateX(-50%)", minWidth: "160px" }}
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 items-center">
             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-slate-950/80 border border-white/10 rounded-full shadow-inner px-3 py-1">
               <input
-                type="range"
+                type="number"
+                value={filterOptions.radius >= 25000 ? "" : filterOptions.radius}
+                placeholder="∞"
                 min={1}
-                max={100}
-                value={filterOptions.radius >= 25000 ? 100 : filterOptions.radius}
+                max={25000}
+                aria-label="Search radius in miles"
                 onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  onFilterChange({ ...filterOptions, radius: val >= 100 ? 25000 : val });
+                  const val = e.target.value;
+                  // Limit the input field string length to 5 digits essentially matching the 25000 max bound visually 
+                  if (val.length > 5) return;
+                  if (val === "" || val === "0") {
+                    onFilterChange({ ...filterOptions, radius: 25000 });
+                  } else {
+                    onFilterChange({ ...filterOptions, radius: Math.min(25000, Math.max(1, parseInt(val) || 1)) });
+                  }
                 }}
-                className="flex-1 accent-indigo-500"
+                className="bg-transparent text-white font-black text-center outline-none border-none placeholder:text-slate-500"
+                style={{ width: "48px", fontSize: "14px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
               />
-              <span className="text-white font-bold text-sm min-w-[40px] text-right">
-                {filterOptions.radius >= 25000 ? "∞" : `${filterOptions.radius}mi`}
-              </span>
+              <span className="text-slate-400 font-bold" style={{ fontSize: "10px", letterSpacing: "1px" }}>MI</span>
             </div>
+            
+            <button
+               onClick={() => onFilterChange({ ...filterOptions, radius: 25000 })}
+               className="mt-1 text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300"
+            >
+              Set Unlimited
+            </button>
           </div>
           <button
             onClick={() => setShowDistance(false)}
-            className="mt-2 w-full text-center text-xs text-slate-500 hover:text-slate-300"
+            className="mt-3 w-full text-center text-xs text-slate-500 hover:text-slate-300"
           >
             Close
           </button>
@@ -149,7 +165,7 @@ export default function TopToolbar({
       {showFilters && (
         <div
           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
-          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
+          style={{ top: "64px", left: "50%", transform: "translateX(-50%)", minWidth: "220px" }}
         >
           <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2 block">Show Users</span>
           <div className="flex flex-col gap-2">
