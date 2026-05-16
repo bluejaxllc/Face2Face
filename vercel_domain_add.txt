@@ -1,0 +1,21 @@
+﻿node.exe : Retrieving 
+projectΓÇª
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Ret  
+  rieving projectΓÇª:Str   
+ ing) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Error: `vercel domains add 
+<domain>` expects one 
+argument.

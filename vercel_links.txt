@@ -1,0 +1,3 @@
+﻿C:\Users\edgar\OneDrive\Desktop\Face 2 Face\.vercel\project.json:
+{"projectId":"prj_MyS4xOHScgh1sDYlaXBZN6xSW2W8","orgId":"team_Ddu3Mki1Oc3bmiE9jhEprD2F","projectName":"face2face-layout"}
+---

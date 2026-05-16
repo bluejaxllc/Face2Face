@@ -1,0 +1,15 @@
+d1962c2 style: finalize navigation UI tweaks per user request
+cb59a5a Revert back to 4-item pill navigation layout
+38bbfd9 style: final UI polish for distance filter and legacy layout deprecation
+cdf4885 Fix 404 for /games by adding placeholder Games route
+78d0bd3 UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster
+b6912ee Deprecate Railway frontend layout, redirect to bump.bluejax.ai
+a5b219e Restore Turf Wars Navigation and Finalize Luxury UI Aesthetics
+95694a4 Revert "feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)"
+ed17f00 feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)
+3e94216 fix: flawlessly unify 5-item Dating layout (3b91347) with recent questionnaires
+23988c4 fix: restore 4b31197 clean state, keep 4-item nav, remove Mode Toggles
+4b31197 feat: Add TrueSocial, LinkedIn priority, location, form navigation links
+00686eb feat: most traveled leaderboard mobile UI and cron
+001275e Add and integrate Phase 3 content scripts and influencer outreach strategy into Strategic Command Center
+c51d5b9 Expand influencer list with sociologists and tech critics

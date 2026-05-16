@@ -115,7 +115,7 @@ export default function TopToolbar({
       {showDistance && (
         <div
           className="fixed z-[10000] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-3"
-          style={{ top: "50px", left: "30%", transform: "translateX(-50%)", minWidth: "200px" }}
+          style={{ top: "50px", left: "50%", transform: "translateX(-50%)", minWidth: "200px" }}
         >
           <div className="flex flex-col gap-2">
             <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Search Radius</span>

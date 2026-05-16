@@ -1,0 +1,24 @@
+﻿node.exe : Fetching domain 
+bump.bluejax.ai under 
+eds-projects-bc846511
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Fet  
+  ching domain...ojects-   
+ bc846511:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Error: Domain not found by 
+"bump.bluejax.ai" under 
+eds-projects-bc846511
+> Run `vercel domains ls` 
+to see your domains.

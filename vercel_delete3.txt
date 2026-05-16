@@ -1,0 +1,29 @@
+﻿node.exe : The project 
+face2face-layout will be 
+removed permanently.
+At C:\Program 
+Files\nodejs\npx.ps1:28 
+char:12
++   $input | & $NODE_EXE 
+$NPX_CLI_JS $args
++            ~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (The  
+   project fac...ed perm   
+ anently.:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+It will also delete 
+everything under the 
+project including 
+deployments.
+? Are you sure? 
+(y/N)[23G[2K[G? Are you 
+sure? (y/N) y[24G[2K[G? 
+Are you sure? yes[20G
+[?25h> Success! Project 
+face2face-layout removed 
+[503ms]

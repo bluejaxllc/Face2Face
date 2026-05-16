@@ -1,0 +1,8 @@
+d1962c2 HEAD@{0}: reset: moving to HEAD~1
+af61afe HEAD@{1}: commit: fix(UI): Restore 5-item navigation layout and center distance dropdown
+d1962c2 HEAD@{2}: checkout: moving from d1962c2a8fad3a90e80db2d79da55f08ffdcdd14 to main
+d1962c2 HEAD@{3}: reset: moving to d1962c2
+cb59a5a HEAD@{4}: checkout: moving from master to cb59a5a
+d1962c2 HEAD@{5}: reset: moving to origin/main
+dd1fdad HEAD@{6}: commit: Auto-sync 2026-05-15 23:30
+39ce0ae HEAD@{7}: commit (initial): Initial backup commit

@@ -1,0 +1,21 @@
+﻿node.exe : Error: 
+unknown or unexpected 
+option: --yes
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo      
+        : NotSpecified: 
+(Err    or: unknown 
+...d optio    n: 
+--yes:String) [], R    
+emoteException
+    + 
+FullyQualifiedErrorI    
+d : NativeCommandError
+ 

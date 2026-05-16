@@ -1,0 +1,112 @@
+﻿node.exe : Fetching 
+projects in 
+eds-projects-bc846511
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Fet  
+  ching projec...ojects-   
+ bc846511:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+> Projects found under 
+eds-projects-bc846511  
+[841ms]
+
+  Project Name             
+ Latest Production URL     
+                  Updated  
+ Node Version   
+  face2face-layout         
+ https://face2face-layout.v
+ercel.app         47m      
+ 24.x           
+  bump-and-grind           
+ https://bump.bluejax.ai   
+                  12h      
+ 24.x           
+  client                   
+ https://client-opal-beta-8
+7.vercel.app      12h      
+ 24.x           
+  face2face-questionnaire  
+ https://business.face2face
+.icu              19h      
+ 24.x           
+  dist                     
+ https://dist-nine-mu-45.ve
+rcel.app          3d       
+ 24.x           
+  cms-deploy               
+ 
+https://planner.bluejax.ai 
+                 3d        
+24.x           
+  vendor-app               
+ https://vendor-app-flax.ve
+rcel.app          4d       
+ 24.x           
+  vercel_pwa_host          
+ https://vercelpwahost.verc
+el.app            4d       
+ 24.x           
+  deploy                   
+ https://deploy-sigma-khaki
+-58.vercel.app    4d       
+ 24.x           
+  hdental-site             
+ https://h-dental.bluejax.a
+i                 4d       
+ 24.x           
+  f2f-command-center       
+ https://f2f-command-center
+.vercel.app       5d       
+ 24.x           
+  f2f-questionnaire        
+ https://f2f-questionnaire.
+vercel.app        5d       
+ 24.x           
+  questionnaire-site       
+ https://questionnaire-site
+-tau.vercel.app   5d       
+ 24.x           
+  canaco-web               
+ https://canaco-web.vercel.
+app               10d      
+ 24.x           
+  ai-course                
+ https://ia.bluejax.ai     
+                  14d      
+ 24.x           
+  menu-don-raul            
+ https://menu-don-raul.verc
+el.app            14d      
+ 24.x           
+  website                  
+ https://face2face.icu     
+                  17d      
+ 24.x           
+  landing                  
+ https://landing-phi-three-
+92.vercel.app     18d      
+ 24.x           
+  planhub-scraper          
+ https://planhub-scraper.ve
+rcel.app          19d      
+ 24.x           
+  diana_temp               
+ https://dianatemp.vercel.a
+pp                22d      
+ 24.x           
+
+> To display the next 
+page, run `vercel project 
+ls --next 1777093235773`

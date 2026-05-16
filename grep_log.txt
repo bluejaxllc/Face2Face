@@ -1,0 +1,3 @@
+﻿8e1438d chore: resolve merge conflicts with other agent
+8c5839c fix: add overscroll-behavior: none to prevent Safari rubber-banding map drag conflicts, remove unneeded pb-[50px] from Map.tsx
+475cf67 fix: add overscroll-behavior: none to prevent Safari rubber-banding map drag conflicts, remove unneeded pb-[50px] from Map.tsx

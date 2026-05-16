@@ -1,0 +1,25 @@
+﻿node.exe : Retrieving 
+projectΓÇª
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Ret  
+  rieving projectΓÇª:Str   
+ ing) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Adding domain 
+bump.bluejax.ai to project 
+face2face-layout
+Error: Cannot add 
+bump.bluejax.ai since it's 
+already assigned to 
+another project. (400)

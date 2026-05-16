@@ -1,0 +1,80 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   git_log.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	all_commits.txt
+	bottom_nav_ed17f00.tsx
+	bottom_nav_ed17f00_2.tsx
+	bottom_nav_history.txt
+	branch_diff_stat.txt
+	bump_files.txt
+	bump_test.png
+	commits.tmp
+	commits_utf8.txt
+	components_cb59a5a.txt
+	configure_webhook_cdp.mjs
+	diff (1).txt
+	extract.cjs
+	extract_full.cjs
+	flame_commit.txt
+	full_commit.txt
+	get_log.cjs
+	gitlog.txt
+	gitlog2.txt
+	grep_log.txt
+	latest_nav_commit.txt
+	log.txt
+	log_oneline.txt
+	log_utf8.txt
+	nav_fixed.tsx
+	nav_fixed_utf8.tsx
+	notion_error.png
+	notion_initial.png
+	onedrive_log.txt
+	pill_nav.txt
+	reflog (1).txt
+	reflog.txt
+	repo_branches.txt
+	repo_log.txt
+	repo_status.txt
+	scrape_nav.cjs
+	scrape_texts.cjs
+	screenshot.png
+	status.txt
+	temp_nav_log.txt
+	temp_nav_show.txt
+	temp_pill.txt
+	top_toolbar_cb59a5a.txt
+	tsc_output.txt
+	tsc_output2.txt
+	vercel_delete.txt
+	vercel_delete2.txt
+	vercel_delete3.txt
+	vercel_deploy.txt
+	vercel_deploy2.txt
+	vercel_deployments.txt
+	vercel_deployments_list.txt
+	vercel_domain_add.txt
+	vercel_domain_add2.txt
+	vercel_domain_rm.txt
+	vercel_domain_rm2.txt
+	vercel_domains.txt
+	vercel_inspect_bump.txt
+	vercel_inspect_layout.txt
+	vercel_links.txt
+	vercel_ls.txt
+	vercel_ls2.txt
+	vercel_projects.txt
+	vercel_relink.txt
+	vercel_relink2.txt
+	vercel_rm_help.txt
+	vite_output.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")

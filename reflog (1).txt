@@ -1,0 +1,10 @@
+﻿3421931 HEAD@{0}: commit: fix: finalize Face 2 Face map layout and deploy triggers
+85cb798 HEAD@{1}: reset: moving to HEAD
+85cb798 HEAD@{2}: commit: fix: resolve massive merge conflicts and restore 4-item pill navigation layout
+d10fbe7 HEAD@{3}: rebase (abort): returning to refs/heads/main
+d10fbe7 HEAD@{4}: rebase (abort): returning to refs/heads/main
+d10fbe7 HEAD@{5}: commit: fix: resolve nested package.json merge conflicts breaking vercel build
+631daf5 HEAD@{6}: commit: Auto-sync 2026-05-13 23:30
+2abc90a HEAD@{7}: cherry-pick: feat: Add TrueSocial, LinkedIn priority, location, form navigation links
+14529a7 HEAD@{8}: pull origin main --rebase: Fast-forward
+00686eb HEAD@{9}: rebase (abort): returning to refs/heads/main

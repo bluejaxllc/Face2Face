@@ -1,0 +1,91 @@
+commit d1962c2a8fad3a90e80db2d79da55f08ffdcdd14
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 02:27:49 2026 -0600
+
+    style: finalize navigation UI tweaks per user request
+
+commit cb59a5a4366e5de8089c7ca61ee9ca8c55068a2d
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 01:37:55 2026 -0600
+
+    Revert back to 4-item pill navigation layout
+
+commit 38bbfd981c79807bfb2c58ad880543215ce1093e
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 01:23:18 2026 -0600
+
+    style: final UI polish for distance filter and legacy layout deprecation
+
+commit cdf4885510753efc942b11be47e6d484b910dc3e
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 01:16:14 2026 -0600
+
+    Fix 404 for /games by adding placeholder Games route
+
+commit 78d0bd33914c60d1edaaa6318fa0b650ba53e2e0
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Sat May 16 00:44:20 2026 -0600
+
+    UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster
+
+commit b6912eedbfeb58785f60dab24c042a9b6605a5d5
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 23:48:17 2026 -0600
+
+    Deprecate Railway frontend layout, redirect to bump.bluejax.ai
+
+commit a5b219ed19bca776e9db064b99bb65a4a91d07bf
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 23:23:45 2026 -0600
+
+    Restore Turf Wars Navigation and Finalize Luxury UI Aesthetics
+
+commit 95694a43238ea181acfd6ebf9c836f69fc7b464b
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 21:00:47 2026 -0600
+
+    Revert "feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)"
+    
+    This reverts commit ed17f00f7dffda0ca91ebfe8fe12cb4709def2fd.
+
+commit ed17f00f7dffda0ca91ebfe8fe12cb4709def2fd
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 20:50:41 2026 -0600
+
+    feat: restore correct 6-item nav layout with TopToolbar (LIVE/DISTANCE/SHOW/LAYERS/SETTINGS) and bottom nav (DATING/MAP/BUMPS/BUMP-MESSAGES/GROUP-LIST/PROFILE)
+
+commit 3e94216dedf3930821b275ec2923c6969b03ae66
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 19:42:52 2026 -0600
+
+    fix: flawlessly unify 5-item Dating layout (3b91347) with recent questionnaires
+
+commit 23988c4ec106b204b8b99eea69dcb307f89c97d9
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Fri May 15 19:24:55 2026 -0600
+
+    fix: restore 4b31197 clean state, keep 4-item nav, remove Mode Toggles
+
+commit 4b311978e879a45925e5e57d706b843b4c5f2f10
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Wed May 13 21:29:36 2026 -0600
+
+    feat: Add TrueSocial, LinkedIn priority, location, form navigation links
+
+commit 00686eb898bf23a7485da3665d86fbd8925da3bd
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Tue May 12 21:56:10 2026 -0600
+
+    feat: most traveled leaderboard mobile UI and cron
+
+commit 001275e23f902b7b39ded308ba5efbcb2e6b2910
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Mon May 11 23:25:15 2026 -0600
+
+    Add and integrate Phase 3 content scripts and influencer outreach strategy into Strategic Command Center
+
+commit c51d5b93f9eddfbb092b36c95521492d909901f7
+Author: bluejaxllc <edgar@bluejax.ai>
+Date:   Mon May 11 23:21:28 2026 -0600
+
+    Expand influencer list with sociologists and tech critics

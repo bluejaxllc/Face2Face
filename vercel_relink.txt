@@ -1,0 +1,45 @@
+﻿node.exe : 
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : 
+NotSpecified: (:St    
+ring) [], RemoteExcept 
+   ion
+    + 
+FullyQualifiedErrorI   
+ d : NativeCommandError
+ 
+  Set up "~\OneDrive\De
+sktop\Face 2 Face"
+Loading teamsΓÇª
+Searching for existing 
+projectsΓÇª
+  Linked      eds-proje
+cts-bc846511/bump-and-g
+rind
+Retrieving projectΓÇª
+> Overwriting existing 
+.env.local file
+> Downloading 
+`development` 
+Environment Variables 
+for eds-projects-bc8465
+11/bump-and-grind
+Downloading
+
+Changes:
++ VERCEL_OIDC_TOKEN 
+(Updated)
+
+Updated .env.local 
+file and added it to 
+.gitignore [130ms]

@@ -1,0 +1,5 @@
+﻿d1962c2 style: finalize navigation UI tweaks per user request
+cb59a5a Revert back to 4-item pill navigation layout
+38bbfd9 style: final UI polish for distance filter and legacy layout deprecation
+cdf4885 Fix 404 for /games by adding placeholder Games route
+78d0bd3 UI Refinements: BottomNavigation layout, FilterDrawer distance input size, remove legacy bump badge cluster

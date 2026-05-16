@@ -1,0 +1,11 @@
+client/src/pages/Dating.tsx
+client/src/pages/DebugLayouts.tsx
+client/src/pages/DevDiagnostics.tsx
+client/src/pages/Evangelists.tsx
+client/src/pages/Explore.tsx
+client/src/pages/Games.tsx
+client/src/pages/MapView.tsx
+client/src/pages/Messages.tsx
+client/src/pages/Profile.tsx
+client/src/pages/Register.tsx
+client/src/pages/not-found.tsx

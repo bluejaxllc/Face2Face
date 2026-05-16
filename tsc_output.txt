@@ -1,0 +1,5 @@
+
+> rest-express@1.0.0 check
+> tsc
+
+client/src/pages/Games.tsx(2,1): error TS1002: Unterminated string literal.

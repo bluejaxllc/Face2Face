@@ -1,0 +1,8 @@
+Fetching Domains under eds-projects-bc846511
+> 2 Domains found under eds-projects-bc846511 [1s]
+ 
+  Domain             Registrar           Nameservers         Expiration Date    Creator             Age    
+  face2face.icu      Third Party         Third Party         -                  edgar-4404          16d    
+  bluejax.ai         Third Party         Third Party         -                  edgar-4404          98d    
+ 
+

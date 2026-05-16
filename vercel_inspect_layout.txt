@@ -1,0 +1,25 @@
+﻿node.exe : Fetching 
+deployment 
+"face2face-layout" in 
+eds-projects-bc846511
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Fet  
+  ching deploy...ojects-   
+ bc846511:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Error: Can't find the 
+deployment 
+"face2face-layout" under 
+the context 
+"eds-projects-bc846511"

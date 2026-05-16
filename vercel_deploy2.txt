@@ -1,0 +1,128 @@
+﻿node.exe : Retrieving 
+projectΓÇª
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Ret  
+  rieving projectΓÇª:Str   
+ ing) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Deploying eds-projects-bc84
+6511/face2face-layout
+Uploading 
+[--------------------] 
+(0.0B/8.9KB)
+Uploading 
+[=====---------------] 
+(2.3KB/8.9KB)
+Uploading 
+[===================-] 
+(8.5KB/8.9KB)
+Uploading 
+[====================] 
+(8.9KB/8.9KB)
+  Inspect     https://verce
+l.com/eds-projects-bc846511
+/face2face-layout/AkkgGSroz
+Un8AGeMF2cJfTuLcwX2
+Γû▓ Production  https://fac
+e2face-layout-qgcpsryun-eds
+-projects-bc846511.vercel.a
+pp
+BuildingΓÇª
+BuildingΓÇª
+Running build in 
+Washington, D.C., USA 
+(East) ΓÇô iad1
+Build machine 
+configuration: 2 cores, 8 
+GB
+Retrieving list of 
+deployment files...
+Previous build caches not 
+available.
+Downloading 481 deployment 
+files...
+Running "vercel build"
+Vercel CLI 53.3.2
+Installing dependencies...
+npm warn deprecated @esbuil
+d-kit/esm-loader@2.6.5: 
+Merged into tsx: 
+https://tsx.is
+npm warn deprecated @esbuil
+d-kit/core-utils@3.3.2: 
+Merged into tsx: 
+https://tsx.is
+npm warn deprecated 
+glob@10.5.0: Old versions 
+of glob are not supported, 
+and contain widely 
+publicized security 
+vulnerabilities, which 
+have been fixed in the 
+current version. Please 
+update. Support for old 
+versions may be purchased 
+(at exorbitant rates) by 
+contacting i@izs.me
+added 578 packages in 11s
+75 packages are looking 
+for funding
+run `npm fund` for details
+> rest-express@1.0.0 build
+> vite build && esbuild 
+server/index.ts 
+--platform=node 
+--packages=external 
+--bundle --format=esm 
+--outdir=dist && esbuild 
+server/api.ts 
+--platform=node 
+--packages=external 
+--bundle --format=esm 
+--outfile=api/index.mjs
+vite v5.4.21 building for 
+production...
+transforming...
+Browserslist: browsers 
+data (caniuse-lite) is 19 
+months old. Please run:
+npx update-browserslist-db@
+latest
+Why you should do it 
+regularly: https://github.c
+om/browserslist/update-db#r
+eadme
+[2K[1A[2K[GΓû▓ 
+Production  https://face2fa
+ce-layout-qgcpsryun-eds-pro
+jects-bc846511.vercel.app
+CompletingΓÇª
+Γû▓ Aliased     https://fac
+e2face-layout.vercel.app
+
+Γ£ô Ready in 39s
+
+Common next commands:
+- `vercel inspect face2face
+-layout-qgcpsryun-eds-proje
+cts-bc846511.vercel.app 
+--logs`
+- `vercel redeploy face2fac
+e-layout-qgcpsryun-eds-proj
+ects-bc846511.vercel.app`
+> Tip: Run `npx plugins 
+add vercel/vercel-plugin` 
+to enhance your agent 
+experience
+https://face2face-layout-qgcpsryun-eds-projects-bc846511.vercel.app

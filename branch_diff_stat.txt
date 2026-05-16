@@ -1,0 +1,25 @@
+﻿git : fatal: ambiguous 
+argument 
+'final-ui-polish': unknown 
+revision or path not in 
+the working tree.
+At line:1 char:1
++ git diff main 
+final-ui-polish --stat 
+2>&1 | Out-File -Encoding 
+utf8 b ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (fat  
+  al: ambiguou...e worki   
+ ng tree.:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Use '--' to separate paths 
+from revisions, like this:
+'git <command> 
+[<revision>...] -- 
+[<file>...]'

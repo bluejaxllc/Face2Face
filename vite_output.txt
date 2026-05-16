@@ -1,0 +1,37 @@
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+Browserslist: browsers data (caniuse-lite) is 19 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[32m✓[39m 2458 modules transformed.
+rendering chunks...
+computing gzip size...
+[2m../dist/public/[22m[32mindex.html                             [39m[1m[2m  6.12 kB[22m[1m[22m[2m │ gzip:   2.18 kB[22m
+[2m../dist/public/[22m[35massets/index-Cxh_D3Bi.css              [39m[1m[2m135.42 kB[22m[1m[22m[2m │ gzip:  22.39 kB[22m
+[2m../dist/public/[22m[36massets/web-Cl6o4s_Q.js                 [39m[1m[2m  0.12 kB[22m[1m[22m[2m │ gzip:   0.13 kB[22m
+[2m../dist/public/[22m[36massets/Games-BvRDxFza.js               [39m[1m[2m  0.15 kB[22m[1m[22m[2m │ gzip:   0.14 kB[22m
+[2m../dist/public/[22m[36massets/search-CZqx6Zij.js              [39m[1m[2m  0.34 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+[2m../dist/public/[22m[36massets/star-CSac7hRh.js                [39m[1m[2m  0.38 kB[22m[1m[22m[2m │ gzip:   0.29 kB[22m
+[2m../dist/public/[22m[36massets/users-CP7tzPdB.js               [39m[1m[2m  0.47 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m
+[2m../dist/public/[22m[36massets/zap-Bt_2Ga8l.js                 [39m[1m[2m  0.75 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[2m../dist/public/[22m[36massets/web-D3h8d9HI.js                 [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[2m../dist/public/[22m[36massets/Explore-DvIuIGMC.js             [39m[1m[2m  1.36 kB[22m[1m[22m[2m │ gzip:   0.69 kB[22m
+[2m../dist/public/[22m[36massets/user-CMnBxIhW.js                [39m[1m[2m  1.36 kB[22m[1m[22m[2m │ gzip:   0.56 kB[22m
+[2m../dist/public/[22m[36massets/DebugLayouts-DAWNmgFJ.js        [39m[1m[2m  4.34 kB[22m[1m[22m[2m │ gzip:   2.02 kB[22m
+[2m../dist/public/[22m[36massets/PageTransition-BEaXJSfP.js      [39m[1m[2m  5.96 kB[22m[1m[22m[2m │ gzip:   2.27 kB[22m
+[2m../dist/public/[22m[36massets/Dating-DjsnotwX.js              [39m[1m[2m  7.30 kB[22m[1m[22m[2m │ gzip:   2.76 kB[22m
+[2m../dist/public/[22m[36massets/Evangelists-Bjf52on4.js         [39m[1m[2m  8.37 kB[22m[1m[22m[2m │ gzip:   2.60 kB[22m
+[2m../dist/public/[22m[36massets/TurfWars-CjBUJDYr.js            [39m[1m[2m  9.32 kB[22m[1m[22m[2m │ gzip:   3.17 kB[22m
+[2m../dist/public/[22m[36massets/Messages-BsQrWLJI.js            [39m[1m[2m 10.42 kB[22m[1m[22m[2m │ gzip:   3.54 kB[22m
+[2m../dist/public/[22m[36massets/DevDiagnostics-BY2njxRk.js      [39m[1m[2m 16.17 kB[22m[1m[22m[2m │ gzip:   4.72 kB[22m
+[2m../dist/public/[22m[36massets/Profile-Cws4xAhd.js             [39m[1m[2m 22.17 kB[22m[1m[22m[2m │ gzip:   5.31 kB[22m
+[2m../dist/public/[22m[36massets/SafetyModal-BgNuRaHJ.js         [39m[1m[2m 34.12 kB[22m[1m[22m[2m │ gzip:  10.58 kB[22m
+[2m../dist/public/[22m[36massets/NotificationsModal-DqQ65ydm.js  [39m[1m[2m 53.95 kB[22m[1m[22m[2m │ gzip:  16.13 kB[22m
+[2m../dist/public/[22m[36massets/MapView-C-9CMRkh.js             [39m[1m[2m173.61 kB[22m[1m[22m[2m │ gzip:  51.55 kB[22m
+[2m../dist/public/[22m[36massets/index-rfMkzRWP.js               [39m[1m[33m596.65 kB[39m[22m[2m │ gzip: 189.02 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 7.61s[39m
