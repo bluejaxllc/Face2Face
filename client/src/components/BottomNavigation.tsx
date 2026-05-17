@@ -1,13 +1,27 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, Heart, Gamepad2, MessageSquare, Users, User } from "lucide-react";
+import { Map, Heart, Gamepad2, MessageSquare, Users, User, Briefcase, Handshake, MapPin, Dice5, Swords, Mail, MessagesSquare, Contact, Building2, UserCheck, ChevronUp } from "lucide-react";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+type CategoryKey = "dating" | "friends" | "business";
+
+const categoryConfig: Record<CategoryKey, { icon: any; label: string; color: string }> = {
+  dating:   { icon: Heart,     label: "DATING",   color: "text-rose-400" },
+  friends:  { icon: Handshake, label: "FRIENDS",  color: "text-emerald-400" },
+  business: { icon: Briefcase, label: "BUSINESS", color: "text-blue-400" },
+};
 
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
   const { user } = useAuth();
+
+  // Category selector state
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>(() => {
+    return (localStorage.getItem("f2f_activeCategory") as CategoryKey) || "dating";
+  });
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   // Fetch unread notifications
   const { data: notifications = [] } = useQuery<any[]>({
@@ -31,57 +45,187 @@ export default function BottomNavigation() {
     navigate(path);
   };
 
-  const navItems = [
-    { path: "/games", icon: Gamepad2, label: "Games" },
-    { path: "/explore", icon: Users, label: "Groups & Lists" },
-    { path: "/dating", icon: Heart, label: "Dating" },
-    { path: "/map", icon: Map, label: "Map" },
-    { path: "/messages", icon: MessageSquare, label: "Bumps & Messages", badge: notifCount },
-    { path: "/profile", icon: User, label: "Profile" },
-  ];
+  const handleCategoryTap = () => {
+    const categoryPath = "/dating";
+    if (location === categoryPath) {
+      // Already on the dating page — toggle the category picker
+      setShowCategoryPicker(!showCategoryPicker);
+    } else {
+      // Navigate to the dating page and close picker
+      navigate(categoryPath);
+      setShowCategoryPicker(false);
+    }
+  };
+
+  const handleCategorySelect = (cat: CategoryKey) => {
+    setActiveCategory(cat);
+    localStorage.setItem("f2f_activeCategory", cat);
+    // Dispatch a custom event so the Dating page can pick it up
+    window.dispatchEvent(new CustomEvent("f2f:categoryChange", { detail: cat }));
+    setShowCategoryPicker(false);
+    // Navigate to dating if not already there
+    if (location !== "/dating") {
+      navigate("/dating");
+    }
+  };
+
+  // Close picker when navigating away from dating
+  useEffect(() => {
+    if (location !== "/dating") {
+      setShowCategoryPicker(false);
+    }
+  }, [location]);
+
+  const catCfg = categoryConfig[activeCategory];
+  const isCategoryActive = location === "/dating";
+
+  // Category-specific nav items
+  const navItemsByCategory: Record<CategoryKey, { path: string; icon: any; label: string; badge?: number }[]> = {
+    dating: [
+      { path: "/map", icon: MapPin, label: "MAP" },
+      { path: "/games", icon: Gamepad2, label: "GAMES" },
+      { path: "/messages", icon: MessageSquare, label: "BUMP/MES..." , badge: notifCount },
+      { path: "/explore", icon: Users, label: "GROUP/LIST" },
+      { path: "/profile", icon: User, label: "PROFILE" },
+    ],
+    friends: [
+      { path: "/map", icon: MapPin, label: "NEARBY" },
+      { path: "/games", icon: Dice5, label: "HANGOUT" },
+      { path: "/messages", icon: MessagesSquare, label: "CHATS", badge: notifCount },
+      { path: "/explore", icon: Contact, label: "CIRCLES" },
+      { path: "/profile", icon: UserCheck, label: "MY INFO" },
+    ],
+    business: [
+      { path: "/map", icon: Building2, label: "NETWORK" },
+      { path: "/games", icon: Swords, label: "COMPETE" },
+      { path: "/messages", icon: Mail, label: "INBOX", badge: notifCount },
+      { path: "/explore", icon: Briefcase, label: "DIRECTORY" },
+      { path: "/profile", icon: User, label: "CARD" },
+    ],
+  };
+
+  const navItems = navItemsByCategory[activeCategory];
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-[9999] px-4 pointer-events-none w-full flex justify-center" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <nav className="bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 rounded-full w-full max-w-[420px] pointer-events-auto" style={{ height: "64px", padding: "4px 8px" }}>
-        <div className="flex justify-around items-center h-full relative">
-          {navItems.map(({ path, icon: Icon, label, badge }) => {
-            const isActive = location === path || (path === "/map" && location === "/");
-            return (
-              <div
-                key={path}
-                onClick={navigateTo(path)}
-                className="flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative"
-                style={{ minWidth: "56px", padding: "4px 2px" }}
+    <>
+      {/* Category picker backdrop */}
+      {showCategoryPicker && (
+        <div
+          className="fixed inset-0 z-[9998]"
+          onClick={() => setShowCategoryPicker(false)}
+        />
+      )}
+
+      {/* Bottom navigation bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-[9999]" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <nav className="bg-slate-900/95 backdrop-blur-md border-t border-slate-700/50 w-full" style={{ height: "60px" }}>
+          <div className="flex justify-around items-center h-full">
+            {/* Category button (Dating/Friends/Business) */}
+            <div
+              className="flex flex-col items-center justify-center cursor-pointer transition-all duration-200 flex-1 relative"
+              style={{ padding: "6px 0" }}
+            >
+              {/* SLIDING DRAWER AND PULL TAB ASSEMBLY */}
+              <div 
+                className={`absolute bottom-[100%] left-1 right-1 flex flex-col justify-start overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  showCategoryPicker ? "max-h-[300px] opacity-100" : "max-h-[14px]"
+                }`}
               >
-                <div className={`relative transition-all duration-300 ${isActive ? 'transform scale-110' : ''}`}>
-                  <Icon
-                    className={`transition-colors duration-300 ${isActive ? "text-blue-400" : "text-slate-500 hover:text-slate-400"}`}
-                    style={{ width: "20px", height: "20px" }}
-                    strokeWidth={isActive ? 2.5 : 1.5}
-                  />
-                  {isActive && (
-                    <div className="absolute -inset-2 bg-blue-500/15 rounded-full -z-10" />
-                  )}
-                  {(badge !== undefined && badge > 0) && (
-                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/30" style={{ fontSize: "8px", height: "16px", width: "16px" }}>
-                      {badge > 9 ? "9+" : badge}
-                    </span>
-                  )}
-                </div>
-                <span
-                  className={`font-bold transition-all duration-300 ${isActive ? "text-blue-400 opacity-100" : "text-slate-500 opacity-80"}`}
-                  style={{ fontSize: "8px", marginTop: "4px", minHeight: "12px", whiteSpace: "nowrap" }}
+                {/* Pull tab indicator */}
+                <div 
+                  className="h-[14px] bg-slate-900/95 backdrop-blur-md border-t border-l border-r border-slate-700/50 rounded-t-xl shadow-sm z-10 flex flex-shrink-0 items-center justify-center"
+                  onClick={handleCategoryTap}
                 >
-                  {label}
-                </span>
-                {isActive && (
-                  <div className="absolute -bottom-2 w-8 h-1 bg-gradient-to-r from-blue-500 via-purple-400 to-pink-500 rounded-full shadow-sm shadow-blue-500/50" />
-                )}
+                  <ChevronUp className={`w-3 h-3 -mt-0.5 transition-transform duration-300 ${showCategoryPicker ? 'rotate-180' : ''} ${isCategoryActive ? catCfg.color : "text-slate-500"}`} strokeWidth={4} />
+                </div>
+
+                {/* The Category Options */}
+                <div className="flex flex-col gap-2 bg-slate-800/95 backdrop-blur-md border-l border-r border-t border-slate-600/50 shadow-2xl p-2 rounded-b-none border-b-0 pb-3 mb-[-4px]">
+                  {(Object.entries(categoryConfig) as [CategoryKey, typeof catCfg][]).map(([key, cfg]) => {
+                    const isSelected = activeCategory === key;
+                    const IconComp = cfg.icon;
+                    return (
+                      <button
+                        key={key}
+                        onClick={(e) => { e.stopPropagation(); handleCategorySelect(key); }}
+                        className={`flex flex-col items-center justify-center rounded-lg px-3 py-2 transition-all duration-200 ${
+                          isSelected
+                            ? "bg-white/10 ring-1 ring-white/20"
+                            : "hover:bg-white/5"
+                        }`}
+                        style={{ minWidth: "60px" }}
+                      >
+                        <IconComp
+                          className={`transition-colors duration-200 ${isSelected ? cfg.color : "text-slate-400"}`}
+                          style={{ width: "20px", height: "20px" }}
+                          strokeWidth={isSelected ? 2.5 : 1.5}
+                        />
+                        <span
+                          className={`font-semibold uppercase tracking-wide transition-colors duration-200 ${
+                            isSelected ? cfg.color : "text-slate-400"
+                          }`}
+                          style={{ fontSize: "8px", marginTop: "4px" }}
+                        >
+                          {cfg.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </nav>
-    </div>
+
+              <div className="relative flex justify-center items-center mt-0.5" onClick={handleCategoryTap}>
+                <catCfg.icon
+                  className={`transition-colors duration-200 ${isCategoryActive ? catCfg.color : "text-slate-500"}`}
+                  style={{ width: "22px", height: "22px" }}
+                  strokeWidth={isCategoryActive ? 2.5 : 1.5}
+                />
+              </div>
+              <span
+                onClick={handleCategoryTap}
+                className={`font-semibold uppercase tracking-wide flex items-center justify-center transition-colors duration-200 ${
+                  isCategoryActive ? catCfg.color : "text-slate-500"
+                }`}
+                style={{ fontSize: "8px", marginTop: "4px", whiteSpace: "nowrap" }}
+              >
+                {catCfg.label}
+              </span>
+            </div>
+
+            {/* Standard nav items */}
+            {navItems.map(({ path, icon: Icon, label, badge }) => {
+              const isActive = location === path || (path === "/map" && location === "/");
+              return (
+                <div
+                  key={path}
+                  onClick={navigateTo(path)}
+                  className="flex flex-col items-center justify-center cursor-pointer transition-all duration-200 flex-1"
+                  style={{ padding: "6px 0" }}
+                >
+                  <div className="relative">
+                    <Icon
+                      className={`transition-colors duration-200 ${isActive ? catCfg.color : "text-slate-500"}`}
+                      style={{ width: "22px", height: "22px" }}
+                      strokeWidth={isActive ? 2.5 : 1.5}
+                    />
+                    {(badge !== undefined && badge > 0) && (
+                      <span className="absolute -top-1 -right-2 bg-pink-500 text-white font-bold rounded-full flex items-center justify-center" style={{ fontSize: "8px", height: "14px", width: "14px" }}>
+                        {badge > 9 ? "9+" : badge}
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={`font-semibold uppercase tracking-wide transition-colors duration-200 ${isActive ? catCfg.color : "text-slate-500"}`}
+                    style={{ fontSize: "8px", marginTop: "4px", whiteSpace: "nowrap" }}
+                  >
+                    {label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
+    </>
   );
 }

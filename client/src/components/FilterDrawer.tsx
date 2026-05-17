@@ -18,6 +18,7 @@ export interface FilterOptions {
   ageRange: [number, number];
   radius: number;
   minRating: number;
+  distanceUnit?: 'mi' | 'km';
 }
 
 interface FilterDrawerProps {

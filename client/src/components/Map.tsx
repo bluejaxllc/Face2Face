@@ -5,11 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProfileCard from "./ProfileCard";
 import LocationError from "./LocationError";
 import FilterDrawer, { FilterOptions } from "./FilterDrawer";
-import BeenBumpedBadge from "./BeenBumpedBadge";
 import ReceivedBumpsSheet from "./ReceivedBumpsSheet";
 import { calculateDistance } from "@/lib/distance";
-import { Locate, Plus, Minus, Layers, Signal, Users, MapPin, Radio } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { Locate, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -103,18 +101,18 @@ const getIcon = (gender: string) => gender === 'male' ? maleIcon : femaleIcon;
 const InvalidateSizeComponent = () => {
   const map = useMap();
   useEffect(() => {
-    // First invalidation after initial layout settles
-    const timer1 = setTimeout(() => {
-      map.invalidateSize({ animate: false });
-    }, 200);
-    // Second invalidation after iOS Safari toolbar animation completes
-    const timer2 = setTimeout(() => {
-      map.invalidateSize({ animate: false });
-    }, 1000);
-    
+    // Aggressively invalidate at multiple intervals to handle all layout timing
+    const timers = [0, 100, 300, 500, 1000, 2000].map(ms =>
+      setTimeout(() => map.invalidateSize({ animate: false }), ms)
+    );
+
+    // Also invalidate on resize
+    const onResize = () => map.invalidateSize({ animate: false });
+    window.addEventListener('resize', onResize);
+
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      timers.forEach(clearTimeout);
+      window.removeEventListener('resize', onResize);
     };
   }, [map]);
   return null;
@@ -192,6 +190,15 @@ function Map() {
   const [radius, setRadius] = useState(filterOptions.radius);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
   const [showReceivedBumps, setShowReceivedBumps] = useState(false);
+
+  // Listen for map style changes from the toolbar LAYERS button
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setMapStyle((e as CustomEvent).detail as 'street' | 'satellite');
+    };
+    window.addEventListener('f2f:mapStyleChange', handler);
+    return () => window.removeEventListener('f2f:mapStyleChange', handler);
+  }, []);
 
   const isActive = user?.isActive ?? true;
   const [zoom, setZoom] = useState(() => {
@@ -394,7 +401,7 @@ function Map() {
   }, []);
 
   return (
-    <div className="w-full h-full relative map-wrapper" style={{ touchAction: 'none' }}>
+    <div className="w-full h-full relative map-wrapper">
       {/* ═══════ THE MAP ITSELF ═══════ */}
       <div className="absolute inset-0 z-0">
         <MapContainer
@@ -423,10 +430,11 @@ function Map() {
           
           {mapStyle === 'satellite' ? (
             <TileLayer
-              attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+              attribution='&copy; Esri'
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               maxZoom={19}
-              className="leaflet-tile-pane"
+              updateWhenZooming={false}
+              updateWhenIdle={true}
             />
           ) : (
             <TileLayer
@@ -436,7 +444,6 @@ function Map() {
               maxZoom={19}
               updateWhenZooming={false}
               updateWhenIdle={true}
-              className="leaflet-tile-pane"
             />
           )}
 
@@ -474,61 +481,10 @@ function Map() {
           ))}
         </MapContainer>
 
-        {/* ═══════ TOP LEFT: Filter + Status info ═══════ */}
-        <div className="absolute z-[1000] flex items-center gap-2" style={{ top: "12px", left: "12px" }}>
-          <FilterDrawer
-            options={filterOptions}
-            onChange={handleFilterChange}
-          />
-          {/* Mini status pill */}
-          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full px-3 shadow-md"
-            style={{ height: "32px" }}>
-            <span className={`inline-block w-2 h-2 rounded-full ${mapLoaded ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
-            <span className="text-gray-700 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>
-              {filteredUsers.length}
-            </span>
-            <Users style={{ width: "11px", height: "11px" }} className="text-slate-500" />
-          </div>
-        </div>
-
-        {/* Mode Toggles removed and moved to Dating.tsx */}
-
-
-
-
-        {/* ═══════ TOP RIGHT: Go Live toggle ═══════ */}
-        <div className="absolute z-[1000]" style={{ top: "12px", right: "12px" }}>
-          <div className={`flex items-center gap-2  border rounded-full shadow-md transition-all duration-300 ${isActive
-            ? "bg-green-50/90 border-green-300 map-live-active"
-            : "bg-white/90 border-gray-200"
-            }`} style={{ padding: "4px 12px", height: "32px" }}>
-            <Radio style={{ width: "12px", height: "12px" }} className={`${isActive ? "text-green-500 animate-pulse" : "text-gray-400"}`} />
-            <span className={`font-bold tracking-wider ${isActive ? "text-green-600" : "text-gray-400"}`} style={{ fontSize: "9px" }}>
-              {isActive ? "GO LIVE" : "LEAVE MAP"}
-            </span>
-            <Switch
-              checked={isActive}
-              onCheckedChange={handleStatusToggle}
-              aria-label="Active status"
-              className="scale-75"
-            />
-          </div>
-        </div>
-
-        {/* ═══════ RIGHT SIDE: Vertical tool strip ═══════ */}
-        <div className="absolute z-[1000] flex flex-col gap-2" style={{ bottom: "24px", right: "12px" }}>
-          {/* Map style toggle */}
+        {/* ═══════ BOTTOM RIGHT: Locate button ═══════ */}
+        <div className="absolute z-[1000]" style={{ bottom: "24px", right: "12px" }}>
           <button
-            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
-            onClick={() => setMapStyle(prev => prev === 'street' ? 'satellite' : 'street')}
-            aria-label="Toggle map style"
-          >
-            <Layers style={{ width: "16px", height: "16px" }} className={mapStyle === 'satellite' ? "text-green-500" : "text-gray-500"} />
-          </button>
-
-          {/* Current location */}
-          <button
-            className="w-10 h-10 rounded-xl bg-white/90  border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
+            className="w-10 h-10 rounded-xl bg-white/90 border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={async () => {
               userHasInteracted.current = false;
               await updateLocation();
@@ -544,62 +500,6 @@ function Map() {
           >
             <Locate style={{ width: "16px", height: "16px" }} className="text-blue-500" />
           </button>
-
-          {/* Zoom controls */}
-          <div className="flex flex-col bg-white/90  border border-gray-200 rounded-xl shadow-md overflow-hidden">
-            <button
-              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600 border-b border-gray-200"
-              onClick={() => mapRef.current?.zoomIn()}
-              aria-label="Zoom in"
-            >
-              <Plus style={{ width: "14px", height: "14px" }} />
-            </button>
-            <button
-              className="w-10 h-8 flex items-center justify-center hover:bg-gray-100 active:scale-95 transition-all text-gray-600"
-              onClick={() => mapRef.current?.zoomOut()}
-              aria-label="Zoom out"
-            >
-              <Minus style={{ width: "14px", height: "14px" }} />
-            </button>
-          </div>
-        </div>
-
-        {/* ═══════ BOTTOM LEFT: Radius input ═══════ */}
-        <div className="absolute z-[1000]" style={{ bottom: "24px", left: "12px" }}>
-          <div className="flex items-center gap-1.5 bg-white/90  border border-gray-200 rounded-full shadow-md"
-            style={{ padding: "3px 8px 3px 12px", height: "34px" }}>
-            <input
-              type="number"
-              value={radius >= 25000 ? "" : radius}
-              placeholder="∞"
-              min={1}
-              max={25000}
-              aria-label="Search radius in miles"
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val === "" || val === "0") {
-                  setRadius(25000);
-                } else {
-                  setRadius(Math.min(25000, Math.max(1, parseInt(val) || 1)));
-                }
-              }}
-              className="bg-transparent text-gray-800 font-bold text-center outline-none border-none"
-              style={{ width: "48px", fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
-            />
-            <span className="text-gray-400 font-semibold" style={{ fontSize: "10px", letterSpacing: "0.5px" }}>MI</span>
-            <button
-              onClick={() => setRadius(25000)}
-              className={`ml-0.5 rounded-full flex items-center justify-center transition-all duration-200 font-bold active:scale-90 ${radius >= 25000
-                ? "bg-blue-500 text-white shadow-sm"
-                : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-                }`}
-              style={{ height: "26px", width: "26px", fontSize: "13px" }}
-              title="Unlimited radius"
-              aria-label="Unlimited radius"
-            >
-              ∞
-            </button>
-          </div>
         </div>
       </div>
 
@@ -642,16 +542,7 @@ function Map() {
           }
         }}
       />
-      {/* GPS Loading Overlay */}
-      {!currentLocation && (!user?.latitude || Number(user.latitude) === 0) && !isError && (
-        <div className="absolute inset-0 z-[2000] bg-slate-900/60 backdrop-blur-md flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500">
-          <div className="bg-white/10 p-6 rounded-3xl border border-white/20 flex flex-col items-center shadow-2xl">
-            <Locate className="w-12 h-12 text-blue-400 animate-pulse mb-4 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
-            <h3 className="text-white font-bold text-lg tracking-wide">Acquiring Signal</h3>
-            <p className="text-blue-200/80 text-xs font-medium mt-1 uppercase tracking-widest">Locating nearby users</p>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

@@ -19,6 +19,12 @@
   overflow: hidden;
 }
 
+/* Fix: Tailwind preflight sets img { max-width: 100% } which breaks Leaflet tiles */
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+}
+
 .leaflet-tile,
 .leaflet-marker-icon,
 .leaflet-marker-shadow {
@@ -222,6 +228,14 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Force form elements to inherit the app font */
+  input,
+  button,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
   h1,
   h2,
   h3,
@@ -364,16 +378,8 @@
   }
 
   .map-container {
-    @apply w-full h-full min-h-[300px] relative bg-slate-900;
-    background-image:
-      linear-gradient(to right,
-        rgba(124, 58, 237, 0.1) 1px,
-        transparent 1px),
-      linear-gradient(to bottom,
-        rgba(124, 58, 237, 0.1) 1px,
-        transparent 1px);
-    background-size: 20px 20px;
-    background-position: center;
+    @apply w-full h-full min-h-[300px] relative;
+    background: #0B0F19;
   }
 
   /* Fix for Leaflet map container */

@@ -12,9 +12,11 @@ import { Settings, Eye, Heart, User } from "lucide-react";
 
 interface SettingsModalProps {
   onClose: () => void;
+  mapStyle?: 'street' | 'satellite';
+  onToggleMapStyle?: () => void;
 }
 
-export default function SettingsModal({ onClose }: SettingsModalProps) {
+export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMapStyle }: SettingsModalProps) {
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 
@@ -63,153 +65,68 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* Personal */}
-          <div className="space-y-3">
+          {/* App Preferences */}
+          <div className="space-y-4">
             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              <User className="w-3 h-3" />
-              Personal
+              <Settings className="w-3 h-3" />
+              App Preferences
             </Label>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs font-medium text-slate-300 mb-1 block">Gender</Label>
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger className="bg-slate-800/60 border-slate-700/50 text-slate-200 h-10 rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-slate-300 mb-1 block">Age</Label>
-                <Input
-                  type="number" min={18} max={99} value={age}
-                  onChange={(e) => setAge(parseInt(e.target.value) || 18)}
-                  className="bg-slate-800/60 border-slate-700/50 text-slate-200 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
-                />
-              </div>
+            
+            <div className="flex items-center justify-between bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
+              <span className="text-sm font-medium text-slate-300">Push Notifications</span>
+              <Switch defaultChecked={true} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs font-medium text-slate-300 mb-1 block">Height</Label>
-                <Input
-                  placeholder="e.g. 5ft 10in" value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                  className="bg-slate-800/60 border-slate-700/50 text-slate-200 placeholder:text-slate-600 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
-                />
-              </div>
-              <div>
-                <Label className="text-xs font-medium text-slate-300 mb-1 block">Weight</Label>
-                <Input
-                  placeholder="e.g. 165 lbs" value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  className="bg-slate-800/60 border-slate-700/50 text-slate-200 placeholder:text-slate-600 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
-                />
-              </div>
+
+            <div className="flex items-center justify-between bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
+              <span className="text-sm font-medium text-slate-300">Haptic Feedback</span>
+              <Switch defaultChecked={true} />
+            </div>
+
+            <div className="flex items-center justify-between bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
+              <span className="text-sm font-medium text-slate-300">Dark Mode</span>
+              <Switch defaultChecked={true} />
             </div>
           </div>
 
-          {/* Preferences */}
-          <div className="space-y-3 border-t border-slate-700/50 pt-4">
-            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Heart className="w-3 h-3" />
-              Preferences
-            </Label>
-            <div>
-              <Label className="block text-xs font-medium text-slate-300 mb-2">Interested In</Label>
-              <div className="flex space-x-2">
-                <Button type="button"
-                  variant={datingPreference === "men" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${datingPreference === "men"
-                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setDatingPreference("men")}>Men</Button>
-                <Button type="button"
-                  variant={datingPreference === "women" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${datingPreference === "women"
-                    ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setDatingPreference("women")}>Women</Button>
-              </div>
-            </div>
-            <div>
-              <Label className="block text-xs font-medium text-slate-300 mb-2">Category</Label>
-              <div className="flex space-x-2">
-                <Button type="button"
-                  variant={category === "dating" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "dating"
-                    ? "bg-pink-500 text-white shadow-lg shadow-pink-500/25 border-pink-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setCategory("dating")}>💕 Dating</Button>
-                <Button type="button"
-                  variant={category === "business" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "business"
-                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25 border-blue-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setCategory("business")}>💼 Business</Button>
-                <Button type="button"
-                  variant={category === "friendships" ? "default" : "outline"}
-                  className={`flex-1 rounded-xl h-10 font-semibold transition-all ${category === "friendships"
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 border-emerald-400/50"
-                    : "bg-slate-800/50 border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-800"
-                    }`}
-                  onClick={() => setCategory("friendships")}>🤝 Friends</Button>
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs font-medium text-slate-300 mb-1 block">Seeking</Label>
-              <Input
-                placeholder="e.g. Friendship, Dating, Networking" value={seeking}
-                onChange={(e) => setSeeking(e.target.value)}
-                className="bg-slate-800/60 border-slate-700/50 text-slate-200 placeholder:text-slate-600 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
-              />
-              <p className="text-[10px] text-slate-400 mt-1">Comma-separated</p>
-            </div>
-          </div>
-
-          {/* Visibility */}
-          <div className="space-y-3 border-t border-slate-700/50 pt-4">
+          {/* Visibility  & Timeout */}
+          <div className="space-y-4 border-t border-slate-700/50 pt-4">
             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <Eye className="w-3 h-3" />
-              Visibility
+              Visibility & Map
             </Label>
+            
             <div className="flex items-center justify-between bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
-              <span className="text-sm font-medium text-slate-300">Show my profile on map</span>
-              <Switch checked={showOnMap} onCheckedChange={setShowOnMap} />
+              <span className="text-sm font-medium text-slate-300">Satellite Map Style</span>
+              <Switch checked={mapStyle === 'satellite'} onCheckedChange={() => onToggleMapStyle?.()} />
             </div>
-            <div>
-              <Label className="text-xs font-medium text-slate-300 mb-1 block">Inactive timeout ({inactiveTimeout}m)</Label>
+
+            <div className="px-1">
+              <Label className="text-xs font-medium text-slate-300 mb-1 block">Screen Timeout (Minutes)</Label>
               <Input
-                type="number" min={5} max={120} value={inactiveTimeout}
+                type="number" min={1} max={120} value={inactiveTimeout}
                 onChange={(e) => setInactiveTimeout(parseInt(e.target.value) || 30)}
                 className="bg-slate-800/60 border-slate-700/50 text-slate-200 h-10 rounded-xl focus:border-blue-500/50 focus:ring-blue-500/20"
               />
-              <p className="text-[10px] text-slate-400 mt-1">Hide from map after this many minutes</p>
+              <p className="text-[10px] text-slate-400 mt-1">Hide from map while app is backgrounded</p>
             </div>
-            <button
-              onClick={() => {
-                onClose();
-                // Use a small delay to let the modal close before navigating
-                setTimeout(() => { window.location.hash = ''; window.history.pushState({}, '', '/dev'); window.dispatchEvent(new PopStateEvent('popstate')); }, 100);
-              }}
-              className="flex items-center justify-center gap-2 bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30 hover:bg-slate-700/40 transition-colors w-full"
-            >
-              <Settings className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Device Diagnostics</span>
-            </button>
           </div>
+          
+          <button
+            onClick={() => {
+              onClose();
+              setTimeout(() => { window.location.hash = ''; window.history.pushState({}, '', '/dev'); window.dispatchEvent(new PopStateEvent('popstate')); }, 100);
+            }}
+            className="flex items-center justify-center gap-2 bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30 hover:bg-slate-700/40 transition-colors w-full mt-4"
+          >
+            <Settings className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Device Diagnostics</span>
+          </button>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-2">
           <Button
             type="button" onClick={handleSave}
-            className="w-full h-12 rounded-xl font-bold text-sm tracking-wide bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg shadow-blue-500/25 border border-blue-400/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
+            className="w-full h-12 rounded-xl font-bold text-sm tracking-wide bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 hover:text-white transition-all"
           >
             Save Settings
           </Button>
