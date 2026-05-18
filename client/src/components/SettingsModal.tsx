@@ -8,15 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Eye, Heart, User } from "lucide-react";
+import { Settings, Eye, Heart, User, Map, Satellite } from "lucide-react";
 
 interface SettingsModalProps {
   onClose: () => void;
   mapStyle?: 'street' | 'satellite';
   onToggleMapStyle?: () => void;
+  onSetMapStyle?: (style: 'street' | 'satellite') => void;
 }
 
-export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMapStyle }: SettingsModalProps) {
+export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMapStyle, onSetMapStyle }: SettingsModalProps) {
+  const handleMapStyleSelect = (style: 'street' | 'satellite') => {
+    if (onSetMapStyle) {
+      onSetMapStyle(style);
+    } else if (onToggleMapStyle && mapStyle !== style) {
+      onToggleMapStyle();
+    }
+    // Dispatch the event so the Map component picks it up
+    window.dispatchEvent(new CustomEvent('f2f:mapStyleChange', { detail: style }));
+  };
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 
@@ -95,9 +105,32 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
               Visibility & Map
             </Label>
             
-            <div className="flex items-center justify-between bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
-              <span className="text-sm font-medium text-slate-300">Satellite Map Style</span>
-              <Switch checked={mapStyle === 'satellite'} onCheckedChange={() => onToggleMapStyle?.()} />
+            <div className="bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
+              <span className="text-sm font-medium text-slate-300 block mb-2.5">Map Style</span>
+              <div className="flex bg-slate-950/80 rounded-lg p-0.5 border border-white/10">
+                <button
+                  onClick={() => handleMapStyleSelect('street')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                    mapStyle === 'street'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Map style={{ width: "14px", height: "14px" }} />
+                  Street
+                </button>
+                <button
+                  onClick={() => handleMapStyleSelect('satellite')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                    mapStyle === 'satellite'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Satellite style={{ width: "14px", height: "14px" }} />
+                  Satellite
+                </button>
+              </div>
             </div>
 
             <div className="px-1">

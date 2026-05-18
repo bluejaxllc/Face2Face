@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Face 2 Face — Strategic Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-deep: #050a14;
@@ -385,11 +385,54 @@
 </head>
 <body>
 
+<!-- ═══════════ PASSWORD GATE ═══════════ -->
+<div id="auth-gate" style="
+    position: fixed; inset: 0; z-index: 99999;
+    background: #050a14;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1.5rem;
+    font-family: 'Inter', -apple-system, sans-serif;
+">
+    <div style="
+        background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+        width: 72px; height: 72px; border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.0rem; font-weight: 900; color: #fff;
+        box-shadow: 0 0 40px rgba(59,130,246,0.35);
+        font-family: 'Nunito', sans-serif;
+    ">F<span style="font-size:0.65em;margin:0 0.02em;opacity:0.85;position:relative;bottom:0.75em;">2</span><span style="display:inline-block;transform:scaleX(-1);">F</span></div>
+    <h2 style="color: #f0f4f8; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em;">Strategic Command Center</h2>
+    <p style="color: #5a7396; font-size: 0.85rem; margin-top: -0.75rem;">Authorized access only</p>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <input id="auth-input" type="password" placeholder="Enter access code" autocomplete="off" style="
+            padding: 0.8rem 1.25rem; width: 260px;
+            background: #0f1d35; border: 1px solid rgba(56,130,246,0.25);
+            border-radius: 10px; color: #f0f4f8; font-size: 0.95rem;
+            font-family: inherit; outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        " onfocus="this.style.borderColor='rgba(59,130,246,0.6)';this.style.boxShadow='0 0 20px rgba(59,130,246,0.15)'"
+          onblur="this.style.borderColor='rgba(56,130,246,0.25)';this.style.boxShadow='none'"/>
+        <button id="auth-btn" onclick="checkAuth()" style="
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border: none; border-radius: 10px;
+            color: #fff; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; font-family: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.25);
+        " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(59,130,246,0.4)'"
+          onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 20px rgba(59,130,246,0.25)'">Enter</button>
+    </div>
+    <p id="auth-error" style="color: #ef4444; font-size: 0.8rem; min-height: 1.2em;"></p>
+</div>
+
+<div id="dashboard-content" style="display: none;">
+
 <!-- ═══════════ HEADER ═══════════ -->
 <header class="header">
     <div class="header-inner">
         <div class="brand">
-            <div class="brand-icon">F2F</div>
+            <div class="brand-icon" style="font-size:2.0rem;font-family:'Nunito',sans-serif;font-weight:900;">F<span style="font-size:0.65em;margin:0 0.02em;opacity:0.85;position:relative;bottom:0.75em;">2</span><span style="display:inline-block;transform:scaleX(-1);">F</span></div>
             <div class="brand-text">
                 <h1>Face 2 Face</h1>
                 <p>Strategic Command Center V2.0</p>
@@ -1430,6 +1473,35 @@
             }
         });
     });
+</script>
+
+</div><!-- /dashboard-content -->
+
+<script>
+    function checkAuth() {
+        var input = document.getElementById('auth-input');
+        if (input.value === 'bluejax') {
+            sessionStorage.setItem('f2f_auth', '1');
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+        } else {
+            document.getElementById('auth-error').textContent = 'Access denied. Invalid code.';
+            input.value = '';
+            input.focus();
+            input.style.borderColor = '#ef4444';
+            setTimeout(function() { input.style.borderColor = 'rgba(56,130,246,0.25)'; }, 1500);
+        }
+    }
+    document.getElementById('auth-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkAuth();
+    });
+    // Auto-unlock if already authenticated this session
+    if (sessionStorage.getItem('f2f_auth') === '1') {
+        document.getElementById('auth-gate').style.display = 'none';
+        document.getElementById('dashboard-content').style.display = 'block';
+    } else {
+        document.getElementById('auth-input').focus();
+    }
 </script>
 
 </body>

@@ -1,14 +1,15 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Map, Heart, Gamepad2, MessageSquare, Users, User, Briefcase, Handshake, MapPin, Dice5, Swords, Mail, MessagesSquare, Contact, Building2, UserCheck, ChevronUp } from "lucide-react";
+import { Map, Gamepad2, MessageSquare, Users, User, Briefcase, Handshake, MapPin, Dice5, Swords, Mail, MessagesSquare, Contact, Building2, UserCheck, ChevronUp } from "lucide-react";
+import CalendarHeart from "@/components/icons/CalendarHeart";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef, useState } from "react";
 
 type CategoryKey = "dating" | "friends" | "business";
 
 const categoryConfig: Record<CategoryKey, { icon: any; label: string; color: string }> = {
-  dating:   { icon: Heart,     label: "DATING",   color: "text-rose-400" },
+  dating:   { icon: CalendarHeart, label: "DATING",   color: "text-rose-400" },
   friends:  { icon: Handshake, label: "FRIENDS",  color: "text-emerald-400" },
   business: { icon: Briefcase, label: "BUSINESS", color: "text-blue-400" },
 };
