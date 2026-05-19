@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useScrollSave } from "@/hooks/use-scroll-save";
 import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Gamepad2, Radio, Swords, Target, Puzzle, Trophy, Zap, Dice5, Crown, Flag } from "lucide-react";
@@ -15,6 +16,7 @@ const gamesList = [
 ];
 
 export default function Games() {
+  const gamesScroll = useScrollSave("f2f_scroll_games");
   const [isLive, setIsLive] = useState(true);
 
   return (
@@ -56,7 +58,7 @@ export default function Games() {
       </div>
 
       {/* Games list */}
-      <div className="fixed left-0 right-0 overflow-y-auto" style={{ top: "44px", bottom: "60px" }}>
+      <div {...gamesScroll} onScroll={gamesScroll.onScroll} className="fixed left-0 right-0 overflow-y-auto" style={{ top: "44px", bottom: "60px" }}>
         <div className="flex flex-col py-2">
           {gamesList.map((game) => {
             const IconComp = game.icon;

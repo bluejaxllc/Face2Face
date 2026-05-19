@@ -28,7 +28,7 @@ export default function MapView() {
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(() => {
     const saved = localStorage.getItem('face2face_filterOptions');
     if (saved) { try { return JSON.parse(saved); } catch (e) { } }
-    return { datingPreference: 'any', showDating: true, showBusiness: true, showFriendships: true, showMen: true, showWomen: true, ageRange: [18, 50], radius: 25000, minRating: 1 };
+    return { datingPreference: 'any', showDating: true, showBusiness: true, showFriendships: true, showMen: true, showWomen: true, ageRange: [18, 50], radius: 25000, minRating: 1, showGroups: true };
   });
 
   const handleToggleActive = useCallback(async (active: boolean) => {

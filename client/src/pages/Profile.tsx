@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useScrollSave } from "@/hooks/use-scroll-save";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -56,6 +57,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function Profile() {
+  const profileScroll = useScrollSave("f2f_scroll_profile");
   const { user, updateProfile, logout } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -145,10 +147,14 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center page-dark">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
-        <p className="mt-2 text-slate-400">Loading profile...</p>
-      </div>
+      <PageTransition className="h-screen page-dark">
+        <Header />
+        <div className="h-full flex flex-col items-center justify-center pb-20">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+          <p className="mt-2 text-slate-400">Loading profile...</p>
+        </div>
+        <BottomNavigation />
+      </PageTransition>
     );
   }
 
@@ -157,6 +163,8 @@ export default function Profile() {
       <Header />
 
       <motion.div
+        ref={profileScroll.ref}
+        onScroll={profileScroll.onScroll}
         className="fixed left-0 right-0 overflow-y-auto pb-32 md:pb-6 page-enter"
         style={{ top: "40px", bottom: "64px" }}
         variants={containerVariants}

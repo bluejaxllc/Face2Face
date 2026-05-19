@@ -39,11 +39,15 @@ interface User {
   profilePhoto?: string | null;
 }
 
-const MapEventHandler = memo(({ onZoomChange, onUserInteract }: { onZoomChange: (zoom: number) => void; onUserInteract: () => void }) => {
+const MapEventHandler = memo(({ onZoomChange, onCenterChange, onUserInteract }: { onZoomChange: (zoom: number) => void; onCenterChange: (center: [number, number]) => void; onUserInteract: () => void }) => {
   const mapEvents = useMemo(() => ({
     zoomend: (e: any) => onZoomChange(e.target.getZoom()),
     dragstart: onUserInteract,
-  }), [onZoomChange, onUserInteract]);
+    moveend: (e: any) => {
+      const center = e.target.getCenter();
+      onCenterChange([center.lat, center.lng]);
+    }
+  }), [onZoomChange, onCenterChange, onUserInteract]);
 
   useMapEvents(mapEvents);
   return null;
@@ -202,13 +206,26 @@ function Map() {
 
   const isActive = user?.isActive ?? true;
   const [zoom, setZoom] = useState(() => {
-    // If we only have the default USA fallback, zoom out to see the continent
+    const saved = localStorage.getItem("f2f_map_state");
+    if (saved) {
+      try { return JSON.parse(saved).zoom; } catch(e) {}
+    }
     return (currentLocation || (user?.latitude && Number(user.latitude) !== 0)) ? 15 : 4;
   });
+
+  const [savedCenter, setSavedCenter] = useState<[number, number] | null>(() => {
+    const saved = localStorage.getItem("f2f_map_state");
+    if (saved) {
+      try { return JSON.parse(saved).center; } catch(e) {}
+    }
+    return null;
+  });
+
   const mapRef = useRef<L.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapKey, setMapKey] = useState(Date.now());
-  const hasCenteredInitially = useRef(false);
+  const hasCenteredInitially = useRef(!!savedCenter);
+  const userHasInteracted = useRef(!!savedCenter);
 
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", {
@@ -330,6 +347,7 @@ function Map() {
   }, [currentLocation]);
 
   const center: [number, number] = useMemo(() => {
+    if (savedCenter) return savedCenter;
     if (currentLocation) {
       return [currentLocation.latitude, currentLocation.longitude];
     }
@@ -338,14 +356,24 @@ function Map() {
       return [Number(user.latitude), Number(user.longitude)];
     }
     return [39.8283, -98.5795]; // Default: Geographic Center of contiguous US
-  }, [currentLocation, user?.latitude, user?.longitude]);
+  }, [currentLocation, user?.latitude, user?.longitude, savedCenter]);
 
   const handleZoomChange = useCallback((newZoom: number) => {
     setZoom(newZoom);
+    if (mapRef.current) {
+      const c = mapRef.current.getCenter();
+      localStorage.setItem("f2f_map_state", JSON.stringify({ zoom: newZoom, center: [c.lat, c.lng] }));
+    }
   }, []);
 
-  // Track if user has manually interacted with the map (pan/drag)
-  const userHasInteracted = useRef(false);
+  const handleCenterChange = useCallback((c: [number, number]) => {
+    setSavedCenter(c);
+    if (mapRef.current) {
+      const z = mapRef.current.getZoom();
+      localStorage.setItem("f2f_map_state", JSON.stringify({ zoom: z, center: c }));
+    }
+  }, []);
+
 
   useEffect(() => {
     if (currentLocation && mapRef.current && !userHasInteracted.current && !hasCenteredInitially.current) {
@@ -447,7 +475,7 @@ function Map() {
             />
           )}
 
-          <MapEventHandler onZoomChange={handleZoomChange} onUserInteract={handleUserInteract} />
+          <MapEventHandler onZoomChange={handleZoomChange} onCenterChange={handleCenterChange} onUserInteract={handleUserInteract} />
 
           {currentLocation && (
             <>

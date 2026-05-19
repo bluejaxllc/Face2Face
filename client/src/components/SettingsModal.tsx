@@ -105,30 +105,38 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
               Visibility & Map
             </Label>
             
-            <div className="bg-slate-800/40 rounded-xl px-4 py-3 border border-slate-700/30">
-              <span className="text-sm font-medium text-slate-300 block mb-2.5">Map Style</span>
-              <div className="flex bg-slate-950/80 rounded-lg p-0.5 border border-white/10">
+            <div className="bg-slate-800/40 rounded-xl px-4 py-4 border border-slate-700/30">
+              <span className="text-sm font-medium text-slate-300 block mb-3">Map Style</span>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleMapStyleSelect('street')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                  className={`relative overflow-hidden rounded-xl h-24 transition-all duration-300 border-2 ${
                     mapStyle === 'street'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                      : 'border-slate-700/50 hover:border-slate-500'
                   }`}
                 >
-                  <Map style={{ width: "14px", height: "14px" }} />
-                  Street
+                  <img src="/images/street_style.png" alt="Street Mode" className="absolute inset-0 w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${mapStyle === 'street' ? 'from-blue-900/80' : 'from-slate-900/80'} to-transparent`} />
+                  <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1.5 text-white">
+                    <Map size={14} className={mapStyle === 'street' ? 'text-blue-400' : 'text-slate-300'} />
+                    <span className="text-xs font-bold uppercase tracking-wider">Street</span>
+                  </div>
                 </button>
                 <button
                   onClick={() => handleMapStyleSelect('satellite')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                  className={`relative overflow-hidden rounded-xl h-24 transition-all duration-300 border-2 ${
                     mapStyle === 'satellite'
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+                      : 'border-slate-700/50 hover:border-slate-500'
                   }`}
                 >
-                  <Satellite style={{ width: "14px", height: "14px" }} />
-                  Satellite
+                  <img src="/images/satellite_style.png" alt="Satellite Mode" className="absolute inset-0 w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity" />
+                  <div className={`absolute inset-0 bg-gradient-to-t ${mapStyle === 'satellite' ? 'from-blue-900/80' : 'from-slate-900/80'} to-transparent`} />
+                  <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-1.5 text-white">
+                    <Satellite size={14} className={mapStyle === 'satellite' ? 'text-blue-400' : 'text-slate-300'} />
+                    <span className="text-xs font-bold uppercase tracking-wider">Satellite</span>
+                  </div>
                 </button>
               </div>
             </div>

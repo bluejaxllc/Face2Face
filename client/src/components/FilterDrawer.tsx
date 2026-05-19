@@ -13,6 +13,7 @@ export interface FilterOptions {
   showDating: boolean;
   showBusiness: boolean;
   showFriendships: boolean;
+  showGroups?: boolean;
   showMen: boolean;
   showWomen: boolean;
   ageRange: [number, number];
@@ -124,6 +125,14 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
                 id="show-friendships"
                 checked={localOptions.showFriendships}
                 onCheckedChange={(checked) => updateOption('showFriendships', checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+              <Label htmlFor="show-groups" className="cursor-pointer text-slate-300">🏛️ Groups</Label>
+              <Switch
+                id="show-groups"
+                checked={localOptions.showGroups || false}
+                onCheckedChange={(checked) => updateOption('showGroups', checked)}
               />
             </div>
           </div>

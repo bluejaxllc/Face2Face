@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useScrollSave } from "@/hooks/use-scroll-save";
 import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Search, Zap } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-type TabKey = "bumps" | "messages" | "settings";
+type PrimaryMode = "bumps" | "messages";
+type BumpSubTab = "list" | "settings";
 
 // Placeholder bumps
 const placeholderBumps = [
@@ -24,10 +26,31 @@ const placeholderMessages = [
 ];
 
 export default function Messages() {
-  const [activeTab, setActiveTab] = useState<TabKey>("bumps");
+  const [primaryMode, setPrimaryMode] = useState<PrimaryMode>(() => 
+    (localStorage.getItem("f2f_messages_primaryMode") as PrimaryMode) || "bumps"
+  );
+  const [bumpTab, setBumpTab] = useState<BumpSubTab>(() => 
+    (localStorage.getItem("f2f_messages_bumpTab") as BumpSubTab) || "list"
+  );
 
-  const renderBumps = () => (
-    <div className="flex-1 overflow-y-auto">
+  useEffect(() => {
+    localStorage.setItem("f2f_messages_primaryMode", primaryMode);
+    localStorage.setItem("f2f_messages_bumpTab", bumpTab);
+  }, [primaryMode, bumpTab]);
+
+  const bumpsScroll = useScrollSave("f2f_msgs_scroll_bumps");
+  const settingsScroll = useScrollSave("f2f_msgs_scroll_settings");
+  const messagesScroll = useScrollSave("f2f_msgs_scroll_messages");
+
+  // Settings State
+  const [pushNotifs, setPushNotifs] = useState(true);
+  const [haptic, setHaptic] = useState(true);
+  const [darkMode, setDarkMode] = useState(true);
+  const [showOnMap, setShowOnMap] = useState(true);
+  const [soundEffects, setSoundEffects] = useState(false);
+
+  const renderBumpsList = () => (
+    <div {...bumpsScroll} onScroll={bumpsScroll.onScroll} className="flex-1 overflow-y-auto w-full">
       <div className="px-5 pt-4 pb-2 flex items-center gap-2">
         <Zap className="text-rose-400" style={{ width: "16px", height: "16px" }} />
         <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">
@@ -36,14 +59,14 @@ export default function Messages() {
       </div>
       <div className="flex flex-col">
         {placeholderBumps.map((bump) => (
-          <div key={bump.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-800/20">
+          <div key={bump.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-700/50">
             <div className="relative">
-              <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-slate-900" style={{ ['--tw-ring-color' as any]: bump.gender === 'female' ? '#ec4899' : '#3b82f6' }}>
+              <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-slate-950" style={{ ['--tw-ring-color' as any]: bump.gender === 'female' ? '#ec4899' : '#3b82f6' }}>
                 <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 text-sm font-bold">
                   {bump.initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-rose-500 border-2 border-slate-900 flex items-center justify-center">
+              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-rose-500 border-2 border-slate-950 flex items-center justify-center">
                 <Zap style={{ width: "10px", height: "10px" }} className="text-white" />
               </div>
             </div>
@@ -64,33 +87,75 @@ export default function Messages() {
     </div>
   );
 
+  const renderSettings = () => (
+    <div {...settingsScroll} onScroll={settingsScroll.onScroll} className="flex-1 overflow-y-auto w-full text-slate-300">
+      <div className="flex flex-col w-full">
+        {/* Toggle Settings */}
+        {[
+          { label: "push notifications", state: pushNotifs, setter: setPushNotifs },
+          { label: "haptic feedback", state: haptic, setter: setHaptic },
+          { label: "dark mode", state: darkMode, setter: setDarkMode },
+          { label: "show on map", state: showOnMap, setter: setShowOnMap },
+          { label: "sound effects", state: soundEffects, setter: setSoundEffects },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
+            <span className="lowercase font-bold tracking-wide">{item.label}</span>
+            <button 
+              onClick={() => item.setter(!item.state)} 
+              className={`text-sm lowercase font-medium transition-colors ${item.state ? 'text-purple-400' : 'text-slate-600'}`}
+            >
+              {item.state ? 'yes' : 'no'}
+            </button>
+          </div>
+        ))}
+
+        {/* Account Divider */}
+        <div className="w-full border-b border-slate-700/50 py-3 mt-4 mb-2 bg-slate-900/40">
+          <h2 className="px-5 lowercase font-bold tracking-wide text-slate-500">account</h2>
+        </div>
+
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50 cursor-pointer hover:bg-slate-800/30 transition-colors">
+          <span className="lowercase font-bold tracking-wide">edit profile</span>
+          <span className="text-slate-500 text-sm">{'>'}</span>
+        </div>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50 cursor-pointer hover:bg-slate-800/30 transition-colors">
+          <span className="lowercase font-bold tracking-wide">privacy & safety</span>
+          <span className="text-slate-500 text-sm">{'>'}</span>
+        </div>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50 cursor-pointer hover:bg-rose-500/10 transition-colors">
+          <span className="lowercase font-bold tracking-wide text-rose-500">log out</span>
+          <span className="text-rose-500/50 text-sm">{'>'}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderMessages = () => (
-    <div className="flex-1 overflow-y-auto">
-      <div className="p-3 px-5">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 h-4 w-4" />
+    <div {...messagesScroll} onScroll={messagesScroll.onScroll} className="flex-1 overflow-y-auto w-full">
+      <div className="px-5 py-3 bg-slate-900/40 border-b border-slate-700/50">
+        <div className="flex items-center bg-transparent border-b border-slate-600 pb-1">
+          <Search className="text-slate-500 w-4 h-4 mr-2" />
           <input
             type="text"
-            placeholder="Search conversations..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 border border-slate-700/40 text-slate-200 placeholder:text-slate-500 rounded-xl outline-none focus:border-rose-500/40 transition-colors"
-            style={{ fontSize: "13px" }}
+            placeholder="search conversations"
+            className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm lowercase font-medium"
           />
         </div>
       </div>
       <div className="flex flex-col">
         {placeholderMessages.map((contact) => (
-          <div key={contact.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-800/20">
+          <div key={contact.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-700/50">
             <div className="relative">
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-12 w-12 border border-slate-700/50">
                 <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 text-sm font-bold">
                   {contact.initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <p className={`text-sm ${contact.unread ? "font-bold text-white" : "font-semibold text-slate-300"}`}>
+                <p className={`text-sm lowercase tracking-wider ${contact.unread ? "font-bold text-white tracking-wide" : "font-semibold text-slate-300"}`}>
                   {contact.name}
                 </p>
                 <span className={`flex-shrink-0 ${contact.unread ? "text-rose-400 font-semibold" : "text-slate-500"}`} style={{ fontSize: "11px" }}>
@@ -110,90 +175,64 @@ export default function Messages() {
     </div>
   );
 
-  const renderSettings = () => (
-    <div className="flex-1 overflow-y-auto px-5 pt-4">
-      <div className="space-y-3">
-        {[
-          { label: "Push Notifications", defaultOn: true },
-          { label: "Haptic Feedback", defaultOn: true },
-          { label: "Dark Mode", defaultOn: true },
-          { label: "Show on Map", defaultOn: true },
-          { label: "Sound Effects", defaultOn: false },
-        ].map((item) => (
-          <div key={item.label} className="flex items-center justify-between bg-slate-800/40 rounded-xl px-4 py-3.5 border border-slate-700/30">
-            <span className="text-sm font-medium text-slate-300">{item.label}</span>
-            <button
-              className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-                item.defaultOn ? 'bg-emerald-500' : 'bg-slate-600'
-              }`}
-            >
-              <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${
-                item.defaultOn ? 'translate-x-[22px]' : 'translate-x-0.5'
-              }`} />
-            </button>
-          </div>
-        ))}
-
-        <div className="border-t border-slate-700/40 pt-4 mt-4">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Account</span>
-          <div className="mt-3 space-y-2">
-            <button className="w-full text-left px-4 py-3 bg-slate-800/40 rounded-xl border border-slate-700/30 hover:bg-slate-700/40 transition-colors">
-              <span className="text-sm font-medium text-slate-300">Edit Profile</span>
-            </button>
-            <button className="w-full text-left px-4 py-3 bg-slate-800/40 rounded-xl border border-slate-700/30 hover:bg-slate-700/40 transition-colors">
-              <span className="text-sm font-medium text-slate-300">Privacy & Safety</span>
-            </button>
-            <button className="w-full text-left px-4 py-3 bg-slate-800/40 rounded-xl border border-rose-500/20 hover:bg-rose-500/10 transition-colors">
-              <span className="text-sm font-medium text-rose-400">Log Out</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <PageTransition className="h-screen w-full page-dark relative overflow-hidden">
-      {/* ═══════ Header ═══════ */}
-      <div className="fixed top-0 left-0 right-0 z-[9999]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
-        {/* Title row */}
-        <div className="bg-slate-900/95 backdrop-blur-md w-full px-5 flex items-end" style={{ height: "52px", paddingBottom: "6px" }}>
-          <h1 className="font-extrabold text-white tracking-tight" style={{ fontSize: "26px", lineHeight: 1 }}>
-            Bumps
-          </h1>
+    <PageTransition className="h-screen w-full page-dark relative overflow-hidden bg-slate-950">
+      {/* ═══════ Primary Header: Bumps / Messages ═══════ */}
+      <div className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+        <div className="w-full flex items-center justify-center pt-4 pb-4">
+          <button 
+            onClick={() => setPrimaryMode("bumps")}
+            className="px-2 relative group pb-1 mr-3"
+          >
+            <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "bumps" ? "text-white" : "text-slate-500"}`}>Bumps</span>
+            {primaryMode === "bumps" && (
+              <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-white rounded-full translate-y-1 mx-2" />
+            )}
+          </button>
+          <span className="text-slate-600 font-light text-[22px]">/</span>
+          <button 
+            onClick={() => setPrimaryMode("messages")}
+            className="px-2 relative group pb-1 ml-3"
+          >
+            <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "messages" ? "text-white" : "text-slate-500"}`}>Messages</span>
+            {primaryMode === "messages" && (
+              <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-white rounded-full translate-y-1 mx-2" />
+            )}
+          </button>
         </div>
 
-        {/* Tab selector — three tabs with dividers */}
-        <div className="bg-slate-900/95 backdrop-blur-md w-full flex items-stretch border-b border-slate-700/40" style={{ height: "42px" }}>
-          {(["bumps", "messages", "settings"] as TabKey[]).map((tab, i) => (
-            <div key={tab} className="contents">
-              {i > 0 && <div className="w-px bg-slate-700/50 self-center" style={{ height: "18px" }} />}
-              <button
-                onClick={() => setActiveTab(tab)}
-                className="flex-1 flex items-center justify-center relative transition-colors duration-200"
-              >
-                <span
-                  className={`font-semibold tracking-wide capitalize transition-colors duration-200 ${
-                    activeTab === tab ? "text-white" : "text-slate-500"
-                  }`}
-                  style={{ fontSize: "14px" }}
-                >
-                  {tab}
-                </span>
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-4 right-4 h-[2px] bg-rose-400 rounded-full" />
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
+        {/* ═══════ Sub-tabs (Only visible in Bumps Mode) ═══════ */}
+        {primaryMode === "bumps" && (
+          <div className="w-full flex border-t border-slate-800/50 h-[44px]">
+            <button 
+              onClick={() => setBumpTab("list")}
+              className="flex-1 flex items-center justify-center relative"
+            >
+              <span className={`text-sm font-semibold tracking-wide ${bumpTab === "list" ? "text-white" : "text-slate-500"}`}>Bumpslist</span>
+              {bumpTab === "list" && <div className="absolute bottom-0 left-8 right-8 h-[2px] bg-rose-500 rounded-t-full" />}
+            </button>
+            <div className="w-px bg-slate-800 self-center h-5" />
+            <button 
+              onClick={() => setBumpTab("settings")}
+              className="flex-1 flex items-center justify-center relative"
+            >
+              <span className={`text-sm font-semibold tracking-wide ${bumpTab === "settings" ? "text-white" : "text-slate-500"}`}>Settings</span>
+              {bumpTab === "settings" && <div className="absolute bottom-0 left-8 right-8 h-[2px] bg-rose-500 rounded-t-full" />}
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ═══════ Main Content ═══════ */}
-      <div className="fixed left-0 right-0 flex flex-col" style={{ top: "94px", bottom: "60px" }}>
-        {activeTab === "bumps" && renderBumps()}
-        {activeTab === "messages" && renderMessages()}
-        {activeTab === "settings" && renderSettings()}
+      {/* ═══════ Main Content Area ═══════ */}
+      <div 
+        className="fixed left-0 right-0 bottom-[60px] overflow-hidden" 
+        style={{ top: primaryMode === "bumps" ? "106px" : "62px" }}
+      >
+        {primaryMode === "bumps" ? (
+          bumpTab === "list" ? renderBumpsList() : renderSettings()
+        ) : (
+          renderMessages()
+        )}
       </div>
 
       <BottomNavigation />
