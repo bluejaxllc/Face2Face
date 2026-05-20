@@ -19,7 +19,7 @@ interface User {
   firstName: string;
   lastName: string;
   category: string;
-  gender: string;
+  sex: string;
   age: number;
   selfRating: number;
   isActive: boolean;
@@ -50,6 +50,12 @@ interface User {
   loveLanguage?: string | null;
   mbti?: string | null;
   perfectDate?: string | null;
+  isHiring?: boolean | null;
+  hiringRoles?: string | null;
+  businessPhone?: string | null;
+  businessService?: string | null;
+  businessNeed?: string | null;
+  businessPartners?: string | null;
 }
 
 interface ProfileCardProps {
@@ -86,11 +92,11 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
   const getInitials = (firstName: string, lastName: string) =>
     `${firstName[0]}${(lastName || '')[0] || ''}`.toUpperCase();
 
-  const genderIcon = user.gender === 'male'
+  const sexIcon = user.sex === 'male'
     ? <svg width="16" height="16" viewBox="0 0 100 100"><defs><linearGradient id="pc-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#3b82f6" /></linearGradient></defs><polygon points="50,8 94,92 6,92" fill="url(#pc-blue-grad)" stroke="#2563eb" strokeWidth="6" strokeLinejoin="round" /></svg>
-    : <svg width="16" height="16" viewBox="0 0 100 100"><defs><linearGradient id="pc-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f472b6" /><stop offset="100%" stopColor="#ec4899" /></linearGradient></defs><circle cx="50" cy="50" r="40" fill="url(#pc-pink-grad)" stroke="#db2777" strokeWidth="6" /></svg>;
-
-  const ratingStars = Math.min(5, Math.round(user.selfRating / 2));
+    : user.sex === 'female' 
+      ? <svg width="16" height="16" viewBox="0 0 100 100"><defs><linearGradient id="pc-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f472b6" /><stop offset="100%" stopColor="#ec4899" /></linearGradient></defs><circle cx="50" cy="50" r="40" fill="url(#pc-pink-grad)" stroke="#db2777" strokeWidth="6" /></svg>
+      : <Sparkles className="w-4 h-4 text-purple-400" />;
 
   // Step 1: User taps SEND BUMP → prepare message, show directional arrow
   const handleSendBump = () => {
@@ -123,7 +129,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
       const data = await res.json();
       if (data.mutual) {
         triggerHeartbeatHaptic();
-        toast({ title: "Profiles Revealed! \ud83c\udf89", description: `You and ${user.firstName} can now see each other's full profiles.` });
+        toast({ title: "Profiles Revealed! 🥳", description: `You and ${user.firstName} can now see each other's full profiles.` });
       } else {
         toast({ title: "Reveal sent", description: `Waiting for ${user.firstName} to reveal theirs too.` });
       }
@@ -178,12 +184,12 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                   ? 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
                   : 'bg-slate-700'
             }`}>
-            <Avatar className="h-24 w-24 border-2 border-slate-900 bg-slate-800">
+            <Avatar className="h-28 w-28 border-2 border-slate-900 bg-slate-800">
               {/* Per spec: profile photo only visible after mutual Reveal */}
-              {isRevealed && user.profilePhoto && (
+              {(isRevealed || user.category === 'business') && user.profilePhoto && (
                 <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
               )}
-              <AvatarFallback className="text-2xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
+              <AvatarFallback className="text-3xl font-black bg-gradient-to-br from-slate-700 to-slate-800 text-slate-300">
                 {getInitials(user.firstName, user.lastName)}
               </AvatarFallback>
             </Avatar>
@@ -191,18 +197,19 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
 
           {/* Name + Age + Gender */}
           <div className="text-center mt-3 z-10 w-full">
-            <h3 className="text-xl font-black text-white tracking-tight flex items-center justify-center gap-2">
-              {user.firstName}, <span className="text-pink-400">{user.age || 20}</span>
-              <span className="inline-flex">{genderIcon}</span>
+            <h3 className="text-xl font-black text-white tracking-tight flex flex-col items-center justify-center gap-1">
+              <div className="flex items-center gap-2">
+                {user.category === 'business' ? (user.company || 'Business Name') : `${user.firstName}, ${user.age || 20}`}
+                <span className="inline-flex">{sexIcon}</span>
+              </div>
+              {user.category === 'business' && (
+                <span className="text-xs text-blue-400/80 font-bold uppercase tracking-wider">{user.company || 'Business'} • Professional</span>
+              )}
             </h3>
 
-            {/* Rating + Distance row */}
-            <div className="flex items-center justify-center mt-1.5 gap-2">
-              <span className="inline-flex items-center bg-slate-800/60 border border-slate-700/50 rounded-full px-2.5 py-0.5">
-                <span className="text-[10px] font-bold text-slate-500 mr-1">RATING</span>
-                <span className="text-xs text-amber-400">{'⭐'.repeat(ratingStars)}</span>
-              </span>
-              <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
+            {/* Distance row (Rating removed) */}
+            <div className="flex items-center justify-center mt-2.5">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] bg-slate-800/40 px-3 py-1 rounded-full border border-white/5">
                 {distance ? formatDistance(distance) : "Nearby"}
               </span>
             </div>
@@ -227,10 +234,18 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                   </div>
                   <div className="flex items-center gap-2 mb-3 relative z-10">
                     <Briefcase className="w-4 h-4 text-blue-400" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Industry & Role</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Core Service</span>
                   </div>
-                  <p className="text-base text-white font-black relative z-10">{user.jobTitle || "Professional"}</p>
-                  <p className="text-xs text-slate-400 relative z-10 mb-3">{user.company || user.industry || "Active Professional"}</p>
+                  <p className="text-base text-white font-black relative z-10">{user.jobTitle || "Professional Services"}</p>
+                  <p className="text-xs text-slate-400 relative z-10 mb-3 italic">"{user.industry || "Active in Sector"}"</p>
+                  
+                  {/* Hiring Badge inside Card */}
+                  {user.isHiring && (
+                    <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded border border-emerald-500/30 animate-pulse mb-3">
+                      <Flame className="w-3 h-3" /> Hiring Now
+                    </div>
+                  )}
+
                   {user.networkingGoal && (
                     <div className="pt-3 border-t border-blue-500/10 flex items-start gap-2 relative z-10">
                       <Target className="w-3.5 h-3.5 text-blue-400 mt-0.5 shrink-0" />
