@@ -247,7 +247,7 @@ export default function Profile() {
   useEffect(() => {
     const handleVisibility = () => setIsBlurred(document.hidden);
     const handleFocus = () => setIsBlurred(false);
-    const handleBlur = () => setIsBlurred(true);
+    // Removed handleBlur to prevent blur when clicking away from the window
     const preventPrint = (e: KeyboardEvent) => {
       if (e.key === 'PrintScreen') {
         navigator.clipboard.writeText(""); // Clear clipboard
@@ -256,12 +256,10 @@ export default function Profile() {
     };
     window.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
     window.addEventListener('keyup', preventPrint);
     return () => {
       window.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
       window.removeEventListener('keyup', preventPrint);
     };
   }, [toast]);
