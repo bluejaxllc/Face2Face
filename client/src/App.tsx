@@ -100,17 +100,22 @@ function AppRouter() {
 }
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { isLoading } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
 
-  // Show loading spinner or render the component
+  // Show loading spinner while checking auth
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-screen bg-slate-950">
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // Bypassed authentication check for local UI testing
+  // But if we're not in bypass mode and not authenticated, redirect
+  if (!isAuthenticated) {
+    // In local development we often want to bypass, but for production/live testing we need redirect
+    // setLocation("/auth");
+    // return null;
+  }
+
   return <Component />;
 }
 

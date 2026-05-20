@@ -5,8 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistance } from "@/lib/distance";
-import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight, Eye, UserPlus } from "lucide-react";
+import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight, Eye, UserPlus, Briefcase, Zap, Target, Linkedin, Smile, MessageSquare, Flame } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import DirectionalArrow from "./DirectionalArrow";
 import { apiRequest } from "@/lib/queryClient";
@@ -34,6 +35,21 @@ interface User {
   profilePhoto?: string | null;
   latitude?: number;
   longitude?: number;
+
+  // New Category Fields
+  jobTitle?: string | null;
+  company?: string | null;
+  industry?: string | null;
+  skills?: string | null;
+  networkingGoal?: string | null;
+  linkedinUrl?: string | null;
+  vibeStatus?: string | null;
+  currentActivity?: string | null;
+  icebreaker?: string | null;
+  relationshipGoal?: string | null;
+  loveLanguage?: string | null;
+  mbti?: string | null;
+  perfectDate?: string | null;
 }
 
 interface ProfileCardProps {
@@ -129,13 +145,21 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
 
   return (
     <>
-      <Card className="fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm bg-slate-900/95  border border-slate-700/50 rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.6)] overflow-hidden z-[2000] p-0 max-h-[70vh] overflow-y-auto">
-        <div className="relative pt-8 pb-5 px-5 flex flex-col items-center">
-          {/* Header gradient */}
-          <div className={`absolute top-0 left-0 w-full h-28 ${user.gender === 'male'
-            ? 'bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent'
-            : 'bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-transparent'
+      <Card className={`fixed left-1/2 transform -translate-x-1/2 bottom-20 w-11/12 max-w-sm border-slate-700/50 rounded-3xl shadow-[0_-8px_50px_rgba(0,0,0,0.8)] overflow-hidden z-[2000] p-0 max-h-[75vh] overflow-y-auto transition-all duration-500 ${user.category === 'business' ? 'theme-business border-blue-500/30 bg-mesh-business' :
+          user.category === 'friendships' ? 'theme-friends border-emerald-500/30 bg-mesh-friends' :
+            user.category === 'dating' ? 'theme-dating border-pink-500/30 bg-mesh-dating' : 'bg-slate-900/95'
+        }`}>
+        <div className="relative pt-10 pb-6 px-6 flex flex-col items-center">
+          {/* Header gradient overlay */}
+          <div className={`absolute top-0 left-0 w-full h-40 transition-all duration-700 opacity-60 ${user.category === 'business'
+              ? 'bg-gradient-to-b from-blue-600/40 via-indigo-600/10 to-transparent'
+              : user.category === 'friendships'
+                ? 'bg-gradient-to-b from-emerald-500/40 via-teal-500/10 to-transparent'
+                : user.category === 'dating'
+                  ? 'bg-gradient-to-b from-pink-500/40 via-rose-500/10 to-transparent'
+                  : 'bg-gradient-to-b from-slate-700/20 to-transparent'
             }`} />
+
 
           {/* Close */}
           <button
@@ -146,11 +170,15 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
           </button>
 
           {/* Avatar */}
-          <div className={`p-[3px] rounded-full z-10 ${user.gender === 'male'
-            ? 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
-            : 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
+          <div className={`p-[3px] rounded-full z-10 transition-all duration-500 ${user.category === 'business'
+              ? 'bg-gradient-to-br from-blue-400 to-indigo-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+              : user.category === 'friendships'
+                ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                : user.category === 'dating'
+                  ? 'bg-gradient-to-br from-pink-400 to-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]'
+                  : 'bg-slate-700'
             }`}>
-            <Avatar className="h-20 w-20 border-2 border-slate-900 bg-slate-800">
+            <Avatar className="h-24 w-24 border-2 border-slate-900 bg-slate-800">
               {/* Per spec: profile photo only visible after mutual Reveal */}
               {isRevealed && user.profilePhoto && (
                 <AvatarImage src={user.profilePhoto} alt={`${user.firstName}'s photo`} />
@@ -179,29 +207,101 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
               </span>
             </div>
 
-            {/* Connect message / bio */}
-            {user.bio && (
-              <div className="mt-3 bg-slate-800/40 border border-slate-700/30 rounded-xl px-4 py-2.5">
-                <p className="text-xs text-slate-300 italic leading-relaxed">"{user.bio}"</p>
+            {/* Category Marker */}
+            <div className="flex justify-center mt-3">
+              <Badge className={`px-4 py-1 text-[11px] uppercase font-black tracking-[0.12em] border transition-all duration-700 ${user.category === 'business' ? 'bg-blue-500/20 text-blue-400 border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.2)]' :
+                  user.category === 'friendships' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]' :
+                    user.category === 'dating' ? 'bg-pink-500/20 text-pink-400 border-pink-500/40 shadow-[0_0_15px_rgba(236,72,153,0.2)]' : 'bg-slate-800 border-slate-700'
+                }`}>
+                {user.category === 'business' ? 'Pro-X Professional' : user.category === 'friendships' ? 'VibeCheck Friend' : 'Aura Dating'}
+              </Badge>
+            </div>
+
+
+            {/* Category Details */}
+            {user.category === 'business' && (
+              <div className="mt-5 w-full space-y-3">
+                <div className="glass-card pro-x-card p-5 border-blue-500/20 relative overflow-hidden group">
+                  <div className="absolute -top-4 -right-4 text-blue-500/5 group-hover:text-blue-500/10 transition-colors">
+                    <Briefcase className="w-20 h-20 rotate-12" />
+                  </div>
+                  <div className="flex items-center gap-2 mb-3 relative z-10">
+                    <Briefcase className="w-4 h-4 text-blue-400" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Industry & Role</span>
+                  </div>
+                  <p className="text-base text-white font-black relative z-10">{user.jobTitle || "Professional"}</p>
+                  <p className="text-xs text-slate-400 relative z-10 mb-3">{user.company || user.industry || "Active Professional"}</p>
+                  {user.networkingGoal && (
+                    <div className="pt-3 border-t border-blue-500/10 flex items-start gap-2 relative z-10">
+                      <Target className="w-3.5 h-3.5 text-blue-400 mt-0.5 shrink-0" />
+                      <p className="text-xs text-slate-300 leading-snug"><span className="text-blue-400 font-bold uppercase text-[9px] mr-1">Direct Goal:</span> {user.networkingGoal}</p>
+                    </div>
+                  )}
+                </div>
+
+                {user.skills && (
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    {user.skills.split(',').slice(0, 4).map((skill, i) => (
+                      <span key={i} className="text-[9px] font-bold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded text-blue-300 uppercase">
+                        {skill.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Info pills grid */}
-            {infoPills.length > 0 && (
-              <div className="mt-3 grid grid-cols-2 gap-2 text-left">
-                {infoPills.map((pill, i) => (
-                  <div
-                    key={i}
-                    className={`bg-slate-800/40 p-2.5 rounded-xl border border-slate-700/30 ${i === infoPills.length - 1 && infoPills.length % 2 !== 0 ? 'col-span-2' : ''
-                      }`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      {pill.icon}
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{pill.label}</span>
-                    </div>
-                    <p className="text-xs text-slate-200 font-semibold truncate">{pill.value}</p>
+            {user.category === 'friendships' && (
+              <div className="mt-4 w-full space-y-3">
+                <div className="glass-card vibecheck-card p-4 border-emerald-500/10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Smile className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Vibe</span>
                   </div>
-                ))}
+                  <p className="text-sm text-white font-bold flex items-center gap-2">
+                    {user.vibeStatus === 'chill' ? '🍃 Chill Mode' :
+                      user.vibeStatus === 'energetic' ? '🔥 High Energy' :
+                        user.vibeStatus === 'productive' ? '💻 Productive' : '😊 Friendly'}
+                  </p>
+                  {user.currentActivity && (
+                    <p className="text-[11px] text-slate-400 mt-1">{user.currentActivity}</p>
+                  )}
+                </div>
+                {user.icebreaker && (
+                  <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 p-3 rounded-xl border border-emerald-500/20">
+                    <p className="text-[10px] text-emerald-400 font-bold uppercase mb-1">Icebreaker</p>
+                    <p className="text-xs text-slate-200 italic">"{user.icebreaker}"</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {user.category === 'dating' && (
+              <div className="mt-4 w-full space-y-3">
+                <div className="glass-card aura-card p-4 border-pink-500/10 group">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Heart className="w-3.5 h-3.5 text-pink-400" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aura Stats</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[9px] text-slate-500 uppercase font-black">Goal</p>
+                      <p className="text-xs text-white font-bold">{user.relationshipGoal || "Casual"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-slate-500 uppercase font-black">MBTI</p>
+                      <p className="text-xs text-white font-bold">{user.mbti || "Unknown"}</p>
+                    </div>
+                  </div>
+                </div>
+                {user.perfectDate && (
+                  <div className="p-3 bg-slate-800/60 rounded-xl border border-pink-500/20 shadow-inner">
+                    <p className="text-[10px] text-pink-400 font-bold uppercase mb-1 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> Perfect Date
+                    </p>
+                    <p className="text-xs text-slate-300 leading-relaxed truncate">{user.perfectDate}</p>
+                  </div>
+                )}
               </div>
             )}
 

@@ -126,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve user profile photo as a cacheable binary image
+  // Served user profile photo as a cacheable binary image
   apiRouter.get("/users/:id/photo", async (req: Request, res: Response) => {
     try {
       const userId = parseInt(req.params.id);
@@ -152,26 +152,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).send("Failed to load photo");
-    }
-  });
-
-  // Profile update route
-  apiRouter.patch("/users/profile", async (req: Request, res: Response) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const updatedUser = await storage.updateUser(req.session.userId, req.body);
-
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      res.status(200).json(updatedUser);
-    } catch (error) {
-      console.error("Profile update error:", error);
-      res.status(500).json({ message: "Failed to update profile" });
     }
   });
 

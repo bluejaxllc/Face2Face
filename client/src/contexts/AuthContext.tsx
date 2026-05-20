@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { buildApiUrl } from "@/lib/api-config";
 
@@ -33,7 +33,23 @@ interface User {
   phoneNumber: string | null;
   isPhoneVerified: boolean;
   safetyAcknowledged: boolean;
+
+  // Specialized Category Fields
+  jobTitle: string | null;
+  company: string | null;
+  industry: string | null;
+  skills: string | null;
+  networkingGoal: string | null;
+  linkedinUrl: string | null;
+  vibeStatus: string | null;
+  currentActivity: string | null;
+  icebreaker: string | null;
+  relationshipGoal: string | null;
+  loveLanguage: string | null;
+  mbti: string | null;
+  perfectDate: string | null;
 }
+
 
 interface AuthContextType {
   user: User | null;
@@ -60,36 +76,34 @@ interface RegisterData {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
-  const { isLoading, refetch, data: userData } = useQuery<User | null>({
+  const { isLoading, refetch, data: user } = useQuery<User | null>({
     queryKey: ["/api/auth/me"],
     retry: false,
-    staleTime: 0, // Always fetch from network
+    staleTime: 30000, // Cache for 30 seconds to avoid excessive network calls
     queryFn: async ({ queryKey }) => {
       const fullUrl = buildApiUrl(queryKey[0] as string);
-      const res = await fetch(fullUrl, {
-        credentials: "include",
-      });
+      try {
+        const res = await fetch(fullUrl, {
+          credentials: "include",
+        });
 
-      if (res.status === 401) {
+        if (res.status === 401) {
+          return null;
+        }
+
+        if (!res.ok) {
+          return null;
+        }
+
+        return res.json();
+      } catch (error) {
+        console.error("Auth check failed:", error);
         return null;
       }
-
-      if (!res.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-
-      return res.json();
     }
   });
-
-  useEffect(() => {
-    if (userData) {
-      setUser(userData);
-    }
-  }, [userData]);
 
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
@@ -101,8 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: (data) => {
-      setUser(data);
-      refetch(); // Force a refetch of the user data
+      queryClient.setQueryData(["/api/auth/me"], data);
       toast({
         title: "Login successful",
         description: `Welcome back, ${data.firstName}!`,
@@ -127,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: (data) => {
-      setUser(data);
+      queryClient.setQueryData(["/api/auth/me"], data);
       toast({
         title: "Registration successful",
         description: `Welcome, ${data.firstName}!`,
@@ -152,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: () => {
-      setUser(null);
+      queryClient.setQueryData(["/api/auth/me"], null);
       toast({
         title: "Logout successful",
         description: "You have been logged out",
@@ -177,7 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: (data) => {
-      setUser(data);
+      queryClient.setQueryData(["/api/auth/me"], data);
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully",
@@ -208,15 +221,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateProfileMutation.mutateAsync(profileData);
   };
 
-  // Run refetch only once when component mounts
-  useEffect(() => {
-    // No need to refetch on mount as the initial query will handle it
-  }, []);
+  // Auto-refetch on focus is fine for auth state
 
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user ?? null,
         isAuthenticated: !!user,
         isLoading,
         login,

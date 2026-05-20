@@ -33,6 +33,35 @@ export const users = pgTable("users", {
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
   safetyAcknowledged: boolean("safety_acknowledged").default(false),
+  pushToken: text("push_token"), // Temporarily added to prevent db:push rejection
+  subscriptionTier: text("subscription_tier"), // Temporarily added to prevent db:push rejection
+  subscriptionExpiresAt: timestamp("subscription_expires_at"), // Temporarily added to prevent db:push rejection
+  // Specialized Category Fields
+  // Business - Professional
+  jobTitle: text("job_title"),
+  company: text("company"),
+  industry: text("industry"),
+  skills: text("skills"), // Comma-separated
+  networkingGoal: text("networking_goal"), // "hiring", "investing", "mentorship", "networking"
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  professionalMotto: text("professional_motto"),
+
+  // Friends - Social
+  vibeStatus: text("vibe_status"), // "chill", "energetic", "productive", etc.
+  currentActivity: text("current_activity"), // "working on a project", "drinking coffee"
+  icebreaker: text("icebreaker"), // Response to a random question
+  weekendVibe: text("weekend_vibe"), // "outdoors", "gaming", "relaxing", "nightlife"
+  socialBattery: text("social_battery"), // "introvert", "extrovert", "ambivert"
+
+  // Dating - Romantic
+  relationshipGoal: text("relationship_goal"), // "long-term", "short-term", "chatting"
+  loveLanguage: text("love_language"),
+  mbti: text("mbti"),
+  perfectDate: text("perfect_date"),
+  lifestyleCoffee: text("lifestyle_coffee"), // "addict", "decal", "none"
+  lifestyleAlcohol: text("lifestyle_alcohol"), // "social", "frequent", "never"
+  lifestyleSchedule: text("lifestyle_schedule"), // "morning", "night", "flexible"
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -41,6 +70,7 @@ export const users = pgTable("users", {
     isActiveIdx: index("is_active_idx").on(table.isActive)
   };
 });
+
 
 export const bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
@@ -134,7 +164,21 @@ export const updateUserSchema = createInsertSchema(users).pick({
   phoneNumber: true,
   isPhoneVerified: true,
   safetyAcknowledged: true,
+  jobTitle: true,
+  company: true,
+  industry: true,
+  skills: true,
+  networkingGoal: true,
+  linkedinUrl: true,
+  vibeStatus: true,
+  currentActivity: true,
+  icebreaker: true,
+  relationshipGoal: true,
+  loveLanguage: true,
+  mbti: true,
+  perfectDate: true,
 });
+
 
 export const insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,

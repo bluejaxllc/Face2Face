@@ -16,7 +16,7 @@ const categoryConfig: Record<CategoryKey, { icon: any; label: string; color: str
 
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
 
   // Category selector state
   const [activeCategory, setActiveCategory] = useState<CategoryKey>(() => {
@@ -58,13 +58,26 @@ export default function BottomNavigation() {
     }
   };
 
-  const handleCategorySelect = (cat: CategoryKey) => {
+  const handleCategorySelect = async (cat: CategoryKey) => {
     setActiveCategory(cat);
     localStorage.setItem("f2f_activeCategory", cat);
-    // Dispatch a custom event so the Dating page can pick it up
+    
+    // Sync with database if authenticated
+    if (user && updateProfile) {
+      try {
+        // Normalize 'friends' to 'friendships' for database consistency
+        const dbCategory = cat === 'friends' ? 'friendships' : cat;
+        await updateProfile({ category: dbCategory });
+      } catch (error) {
+        console.error("Failed to sync category to profile:", error);
+      }
+    }
+
+    // Dispatch a custom event so the Dating page and other components can pick it up
     window.dispatchEvent(new CustomEvent("f2f:categoryChange", { detail: cat }));
     setShowCategoryPicker(false);
-    // Navigate to dating if not already there
+    
+    // Navigate to dating if not already there (Dating page is the main feed for all categories)
     if (location !== "/dating") {
       navigate("/dating");
     }

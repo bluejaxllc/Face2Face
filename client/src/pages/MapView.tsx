@@ -80,7 +80,11 @@ export default function MapView() {
   };
 
   return (
-    <PageTransition className="h-screen w-full page-dark map-view">
+    <PageTransition className={`h-screen w-full map-view ${
+      user?.category === 'business' ? 'bg-mesh-business' : 
+      user?.category === 'dating' ? 'bg-mesh-dating' : 
+      'bg-mesh-friends'
+    }`}>
       <TopToolbar
         isActive={isActive}
         onToggleActive={handleToggleActive}
