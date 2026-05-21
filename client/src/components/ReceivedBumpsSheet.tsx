@@ -18,9 +18,8 @@ interface ReceivedBump {
         id: number;
         firstName: string;
         lastName: string;
-        gender: string;
+        sex: string;
         age: number;
-        selfRating: number;
         category: string;
         profilePhoto: string | null;
         latitude: number;
@@ -110,7 +109,7 @@ export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack, onS
                                     {/* Sender info */}
                                     {bump.sender && (
                                         <div className="flex items-center gap-3">
-                                            <div className={`p-[2px] rounded-full ${bump.sender.gender === 'male'
+                                            <div className={`p-[2px] rounded-full ${bump.sender.sex === 'male'
                                                 ? 'bg-gradient-to-br from-blue-400 to-indigo-500'
                                                 : 'bg-gradient-to-br from-pink-400 to-rose-500'
                                                 }`}>
@@ -124,15 +123,13 @@ export default function ReceivedBumpsSheet({ open, onOpenChange, onBumpBack, onS
                                                 <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
                                                     {bump.sender.firstName}, {bump.sender.age}
                                                     <span className="inline-flex">
-                                                        {bump.sender.gender === 'male'
+                                                        {bump.sender.sex === 'male'
                                                             ? <svg width="12" height="12" viewBox="0 0 100 100"><polygon points="50,8 94,92 6,92" fill="#4285F4" stroke="#1a73e8" strokeWidth="6" strokeLinejoin="round" /></svg>
                                                             : <svg width="12" height="12" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#EA4335" stroke="#c5221f" strokeWidth="6" /></svg>
                                                         }
                                                     </span>
                                                 </h4>
-                                                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
-                                                    Rating: {'⭐'.repeat(Math.min(5, Math.round(bump.sender.selfRating / 2)))}
-                                                </p>
+
                                             </div>
                                             <span className="text-[10px] text-slate-600 font-mono">
                                                 {new Date(bump.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -2,13 +2,14 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Map, Gamepad2, MessageSquare, Users, User, Briefcase, Handshake, MapPin, Dice5, Swords, Mail, MessagesSquare, Contact, Building2, UserCheck, ChevronUp } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import CalendarHeart from "@/components/icons/CalendarHeart";
 import { triggerHaptic, triggerHapticPattern } from "@/services/haptics-service";
 import { useEffect, useRef, useState } from "react";
 
-type CategoryKey = "dating" | "friends" | "business";
+export type CategoryKey = "dating" | "friends" | "business";
 
-const categoryConfig: Record<CategoryKey, { icon: any; label: string; color: string }> = {
+export const categoryConfig: Record<CategoryKey, { icon: any; label: string; color: string }> = {
   dating:   { icon: CalendarHeart, label: "DATING",   color: "text-rose-400" },
   friends:  { icon: Handshake, label: "FRIENDS",  color: "text-emerald-400" },
   business: { icon: Briefcase, label: "BUSINESS", color: "text-blue-400" },
@@ -17,6 +18,19 @@ const categoryConfig: Record<CategoryKey, { icon: any; label: string; color: str
 export default function BottomNavigation() {
   const [location, navigate] = useLocation();
   const { user, updateProfile } = useAuth();
+  const { toast } = useToast();
+
+  const calculateAge = (dob: string | Date | number) => {
+    if (!dob) return 0;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   // Category selector state
   const [activeCategory, setActiveCategory] = useState<CategoryKey>(() => {
@@ -47,22 +61,33 @@ export default function BottomNavigation() {
   };
 
   const handleCategoryTap = () => {
-    const categoryPath = "/dating";
-    if (location === categoryPath) {
-      // Already on the dating page — toggle the category picker
-      setShowCategoryPicker(!showCategoryPicker);
-    } else {
-      // Navigate to the dating page and close picker
-      navigate(categoryPath);
-      setShowCategoryPicker(false);
-    }
+    setShowCategoryPicker(!showCategoryPicker);
   };
 
   const handleCategorySelect = async (cat: CategoryKey) => {
+    // Check age for dating category
+    if (cat === "dating" && user?.dateOfBirth) {
+      const age = calculateAge(user.dateOfBirth);
+      if (age < 18) {
+        toast({
+          title: "Access Denied",
+          description: "You must be 18 or older to use Dating mode.",
+          variant: "destructive",
+        });
+        setShowCategoryPicker(false);
+        return;
+      }
+    }
+
+    // Provide instant UI feedback
     setActiveCategory(cat);
     localStorage.setItem("f2f_activeCategory", cat);
+    setShowCategoryPicker(false);
     
-    // Sync with database if authenticated
+    // Dispatch a custom event so the Dating page and other components can pick it up
+    window.dispatchEvent(new CustomEvent("f2f:categoryChange", { detail: cat }));
+
+    // Sync with database in the background if authenticated
     if (user && updateProfile) {
       try {
         // Normalize 'friends' to 'friendships' for database consistency
@@ -71,15 +96,6 @@ export default function BottomNavigation() {
       } catch (error) {
         console.error("Failed to sync category to profile:", error);
       }
-    }
-
-    // Dispatch a custom event so the Dating page and other components can pick it up
-    window.dispatchEvent(new CustomEvent("f2f:categoryChange", { detail: cat }));
-    setShowCategoryPicker(false);
-    
-    // Navigate to dating if not already there (Dating page is the main feed for all categories)
-    if (location !== "/dating") {
-      navigate("/dating");
     }
   };
 

@@ -23,16 +23,17 @@ import { motion } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 
 const registerSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Please enter a valid email"),
-  phoneNumber: z.string().min(10, "Enter a valid phone number"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  firstName: z.string().min(1, "Required"),
+  lastName: z.string().min(1, "Required"),
+  username: z.string().min(3, "Too short").regex(/^[a-zA-Z0-9_]+$/, "Alphanumeric only"),
+  email: z.string().email("Invalid email"),
+  phoneNumber: z.string().min(10, "Invalid phone"),
+  password: z.string().min(6, "Min 6 chars"),
   confirmPassword: z.string(),
-  gender: z.string().default("other"),
-  age: z.coerce.number().min(18, "Must be at least 18").max(99),
-  selfRating: z.coerce.number().min(1).max(10).default(5),
+  sex: z.string().min(1, "Required"),
+  customSex: z.string().optional(),
+  dateOfBirth: z.string().optional().or(z.literal("")),
+  age: z.number().min(13, "Must be at least 13"),
   datingPreference: z.string().default("all"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -52,6 +53,7 @@ export default function Register() {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [regStep, setRegStep] = useState(0);
   const [_, navigate] = useLocation();
   const { login, register } = useAuth();
 
@@ -65,12 +67,37 @@ export default function Register() {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
-      gender: "other",
+      sex: "",
+      customSex: "",
+      dateOfBirth: "",
       age: 18,
-      selfRating: 5,
       datingPreference: "all",
     },
   });
+
+  // Calculate age when DOB changes
+  const dobValue = registerForm.watch("dateOfBirth");
+  useEffect(() => {
+    if (dobValue) {
+      const birthDate = new Date(dobValue);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      registerForm.setValue("age", age);
+    }
+  }, [dobValue, registerForm]);
+
+  const nextStep = async (fields: (keyof RegisterFormValues)[]) => {
+    const isValid = await registerForm.trigger(fields);
+    if (isValid) {
+      setRegStep(prev => prev + 1);
+    }
+  };
+
+  const prevStep = () => setRegStep(prev => Math.max(0, prev - 1));
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -91,7 +118,9 @@ export default function Register() {
 
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     try {
-      const { confirmPassword, ...registerData } = values;
+      const finalSex = values.sex === "custom" ? values.customSex || "other" : values.sex;
+      const { confirmPassword, customSex, ...registerData } = { ...values, sex: finalSex };
+      
       await register(registerData);
 
       // Send verification code
@@ -373,224 +402,347 @@ export default function Register() {
 
             <TabsContent value="register" className="mt-0">
               <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormField
-                      control={registerForm.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 text-sm font-medium">First Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="First name" {...field} className="auth-input" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 text-sm font-medium">Last Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Last name" {...field} className="auth-input" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 text-sm font-medium">Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Choose a username" {...field} className="auth-input" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 text-sm font-medium">Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="Enter your email" {...field} className="auth-input" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="phoneNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 text-sm font-medium">Phone Number</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">+1</span>
-                            <Input
-                              type="tel"
-                              inputMode="numeric"
-                              placeholder="(555) 000-0000"
-                              {...field}
-                              onChange={(e) => {
-                                const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                field.onChange(digits);
-                              }}
-                              value={field.value ? field.value.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3") : ""}
-                              className="auth-input pl-10"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription className="text-slate-400 text-[10px]">We'll send a verification code</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Face2Face-specific fields */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <FormField
-                      control={registerForm.control}
-                      name="gender"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 text-sm font-medium">Gender</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <form
+                  onSubmit={(e) => {
+                    if (regStep < 4) {
+                      e.preventDefault();
+                    } else {
+                      registerForm.handleSubmit(onRegisterSubmit)(e);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  {regStep === 0 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">First, pick a username</h2>
+                        <p className="text-slate-400 text-sm">This is how you'll be identified on the map</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
                             <FormControl>
-                              <SelectTrigger className="auth-input">
-                                <SelectValue placeholder="Gender" />
-                              </SelectTrigger>
+                              <Input placeholder="Enter username" {...field} className="auth-input h-14 text-lg text-center" />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="male">Male</SelectItem>
-                              <SelectItem value="female">Female</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="button" onClick={() => nextStep(["username"])} className="w-full h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                    </motion.div>
+                  )}
+
+                  {regStep === 1 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">Create a password</h2>
+                        <p className="text-slate-400 text-sm">Make it strong to keep your profile secure</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <Input type={showRegisterPassword ? "text" : "password"} placeholder="Enter password" {...field} className="auth-input h-14 text-lg text-center pr-12" />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                >
+                                  {showRegisterPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["password"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 2 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">Confirm your password</h2>
+                        <p className="text-slate-400 text-sm">Just to make sure there are no typos</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm password" {...field} className="auth-input h-14 text-lg text-center pr-12" />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                >
+                                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["confirmPassword"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 3 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">What is your first name?</h2>
+                        <p className="text-slate-400 text-sm">Tell us what to call you</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Enter first name" {...field} className="auth-input h-14 text-lg text-center" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["firstName"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 4 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">And your last name?</h2>
+                        <p className="text-slate-400 text-sm">For your full professional or personal profile</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Enter last name" {...field} className="auth-input h-14 text-lg text-center" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["lastName"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 5 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">Your email address?</h2>
+                        <p className="text-slate-400 text-sm">We'll use this for account recovery</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input type="email" placeholder="you@example.com" {...field} className="auth-input h-14 text-lg text-center" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["email"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 6 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">Phone number?</h2>
+                        <p className="text-slate-400 text-sm">Required for verification and safety</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="relative">
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-lg font-bold">+1</span>
+                                <Input
+                                  type="tel"
+                                  inputMode="numeric"
+                                  placeholder="(555) 000-0000"
+                                  {...field}
+                                  onChange={(e) => {
+                                    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                    field.onChange(digits);
+                                  }}
+                                  value={field.value ? field.value.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3") : ""}
+                                  className="auth-input h-14 text-lg text-center pl-16"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["phoneNumber"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 7 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">When is your birthday?</h2>
+                        <p className="text-slate-400 text-sm">This confirms you're eligible for all app features</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="dateOfBirth"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input type="date" {...field} className="auth-input h-14 text-lg text-center" />
+                            </FormControl>
+                            <FormDescription className="text-slate-500 text-sm mt-2">Current age: {registerForm.watch("age")}</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["dateOfBirth"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 8 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">How do you identify?</h2>
+                        <p className="text-slate-400 text-sm">Select your sex for profile matching</p>
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="sex"
+                        render={({ field }) => (
+                          <FormItem>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="auth-input h-14 text-lg text-center">
+                                  <SelectValue placeholder="Select Sex" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="bg-slate-900 border-slate-800">
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {registerForm.watch("sex") === "custom" && (
+                        <FormField
+                          control={registerForm.control}
+                          name="customSex"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Type your preference" {...field} className="auth-input text-center h-14" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="age"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 text-sm font-medium">Age</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="18" max="99" {...field} className="auth-input" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                      <div className="flex gap-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button type="button" onClick={() => nextStep(["sex", "customSex"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {regStep === 9 && (
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 text-center">
+                      <div className="py-6">
+                        <h2 className="text-2xl font-black text-white mb-2">Last step!</h2>
+                        {registerForm.watch("age") >= 18 ? (
+                          <p className="text-slate-400 text-sm">Who are you interested in meeting?</p>
+                        ) : (
+                          <p className="text-slate-400 text-sm">You're almost there!</p>
+                        )}
+                      </div>
+                      
+                      {registerForm.watch("age") >= 18 ? (
+                        <FormField
+                          control={registerForm.control}
+                          name="datingPreference"
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="auth-input h-14 text-lg text-center">
+                                    <SelectValue placeholder="I'm interested in..." />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="bg-slate-900 border-slate-800">
+                                  <SelectItem value="men">Men</SelectItem>
+                                  <SelectItem value="women">Women</SelectItem>
+                                  <SelectItem value="all">Everyone</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ) : (
+                        <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                          <p className="text-blue-400 text-sm font-medium">Dating features are restricted to adults. You'll have access to Friends and Business modes!</p>
+                        </div>
                       )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="selfRating"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-300 text-sm font-medium">Rating</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="1" max="10" {...field} className="auth-input" />
-                          </FormControl>
-                          <FormDescription className="text-slate-400 text-[10px]">1-10</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
 
-                  <FormField
-                    control={registerForm.control}
-                    name="datingPreference"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 text-sm font-medium">Interested In</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="auth-input">
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="men">Men</SelectItem>
-                            <SelectItem value="women">Women</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 text-sm font-medium">Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input type={showRegisterPassword ? "text" : "password"} placeholder="Create a password" {...field} className="auth-input pr-10" />
-                            <button
-                              type="button"
-                              onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                              tabIndex={-1}
-                            >
-                              {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-300 text-sm font-medium">Confirm Password</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" {...field} className="auth-input pr-10" />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                              tabIndex={-1}
-                            >
-                              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg shadow-pink-500/25 transition-all duration-300 hover:shadow-pink-500/40 hover:scale-[1.02] active:scale-[0.98]"
-                    disabled={registerForm.formState.isSubmitting}
-                  >
-                    {registerForm.formState.isSubmitting ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</>
-                    ) : "Create Account"}
-                  </Button>
+                      <div className="flex gap-4 pt-4">
+                        <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
+                        <Button
+                          type="submit"
+                          className="flex-1 h-14 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/25 transition-all"
+                          disabled={registerForm.formState.isSubmitting}
+                        >
+                          {registerForm.formState.isSubmitting ? (
+                            <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Finalizing...</>
+                          ) : "Create Account"}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
                 </form>
               </Form>
             </TabsContent>

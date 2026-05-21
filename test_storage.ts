@@ -1,0 +1,1 @@
+import { storage } from './server/storage.ts'; async function run() { try { const u = await storage.updateUser(62, { isPublic: false, bannerPhoto: 'xyz' }); console.log('OK'); } catch (e) { console.error('STORAGE ERROR:', e); } process.exit(0); } run();

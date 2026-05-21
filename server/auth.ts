@@ -13,8 +13,9 @@ const registerSchema = z.object({
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50),
   phoneNumber: z.string().min(10).max(15).optional(),
-  gender: z.string().optional().default("female"),
-  age: z.coerce.number().min(18).optional().default(18),
+  sex: z.string().optional().default("female"),
+  age: z.coerce.number().min(13).optional().default(18),
+  dateOfBirth: z.string().or(z.date()).optional(),
   selfRating: z.coerce.number().min(1).max(10).optional().default(5),
 });
 
@@ -34,6 +35,9 @@ async function comparePasswords(supplied: string, stored: string) {
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
+
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 export async function setupAuth(app: Express) {
   // User authentication routes
@@ -60,6 +64,7 @@ export async function setupAuth(app: Express) {
       const user = await storage.createUser({
         ...userData,
         password: hashedPassword,
+        dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth) : null
       });
 
       // Don't return the password in the response
@@ -79,7 +84,7 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Failed to register user" });
+      res.status(500).json({ message: "Failed to register user", error: error instanceof Error ? error.message : String(error) });
     }
   });
 

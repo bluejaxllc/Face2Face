@@ -1,0 +1,1 @@
+import { insertUserSchema } from './shared/schema.ts'; console.log(JSON.stringify(insertUserSchema.safeParse({ username: 'test', password: '123', email: 'test@test.com', firstName: 'T', lastName: 'U' })));

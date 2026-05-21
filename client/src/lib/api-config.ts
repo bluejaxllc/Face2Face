@@ -14,11 +14,12 @@ const PRODUCTION_API_URL = 'https://face2face-production-11ee.up.railway.app';
  * - On web: uses relative URLs (same origin)
  */
 export function getApiBaseUrl(): string {
-    if (Capacitor.isNativePlatform()) {
-        return PRODUCTION_API_URL;
+    // If we're on a web browser and the hostname is localhost, use relative URLs (Vite proxy)
+    // Otherwise (Native or Vercel production), use the Railway backend URL
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        return '';
     }
-    // On web, use relative URLs (Vite proxy or same origin)
-    return '';
+    return PRODUCTION_API_URL;
 }
 
 /**

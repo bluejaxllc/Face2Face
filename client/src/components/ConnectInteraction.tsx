@@ -25,7 +25,6 @@ interface User {
   lastName: string;
   username: string;
   category: string;
-  selfRating: number;
 }
 
 interface ConnectInteractionProps {

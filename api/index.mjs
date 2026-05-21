@@ -16,15 +16,21 @@ import { createServer } from "http";
 var schema_exports = {};
 __export(schema_exports, {
   bumps: () => bumps,
+  communityGroups: () => communityGroups,
+  datingEvents: () => datingEvents,
   insertBumpSchema: () => insertBumpSchema,
+  insertDatingEventSchema: () => insertDatingEventSchema,
   insertMessageSchema: () => insertMessageSchema,
   insertNotificationSchema: () => insertNotificationSchema,
   insertUserSchema: () => insertUserSchema,
+  insertWaitlistSchema: () => insertWaitlistSchema,
   messages: () => messages,
   notifications: () => notifications,
+  tags: () => tags,
   updateUserSchema: () => updateUserSchema,
   users: () => users,
-  verificationCodes: () => verificationCodes
+  verificationCodes: () => verificationCodes,
+  waitlists: () => waitlists
 });
 import { pgTable, text, serial, integer, boolean, numeric, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -35,9 +41,11 @@ var users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
-  gender: text("gender").notNull().default("female"),
-  // 'male', 'female'
+  sex: text("sex").notNull().default("female"),
+  // 'male', 'female', 'custom'
   age: integer("age").notNull().default(18),
+  displayAge: text("display_age"),
+  dateOfBirth: timestamp("date_of_birth"),
   height: text("height"),
   weight: text("weight"),
   selfRating: integer("self_rating").default(5),
@@ -66,7 +74,65 @@ var users = pgTable("users", {
   // base64 encoded photo string
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
-  safetyAcknowledged: boolean("safety_acknowledged").default(false)
+  safetyAcknowledged: boolean("safety_acknowledged").default(false),
+  pushToken: text("push_token"),
+  // Temporarily added to prevent db:push rejection
+  subscriptionTier: text("subscription_tier"),
+  // Temporarily added to prevent db:push rejection
+  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  // Temporarily added to prevent db:push rejection
+  // Specialized Category Fields
+  // Business - Professional
+  jobTitle: text("job_title"),
+  company: text("company"),
+  industry: text("industry"),
+  skills: text("skills"),
+  // Comma-separated
+  networkingGoal: text("networking_goal"),
+  // "hiring", "investing", "mentorship", "networking"
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  professionalMotto: text("professional_motto"),
+  // Friends - Social
+  vibeStatus: text("vibe_status"),
+  // "chill", "energetic", "productive", etc.
+  currentActivity: text("current_activity"),
+  // "working on a project", "drinking coffee"
+  icebreaker: text("icebreaker"),
+  // Response to a random question
+  weekendVibe: text("weekend_vibe"),
+  // "outdoors", "gaming", "relaxing", "nightlife"
+  socialBattery: text("social_battery"),
+  // "introvert", "extrovert", "ambivert"
+  // Dating - Romantic
+  relationshipGoal: text("relationship_goal"),
+  // "long-term", "short-term", "chatting"
+  datingMode: text("dating_mode"),
+  // "viewing", "seeking", "offering", "events"
+  loveLanguage: text("love_language"),
+  mbti: text("mbti"),
+  perfectDate: text("perfect_date"),
+  lifestyleCoffee: text("lifestyle_coffee"),
+  // "addict", "decal", "none"
+  lifestyleAlcohol: text("lifestyle_alcohol"),
+  // "social", "frequent", "never"
+  lifestyleSchedule: text("lifestyle_schedule"),
+  // "morning", "night", "flexible"
+  bannerPhoto: text("banner_photo"),
+  // base64 encoded banner string
+  isPublic: boolean("is_public").default(true),
+  // New Business Fields
+  businessSlogan: text("business_slogan"),
+  businessPhone: text("business_phone"),
+  businessService: text("business_service"),
+  businessNeed: text("business_need"),
+  businessPartners: text("business_partners"),
+  isNetworkingOpen: boolean("is_networking_open").default(true),
+  isHiring: boolean("is_hiring").default(false),
+  openPositions: integer("open_positions").default(0),
+  hiringRoles: text("hiring_roles"),
+  menuData: text("menu_data")
+  // JSON string of menu items: [{name, price, desc}]
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -74,6 +140,26 @@ var users = pgTable("users", {
     phoneIdx: index("phone_idx").on(table.phoneNumber),
     isActiveIdx: index("is_active_idx").on(table.isActive)
   };
+});
+var tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  category: text("category").notNull(),
+  // "dating", "business", "friendships"
+  isApproved: boolean("is_approved").default(true)
+  // true by default, filter NSFW for friends 
+}, (table) => {
+  return {
+    nameIdx: index("tag_name_idx").on(table.name),
+    categoryIdx: index("tag_category_idx").on(table.category)
+  };
+});
+var communityGroups = pgTable("community_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  category: text("category").notNull(),
+  imageUrl: text("image_url")
 });
 var bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
@@ -119,6 +205,25 @@ var notifications = pgTable("notifications", {
     userIdIdx: index("notification_user_id_idx").on(table.userId)
   };
 });
+var datingEvents = pgTable("dating_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(),
+  // 'seek', 'offer', 'event'
+  title: text("title"),
+  description: text("description").notNull(),
+  date: text("date"),
+  location: text("location"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  isActive: boolean("is_active").default(true)
+});
+var insertDatingEventSchema = createInsertSchema(datingEvents).pick({
+  type: true,
+  title: true,
+  description: true,
+  date: true,
+  location: true
+});
 var verificationCodes = pgTable("verification_codes", {
   id: serial("id").primaryKey(),
   phoneNumber: text("phone_number").notNull(),
@@ -131,22 +236,47 @@ var verificationCodes = pgTable("verification_codes", {
     phoneCodeIdx: index("phone_code_idx").on(table.phoneNumber, table.code)
   };
 });
+var waitlists = pgTable("waitlists", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(),
+  // 'individual' or 'business'
+  name: text("name").notNull(),
+  // contact person or individual name
+  email: text("email").notNull(),
+  // Optional / Business specific
+  businessName: text("business_name"),
+  location: text("location"),
+  phone: text("phone"),
+  socialLink: text("social_link"),
+  createdAt: timestamp("created_at").defaultNow()
+});
+var insertWaitlistSchema = createInsertSchema(waitlists);
 var insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   firstName: true,
   lastName: true,
   email: true,
-  gender: true,
+  sex: true,
   age: true,
-  selfRating: true,
+  dateOfBirth: true,
   datingPreference: true,
-  phoneNumber: true
+  phoneNumber: true,
+  bannerPhoto: true,
+  isPublic: true,
+  displayAge: true,
+  businessSlogan: true,
+  openPositions: true
 });
 var updateUserSchema = createInsertSchema(users).pick({
+  firstName: true,
+  lastName: true,
+  sex: true,
+  age: true,
+  displayAge: true,
+  dateOfBirth: true,
   height: true,
   weight: true,
-  selfRating: true,
   category: true,
   bio: true,
   datingPreference: true,
@@ -165,7 +295,34 @@ var updateUserSchema = createInsertSchema(users).pick({
   profilePhoto: true,
   phoneNumber: true,
   isPhoneVerified: true,
-  safetyAcknowledged: true
+  safetyAcknowledged: true,
+  jobTitle: true,
+  company: true,
+  industry: true,
+  skills: true,
+  networkingGoal: true,
+  linkedinUrl: true,
+  portfolioUrl: true,
+  professionalMotto: true,
+  vibeStatus: true,
+  currentActivity: true,
+  icebreaker: true,
+  weekendVibe: true,
+  socialBattery: true,
+  relationshipGoal: true,
+  datingMode: true,
+  bannerPhoto: true,
+  isPublic: true,
+  businessPhone: true,
+  businessService: true,
+  businessNeed: true,
+  businessPartners: true,
+  isNetworkingOpen: true,
+  isHiring: true,
+  businessSlogan: true,
+  openPositions: true,
+  hiringRoles: true,
+  menuData: true
 });
 var insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,
@@ -431,6 +588,30 @@ var DatabaseStorage = class {
     )).returning();
     return result.length;
   }
+  async createWaitlist(data) {
+    const [waitlist] = await db.insert(waitlists).values(data).returning();
+    return waitlist;
+  }
+  async getWaitlists(type) {
+    if (type) {
+      return await db.select().from(waitlists).where(eq(waitlists.type, type)).orderBy(desc(waitlists.createdAt));
+    }
+    return await db.select().from(waitlists).orderBy(desc(waitlists.createdAt));
+  }
+  async createDatingEvent(event) {
+    const result = await db.insert(datingEvents).values(event).returning();
+    return result[0];
+  }
+  async getDatingEvents(params) {
+    let conditions = [];
+    if (params?.type) conditions.push(eq(datingEvents.type, params.type));
+    if (params?.location) conditions.push(eq(datingEvents.location, params.location));
+    conditions.push(eq(datingEvents.isActive, true));
+    if (conditions.length > 0) {
+      return await db.select().from(datingEvents).where(and(...conditions)).orderBy(desc(datingEvents.timestamp));
+    }
+    return await db.select().from(datingEvents).where(eq(datingEvents.isActive, true)).orderBy(desc(datingEvents.timestamp));
+  }
 };
 var storage = new DatabaseStorage();
 
@@ -448,8 +629,9 @@ var registerSchema = z.object({
   firstName: z.string().min(1).max(50),
   lastName: z.string().min(1).max(50),
   phoneNumber: z.string().min(10).max(15).optional(),
-  gender: z.string().optional().default("female"),
-  age: z.coerce.number().min(18).optional().default(18),
+  sex: z.string().optional().default("female"),
+  age: z.coerce.number().min(13).optional().default(18),
+  dateOfBirth: z.string().or(z.date()).optional(),
   selfRating: z.coerce.number().min(1).max(10).optional().default(5)
 });
 var scryptAsync = promisify(scrypt);
@@ -479,7 +661,8 @@ async function setupAuth(app2) {
       const hashedPassword = await hashPassword(userData.password);
       const user = await storage.createUser({
         ...userData,
-        password: hashedPassword
+        password: hashedPassword,
+        dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth) : null
       });
       const { password, ...userWithoutPassword } = user;
       if (req.session) {
@@ -494,7 +677,7 @@ async function setupAuth(app2) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Failed to register user" });
+      res.status(500).json({ message: "Failed to register user", error: error instanceof Error ? error.message : String(error) });
     }
   });
   app2.post("/api/auth/login", async (req, res) => {
@@ -661,10 +844,12 @@ async function registerRoutes(app2) {
         profilePhoto: updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null
       });
     } catch (error) {
+      const err = error;
+      console.error("Profile update error:", err);
       if (error instanceof z2.ZodError) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to update profile" });
+      res.status(500).json({ message: "Failed to update profile", err: err.message, stack: err.stack });
     }
   });
   apiRouter.post("/users/location", async (req, res) => {
@@ -690,6 +875,19 @@ async function registerRoutes(app2) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update location" });
+    }
+  });
+  apiRouter.post("/waitlist", async (req, res) => {
+    try {
+      const raw = insertWaitlistSchema.parse(req.body);
+      const waitlist = await storage.createWaitlist(raw);
+      res.status(201).json(waitlist);
+    } catch (error) {
+      console.error("Waitlist error:", error);
+      if (error instanceof z2.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to join waitlist" });
     }
   });
   apiRouter.get("/users/:id", async (req, res, next) => {
@@ -742,21 +940,6 @@ async function registerRoutes(app2) {
       res.status(500).send("Failed to load photo");
     }
   });
-  apiRouter.patch("/users/profile", async (req, res) => {
-    try {
-      if (!req.session || !req.session.userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      const updatedUser = await storage.updateUser(req.session.userId, req.body);
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.status(200).json(updatedUser);
-    } catch (error) {
-      console.error("Profile update error:", error);
-      res.status(500).json({ message: "Failed to update profile" });
-    }
-  });
   apiRouter.get("/users/nearby", async (req, res) => {
     try {
       if (!req.session || !req.session.userId) {
@@ -773,7 +956,7 @@ async function registerRoutes(app2) {
       const category = req.query.category;
       const queryDatingPreference = req.query.datingPreference;
       const datingPreference = queryDatingPreference || user.datingPreference || void 0;
-      const userGender = user.gender || void 0;
+      const userSex = user.sex || void 0;
       const nearbyUsers = await storage.getNearbyUsers(
         Number(user.latitude),
         Number(user.longitude),
@@ -782,7 +965,7 @@ async function registerRoutes(app2) {
         {
           category,
           datingPreference,
-          userGender
+          userSex
         }
       );
       const sanitizedUsers = nearbyUsers.map(({ password, email, phoneNumber, ...rest }) => ({
@@ -857,7 +1040,7 @@ async function registerRoutes(app2) {
               id: sender.id,
               firstName: sender.firstName,
               lastName: sender.lastName,
-              gender: sender.gender,
+              sex: sender.sex,
               age: sender.age,
               selfRating: sender.selfRating,
               category: sender.category,
@@ -1124,6 +1307,35 @@ async function registerRoutes(app2) {
     } catch (error) {
       console.error("Verify check error:", error);
       res.status(500).json({ message: "Failed to verify code" });
+    }
+  });
+  apiRouter.post("/dating-events", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const eventData = { ...req.body, userId: req.session.userId };
+      const newEvent = await storage.createDatingEvent(eventData);
+      res.status(201).json(newEvent);
+    } catch (error) {
+      console.error("Create dating event error:", error);
+      res.status(500).json({ message: "Failed to create dating event" });
+    }
+  });
+  apiRouter.get("/dating-events", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const params = {
+        type: req.query.type,
+        location: req.query.location
+      };
+      const events = await storage.getDatingEvents(params);
+      res.status(200).json(events);
+    } catch (error) {
+      console.error("Get dating events error:", error);
+      res.status(500).json({ message: "Failed to fetch dating events" });
     }
   });
   app2.use("/api", apiRouter);

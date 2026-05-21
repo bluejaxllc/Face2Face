@@ -3,16 +3,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ArrowRight, Heart, Sparkles, User, Mail, Phone, Link as LinkIcon } from "lucide-react";
+import { Loader2, ArrowRight, Heart, Sparkles, User, Mail, Phone, Link as LinkIcon, Building, MapPin } from "lucide-react";
 import { useLocation } from "wouter";
 
 const waitlistSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().min(2, "Contact person must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email"),
+  businessName: z.string().min(2, "Business name is required"),
+  location: z.string().min(2, "Location is required"),
+  phone: z.string().min(5, "Contact phone is required").optional().or(z.literal("")),
+  socialLink: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
 });
 
 type WaitlistFormData = z.infer<typeof waitlistSchema>;
 
-export default function EvangelistsWaitlist() {
+export default function BusinessWaitlist() {
   const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -22,6 +27,11 @@ export default function EvangelistsWaitlist() {
     resolver: zodResolver(waitlistSchema),
     defaultValues: {
       name: "",
+      email: "",
+      businessName: "",
+      location: "",
+      phone: "",
+      socialLink: "",
     },
   });
 
@@ -32,7 +42,7 @@ export default function EvangelistsWaitlist() {
     try {
       const waitlistData = {
         ...data,
-        type: 'individual'
+        type: 'business'
       };
 
       const res = await fetch("/api/waitlist", {
@@ -69,14 +79,14 @@ export default function EvangelistsWaitlist() {
           className="text-center mb-10"
         >
           <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl mb-6 shadow-[0_0_30px_rgba(59,130,246,0.3)] backdrop-blur-xl border border-white/10">
-            <Sparkles className="w-8 h-8 text-blue-400" />
-            <Heart className="w-8 h-8 text-pink-400 -ml-2" />
+            <Building className="w-8 h-8 text-blue-400" />
+            <Sparkles className="w-8 h-8 text-pink-400 -ml-2" />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-            Evangelists
+            Business Partner
           </h1>
           <p className="text-slate-400 text-lg sm:text-xl font-medium max-w-sm mx-auto leading-relaxed">
-            Join the exclusive waitlist to shape the future of Face 2 Face.
+            Join the exclusive business waitlist to connect locally on Face 2 Face.
           </p>
         </motion.div>
 
@@ -94,15 +104,87 @@ export default function EvangelistsWaitlist() {
                 
                 <div className="space-y-1 relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Building className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <input 
+                    {...form.register("businessName")}
+                    placeholder="Business Name *"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3.5 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                  />
+                  {form.formState.errors.businessName && (
+                    <p className="text-pink-500 text-sm pl-2 pt-1.5">{form.formState.errors.businessName.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1 relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <MapPin className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <input 
+                    {...form.register("location")}
+                    placeholder="Location / Address *"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3.5 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                  />
+                  {form.formState.errors.location && (
+                    <p className="text-pink-500 text-sm pl-2 pt-1.5">{form.formState.errors.location.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1 relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                     <User className="w-5 h-5 text-slate-500" />
                   </div>
                   <input 
                     {...form.register("name")}
-                    placeholder="Full Name *"
+                    placeholder="Contact Person *"
                     className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3.5 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
                   />
                   {form.formState.errors.name && (
                     <p className="text-pink-500 text-sm pl-2 pt-1.5">{form.formState.errors.name.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1 relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Mail className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <input 
+                    {...form.register("email")}
+                    type="email"
+                    placeholder="Email Address *"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3.5 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                  />
+                  {form.formState.errors.email && (
+                    <p className="text-pink-500 text-sm pl-2 pt-1.5">{form.formState.errors.email.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1 relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Phone className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <input 
+                    {...form.register("phone")}
+                    type="tel"
+                    placeholder="Phone Number (Optional)"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3.5 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                  />
+                  {form.formState.errors.phone && (
+                    <p className="text-pink-500 text-sm pl-2 pt-1.5">{form.formState.errors.phone.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1 relative">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <LinkIcon className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <input 
+                    {...form.register("socialLink")}
+                    placeholder="Social Media / Website URL (Optional)"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3.5 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                  />
+                   {form.formState.errors.socialLink && (
+                    <p className="text-pink-500 text-sm pl-2 pt-1.5">{form.formState.errors.socialLink.message}</p>
                   )}
                 </div>
 
@@ -125,7 +207,7 @@ export default function EvangelistsWaitlist() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <>
-                      <span>Apply Now</span>
+                      <span>Apply as Partner</span>
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -150,15 +232,15 @@ export default function EvangelistsWaitlist() {
               <div className="w-20 h-20 mx-auto bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
                 <Sparkles className="w-10 h-10" />
               </div>
-              <h2 className="text-3xl font-bold text-white mb-3">You're on the list!</h2>
+              <h2 className="text-3xl font-bold text-white mb-3">Welcome Aboard!</h2>
               <p className="text-slate-400 mb-8 max-w-[280px] mx-auto leading-relaxed">
-                Thank you for applying to be a Face 2 Face Evangelist. Please proceed forward to fill out our mandatory ambassador questionnaire.
+                Thank you for applying to be a Face 2 Face Business Partner. We will be in touch with you shortly.
               </p>
               <button
-                onClick={() => window.location.href = "https://waitlist.face2face.icu/ambassador_questionnaire.html"}
+                onClick={() => setLocation("/")}
                 className="w-full max-w-[250px] mx-auto flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium rounded-xl py-3.5 transition-all duration-300"
               >
-                Continue to Questionnaire <ArrowRight className="w-5 h-5" />
+                Back to Dashboard <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}

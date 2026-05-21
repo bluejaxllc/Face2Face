@@ -25,7 +25,7 @@ interface User {
   isActive: boolean;
   latitude: number;
   longitude: number;
-  gender: string;
+  sex: string;
   age: number;
   selfRating: number;
   height?: string | null;
@@ -37,6 +37,9 @@ interface User {
   seeking?: string | null;
   bumpMessage?: string | null;
   profilePhoto?: string | null;
+  company?: string | null;
+  isHiring?: boolean | null;
+  businessService?: string | null;
 }
 
 const MapEventHandler = memo(({ onZoomChange, onCenterChange, onUserInteract }: { onZoomChange: (zoom: number) => void; onCenterChange: (center: [number, number]) => void; onUserInteract: () => void }) => {
@@ -100,7 +103,23 @@ const femaleIcon = L.divIcon({
   iconAnchor: [21, 21]
 });
 
-const getIcon = (gender: string) => gender === 'male' ? maleIcon : femaleIcon;
+const businessIcon = L.divIcon({
+  className: 'custom-div-icon border-none bg-transparent',
+  html: `<div class="marker-pin" role="img" aria-label="Business">
+    <svg width="44" height="44" viewBox="0 0 100 100">
+      <rect x="10" y="20" width="80" height="65" rx="12" fill="#3b82f6" stroke="#1e40af" stroke-width="5"/>
+      <path d="M35 20V12C35 8.68629 37.6863 6 41 6H59C62.3137 6 65 8.68629 65 12V20" stroke="#1e40af" stroke-width="5" fill="none"/>
+      <circle cx="50" cy="52" r="11" fill="white" opacity="0.95" />
+    </svg>
+  </div>`,
+  iconSize: [42, 42],
+  iconAnchor: [21, 21]
+});
+
+const getIcon = (sex: string, category: string) => {
+  if (category === 'business') return businessIcon;
+  return sex === 'male' ? maleIcon : femaleIcon;
+};
 
 const InvalidateSizeComponent = () => {
   const map = useMap();
@@ -127,7 +146,7 @@ const UserMarker = memo(({ user, currentLocation, onMarkerClick }: { user: User,
     click: () => onMarkerClick(user)
   }), [user, onMarkerClick]);
 
-  const mapIcon = useMemo(() => getIcon(user.gender || "other"), [user.gender]);
+  const mapIcon = useMemo(() => getIcon(user.sex || "other", user.category), [user.sex, user.category]);
 
   return (
     <Marker
@@ -138,13 +157,26 @@ const UserMarker = memo(({ user, currentLocation, onMarkerClick }: { user: User,
       <Popup>
         <div style={{ fontFamily: "'Inter', system-ui", textAlign: 'center', padding: '4px 2px', minWidth: '130px' }}>
           <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '2px' }}>
-            {user.firstName}, {user.age}
-            <span style={{ marginLeft: '4px', fontSize: '14px', color: user.gender === 'male' ? '#3b82f6' : user.gender === 'female' ? '#ec4899' : '#a855f7' }}>
-              {user.gender === 'male' ? '♂' : user.gender === 'female' ? '♀' : '⚥'}
-            </span>
+            {user.category === 'business' && user.company ? user.company : `${user.firstName} ${user.lastName}`}
+            {user.category !== 'business' && (
+              <span style={{ marginLeft: '4px', fontSize: '14px', color: user.sex === 'male' ? '#3b82f6' : user.sex === 'female' ? '#ec4899' : '#a855f7' }}>
+                {user.sex === 'male' ? '♂' : user.sex === 'female' ? '♀' : '⚥'}
+              </span>
+            )}
           </div>
-          <div style={{ fontSize: '12px', color: '#cbd5e1' }}>
-            {'⭐'.repeat(Math.min(5, Math.round(user.selfRating / 2)))}
+          <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+            {user.category === 'business' ? (
+              <div className="flex flex-col items-center">
+                <span className="text-blue-500 font-bold">{user.businessService || "Business Service"}</span>
+                {user.isHiring && (
+                  <div className="mt-1 px-2 py-0.5 bg-blue-500 text-white text-[10px] font-black rounded-full animate-pulse">
+                    HIRING
+                  </div>
+                )}
+              </div>
+            ) : (
+              `Age ${user.age || 18}`
+            )}
           </div>
           {currentLocation && (
             <div style={{ marginTop: '6px', background: '#1e293b', borderRadius: '12px', padding: '3px 8px', display: 'inline-block', fontSize: '11px', fontWeight: 500, color: '#a5b4fc' }}>
@@ -263,8 +295,8 @@ function Map() {
     if (!(filterOptions.showBusiness ?? true) && nearbyUser.category === "business") return false;
     if (!(filterOptions.showFriendships ?? true) && nearbyUser.category === "friendships") return false;
     if (nearbyUser.selfRating < filterOptions.minRating) return false;
-    if (!showMen && nearbyUser.gender === "male") return false;
-    if (!showWomen && nearbyUser.gender === "female") return false;
+    if (!showMen && nearbyUser.sex === "male") return false;
+    if (!showWomen && nearbyUser.sex === "female") return false;
     return true;
   });
 

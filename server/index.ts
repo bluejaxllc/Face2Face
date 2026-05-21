@@ -19,8 +19,8 @@ app.set('trust proxy', 1);
 // Enable gzip/brotli compression for all responses
 app.use(compression());
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: false, limit: '5mb' }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: false, limit: '25mb' }));
 
 // Security headers for all responses
 app.use((_req, res, next) => {

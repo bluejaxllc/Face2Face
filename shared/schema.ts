@@ -9,8 +9,10 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
-  gender: text("gender").notNull().default("female"), // 'male', 'female'
+  sex: text("sex").notNull().default("female"), // 'male', 'female', 'custom'
   age: integer("age").notNull().default(18),
+  displayAge: text("display_age"),
+  dateOfBirth: timestamp("date_of_birth"),
   height: text("height"),
   weight: text("weight"),
   selfRating: integer("self_rating").default(5),
@@ -56,12 +58,29 @@ export const users = pgTable("users", {
 
   // Dating - Romantic
   relationshipGoal: text("relationship_goal"), // "long-term", "short-term", "chatting"
+  datingMode: text("dating_mode"), // "viewing", "seeking", "offering", "events"
   loveLanguage: text("love_language"),
   mbti: text("mbti"),
   perfectDate: text("perfect_date"),
   lifestyleCoffee: text("lifestyle_coffee"), // "addict", "decal", "none"
   lifestyleAlcohol: text("lifestyle_alcohol"), // "social", "frequent", "never"
   lifestyleSchedule: text("lifestyle_schedule"), // "morning", "night", "flexible"
+  bannerPhoto: text("banner_photo"), // base64 encoded banner string
+  isPublic: boolean("is_public").default(true),
+  // New Business Fields
+  businessSlogan: text("business_slogan"),
+  businessPhone: text("business_phone"),
+  businessService: text("business_service"),
+  businessNeed: text("business_need"),
+  businessPartners: text("business_partners"),
+  isNetworkingOpen: boolean("is_networking_open").default(true),
+  isHiring: boolean("is_hiring").default(false),
+  openPositions: integer("open_positions").default(0),
+  hiringRoles: text("hiring_roles"),
+  menuData: text("menu_data"), // JSON string of menu items: [{name, price, desc}]
+  websiteUrl: text("website_url"),
+  menuUrl: text("menu_url"),
+  bookingUrl: text("booking_url"),
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -71,7 +90,25 @@ export const users = pgTable("users", {
   };
 });
 
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  category: text("category").notNull(), // "dating", "business", "friendships"
+  isApproved: boolean("is_approved").default(true), // true by default, filter NSFW for friends 
+}, (table) => {
+  return {
+    nameIdx: index("tag_name_idx").on(table.name),
+    categoryIdx: index("tag_category_idx").on(table.category)
+  };
+});
 
+export const communityGroups = pgTable("community_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  category: text("category").notNull(), 
+  imageUrl: text("image_url"),
+});
 export const bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -115,6 +152,29 @@ export const notifications = pgTable("notifications", {
   };
 });
 
+export const datingEvents = pgTable("dating_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'seek', 'offer', 'event'
+  title: text("title"),
+  description: text("description").notNull(),
+  date: text("date"),
+  location: text("location"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  isActive: boolean("is_active").default(true),
+});
+
+export const insertDatingEventSchema = createInsertSchema(datingEvents).pick({
+  type: true,
+  title: true,
+  description: true,
+  date: true,
+  location: true,
+});
+
+export type InsertDatingEvent = z.infer<typeof insertDatingEventSchema>;
+export type DatingEvent = typeof datingEvents.$inferSelect;
+
 export const verificationCodes = pgTable("verification_codes", {
   id: serial("id").primaryKey(),
   phoneNumber: text("phone_number").notNull(),
@@ -128,23 +188,52 @@ export const verificationCodes = pgTable("verification_codes", {
   };
 });
 
+export const waitlists = pgTable("waitlists", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(), // 'individual' or 'business'
+  name: text("name").notNull(), // contact person or individual name
+  email: text("email").notNull(),
+  
+  // Optional / Business specific
+  businessName: text("business_name"),
+  location: text("location"),
+  phone: text("phone"),
+  socialLink: text("social_link"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertWaitlistSchema = createInsertSchema(waitlists);
+export type Waitlist = typeof waitlists.$inferSelect;
+export type InsertWaitlist = typeof waitlists.$inferInsert;
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   firstName: true,
   lastName: true,
   email: true,
-  gender: true,
+  sex: true,
   age: true,
-  selfRating: true,
+  dateOfBirth: true,
   datingPreference: true,
   phoneNumber: true,
+  bannerPhoto: true,
+  isPublic: true,
+  displayAge: true,
+  businessSlogan: true,
+  openPositions: true,
 });
 
 export const updateUserSchema = createInsertSchema(users).pick({
+  firstName: true,
+  lastName: true,
+  sex: true,
+  age: true,
+  displayAge: true,
+  dateOfBirth: true,
   height: true,
   weight: true,
-  selfRating: true,
   category: true,
   bio: true,
   datingPreference: true,
@@ -170,13 +259,30 @@ export const updateUserSchema = createInsertSchema(users).pick({
   skills: true,
   networkingGoal: true,
   linkedinUrl: true,
+  portfolioUrl: true,
+  professionalMotto: true,
   vibeStatus: true,
   currentActivity: true,
   icebreaker: true,
+  weekendVibe: true,
+  socialBattery: true,
   relationshipGoal: true,
-  loveLanguage: true,
-  mbti: true,
-  perfectDate: true,
+  datingMode: true,
+  bannerPhoto: true,
+  isPublic: true,
+  businessPhone: true,
+  businessService: true,
+  businessNeed: true,
+  businessPartners: true,
+  isNetworkingOpen: true,
+  isHiring: true,
+  businessSlogan: true,
+  openPositions: true,
+  hiringRoles: true,
+  menuData: true,
+  websiteUrl: true,
+  menuUrl: true,
+  bookingUrl: true,
 });
 
 
@@ -201,8 +307,8 @@ export const insertNotificationSchema = createInsertSchema(notifications).pick({
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type UpdateUser = z.infer<typeof updateUserSchema>;
 export type User = typeof users.$inferSelect;
+export type UpdateUser = Partial<Omit<User, "id" | "username" | "password">>;
 
 export type InsertBump = z.infer<typeof insertBumpSchema>;
 export type Bump = typeof bumps.$inferSelect;

@@ -10,8 +10,9 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  gender: string;
+  sex: string;
   age: number;
+  dateOfBirth: string | null;
   height: string | null;
   weight: string | null;
   selfRating: number;
@@ -41,13 +42,31 @@ interface User {
   skills: string | null;
   networkingGoal: string | null;
   linkedinUrl: string | null;
+  portfolioUrl: string | null;
+  professionalMotto: string | null;
   vibeStatus: string | null;
   currentActivity: string | null;
   icebreaker: string | null;
+  weekendVibe: string | null;
+  socialBattery: string | null;
   relationshipGoal: string | null;
+  datingMode: string | null;
   loveLanguage: string | null;
   mbti: string | null;
   perfectDate: string | null;
+  lifestyleCoffee: string | null;
+  lifestyleAlcohol: string | null;
+  lifestyleSchedule: string | null;
+  bannerPhoto: string | null;
+  isPublic: boolean;
+  businessPhone: string | null;
+  businessService: string | null;
+  businessNeed: string | null;
+  businessPartners: string | null;
+  isNetworkingOpen: boolean;
+  isHiring: boolean;
+  hiringRoles: string | null;
+  menuData: string | null;
 }
 
 
@@ -68,8 +87,8 @@ interface RegisterData {
   lastName: string;
   email: string;
   phoneNumber?: string;
-  gender?: string;
-  age?: number;
+  sex?: string;
+  dateOfBirth?: string;
   selfRating?: number;
 }
 

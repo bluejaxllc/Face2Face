@@ -56,6 +56,11 @@ interface User {
   businessService?: string | null;
   businessNeed?: string | null;
   businessPartners?: string | null;
+  businessSlogan?: string | null;
+  openPositions?: number | null;
+  bannerPhoto?: string | null;
+  isPublic?: boolean | null;
+  displayAge?: string | null;
 }
 
 interface ProfileCardProps {
@@ -206,6 +211,13 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                 <span className="text-xs text-blue-400/80 font-bold uppercase tracking-wider">{user.company || 'Business'} • Professional</span>
               )}
             </h3>
+
+            {/* Business Slogan */}
+            {user.category === 'business' && user.businessSlogan && (
+              <div className="mt-2 text-sm text-slate-300 italic px-6 font-medium bg-blue-900/10 py-1.5 rounded-lg border border-blue-500/10 shadow-sm inline-block">
+                "{user.businessSlogan}"
+              </div>
+            )}
 
             {/* Distance row (Rating removed) */}
             <div className="flex items-center justify-center mt-2.5">

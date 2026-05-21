@@ -14,6 +14,12 @@ import {
   type InsertMessage,
   verificationCodes,
   type VerificationCode,
+  waitlists,
+  type Waitlist,
+  type InsertWaitlist,
+  datingEvents,
+  type DatingEvent,
+  type InsertDatingEvent,
 } from "@shared/schema";
 import { eq, or, and, desc, asc, sql, SQL } from "drizzle-orm";
 import { db } from "./db";
@@ -31,7 +37,7 @@ export interface IStorage {
   getNearbyUsers(latitude: number, longitude: number, radius: number, userId: number, preferences?: {
     category?: string;
     datingPreference?: string;
-    userGender?: string;
+    userSex?: string;
     ageRange?: { min: number, max: number };
   }): Promise<User[]>;
 
@@ -66,6 +72,14 @@ export interface IStorage {
   getRecentCodeCount(phoneNumber: string, sinceMinutes: number): Promise<number>;
   getUserByPhone(phone: string): Promise<User | undefined>;
   deactivateInactiveUsers(): Promise<number>;
+
+  // Waitlist operations
+  createWaitlist(data: InsertWaitlist): Promise<Waitlist>;
+  getWaitlists(type?: 'individual' | 'business'): Promise<Waitlist[]>;
+
+  // Dating Event operations
+  createDatingEvent(event: InsertDatingEvent & { userId: number }): Promise<DatingEvent>;
+  getDatingEvents(params?: { type?: string; location?: string }): Promise<DatingEvent[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -132,7 +146,7 @@ export class DatabaseStorage implements IStorage {
     preferences: {
       category?: string;
       datingPreference?: string;
-      userGender?: string;
+      userSex?: string;
       ageRange?: { min: number; max: number };
     } = {}
   ): Promise<User[]> {
@@ -399,6 +413,38 @@ export class DatabaseStorage implements IStorage {
       ))
       .returning();
     return result.length;
+  }
+
+  async createWaitlist(data: InsertWaitlist): Promise<Waitlist> {
+    const [waitlist] = await db.insert(waitlists).values(data).returning();
+    return waitlist;
+  }
+
+  async getWaitlists(type?: 'individual' | 'business'): Promise<Waitlist[]> {
+    if (type) {
+      return await db.select().from(waitlists).where(eq(waitlists.type, type)).orderBy(desc(waitlists.createdAt));
+    }
+    return await db.select().from(waitlists).orderBy(desc(waitlists.createdAt));
+  }
+
+  async createDatingEvent(event: InsertDatingEvent & { userId: number }): Promise<DatingEvent> {
+    const result = await db.insert(datingEvents).values(event).returning();
+    return result[0];
+  }
+
+  async getDatingEvents(params?: { type?: string; location?: string }): Promise<DatingEvent[]> {
+    let conditions = [];
+    if (params?.type) conditions.push(eq(datingEvents.type, params.type));
+    if (params?.location) conditions.push(eq(datingEvents.location, params.location));
+    
+    // Always filter for active events
+    conditions.push(eq(datingEvents.isActive, true));
+
+    if (conditions.length > 0) {
+      return await db.select().from(datingEvents).where(and(...conditions)).orderBy(desc(datingEvents.timestamp));
+    }
+    
+    return await db.select().from(datingEvents).where(eq(datingEvents.isActive, true)).orderBy(desc(datingEvents.timestamp));
   }
 }
 

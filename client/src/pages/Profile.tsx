@@ -44,6 +44,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useScrollSave } from "@/hooks/use-scroll-save";
 import BottomNavigation, { CategoryKey, categoryConfig } from "@/components/BottomNavigation";
 
@@ -69,6 +70,7 @@ const profileSchema = z.object({
   sex: z.string().default("other"),
   dateOfBirth: z.string().optional(),
   age: z.coerce.number().min(0).max(99).default(18),
+  displayAge: z.string().optional(),
   height: z.string().optional(),
   weight: z.string().optional(),
   category: z.string().default("friendships"),
@@ -122,7 +124,9 @@ const profileSchema = z.object({
   businessService: z.string().optional(),
   businessSlogan: z.string().optional(),
   openPositions: z.coerce.number().optional(),
-  displayAge: z.string().optional(),
+  websiteUrl: z.string().optional(),
+  menuUrl: z.string().optional(),
+  bookingUrl: z.string().optional(),
 });
 
 
@@ -130,48 +134,86 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function Profile() {
   const profileScroll = useScrollSave("f2f_scroll_profile");
-  const { user, updateProfile, logout } = useAuth();
+  const [, setLocation] = useLocation();
+  const [showHiringMenu, setShowHiringMenu] = useState(false);
+  const { user, updateProfile, logout, isLoading } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [servicePhotos, setServicePhotos] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('f2f_service_photos') || '[]'); } catch { return []; }
+  });
+  const [customLinks, setCustomLinks] = useState<{label: string; url: string}[]>(() => {
+    try { return JSON.parse(localStorage.getItem('f2f_custom_links') || '[]'); } catch { return []; }
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper to resize and compress images before upload
+  const resizeImage = (file: File, maxWidth: number, maxHeight: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(event.target?.result as string); // fallback to original if canvas fails
+            return;
+          }
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          // Compress to JPEG with 0.8 quality
+          resolve(canvas.toDataURL("image/jpeg", 0.8));
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        if (event.target?.result) {
+          img.src = event.target.result as string;
+        }
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
       return;
     }
 
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Please select an image under 2MB.", variant: "destructive" });
-      return;
-    }
-
     setIsUploading(true);
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        await updateProfile({ profilePhoto: base64 });
-        toast({ title: "Photo updated", description: "Your profile photo has been saved." });
-        setIsUploading(false);
-      };
-      reader.onerror = () => {
-        toast({ title: "Upload failed", description: "Could not read the image file.", variant: "destructive" });
-        setIsUploading(false);
-      };
-      reader.readAsDataURL(file);
+      // Resize to max 800x800 for profile photos
+      const base64 = await resizeImage(file, 800, 800);
+      await updateProfile({ profilePhoto: base64 });
+      toast({ title: "Photo updated", description: "Your profile photo has been saved." });
     } catch (error) {
       toast({ title: "Upload failed", description: "There was a problem uploading your photo.", variant: "destructive" });
+    } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-    // Reset file input so the same file can be re-selected
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const form = useForm<ProfileFormValues>({
@@ -191,6 +233,7 @@ export default function Profile() {
         lastName: user.lastName || "",
         sex: user.sex || "other",
         age: user.age || 18,
+        displayAge: user.displayAge || "",
         dateOfBirth: user.dateOfBirth || "",
         height: user.height || "",
         weight: user.weight || "",
@@ -237,34 +280,30 @@ export default function Profile() {
         businessService: user.businessService || "",
         businessSlogan: user.businessSlogan || "",
         openPositions: user.openPositions || undefined,
+        websiteUrl: user.websiteUrl || "",
+        menuUrl: user.menuUrl || "",
+        bookingUrl: user.bookingUrl || "",
         displayAge: user.displayAge || "",
       });
     }
   }, [user, form, isEditing]);
   
-  // Screenshot Prevention logic
-  const [isBlurred, setIsBlurred] = useState(false);
+  // Screenshot Prevention logic (PrintScreen key blocking only, removed blur per user request)
   useEffect(() => {
-    const handleVisibility = () => setIsBlurred(document.hidden);
-    const handleFocus = () => setIsBlurred(false);
-    // Removed handleBlur to prevent blur when clicking away from the window
     const preventPrint = (e: KeyboardEvent) => {
       if (e.key === 'PrintScreen') {
         navigator.clipboard.writeText(""); // Clear clipboard
         toast({ title: "Security Alert", description: "Screenshots are restricted on Face 2 Face profiles.", variant: "destructive" });
       }
     };
-    window.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('focus', handleFocus);
     window.addEventListener('keyup', preventPrint);
     return () => {
-      window.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('focus', handleFocus);
       window.removeEventListener('keyup', preventPrint);
     };
   }, [toast]);
 
   const selectedCategory = form.watch("category");
+
 
 
   const onSubmit = async (values: ProfileFormValues) => {
@@ -286,9 +325,6 @@ export default function Profile() {
     if (!firstName || !lastName) return "U";
     return `${firstName[0]}${lastName[0]}`;
   };
-
-  const { isLoading } = useAuth();
-  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -394,19 +430,12 @@ export default function Profile() {
       toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Please select an image under 2MB.", variant: "destructive" });
-      return;
-    }
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        await updateProfile({ bannerPhoto: base64 });
-        toast({ title: "Banner updated", description: "Your profile banner has been saved." });
-      };
-      reader.readAsDataURL(file);
+      // Resize to max 1200x1200 for cover banners to prevent large JSON payloads
+      const base64 = await resizeImage(file, 1200, 1200);
+      await updateProfile({ bannerPhoto: base64 });
+      toast({ title: "Banner updated", description: "Your profile banner has been saved." });
     } catch (error) {
       toast({ title: "Upload failed", description: "There was a problem uploading your banner.", variant: "destructive" });
     }
@@ -415,7 +444,7 @@ export default function Profile() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className={isBlurred ? "blur-md pointer-events-none transition-all duration-300" : "transition-all duration-300"}>
+    <div className="transition-all duration-300">
     <PageTransition className={`h-screen overflow-y-auto ${theme.mesh}`}>
       <Header />
 
@@ -428,7 +457,8 @@ export default function Profile() {
         initial="hidden"
         animate="show"
       >
-        {/* Banner Section */}
+        {/* Banner Section - Hidden for Business */}
+        {activeCategory !== 'business' && (
         <div className="relative h-80 w-full overflow-hidden">
           {user.bannerPhoto ? (
             <img 
@@ -473,8 +503,10 @@ export default function Profile() {
             />
           </div>
         </div>
+        )}
 
-        {/* Profile hero section */}
+        {/* Profile hero section - Hidden for Business */}
+        {activeCategory !== 'business' && (
         <motion.div variants={itemVariants} className="px-4 -mt-24 pb-6 text-center relative z-20">
           <div className="relative inline-block">
             <div className={`avatar-ring shadow-[0_0_60px_rgba(59,130,246,0.5)] rounded-full p-1.5 bg-gradient-to-br ${
@@ -540,8 +572,10 @@ export default function Profile() {
             {renderCategoryStats()}
           </div>
         </motion.div>
+        )}
 
-        {/* Horizontal Quick Menu orientation layout */}
+        {/* Horizontal Quick Menu orientation layout - Hidden for Business */}
+        {activeCategory !== 'business' && (
         <motion.div variants={itemVariants} className="w-full max-w-lg mx-auto mt-2 overflow-x-auto no-scrollbar pb-2 px-4">
           <div className="flex gap-3 w-max mx-auto pb-2">
             {activeCategory === 'business' ? (
@@ -601,6 +635,7 @@ export default function Profile() {
             )}
           </div>
         </motion.div>
+        )}
 
         {/* Physical stats row - Hidden for Business */}
         {activeCategory !== 'business' && (user.height || user.weight) && (
@@ -622,8 +657,8 @@ export default function Profile() {
           </motion.div>
         )}
 
-        {/* Seeking tags */}
-        {user.seeking && !isEditing && (
+        {/* Seeking tags - Hidden for Business */}
+        {user.seeking && !isEditing && activeCategory !== 'business' && (
           <motion.div variants={itemVariants} className="px-4 mt-3">
             <div className={`flex justify-center flex-wrap gap-1.5 ${
               activeCategory === 'business' ? 'text-blue-400' :
@@ -665,115 +700,447 @@ export default function Profile() {
           {!isEditing && (activeCategory !== 'dating' || (user.age || 18) >= 18) && (
             <motion.div variants={itemVariants} className="space-y-4">
               {activeCategory === "business" && (
-                <div className="glass-card business-card p-0 border-blue-500/30 overflow-hidden shadow-2xl relative bg-slate-900/40 backdrop-blur-2xl ring-1 ring-white/10">
-                  {/* Subtle hiring badge */}
-                  {user.isHiring && (
-                    <div className="absolute top-4 right-4 z-30">
-                      <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-none animate-pulse px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/40 flex flex-col items-end gap-0.5">
-                        <span>HIRING: {user.hiringRoles || "Staff"}</span>
-                        {user.openPositions && (
-                          <span className="text-[9px] opacity-90">{user.openPositions} Open Positions</span>
-                        )}
-                      </Badge>
+                <div className="overflow-hidden relative mx-2 space-y-0 pt-16">
+                  {/* Top Layer - Cover Photo + Company Identity */}
+                  <div className="relative border-b border-blue-500/20 overflow-hidden">
+                    {/* Cover Photo Background */}
+                    <div className="absolute inset-0">
+                      {user.bannerPhoto ? (
+                        <img src={user.bannerPhoto} alt="Cover" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-600/30 via-blue-900/30 to-slate-950" />
+                      )}
+                      <div className="absolute inset-0 bg-slate-950/60" />
                     </div>
-                  )}
-
-                  <div className="p-10">
-                    <div className="flex justify-between items-start mb-10">
-                      <div className="space-y-1.5 pr-4">
-                        <h3 className="text-3xl font-black text-white tracking-tighter uppercase leading-none">{user.company || "Your Brand"}</h3>
-                        <p className="text-blue-400 font-black text-[10px] uppercase tracking-[0.3em] pl-0.5 opacity-80">{user.industry || "Professional Sector"}</p>
-                        {user.businessSlogan && (
-                          <p className="text-slate-300 text-sm mt-3 font-medium italic border-l-2 border-blue-500 pl-3 py-0.5">
-                            "{user.businessSlogan}"
-                          </p>
-                        )}
-                      </div>
-                      <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner shrink-0">
-                        <Briefcase className="w-7 h-7 text-blue-400" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-8">
-                      {/* Product/Service focus */}
-                      <div className="p-5 rounded-3xl bg-blue-500/5 border border-blue-500/10 shadow-lg relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/40" />
-                        <p className="text-[10px] text-blue-400 font-black uppercase tracking-[0.25em] mb-2 opacity-70">Core Service / Product</p>
-                        <p className="text-lg text-slate-100 font-bold leading-tight">
-                          {user.businessService || user.jobTitle || "Your specialized business offering"}
-                        </p>
-                      </div>
-
-                      {/* Business Context Row */}
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-1.5">
-                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">Current Priority</p>
-                          <p className="text-sm text-white font-bold leading-none">{user.businessNeed || "Growth"}</p>
+                    {/* Upload Button */}
+                    <input type="file" ref={bannerInputRef} accept="image/*" className="hidden" onChange={handleBannerUpload} />
+                    <button
+                      onClick={() => bannerInputRef.current?.click()}
+                      className="absolute top-3 right-3 bg-black/50 text-white rounded-full p-2 backdrop-blur-md border border-white/10 hover:bg-black/70 transition-all z-10"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
+                    {/* Draggable Slogan Box */}
+                    <div className="relative z-[5] min-h-[190px] overflow-hidden">
+                      <div
+                        tabIndex={-1}
+                        className="absolute group outline-none"
+                        style={{
+                          left: `${JSON.parse(localStorage.getItem(`f2f_slogan_pos_${user.id}`) || '{"x":50,"y":75}').x}%`,
+                          top: `${JSON.parse(localStorage.getItem(`f2f_slogan_pos_${user.id}`) || '{"x":50,"y":75}').y}%`,
+                          transform: 'translate(-50%, -50%)',
+                          maxWidth: '95%',
+                        }}
+                      >
+                        {/* Drag Handle - visible on focus */}
+                        <div
+                          className="flex items-center justify-center gap-1 cursor-grab active:cursor-grabbing py-1 px-4 mx-auto w-fit rounded-t-md bg-white/10 backdrop-blur-sm select-none opacity-0 group-focus-within:opacity-100 transition-opacity"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            const draggable = e.currentTarget.parentElement!;
+                            const container = draggable.parentElement!;
+                            const rect = container.getBoundingClientRect();
+                            const onMove = (ev: MouseEvent) => {
+                              const x = Math.max(15, Math.min(85, ((ev.clientX - rect.left) / rect.width) * 100));
+                              const y = Math.max(5, Math.min(95, ((ev.clientY - rect.top) / rect.height) * 100));
+                              draggable.style.left = `${x}%`;
+                              draggable.style.top = `${y}%`;
+                              localStorage.setItem(`f2f_slogan_pos_${user.id}`, JSON.stringify({ x, y }));
+                            };
+                            const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+                            document.addEventListener('mousemove', onMove);
+                            document.addEventListener('mouseup', onUp);
+                          }}
+                          onTouchStart={(e) => {
+                            const draggable = e.currentTarget.parentElement!;
+                            const container = draggable.parentElement!;
+                            const rect = container.getBoundingClientRect();
+                            const onMove = (ev: TouchEvent) => {
+                              ev.preventDefault();
+                              const t = ev.touches[0];
+                              const x = Math.max(15, Math.min(85, ((t.clientX - rect.left) / rect.width) * 100));
+                              const y = Math.max(5, Math.min(95, ((t.clientY - rect.top) / rect.height) * 100));
+                              draggable.style.left = `${x}%`;
+                              draggable.style.top = `${y}%`;
+                              localStorage.setItem(`f2f_slogan_pos_${user.id}`, JSON.stringify({ x, y }));
+                            };
+                            const onUp = () => { document.removeEventListener('touchmove', onMove as any); document.removeEventListener('touchend', onUp); };
+                            document.addEventListener('touchmove', onMove as any, { passive: false });
+                            document.addEventListener('touchend', onUp);
+                          }}
+                        >
+                          <span className="text-white/50 text-[8px] font-bold tracking-widest uppercase">⠿ drag</span>
                         </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">Network Context</p>
-                          <p className="text-sm text-white font-bold leading-none">{user.businessPartners || "Collaborative"}</p>
-                        </div>
-                      </div>
-
-                      {/* Networking & Actions */}
-                      <div className="flex flex-col gap-4 pt-6 border-t border-white/10">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-2.5 h-2.5 rounded-full ${user.isNetworkingOpen ? 'bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.6)]' : 'bg-slate-700'}`} />
-                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{user.isNetworkingOpen ? 'Accepting Connections' : 'Limited Networking'}</span>
-                          </div>
-                          <div className="flex gap-4">
-                            {user.linkedinUrl && (
-                              <a href={user.linkedinUrl} target="_blank" rel="noopener noreferrer">
-                                <Linkedin className="w-5 h-5 text-blue-400 opacity-60 hover:opacity-100 transition-all hover:scale-110" />
-                              </a>
-                            )}
-                            {user.portfolioUrl && (
-                               <a href={user.portfolioUrl} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="w-5 h-5 text-slate-400 opacity-60 hover:opacity-100 transition-all hover:scale-110" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Call to Actions (Unified & High Impact) */}
-                        <div className="flex flex-col gap-3">
-                          {user.businessPhone && (
-                            <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-xl h-14 rounded-2xl text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 transform active:scale-[0.98]">
-                              <Zap className="w-4 h-4 mr-3 fill-current" /> Contact Business Now
-                            </Button>
-                          )}
-                        </div>
-
-                        {/* Menu Display for Restaurants/Services - Refined Horizontal Cards */}
-                        {user.menuData && (
-                          <div className="mt-6 space-y-4">
-                            <div className="flex items-center gap-2.5 px-1">
-                              <div className="w-1.5 h-4 bg-amber-400 rounded-full" />
-                              <span className="text-[10px] text-amber-400 font-black uppercase tracking-[0.3em]">Featured Catalog</span>
-                            </div>
-                            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1">
-                              {(() => {
-                                try {
-                                  const menu = JSON.parse(user.menuData);
-                                  return menu.map((item: any, i: number) => (
-                                    <div key={i} className="min-w-[160px] p-5 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col justify-between h-28 backdrop-blur-sm group hover:bg-white/[0.05] transition-colors cursor-default">
-                                      <span className="text-xs text-slate-200 font-bold leading-snug line-clamp-2 uppercase tracking-tight">{item.name}</span>
-                                      <div className="flex items-center justify-between mt-2">
-                                        <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                        <span className="text-[16px] text-amber-400 font-black tracking-tight">{item.price}</span>
-                                      </div>
-                                    </div>
-                                  ));
-                                } catch (e) {
-                                  return <p className="text-[10px] text-slate-500 italic">Configuration Required</p>;
+                        {/* Slogan + Controls */}
+                        <div
+                          className="rounded-b-md rounded-tr-md p-2"
+                          data-slogan-box="true"
+                          style={{
+                            backgroundColor: `rgba(0,0,0,${Number(localStorage.getItem(`f2f_slogan_blur_${user.id}`) || '4') > 0 ? 0.2 : 0})`,
+                            backdropFilter: `blur(${localStorage.getItem(`f2f_slogan_blur_${user.id}`) || '4'}px)`,
+                          }}
+                        >
+                          <textarea
+                            defaultValue={(user as any).businessSlogan || ''}
+                            onBlur={(e) => updateProfile({ businessSlogan: e.target.value } as any)}
+                            maxLength={100}
+                            style={{ color: localStorage.getItem(`f2f_slogan_color_${user.id}`) || '#93c5fd', resize: 'both', overflow: 'auto' }}
+                            className="text-sm font-bold italic drop-shadow-md bg-transparent border-0 outline-none text-center placeholder:text-blue-300/40 appearance-none shadow-none min-w-[180px] max-w-[400px] block"
+                            placeholder="All Your Needs From A to Z"
+                            rows={2}
+                          />
+                          {/* Controls row - visible on focus */}
+                          <div className="hidden group-focus-within:flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
+                            <input
+                              type="color"
+                              defaultValue={localStorage.getItem(`f2f_slogan_color_${user.id}`) || '#93c5fd'}
+                              onChange={(e) => {
+                                localStorage.setItem(`f2f_slogan_color_${user.id}`, e.target.value);
+                                const ta = e.target.closest('[data-slogan-box]')?.querySelector('textarea');
+                                if (ta) ta.style.color = e.target.value;
+                              }}
+                              className="w-5 h-5 rounded-full border border-white/20 cursor-pointer shrink-0"
+                              style={{ WebkitAppearance: 'none', padding: 0 }}
+                            />
+                            <span className="text-white/40 text-[9px] shrink-0">BLUR</span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="20"
+                              step="1"
+                              defaultValue={localStorage.getItem(`f2f_slogan_blur_${user.id}`) || '4'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                localStorage.setItem(`f2f_slogan_blur_${user.id}`, val);
+                                const box = e.target.closest('[data-slogan-box]') as HTMLElement;
+                                if (box) {
+                                  box.style.backdropFilter = `blur(${val}px)`;
+                                  box.style.backgroundColor = Number(val) > 0 ? 'rgba(0,0,0,0.2)' : 'transparent';
                                 }
-                              })()}
-                            </div>
+                                const label = e.target.nextElementSibling as HTMLElement;
+                                if (label) label.textContent = `${val}px`;
+                              }}
+                              className="flex-1 h-1 accent-blue-400 cursor-pointer"
+                            />
+                            <span className="text-white/40 text-[9px] shrink-0">{localStorage.getItem(`f2f_slogan_blur_${user.id}`) || '4'}px</span>
                           </div>
-                        )}
+                        </div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Services / Menu Layer */}
+                  <div className="px-8 py-6 border-b border-blue-500/10">
+                    <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 border-b border-white/5 pb-2">Services, Products, Menu</h4>
+                    {user.menuData && (
+                      <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 mb-4">
+                        {(() => {
+                          try {
+                            const menu = JSON.parse(user.menuData);
+                            return menu.map((item: any, i: number) => (
+                              <div key={i} className="min-w-[140px] p-4 rounded-xl bg-blue-950/30 border border-blue-500/10 flex flex-col justify-between h-24 backdrop-blur-sm">
+                                <span className="text-xs text-slate-200 font-bold leading-snug line-clamp-2 uppercase tracking-tight">{item.name}</span>
+                                <span className="text-sm text-blue-400 font-black tracking-tight">{item.price}</span>
+                              </div>
+                            ));
+                          } catch (e) {
+                            return <p className="text-xs text-slate-500 italic">Configuration Required</p>;
+                          }
+                        })()}
+                      </div>
+                    )}
+                    <div className="space-y-3">
+                      <textarea
+                        defaultValue={user.businessService || user.jobTitle || ''}
+                        onBlur={(e) => updateProfile({ businessService: e.target.value } as any)}
+                        className="w-full text-lg text-slate-200 font-bold bg-transparent border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500/40 transition-colors resize-none min-h-[50px] placeholder:text-slate-500"
+                        placeholder="Describe your specialized business offering..."
+                        rows={2}
+                        maxLength={150}
+                      />
+                      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                        {servicePhotos.map((photo, i) => (
+                          <div key={i} className="relative min-w-[100px] h-[80px] rounded-lg overflow-hidden group/photo">
+                            <img src={photo} alt={`Service ${i + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => {
+                                const updated = servicePhotos.filter((_, idx) => idx !== i);
+                                setServicePhotos(updated);
+                                localStorage.setItem('f2f_service_photos', JSON.stringify(updated));
+                              }}
+                              className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover/photo:opacity-100 transition-opacity"
+                            >×</button>
+                          </div>
+                        ))}
+                        <label className="min-w-[100px] h-[80px] rounded-lg border-2 border-dashed border-blue-500/30 hover:border-blue-400/50 flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors bg-blue-950/20 shrink-0">
+                          <Camera className="w-5 h-5 text-blue-400" />
+                          <span className="text-[9px] text-blue-400 font-bold uppercase tracking-wider">Add Photos</span>
+                          <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            files.forEach(file => {
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                const img = new Image();
+                                img.onload = () => {
+                                  const canvas = document.createElement('canvas');
+                                  const maxW = 400, maxH = 300;
+                                  let w = img.width, h = img.height;
+                                  if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+                                  if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+                                  canvas.width = w; canvas.height = h;
+                                  canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+                                  const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                                  setServicePhotos(prev => {
+                                    const updated = [...prev, base64];
+                                    localStorage.setItem('f2f_service_photos', JSON.stringify(updated));
+                                    return updated;
+                                  });
+                                };
+                                img.src = ev.target?.result as string;
+                              };
+                              reader.readAsDataURL(file);
+                            });
+                            e.target.value = '';
+                          }} />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Details Layer */}
+                  <div className="px-8 py-6 border-b border-blue-500/10 space-y-5">
+                    {/* Map + Address Row */}
+                    <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Business Address</span>
+                    <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 3fr' }}>
+                      <button 
+                        onClick={() => {
+                          try {
+                            const saved = localStorage.getItem('face2face_filterOptions');
+                            const opts = saved ? JSON.parse(saved) : {};
+                            localStorage.setItem('face2face_filterOptions', JSON.stringify({
+                              ...opts,
+                              showBusiness: true,
+                              showDating: false,
+                              showFriendships: false,
+                            }));
+                          } catch(e) {}
+                          setLocation("/");
+                        }}
+                        className="flex items-center justify-center gap-2 bg-blue-900/50 hover:bg-blue-800/60 border border-blue-500/30 rounded-lg px-3 h-10 group cursor-pointer transition-all"
+                      >
+                        <MapPin className="w-4 h-4 text-blue-400" />
+                        <span className="text-[10px] font-black text-white tracking-wider uppercase">View on Map</span>
+                      </button>
+                      <Input
+                        defaultValue={user.bio?.includes('📍') ? user.bio.split('📍')[1]?.trim() : ''}
+                        onBlur={(e) => {
+                          const currentBio = user.bio || '';
+                          const cleanBio = currentBio.replace(/📍.*$/, '').trim();
+                          const newBio = e.target.value ? `${cleanBio} 📍 ${e.target.value}`.trim() : cleanBio;
+                          updateProfile({ bio: newBio });
+                        }}
+                        className="bg-slate-950/50 border-blue-500/20 text-white text-sm font-medium h-10 rounded-lg placeholder:text-slate-600"
+                        placeholder="Business Address"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Phone #</span>
+                        <Input
+                          defaultValue={user.businessPhone || ''}
+                          onBlur={(e) => updateProfile({ businessPhone: e.target.value } as any)}
+                          className="bg-slate-950/50 border-blue-500/20 text-white text-sm font-bold h-9 rounded-lg placeholder:text-slate-600"
+                          placeholder="(555) 123-4567"
+                          type="tel"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Email</span>
+                        <Input
+                          defaultValue={user.email || ''}
+                          onBlur={(e) => updateProfile({ email: e.target.value } as any)}
+                          className="bg-slate-950/50 border-blue-500/20 text-white text-sm font-bold h-9 rounded-lg placeholder:text-slate-600"
+                          placeholder="business@email.com"
+                          type="email"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profile & Status Layer */}
+                  <div className="px-8 py-6 border-b border-blue-500/10">
+                    <div className="flex items-center gap-5 mb-5">
+                      <label className="relative cursor-pointer group/portrait">
+                        <Avatar className="w-24 h-24 !rounded-2xl border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                          {user.profilePhoto && <AvatarImage src={user.profilePhoto} className="object-cover !rounded-2xl" />}
+                          <AvatarFallback className="bg-slate-900 text-blue-400 font-black !rounded-2xl flex flex-col items-center justify-center gap-0.5">
+                            <Camera className="w-4 h-4" />
+                            <span className="text-[7px] uppercase tracking-wider leading-none">Add Portrait</span>
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute inset-0 bg-black/50 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover/portrait:opacity-100 transition-opacity">
+                          <Camera className="w-4 h-4 text-white" />
+                          <span className="text-[7px] text-white uppercase tracking-wider">Change</span>
+                        </div>
+                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const base64 = await resizeImage(file, 300, 300);
+                            await updateProfile({ profilePhoto: base64 });
+                          } catch (err) {
+                            console.error('Portrait upload failed:', err);
+                          }
+                          e.target.value = '';
+                        }} />
+                      </label>
+                      <div className="space-y-1 flex-1 border-l-2 border-blue-500/20 pl-4 py-1">
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Face 2 Face Contact</p>
+                        <div className="flex gap-2">
+                          <Input
+                            defaultValue={user.firstName || ''}
+                            onBlur={(e) => updateProfile({ firstName: e.target.value })}
+                            className="bg-transparent border-blue-500/20 text-xl font-black text-white h-8 rounded-md px-2 placeholder:text-slate-600"
+                            placeholder="First"
+                          />
+                          <Input
+                            defaultValue={user.lastName || ''}
+                            onBlur={(e) => updateProfile({ lastName: e.target.value })}
+                            className="bg-transparent border-blue-500/20 text-xl font-black text-white h-8 rounded-md px-2 placeholder:text-slate-600"
+                            placeholder="Last"
+                          />
+                        </div>
+                        <div className="pt-1">
+                          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1">Job Title</p>
+                          <Input
+                            defaultValue={user.jobTitle || ''}
+                            onBlur={(e) => updateProfile({ jobTitle: e.target.value })}
+                            className="bg-transparent border-blue-500/20 text-xs text-blue-400 font-bold uppercase tracking-widest h-7 rounded-md px-2 placeholder:text-slate-600"
+                            placeholder="Job Title (e.g. Owner/Manager)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <Badge 
+                          onClick={(e) => { e.preventDefault(); updateProfile({ isHiring: true }); setShowHiringMenu(true); }}
+                          className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-2 transition-all cursor-pointer ${user.isHiring ? 'bg-blue-500/20 text-blue-400 border-blue-500 hover:bg-blue-500/30' : 'bg-transparent text-slate-500 border-slate-700 hover:bg-slate-800'}`}>
+                          [ Hiring ]
+                        </Badge>
+                        <Badge 
+                          onClick={(e) => { e.preventDefault(); updateProfile({ isHiring: false }); setShowHiringMenu(false); }}
+                          className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-2 transition-all cursor-pointer ${!user.isHiring ? 'bg-red-500/20 text-red-400 border-red-500 hover:bg-red-500/30' : 'bg-transparent text-slate-500 border-slate-700 hover:bg-slate-800'}`}>
+                          [ Not Hiring ]
+                        </Badge>
+                      </div>
+
+                      <AnimatePresence>
+                        {showHiringMenu && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="w-full relative overflow-hidden"
+                          >
+                            <div className="mt-4 p-5 rounded-xl bg-blue-950/20 border border-blue-500/30 shadow-[inset_0_0_20px_rgba(59,130,246,0.05)] space-y-4">
+                              <h5 className="text-[11px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                                <Briefcase className="w-4 h-4" /> Hiring Setup
+                              </h5>
+
+
+
+
+                              <div className="p-2 rounded-lg bg-slate-900/60 border border-blue-500/10 flex items-center gap-3">
+                                <label className="text-[10px] font-black text-blue-300/70 uppercase tracking-widest shrink-0">
+                                  Open Positions
+                                </label>
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  max={999}
+                                  maxLength={3}
+                                  defaultValue={(user as any).openPositions ?? 0}
+                                  onBlur={(e) => updateProfile({ openPositions: parseInt(e.target.value) || 0 })}
+                                  className="bg-slate-950/50 border-blue-500/20 text-white text-xs font-bold h-6 w-12 rounded px-1 text-center"
+                                  placeholder="0"
+                                />
+                              </div>
+
+                              {/* Roles / Description */}
+                              <div className="p-3 rounded-lg bg-slate-900/60 border border-blue-500/10">
+                                <label className="text-[10px] font-black text-blue-300/70 uppercase tracking-widest block mb-2">
+                                  Roles & Requirements
+                                </label>
+                                <Textarea
+                                  defaultValue={user.hiringRoles ?? ''}
+                                  onBlur={(e) => updateProfile({ hiringRoles: e.target.value })}
+                                  className="bg-slate-950/50 border-blue-500/20 text-white text-sm min-h-[80px] rounded-lg resize-none"
+                                  placeholder="e.g. Barista (full-time), Cashier (weekends)..."
+                                />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Business Links / Bottom Layer */}
+                  <div className="px-8 py-6 bg-blue-950/20">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Business Links</h4>
+                    <div className="space-y-3">
+                      {/* Custom Links */}
+                      {customLinks.map((link, idx) => (
+                        <div key={idx} className="flex items-end gap-2">
+                          <div className="space-y-1 flex-1">
+                            <Input
+                              defaultValue={link.label}
+                              onBlur={(e) => {
+                                const updated = [...customLinks];
+                                updated[idx] = { ...updated[idx], label: e.target.value };
+                                setCustomLinks(updated);
+                                localStorage.setItem('f2f_custom_links', JSON.stringify(updated));
+                              }}
+                              className="bg-slate-950/50 border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest h-6 rounded px-2 placeholder:text-slate-600"
+                              placeholder="Link Name"
+                            />
+                            <Input
+                              defaultValue={link.url}
+                              onBlur={(e) => {
+                                const updated = [...customLinks];
+                                updated[idx] = { ...updated[idx], url: e.target.value };
+                                setCustomLinks(updated);
+                                localStorage.setItem('f2f_custom_links', JSON.stringify(updated));
+                              }}
+                              className="bg-slate-950/50 border-blue-500/20 text-white text-sm font-bold h-9 rounded-lg placeholder:text-slate-600"
+                              placeholder="https://..."
+                              type="url"
+                            />
+                          </div>
+                          <button
+                            onClick={() => {
+                              const updated = customLinks.filter((_, i) => i !== idx);
+                              setCustomLinks(updated);
+                              localStorage.setItem('f2f_custom_links', JSON.stringify(updated));
+                            }}
+                            className="text-red-400/60 hover:text-red-400 text-xs font-bold mb-2"
+                          >✕</button>
+                        </div>
+                      ))}
+
+                      <button
+                        onClick={() => {
+                          const updated = [...customLinks, { label: '', url: '' }];
+                          setCustomLinks(updated);
+                          localStorage.setItem('f2f_custom_links', JSON.stringify(updated));
+                        }}
+                        className="w-full py-2 rounded-lg border-2 border-dashed border-blue-500/30 text-blue-400 text-[10px] font-black uppercase tracking-widest hover:border-blue-500/50 hover:bg-blue-500/5 transition-all"
+                      >
+                        + Add Link
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -887,31 +1254,49 @@ export default function Profile() {
             </motion.div>
           )}
 
-          {/* Bio card */}
-          {user.bio && !isEditing && (
-            <motion.div variants={itemVariants} className="glass-card p-5 relative overflow-hidden">
-              <h3 className="text-sm font-semibold text-slate-300 mb-3 tracking-wide uppercase">About</h3>
-              <p className="text-slate-200">{user.bio}</p>
-            </motion.div>
-          )}
+
+          {/* Category Navigation */}
+          <motion.div variants={itemVariants} className="flex items-center justify-center gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setLocation('/games')}
+              className="flex-1 h-10 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5"
+            >
+              <Zap className="w-5 h-5" /> <span className="text-3xl" style={{ lineHeight: 0 }}>+</span> Games
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setLocation('/groups')}
+              className="flex-1 h-10 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5"
+            >
+              <Users className="w-5 h-5" /> <span className="text-3xl" style={{ lineHeight: 0 }}>+</span> Groups
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setLocation('/dating')}
+              className="flex-1 h-10 rounded-xl border-pink-500/30 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 hover:text-pink-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5"
+            >
+              <Heart className="w-5 h-5" /> <span className="text-3xl" style={{ lineHeight: 0 }}>+</span> Dates
+            </Button>
+          </motion.div>
 
           {/* Edit button */}
-          <motion.div variants={itemVariants} className="flex justify-center max-w-sm mx-auto gap-3 mt-6">
+          <motion.div variants={itemVariants} className="flex flex-col justify-center items-center max-w-[200px] mx-auto gap-2 mt-6">
             <Button
               variant="outline"
               onClick={() => setIsEditing(!isEditing)}
-              className="flex-1 h-11 rounded-xl border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all font-bold uppercase tracking-widest text-[10px]"
+              className="w-full h-11 rounded-xl border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all font-bold uppercase tracking-widest text-[10px]"
             >
               {isEditing ? "Cancel" : "Edit Profile"}
             </Button>
             {!isEditing && (
               <Button
-                variant="outline"
+                variant="ghost"
                 aria-label="Log out"
-                className="h-11 px-4 rounded-xl border-red-900/50 bg-red-950/30 text-red-400 hover:bg-red-950/50 hover:text-red-300 transition-all"
+                className="w-full h-9 rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-950/10 transition-all font-bold uppercase tracking-widest text-[10px]"
                 onClick={handleLogout}
               >
-                <LogOut className="h-4 w-4" />
+                Log Out
               </Button>
             )}
           </motion.div>
@@ -1216,9 +1601,23 @@ export default function Profile() {
                             <FormMessage />
                           </FormItem>
                         )} />
-                        <FormField control={form.control} name="portfolioUrl" render={({ field }) => (
+                        <FormField control={form.control} name="websiteUrl" render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-300 text-sm">Portfolio/Website URL</FormLabel>
+                            <FormLabel className="text-slate-300 text-sm">Primary Website URL</FormLabel>
+                            <FormControl><Input {...field} placeholder="https://..." className="auth-input" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="menuUrl" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-300 text-sm">Menu / Deals URL</FormLabel>
+                            <FormControl><Input {...field} placeholder="https://..." className="auth-input" /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="bookingUrl" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-300 text-sm">Booking / Appointment URL</FormLabel>
                             <FormControl><Input {...field} placeholder="https://..." className="auth-input" /></FormControl>
                             <FormMessage />
                           </FormItem>

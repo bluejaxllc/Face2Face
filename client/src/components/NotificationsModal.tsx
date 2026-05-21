@@ -23,7 +23,7 @@ interface User {
   firstName: string;
   lastName: string;
   category: string;
-  gender: string;
+  sex: string;
   age: number;
   selfRating: number;
   isActive: boolean;

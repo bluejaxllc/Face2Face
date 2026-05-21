@@ -12,6 +12,52 @@ type GroupSubTab = "feed" | "settings";
 type ListSubTab = "feed" | "dates" | "settings";
 
 import { useScrollSave } from "@/hooks/use-scroll-save";
+import { CategoryKey, categoryConfig } from "@/components/BottomNavigation";
+import TagsMenu from "@/components/TagsMenu";
+import SuggestedGroups from "@/components/SuggestedGroups";
+
+const CATEGORY_COLORS = {
+  business: {
+    primary: "blue-500",
+    hover: "blue-600",
+    text: "text-blue-500",
+    bg: "bg-blue-500",
+    border: "border-blue-500/40",
+    shadow: "shadow-blue-500/25",
+    gradient: "from-blue-500 to-blue-600",
+    mesh: "bg-mesh-business"
+  },
+  friendships: {
+    primary: "emerald-500",
+    hover: "emerald-600",
+    text: "text-emerald-500",
+    bg: "bg-emerald-500",
+    border: "border-emerald-500/40",
+    shadow: "shadow-emerald-500/25",
+    gradient: "from-emerald-500 to-emerald-600",
+    mesh: "bg-mesh-friends"
+  },
+  dating: {
+    primary: "rose-500",
+    hover: "rose-600",
+    text: "text-rose-500",
+    bg: "bg-rose-500",
+    border: "border-rose-500/40",
+    shadow: "shadow-rose-500/25",
+    gradient: "from-rose-500 to-rose-600",
+    mesh: "bg-mesh-dating"
+  },
+  other: {
+    primary: "slate-500",
+    hover: "slate-600",
+    text: "text-slate-500",
+    bg: "bg-slate-500",
+    border: "border-slate-500/40",
+    shadow: "shadow-slate-500/25",
+    gradient: "from-slate-500 to-slate-600",
+    mesh: "bg-slate-950"
+  }
+};
 
 export default function Explore() {
   const groupsScroll = useScrollSave("f2f_explore_scroll_groups");
@@ -31,7 +77,23 @@ export default function Explore() {
   const [listTab, setListTab] = useState<ListSubTab>(() => 
     (localStorage.getItem("f2f_explore_listTab") as ListSubTab) || "feed"
   );
+  const [modeCategory, setModeCategory] = useState<CategoryKey>(() => 
+    (localStorage.getItem("f2f_activeCategory") as CategoryKey) || "dating"
+  );
   const [activeCategory, setActiveCategory] = useState<{title: string, groups: any[]} | null>(null);
+
+  // Sync with global category change
+  useEffect(() => {
+    const handleCatChange = (e: any) => {
+      if (e.detail?.category) {
+        setModeCategory(e.detail.category);
+      }
+    };
+    window.addEventListener('f2f:categoryChange', handleCatChange as any);
+    return () => window.removeEventListener('f2f:categoryChange', handleCatChange as any);
+  }, []);
+
+  const theme = CATEGORY_COLORS[modeCategory === 'friends' ? 'friendships' : (modeCategory as keyof typeof CATEGORY_COLORS) || 'other'];
 
   // Sync sub-menu position to localStorage
   useEffect(() => {
@@ -44,7 +106,7 @@ export default function Explore() {
   // Settings States
   const [listDistance, setListDistance] = useState("25");
   const [distanceUnit, setDistanceUnit] = useState<"mi" | "km">("mi");
-  const [listGender, setListGender] = useState<"male" | "female" | "custom">("male");
+  const [listSex, setListSex] = useState<"male" | "female" | "custom">("male");
   const [listTags, setListTags] = useState("");
   const [listAgeMin, setListAgeMin] = useState("18");
   const [listAgeMax, setListAgeMax] = useState("35");
@@ -87,11 +149,11 @@ export default function Explore() {
     if (activeCategory) {
       return (
         <div className="flex-1 overflow-y-auto w-full h-full text-slate-300 relative bg-slate-950 pb-20">
-          <div className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl">
+          <div className={`w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl transition-colors duration-500`}>
              <button onClick={() => setActiveCategory(null)} className="mr-3 p-1 rounded-full hover:bg-slate-800/50 transition-colors">
-               <ArrowLeft className="w-6 h-6 text-slate-300 hover:text-rose-400 transition-colors" />
+               <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${theme.text} transition-colors`} />
              </button>
-             <h2 className="text-[20px] font-bold text-rose-500 tracking-tight">{activeCategory.title}</h2>
+             <h2 className={`text-[20px] font-bold ${theme.text} tracking-tight`}>{activeCategory.title}</h2>
           </div>
           <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
             {activeCategory.groups.map((g, i) => (
@@ -119,8 +181,8 @@ export default function Explore() {
                   }}
                   className={`px-4 py-1.5 rounded-full text-[13px] font-bold shadow-sm transition-transform active:scale-95 shrink-0 ${
                     activeCategory.title === "Private" 
-                      ? 'bg-slate-800 text-rose-400 border border-slate-700/50 hover:bg-slate-700' 
-                      : 'bg-rose-500 text-white hover:bg-rose-600'
+                      ? `bg-slate-800 ${theme.text} border border-slate-700/50 hover:bg-slate-700` 
+                      : `${theme.bg} text-white hover:opacity-90`
                   }`}
                 >
                   {activeCategory.title === "Private" ? "Request" : "Join"}
@@ -132,61 +194,42 @@ export default function Explore() {
       );
     }
 
-    const renderHorizontalSection = (title: string, groups: any[]) => (
-      <div className="mb-6">
-        <div className="flex justify-between items-end mb-3 px-4">
-          <h2 className="text-[26px] font-bold text-rose-500 tracking-tight">{title}</h2>
-          <button 
-            onClick={() => setActiveCategory({ title, groups })}
-            className="flex flex-col items-center cursor-pointer group"
-          >
-            <span className="text-[11px] font-extrabold text-rose-500 lowercase tracking-wider mb-0 hover:text-rose-400 transition-colors">all</span>
-            <ChevronDown className="w-5 h-5 text-rose-500 group-hover:text-rose-400 transition-colors translate-y-[-4px]" strokeWidth={3} />
-          </button>
-        </div>
-        <div className="flex gap-4 overflow-x-auto px-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden">
-          {groups.map((g, i) => (
-            <div key={i} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
-              <img src={`https://picsum.photos/seed/${g.seed}/400/600`} alt={g.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
-              <div className="absolute inset-0 bg-slate-950/40 pointer-events-none transition-colors group-hover:bg-slate-950/50" />
-              <div className="absolute inset-0 flex items-center justify-center px-2 pointer-events-none text-center">
-                <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] break-words">{g.name}</h3>
-              </div>
-            </div>
-          ))}
-          <div className="w-1 shrink-0 snap-end" />
-        </div>
-      </div>
-    );
-
     return (
       <div {...groupsScroll} onScroll={groupsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 relative pb-20">
         <div className="pt-8 pb-8">
-          <div className="px-4 mb-6 flex gap-3 z-10 h-[52px]">
+          <div className="px-4 mb-4 flex gap-3 z-10 h-[52px]">
             <div className="w-[55%]">
               <button 
                 onClick={() => toast({ title: "Group Builder", description: "The group creation flow is being built. Stay tuned!", variant: "default" })}
-                className="w-full h-full bg-gradient-to-b from-rose-500 to-rose-600 text-white font-extrabold px-4 rounded-2xl text-[16px] shadow-[0_8px_30px_rgba(244,63,94,0.3)] flex items-center justify-center border border-rose-400/30 hover:scale-[1.02] active:scale-95 transition-transform"
+                className={`w-full h-full bg-gradient-to-b ${theme.gradient} text-white font-extrabold px-4 rounded-2xl text-[16px] shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex items-center justify-center border ${theme.border} hover:scale-[1.02] active:scale-95 transition-transform`}
               >
-                Create group
+                {modeCategory === 'business' ? 'Post opening' : modeCategory === 'friends' ? 'Start group' : 'Create dating group'}
               </button>
             </div>
             
-            <div className="flex-1 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] flex items-center overflow-hidden focus-within:ring-1 ring-rose-500 transition-shadow">
+            <div className={`flex-1 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] flex items-center overflow-hidden focus-within:ring-1 ring-${theme.primary} transition-shadow`}>
               <div className="pl-3 pr-2 flex items-center justify-center h-full">
                 <Search className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
               </div>
               
               <input 
                 type="text" 
-                placeholder="Search tags, keywords (e.g. 'hiking', 'denver')..." 
+                placeholder="Search..." 
                 className="bg-transparent text-[13px] text-white placeholder:text-slate-500 h-full w-full outline-none truncate pr-3" 
               />
             </div>
           </div>
-          {renderHorizontalSection("Public", publicGroups)}
-          {renderHorizontalSection("Private", privateGroups)}
-          {renderHorizontalSection("21+", adultGroups)}
+          
+          <TagsMenu 
+            tags={['hiking', 'denver', 'tech', 'coffee', 'music', 'art', 'fitness', 'reading']} 
+            activeTag={null} 
+            onTagSelect={(t) => console.log(t)} 
+            theme={theme}
+          />
+          
+          <SuggestedGroups title="Public" groups={publicGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
+          <SuggestedGroups title="Private" groups={privateGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
+          <SuggestedGroups title="21+" groups={adultGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
         </div>
       </div>
     );
@@ -203,13 +246,13 @@ export default function Explore() {
               type="text" 
               value={groupDistance}
               onChange={(e) => setGroupDistance(e.target.value)}
-              className="bg-transparent w-8 text-center outline-none text-white font-medium focus:ring-1 ring-rose-500 rounded px-1"
+              className={`bg-transparent w-8 text-center outline-none text-white font-medium focus:ring-1 ring-${theme.primary} rounded px-1`}
             />
             <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
             <div className="flex items-center space-x-2 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-              <button onClick={() => setGroupDistanceUnit("mi")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? 'text-rose-500' : 'text-slate-500'}`}>MI</button>
+              <button onClick={() => setGroupDistanceUnit("mi")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
               <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => setGroupDistanceUnit("km")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? 'text-rose-500' : 'text-slate-500'}`}>KM</button>
+              <button onClick={() => setGroupDistanceUnit("km")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
             </div>
           </div>
         </div>
@@ -264,32 +307,32 @@ export default function Explore() {
 
   const mockListProfiles = [
     { 
-      id: 801, username: "shay", firstName: "shay", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 27, city: "Denver (Jefferson co.)", quote: '"lover girl and caring"', seed: "p1", selfRating: 8, bio: "lover girl and caring", interests: "Concerts, Food", profilePhoto: "https://picsum.photos/seed/p1/200/200"
+      id: 801, username: "shay", firstName: "shay", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 27, city: "Denver (Jefferson co.)", quote: '"lover girl and caring"', seed: "p1", bio: "lover girl and caring", interests: "Concerts, Food", profilePhoto: "https://picsum.photos/seed/p1/200/200"
     },
     { 
-      id: 802, username: "aly", firstName: "Aly", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 30, city: "Byers", quote: '"Hello 😊"', seed: "p2", selfRating: 7, bio: "Hello 😊", interests: "Travel", profilePhoto: "https://picsum.photos/seed/p2/200/200"
+      id: 802, username: "aly", firstName: "Aly", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 30, city: "Byers", quote: '"Hello 😊"', seed: "p2", bio: "Hello 😊", interests: "Travel", profilePhoto: "https://picsum.photos/seed/p2/200/200"
     },
     { 
-      id: 803, username: "kyniah", firstName: "kyniah", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 29, city: "Denver", quote: '"iykYK it\'s Simple 😌"', seed: "p3", selfRating: 9, bio: "iykYK it's Simple 😌", interests: "Hiking", profilePhoto: "https://picsum.photos/seed/p3/200/200"
+      id: 803, username: "kyniah", firstName: "kyniah", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 29, city: "Denver", quote: '"iykYK it\'s Simple 😌"', seed: "p3", bio: "iykYK it's Simple 😌", interests: "Hiking", profilePhoto: "https://picsum.photos/seed/p3/200/200"
     },
     { 
-      id: 804, username: "kia", firstName: "kia", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 22, city: "Colorado Springs", quote: '"Here for vibes, laughs, and snack..."', seed: "p4", selfRating: 8, bio: "Here for vibes, laughs, and snacks", interests: "Movies", profilePhoto: "https://picsum.photos/seed/p4/200/200"
+      id: 804, username: "kia", firstName: "kia", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 22, city: "Colorado Springs", quote: '"Here for vibes, laughs, and snack..."', seed: "p4", bio: "Here for vibes, laughs, and snacks", interests: "Movies", profilePhoto: "https://picsum.photos/seed/p4/200/200"
     },
     { 
-      id: 805, username: "aaliyah", firstName: "aaliyah", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 24, city: "Denver", quote: '"i\'m wood smoker and i like to ba..."', seed: "p5", selfRating: 8, bio: "i'm wood smoker and i like to bake", interests: "Cooking", profilePhoto: "https://picsum.photos/seed/p5/200/200"
+      id: 805, username: "aaliyah", firstName: "aaliyah", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 24, city: "Denver", quote: '"i\'m wood smoker and i like to ba..."', seed: "p5", bio: "i'm wood smoker and i like to bake", interests: "Cooking", profilePhoto: "https://picsum.photos/seed/p5/200/200"
     },
     { 
-      id: 806, username: "kaylin", firstName: "Kaylin", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 29, city: "Castle Rock", quote: '"Sarcasm, kindness, good vibes"', seed: "p6", selfRating: 9, bio: "Sarcasm, kindness, good vibes", interests: "Comedy", profilePhoto: "https://picsum.photos/seed/p6/200/200"
+      id: 806, username: "kaylin", firstName: "Kaylin", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 29, city: "Castle Rock", quote: '"Sarcasm, kindness, good vibes"', seed: "p6", bio: "Sarcasm, kindness, good vibes", interests: "Comedy", profilePhoto: "https://picsum.photos/seed/p6/200/200"
     },
     { 
-      id: 807, username: "ladii", firstName: "ladii", lastName: "", category: "dating", gender: "female", isActive: true,
-      age: 28, city: "Aurora", quote: '"All about money it\'s all about me"', seed: "p7", selfRating: 10, bio: "All about money it's all about me", interests: "Business", profilePhoto: "https://picsum.photos/seed/p7/200/200"
+      id: 807, username: "ladii", firstName: "ladii", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 28, city: "Aurora", quote: '"All about money it\'s all about me"', seed: "p7", bio: "All about money it's all about me", interests: "Business", profilePhoto: "https://picsum.photos/seed/p7/200/200"
     },
   ];
 
@@ -304,12 +347,14 @@ export default function Explore() {
               className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group"
             >
               <div className="w-[72px] h-[72px] rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative group-hover:scale-105 transition-transform">
-                <img src={p.profilePhoto} alt={p.firstName} className="w-full h-full object-cover" />
+                <img src={p.profilePhoto} alt={p.category === 'business' ? (p.company || p.firstName) : p.firstName} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-white/5 pointer-events-none" />
               </div>
               
               <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
-                <h3 className="text-white text-[19px] font-semibold tracking-tight leading-snug">{p.firstName}</h3>
+                <h3 className="text-white text-[19px] font-semibold tracking-tight leading-snug">
+                  {p.category === 'business' ? (p.company || p.firstName) : p.firstName}
+                </h3>
                 <p className="text-slate-400 text-[14px] leading-snug mt-0.5 truncate">
                   {p.age}, {p.city}
                 </p>
@@ -321,13 +366,13 @@ export default function Explore() {
               <div className="flex flex-col gap-2 shrink-0">
                 <button 
                   onClick={(e) => { e.stopPropagation(); toast({ title: "Bump sent! ✨", description: `You bumped ${p.firstName}. They will be notified.` }); }}
-                  className="px-2.5 py-1 w-16 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-rose-500 hover:text-rose-400 font-bold text-[10px] tracking-wider transition-transform active:scale-95"
+                  className={`px-2.5 py-1 w-16 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/50 ${theme.text} hover:opacity-80 font-bold text-[10px] tracking-wider transition-transform active:scale-95`}
                 >
                    BUMP
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setLocation("/"); }}
-                  className="px-2.5 py-1 w-16 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-rose-500 hover:text-rose-400 font-bold text-[10px] tracking-wider transition-transform active:scale-95"
+                  className={`px-2.5 py-1 w-16 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700/50 ${theme.text} hover:opacity-80 font-bold text-[10px] tracking-wider transition-transform active:scale-95`}
                 >
                    MAP
                 </button>
@@ -360,7 +405,7 @@ export default function Explore() {
                  <h3 className="text-white text-[17px] font-semibold tracking-tight">{d.name}</h3>
                  <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${d.status === "Confirmed" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>{d.status}</span>
               </div>
-              <p className="text-rose-400 font-semibold text-[14px] leading-snug mt-1 truncate flex items-center">
+              <p className={`font-semibold text-[14px] leading-snug mt-1 truncate flex items-center ${theme.text}`}>
                 <CalendarDays className="w-4 h-4 mr-1.5" />
                 {d.date}
               </p>
@@ -390,9 +435,9 @@ export default function Explore() {
             />
             <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
             <div className="flex items-center space-x-2 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-              <button onClick={() => setDistanceUnit("mi")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? 'text-rose-500' : 'text-slate-500'}`}>MI</button>
+              <button onClick={() => setDistanceUnit("mi")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
               <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => setDistanceUnit("km")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? 'text-rose-500' : 'text-slate-500'}`}>KM</button>
+              <button onClick={() => setDistanceUnit("km")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
             </div>
           </div>
         </div>
@@ -400,9 +445,9 @@ export default function Explore() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
           <span className="lowercase font-bold tracking-wide">sex</span>
           <div className="flex items-center space-x-4">
-             <button onClick={() => setListGender("male")} className={`text-sm lowercase font-medium transition-colors ${listGender === 'male' ? 'text-rose-500' : 'text-slate-600'}`}>male</button>
-             <button onClick={() => setListGender("female")} className={`text-sm lowercase font-medium transition-colors ${listGender === 'female' ? 'text-rose-500' : 'text-slate-600'}`}>female</button>
-             <button onClick={() => setListGender("custom")} className={`text-sm lowercase font-medium transition-colors ${listGender === 'custom' ? 'text-rose-500' : 'text-slate-600'}`}>custom</button>
+             <button onClick={() => setListSex("male")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'male' ? theme.text : 'text-slate-600'}`}>male</button>
+             <button onClick={() => setListSex("female")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'female' ? theme.text : 'text-slate-600'}`}>female</button>
+             <button onClick={() => setListSex("custom")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'custom' ? theme.text : 'text-slate-600'}`}>custom</button>
           </div>
         </div>
 
@@ -448,7 +493,7 @@ export default function Explore() {
   );
 
   return (
-    <PageTransition className="h-screen w-full page-dark relative overflow-hidden bg-slate-950">
+    <PageTransition className={`h-screen w-full page-dark relative overflow-hidden transition-all duration-700 ${theme.mesh}`}>
       {/* ═══════ Primary Header: Groups / List view ═══════ */}
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <div className="w-full h-[64px] flex items-center justify-center">
@@ -456,9 +501,9 @@ export default function Explore() {
             onClick={() => { setPrimaryMode("groups"); setGroupTab("feed"); setActiveCategory(null); }}
             className="px-2 relative group pb-1 mr-3"
           >
-            <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "groups" ? "text-rose-500" : "text-slate-500"}`}>Groups</span>
+            <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "groups" ? theme.text : "text-slate-500"}`}>Groups</span>
             {primaryMode === "groups" && (
-              <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-rose-500 rounded-full translate-y-1 mx-2" />
+              <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${theme.bg} rounded-full translate-y-1 mx-2 shadow-[0_0_8px_${theme.primary}]`} />
             )}
           </button>
           <span className="text-slate-600 font-light text-[22px]">/</span>
@@ -466,9 +511,9 @@ export default function Explore() {
             onClick={() => { setPrimaryMode("list"); setActiveCategory(null); }}
             className="px-2 relative group pb-1 ml-3"
           >
-            <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "list" ? "text-rose-500" : "text-slate-500"}`}>List view</span>
+            <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "list" ? theme.text : "text-slate-500"}`}>List view</span>
             {primaryMode === "list" && (
-              <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-rose-500 rounded-full translate-y-1 mx-2" />
+              <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${theme.bg} rounded-full translate-y-1 mx-2 shadow-[0_0_8px_${theme.primary}]`} />
             )}
           </button>
         </div>
@@ -508,8 +553,8 @@ export default function Explore() {
               onClick={() => setGroupTab("settings")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
-              <span className={`text-sm font-semibold tracking-wide ${groupTab === "settings" ? "text-rose-500" : "text-slate-500"}`}>Settings</span>
-              {groupTab === "settings" && <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-rose-500 rounded-t-full shadow-[0_0_8px_rgba(244,63,94,0.6)]" />}
+              <span className={`text-sm font-semibold tracking-wide ${groupTab === "settings" ? theme.text : "text-slate-500"}`}>Settings</span>
+              {groupTab === "settings" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full shadow-[0_0_8px_rgba(0,0,0,0.6)]`} />}
             </button>
           </div>
         )}
@@ -521,24 +566,28 @@ export default function Explore() {
               onClick={() => setListTab("feed")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
-              <span className={`text-sm font-semibold tracking-wide ${listTab === "feed" ? "text-rose-500" : "text-slate-500"}`}>User list</span>
-              {listTab === "feed" && <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-rose-500 rounded-t-full shadow-[0_0_8px_rgba(244,63,94,0.6)]" />}
+              <span className={`text-sm font-semibold tracking-wide ${listTab === "feed" ? theme.text : "text-slate-500"}`}>
+                {modeCategory === 'business' ? 'Professionals' : modeCategory === 'friends' ? 'Local people' : 'Explore List'}
+              </span>
+              {listTab === "feed" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
             <div className="w-px bg-slate-800 self-center h-5" />
             <button 
               onClick={() => setListTab("dates")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
-              <span className={`text-sm font-semibold tracking-wide ${listTab === "dates" ? "text-rose-500" : "text-slate-500"}`}>Dates list</span>
-              {listTab === "dates" && <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-rose-500 rounded-t-full shadow-[0_0_8px_rgba(244,63,94,0.6)]" />}
+              <span className={`text-sm font-semibold tracking-wide ${listTab === "dates" ? theme.text : "text-slate-500"}`}>
+                {modeCategory === 'business' ? 'Meetings' : 'Matches'}
+              </span>
+              {listTab === "dates" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
             <div className="w-px bg-slate-800 self-center h-5" />
             <button 
               onClick={() => setListTab("settings")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
-              <span className={`text-sm font-semibold tracking-wide ${listTab === "settings" ? "text-rose-500" : "text-slate-500"}`}>Settings</span>
-              {listTab === "settings" && <div className="absolute bottom-0 left-6 right-6 h-[2px] bg-rose-500 rounded-t-full shadow-[0_0_8px_rgba(244,63,94,0.6)]" />}
+              <span className={`text-sm font-semibold tracking-wide ${listTab === "settings" ? theme.text : "text-slate-500"}`}>Settings</span>
+              {listTab === "settings" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
           </div>
         )}

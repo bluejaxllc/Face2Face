@@ -5,7 +5,8 @@ import {
   insertUserSchema,
   updateUserSchema,
   insertBumpSchema,
-  insertNotificationSchema
+  insertNotificationSchema,
+  insertWaitlistSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth } from "./auth";
@@ -25,7 +26,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes (/api/auth/...)
   await setupAuth(app);
 
-  // User profile routes
   apiRouter.patch("/users/profile", async (req: Request, res: Response) => {
     try {
       if (!req.session || !req.session.userId) {
@@ -52,10 +52,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profilePhoto: updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null
       });
     } catch (error) {
+      const err = error as any;
+      console.error("Profile update error:", err);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to update profile" });
+      res.status(500).json({ message: "Failed to update profile", err: err.message, stack: err.stack });
     }
   });
 
@@ -88,6 +90,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update location" });
+    }
+  });
+
+  // Waitlist route
+  apiRouter.post("/waitlist", async (req: Request, res: Response) => {
+    try {
+      const raw = insertWaitlistSchema.parse(req.body);
+      const waitlist = await storage.createWaitlist(raw);
+      res.status(201).json(waitlist);
+    } catch (error) {
+      console.error("Waitlist error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to join waitlist" });
     }
   });
 
@@ -176,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const category = req.query.category as string | undefined;
       const queryDatingPreference = req.query.datingPreference as string | undefined;
       const datingPreference = queryDatingPreference || user.datingPreference || undefined;
-      const userGender = user.gender || undefined;
+      const userSex = user.sex || undefined;
 
       const nearbyUsers = await storage.getNearbyUsers(
         Number(user.latitude),
@@ -186,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           category,
           datingPreference,
-          userGender
+          userSex
         }
       );
 
@@ -289,7 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: sender.id,
               firstName: sender.firstName,
               lastName: sender.lastName,
-              gender: sender.gender,
+              sex: sender.sex,
               age: sender.age,
               selfRating: sender.selfRating,
               category: sender.category,
@@ -638,6 +655,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Verify check error:", error);
       res.status(500).json({ message: "Failed to verify code" });
+    }
+  });
+
+  // Dating Events
+  apiRouter.post("/dating-events", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const eventData = { ...req.body, userId: req.session.userId };
+      const newEvent = await storage.createDatingEvent(eventData);
+      
+      res.status(201).json(newEvent);
+    } catch (error) {
+      console.error("Create dating event error:", error);
+      res.status(500).json({ message: "Failed to create dating event" });
+    }
+  });
+
+  apiRouter.get("/dating-events", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const params = {
+        type: req.query.type as string | undefined,
+        location: req.query.location as string | undefined
+      };
+      
+      const events = await storage.getDatingEvents(params);
+      res.status(200).json(events);
+    } catch (error) {
+      console.error("Get dating events error:", error);
+      res.status(500).json({ message: "Failed to fetch dating events" });
     }
   });
 

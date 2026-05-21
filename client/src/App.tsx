@@ -24,6 +24,7 @@ const Profile = lazy(() => import("@/pages/Profile"));
 const Messages = lazy(() => import("@/pages/Messages"));
 const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
 const Evangelists = lazy(() => import("@/pages/Evangelists"));
+const BusinessWaitlist = lazy(() => import("@/pages/BusinessWaitlist"));
 const DebugLayouts = lazy(() => import("@/pages/DebugLayouts"));
 const Games = lazy(() => import("@/pages/Games"));
 
@@ -41,6 +42,15 @@ const PageLoader = () => (
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
+
+  // Domain-based routing: if someone visits business.waitlist.face2face.icu
+  if (window.location.hostname.startsWith('business.waitlist.')) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <BusinessWaitlist />
+      </Suspense>
+    );
+  }
 
   // Domain-based routing: if someone visits waitlist.face2face.icu (or localhost waitlist.*), 
   // serve only the Evangelists waitlist page, bypassing normal routing.
@@ -93,6 +103,7 @@ function AppRouter() {
           <DebugLayouts />
         </Route>
         <Route path="/evangelists" component={Evangelists} />
+        <Route path="/business-waitlist" component={BusinessWaitlist} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -112,8 +123,8 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   // But if we're not in bypass mode and not authenticated, redirect
   if (!isAuthenticated) {
     // In local development we often want to bypass, but for production/live testing we need redirect
-    // setLocation("/auth");
-    // return null;
+    setLocation("/auth");
+    return null;
   }
 
   return <Component />;

@@ -30,7 +30,7 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
 
-  const [gender, setGender] = useState(user?.gender || "other");
+  const [sex, setSex] = useState(user?.sex || "other");
   const [age, setAge] = useState(user?.age || 18);
   const [height, setHeight] = useState(user?.height || "");
   const [weight, setWeight] = useState(user?.weight || "");
@@ -43,7 +43,7 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
   const handleSave = async () => {
     try {
       await updateProfile({
-        gender,
+        sex,
         age,
         height: height || undefined,
         weight: weight || undefined,

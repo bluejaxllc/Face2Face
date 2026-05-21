@@ -10,11 +10,11 @@ type BumpSubTab = "list" | "settings";
 
 // Placeholder bumps
 const placeholderBumps = [
-  { id: 1, name: "Sarah M.", initials: "SM", message: "Bumped you from 0.3 mi away!", time: "2m", gender: "female" },
-  { id: 2, name: "Jake R.", initials: "JR", message: "Hey! Bumped you 👋", time: "15m", gender: "male" },
-  { id: 3, name: "Mia L.", initials: "ML", message: "Wants to meet up!", time: "1h", gender: "female" },
-  { id: 4, name: "Carlos D.", initials: "CD", message: "Bumped you twice!", time: "3h", gender: "male" },
-  { id: 5, name: "Priya K.", initials: "PK", message: "Nearby bump!", time: "5h", gender: "female" },
+  { id: 1, name: "Sarah M.", initials: "SM", message: "Bumped you from 0.3 mi away!", time: "2m", sex: "female" },
+  { id: 2, name: "Jake R.", initials: "JR", message: "Hey! Bumped you 👋", time: "15m", sex: "male" },
+  { id: 3, name: "Mia L.", initials: "ML", message: "Wants to meet up!", time: "1h", sex: "female" },
+  { id: 4, name: "Carlos D.", initials: "CD", message: "Bumped you twice!", time: "3h", sex: "male" },
+  { id: 5, name: "Priya K.", initials: "PK", message: "Nearby bump!", time: "5h", sex: "female" },
 ];
 
 // Placeholder messages
@@ -61,7 +61,7 @@ export default function Messages() {
         {placeholderBumps.map((bump) => (
           <div key={bump.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-700/50">
             <div className="relative">
-              <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-slate-950" style={{ ['--tw-ring-color' as any]: bump.gender === 'female' ? '#ec4899' : '#3b82f6' }}>
+              <Avatar className="h-12 w-12 ring-2 ring-offset-2 ring-offset-slate-950" style={{ ['--tw-ring-color' as any]: bump.sex === 'female' ? '#ec4899' : '#3b82f6' }}>
                 <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 text-sm font-bold">
                   {bump.initials}
                 </AvatarFallback>

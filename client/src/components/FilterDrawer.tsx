@@ -18,7 +18,6 @@ export interface FilterOptions {
   showWomen: boolean;
   ageRange: [number, number];
   radius: number;
-  minRating: number;
   distanceUnit?: 'mi' | 'km';
 }
 
@@ -197,25 +196,6 @@ export default function FilterDrawer({ options, onChange }: FilterDrawerProps) {
             </div>
           </div>
 
-          {/* Minimum Rating */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Minimum Rating</Label>
-            <Select
-              value={localOptions.minRating.toString()}
-              onValueChange={(value) => updateOption('minRating', parseInt(value))}
-            >
-              <SelectTrigger className="bg-slate-800/50 border-slate-700/50 text-slate-200">
-                <SelectValue placeholder="Select minimum rating" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
-                <SelectItem value="1">⭐ (Any)</SelectItem>
-                <SelectItem value="2">⭐⭐</SelectItem>
-                <SelectItem value="3">⭐⭐⭐</SelectItem>
-                <SelectItem value="4">⭐⭐⭐⭐</SelectItem>
-                <SelectItem value="5">⭐⭐⭐⭐⭐</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           {/* Action Buttons */}
           <div className="flex justify-between pt-4 gap-3">

@@ -6,6 +6,7 @@ import Map from "@/components/Map";
 import BottomNavigation from "@/components/BottomNavigation";
 import { PageTransition } from "@/components/PageTransition";
 import { FilterOptions } from "@/components/FilterDrawer";
+import DatingMenu from "@/components/DatingMenu";
 
 type CategoryKey = "dating" | "friends" | "business";
 
@@ -100,6 +101,7 @@ export default function Dating() {
       <div className="fixed left-0 right-0 flex flex-col" style={{ top: "48px", bottom: "60px" }}>
         <div className="flex-1 relative overflow-hidden">
           <Map />
+          {activeCategory === "dating" && <DatingMenu />}
         </div>
       </div>
       <BottomNavigation />
