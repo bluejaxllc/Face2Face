@@ -5,7 +5,12 @@ import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileCard from "@/components/ProfileCard";
 import Map from "@/components/Map";
-import { ChevronDown, Search, Heart, ArrowLeft, CalendarDays, MapPin } from "lucide-react";
+import { ChevronDown, Search, Heart, ArrowLeft, CalendarDays, MapPin, Plus, ImagePlus, Camera, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type PrimaryMode = "groups" | "list";
 type GroupSubTab = "feed" | "settings";
@@ -103,6 +108,98 @@ export default function Explore() {
   }, [primaryMode, groupTab, listTab]);
   const [selectedUserForProfile, setSelectedUserForProfile] = useState<any | null>(null);
   
+  // Create Group Modal State
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const [groupPhotos, setGroupPhotos] = useState<string[]>([]);
+  const [newGroup, setNewGroup] = useState({
+    name: "",
+    description: "",
+    type: "public" as "public" | "private",
+    maxMembers: "50",
+    tags: "",
+    coverImage: "",
+    overlayText: "",
+    overlayColor: "#ffffff",
+    overlayPosition: "center" as "top" | "center" | "bottom",
+    overlaySize: "24"
+  });
+
+  const handleGroupPhotosUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxW = 400, maxH = 300;
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+          if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+          setGroupPhotos(prev => [...prev, canvas.toDataURL('image/jpeg', 0.7)]);
+        };
+        img.src = ev.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
+  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width, h = img.height;
+        const maxW = 1200, maxH = 400;
+        if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+        if (h > maxH) { w = Math.round((w * maxH) / h); h = maxH; }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          setNewGroup(prev => ({...prev, coverImage: canvas.toDataURL("image/jpeg", 0.85)}));
+        }
+      };
+      if (ev.target?.result) img.src = ev.target.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCreateGroup = () => {
+    if (!newGroup.name.trim()) {
+      toast({ title: "Name required", description: "Please enter a group name.", variant: "destructive" });
+      return;
+    }
+    // Add to local groups list for now
+    const newGroupEntry = {
+      name: newGroup.name,
+      members: 1,
+      distance: "0 mi",
+      seed: `f2f_new_${Date.now()}`
+    };
+    if (newGroup.type === "public") {
+      publicGroups.unshift(newGroupEntry);
+    } else {
+      privateGroups.unshift(newGroupEntry);
+    }
+    toast({ title: "Group Created! 🎉", description: `"${newGroup.name}" is now live. Share it with friends!` });
+    setCreateGroupOpen(false);
+    setNewGroup({ name: "", description: "", type: "public", maxMembers: "50", tags: "", coverImage: "", overlayText: "", overlayColor: "#ffffff", overlayPosition: "center", overlaySize: "24" });
+    setGroupPhotos([]);
+  };
+
   // Settings States
   const [listDistance, setListDistance] = useState("25");
   const [distanceUnit, setDistanceUnit] = useState<"mi" | "km">("mi");
@@ -200,7 +297,7 @@ export default function Explore() {
           <div className="px-4 mb-4 flex gap-3 z-10 h-[52px]">
             <div className="w-[55%]">
               <button 
-                onClick={() => toast({ title: "Group Builder", description: "The group creation flow is being built. Stay tuned!", variant: "default" })}
+                onClick={() => setCreateGroupOpen(true)}
                 className={`w-full h-full bg-gradient-to-b ${theme.gradient} text-white font-extrabold px-4 rounded-2xl text-[16px] shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex items-center justify-center border ${theme.border} hover:scale-[1.02] active:scale-95 transition-transform`}
               >
                 {modeCategory === 'business' ? 'Post opening' : modeCategory === 'friends' ? 'Start group' : 'Create dating group'}
@@ -621,6 +718,272 @@ export default function Explore() {
           />
         </div>
       )}
+
+      {/* ═══════ Create Group Modal ═══════ */}
+      <Dialog open={createGroupOpen} onOpenChange={setCreateGroupOpen}>
+        <DialogContent className="sm:max-w-md bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className={`${theme.text}`}>
+              {modeCategory === 'business' ? 'Post Opening' : modeCategory === 'friends' ? 'Start a Group' : 'Create Dating Group'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              {modeCategory === 'dating' 
+                ? 'Create a dating group for local meetups, speed dating, or social events.'
+                : modeCategory === 'business'
+                ? 'Post a job opening or business networking group.'
+                : 'Start a local group to meet new friends and connect.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            {/* Cover Photo Upload + Text Builder */}
+            <div className="space-y-2">
+              <Label className="text-white">Cover Photo</Label>
+              <input 
+                ref={coverInputRef}
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleCoverUpload}
+              />
+              {newGroup.coverImage ? (
+                <div className="relative rounded-2xl overflow-hidden border border-slate-700">
+                  {/* Cover Image */}
+                  <div className="absolute inset-0">
+                    <img src={newGroup.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-slate-950/40" />
+                  </div>
+                  {/* Camera Button */}
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    className="absolute top-3 right-3 bg-black/50 text-white rounded-full p-2 backdrop-blur-md border border-white/10 hover:bg-black/70 transition-all z-10"
+                  >
+                    <ImagePlus className="w-4 h-4" />
+                  </button>
+                  {/* Draggable Text Box */}
+                  <div className="relative z-[5] min-h-[180px] overflow-hidden">
+                    <div
+                      tabIndex={-1}
+                      className="absolute group outline-none"
+                      style={{
+                        left: `${newGroup.overlayPosition === 'center' ? 50 : newGroup.overlayPosition === 'top' ? 50 : 50}%`,
+                        top: `${newGroup.overlayPosition === 'top' ? 25 : newGroup.overlayPosition === 'bottom' ? 75 : 50}%`,
+                        transform: 'translate(-50%, -50%)',
+                        maxWidth: '95%',
+                      }}
+                    >
+                      {/* Drag Handle */}
+                      <div
+                        className="flex items-center justify-center gap-1 cursor-grab active:cursor-grabbing py-1 px-4 mx-auto w-fit rounded-t-md bg-white/10 backdrop-blur-sm select-none opacity-0 group-focus-within:opacity-100 transition-opacity"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          const draggable = e.currentTarget.parentElement!;
+                          const container = draggable.parentElement!;
+                          const rect = container.getBoundingClientRect();
+                          const onMove = (ev: MouseEvent) => {
+                            const x = Math.max(15, Math.min(85, ((ev.clientX - rect.left) / rect.width) * 100));
+                            const y = Math.max(5, Math.min(95, ((ev.clientY - rect.top) / rect.height) * 100));
+                            draggable.style.left = `${x}%`;
+                            draggable.style.top = `${y}%`;
+                          };
+                          const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+                          document.addEventListener('mousemove', onMove);
+                          document.addEventListener('mouseup', onUp);
+                        }}
+                        onTouchStart={(e) => {
+                          const draggable = e.currentTarget.parentElement!;
+                          const container = draggable.parentElement!;
+                          const rect = container.getBoundingClientRect();
+                          const onMove = (ev: TouchEvent) => {
+                            ev.preventDefault();
+                            const t = ev.touches[0];
+                            const x = Math.max(15, Math.min(85, ((t.clientX - rect.left) / rect.width) * 100));
+                            const y = Math.max(5, Math.min(95, ((t.clientY - rect.top) / rect.height) * 100));
+                            draggable.style.left = `${x}%`;
+                            draggable.style.top = `${y}%`;
+                          };
+                          const onUp = () => { document.removeEventListener('touchmove', onMove as any); document.removeEventListener('touchend', onUp); };
+                          document.addEventListener('touchmove', onMove as any, { passive: false });
+                          document.addEventListener('touchend', onUp);
+                        }}
+                      >
+                        <span className="text-white/50 text-[8px] font-bold tracking-widest uppercase">⠿ drag</span>
+                      </div>
+                      {/* Text Box + Controls */}
+                      <div
+                        className="rounded-b-md rounded-tr-md p-2"
+                        data-group-slogan="true"
+                        style={{
+                          backgroundColor: `rgba(0,0,0,${Number(newGroup.overlaySize) > 0 ? 0.2 : 0})`,
+                          backdropFilter: `blur(4px)`,
+                        }}
+                      >
+                        <textarea
+                          value={newGroup.overlayText}
+                          onChange={(e) => setNewGroup({...newGroup, overlayText: e.target.value})}
+                          maxLength={100}
+                          style={{ color: newGroup.overlayColor, resize: 'both', overflow: 'auto' }}
+                          className="text-sm font-bold italic drop-shadow-md bg-transparent border-0 outline-none text-center placeholder:text-blue-300/40 appearance-none shadow-none min-w-[180px] max-w-[400px] block"
+                          placeholder="Your group tagline..."
+                          rows={2}
+                        />
+                        {/* Controls row - visible on focus */}
+                        <div className="hidden group-focus-within:flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
+                          <input
+                            type="color"
+                            value={newGroup.overlayColor}
+                            onChange={(e) => {
+                              setNewGroup({...newGroup, overlayColor: e.target.value});
+                            }}
+                            className="w-5 h-5 rounded-full border border-white/20 cursor-pointer shrink-0"
+                            style={{ WebkitAppearance: 'none', padding: 0 } as any}
+                          />
+                          <span className="text-white/40 text-[9px] shrink-0">BLUR</span>
+                          <input
+                            type="range"
+                            min="0"
+                            max="20"
+                            step="1"
+                            defaultValue="4"
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const box = e.target.closest('[data-group-slogan]') as HTMLElement;
+                              if (box) {
+                                box.style.backdropFilter = `blur(${val}px)`;
+                                box.style.backgroundColor = Number(val) > 0 ? 'rgba(0,0,0,0.2)' : 'transparent';
+                              }
+                            }}
+                            className="flex-1 h-1 accent-blue-400 cursor-pointer"
+                          />
+                          <span className="text-white/40 text-[9px] shrink-0">SIZE</span>
+                          <select
+                            value={newGroup.overlaySize}
+                            onChange={(e) => setNewGroup({...newGroup, overlaySize: e.target.value})}
+                            className="bg-transparent border border-white/20 text-white text-[9px] rounded px-1 py-0.5 outline-none"
+                          >
+                            <option value="12" className="bg-slate-900">S</option>
+                            <option value="14" className="bg-slate-900">M</option>
+                            <option value="18" className="bg-slate-900">L</option>
+                            <option value="24" className="bg-slate-900">XL</option>
+                            <option value="32" className="bg-slate-900">2XL</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => coverInputRef.current?.click()}
+                  className="w-full h-36 rounded-2xl border-2 border-dashed border-slate-600 hover:border-slate-500 bg-slate-800/50 hover:bg-slate-800 transition-all flex flex-col items-center justify-center gap-2"
+                >
+                  <ImagePlus className="w-8 h-8 text-slate-500 group-hover:text-slate-400 transition-colors" />
+                  <span className="text-slate-500 text-sm font-medium">Tap to add cover photo</span>
+                </button>
+              )}
+            </div>
+            {/* Group Photos Gallery */}
+            <div className="space-y-2">
+              <Label className="text-white">Group Photos</Label>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                {groupPhotos.map((photo, i) => (
+                  <div key={i} className="relative min-w-[100px] h-[80px] rounded-lg overflow-hidden group/photo shrink-0">
+                    <img src={photo} alt={`Group ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setGroupPhotos(prev => prev.filter((_, idx) => idx !== i))}
+                      className="absolute top-1 right-1 w-5 h-5 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover/photo:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                <label className="min-w-[100px] h-[80px] rounded-lg border-2 border-dashed border-slate-600 hover:border-slate-500 flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors bg-slate-800/50 shrink-0">
+                  <Camera className="w-5 h-5 text-slate-400" />
+                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Add Photos</span>
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleGroupPhotosUpload} />
+                </label>
+              </div>
+            </div>
+            {/* Group Name */}
+            <div className="space-y-2">
+              <Label htmlFor="groupName" className="text-white">Group Name</Label>
+              <Input 
+                id="groupName"
+                value={newGroup.name}
+                onChange={(e) => setNewGroup({...newGroup, name: e.target.value})}
+                placeholder="e.g. Friday Night Mixers"
+                className="bg-slate-800 border-slate-700 text-white"
+              />
+            </div>
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="groupDesc" className="text-white">Description</Label>
+              <Textarea 
+                id="groupDesc"
+                value={newGroup.description}
+                onChange={(e) => setNewGroup({...newGroup, description: e.target.value})}
+                placeholder="What's this group about?"
+                className="bg-slate-800 border-slate-700 text-white resize-none h-20"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-white">Group Type</Label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setNewGroup({...newGroup, type: "public"})}
+                  className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+                    newGroup.type === "public" 
+                      ? `bg-gradient-to-r ${theme.gradient} text-white shadow-lg` 
+                      : "bg-slate-800 text-slate-400 border border-slate-700"
+                  }`}
+                >
+                  Public
+                </button>
+                <button
+                  onClick={() => setNewGroup({...newGroup, type: "private"})}
+                  className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+                    newGroup.type === "private" 
+                      ? `bg-gradient-to-r ${theme.gradient} text-white shadow-lg` 
+                      : "bg-slate-800 text-slate-400 border border-slate-700"
+                  }`}
+                >
+                  Private
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxMembers" className="text-white">Max Members</Label>
+                <Input 
+                  id="maxMembers"
+                  type="number"
+                  value={newGroup.maxMembers}
+                  onChange={(e) => setNewGroup({...newGroup, maxMembers: e.target.value})}
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="groupTags" className="text-white">Tags</Label>
+                <Input 
+                  id="groupTags"
+                  value={newGroup.tags}
+                  onChange={(e) => setNewGroup({...newGroup, tags: e.target.value})}
+                  placeholder="coffee, dating"
+                  className="bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCreateGroupOpen(false)} className="text-slate-400">Cancel</Button>
+            <Button onClick={handleCreateGroup} className={`bg-gradient-to-r ${theme.gradient} text-white`}>
+              Create Group
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageTransition>
   );
 }

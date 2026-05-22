@@ -13,7 +13,7 @@ import {
   Smile, Coffee, Zap, Shield, MessageSquare, 
   Navigation, Linkedin, ExternalLink, BookOpen, Play, 
   Users, CheckCircle, Flame, Music, Beer, Sun, Moon,
-  Activity, UserPlus, Palette, LogOut
+  Activity, UserPlus, Palette, LogOut, Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -137,6 +137,13 @@ export default function Profile() {
   const [, setLocation] = useLocation();
   const [showHiringMenu, setShowHiringMenu] = useState(false);
   const { user, updateProfile, logout, isLoading } = useAuth();
+  
+  // Show hiring setup box by default when user has hiring enabled
+  useEffect(() => {
+    if (user && (user as any).isHiring) {
+      setShowHiringMenu(true);
+    }
+  }, [user]);
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -1256,32 +1263,34 @@ export default function Profile() {
 
 
           {/* Category Navigation */}
-          <motion.div variants={itemVariants} className="flex items-center justify-center gap-3 mt-6">
+          <motion.div variants={itemVariants} className="flex items-center justify-center gap-8 mt-20">
             <Button
               variant="outline"
               onClick={() => setLocation('/games')}
-              className="flex-1 h-10 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5"
+              className="px-6 h-12 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5 [&_svg]:!size-auto"
             >
-              <Zap className="w-5 h-5" /> <span className="text-3xl" style={{ lineHeight: 0 }}>+</span> Games
+              <Plus className="w-7 h-7 shrink-0 -skew-x-12" strokeWidth={4} /> <span className="text-2xl leading-none shrink-0 -scale-x-100 text-green-400">♘</span> Games
             </Button>
             <Button
               variant="outline"
               onClick={() => setLocation('/groups')}
-              className="flex-1 h-10 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5"
+              className="px-6 h-12 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5 [&_svg]:!size-auto"
             >
-              <Users className="w-5 h-5" /> <span className="text-3xl" style={{ lineHeight: 0 }}>+</span> Groups
+              <Plus className="w-7 h-7 shrink-0 -skew-x-12" strokeWidth={4} /> <Users className="w-5 h-5 shrink-0 text-green-400" /> Groups
             </Button>
+          </motion.div>
+          <motion.div variants={itemVariants} className="flex items-center justify-center mt-3">
             <Button
               variant="outline"
               onClick={() => setLocation('/dating')}
-              className="flex-1 h-10 rounded-xl border-pink-500/30 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 hover:text-pink-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5"
+              className="px-6 h-12 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5 [&_svg]:!size-auto"
             >
-              <Heart className="w-5 h-5" /> <span className="text-3xl" style={{ lineHeight: 0 }}>+</span> Dates
+              <Plus className="w-7 h-7 shrink-0 -skew-x-12" strokeWidth={4} /> <Heart className="w-5 h-5 shrink-0 text-red-400" /> Dates
             </Button>
           </motion.div>
 
           {/* Edit button */}
-          <motion.div variants={itemVariants} className="flex flex-col justify-center items-center max-w-[200px] mx-auto gap-2 mt-6">
+          <motion.div variants={itemVariants} className="flex flex-col justify-center items-center max-w-[200px] mx-auto gap-2 mt-20">
             <Button
               variant="outline"
               onClick={() => setIsEditing(!isEditing)}
@@ -1923,7 +1932,7 @@ export default function Profile() {
                   <p className="text-xs text-slate-400">Email</p>
                   <p className="text-sm text-slate-200 truncate">{user.email}</p>
                 </div>
-                <div>
+                <div className="text-right">
                   <p className="text-xs text-slate-400">Username</p>
                   <p className="text-sm text-slate-300 font-medium">@{user.username}</p>
                 </div>
