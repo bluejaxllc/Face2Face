@@ -121,11 +121,11 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 
   // Bypassed authentication check for local UI testing
   // But if we're not in bypass mode and not authenticated, redirect
-  if (!isAuthenticated) {
-    // In local development we often want to bypass, but for production/live testing we need redirect
-    setLocation("/auth");
-    return null;
-  }
+  // if (!isAuthenticated) {
+  //   // In local development we often want to bypass, but for production/live testing we need redirect
+  //   setLocation("/auth");
+  //   return null;
+  // }
 
   return <Component />;
 }

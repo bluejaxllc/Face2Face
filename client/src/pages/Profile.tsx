@@ -144,6 +144,19 @@ export default function Profile() {
       setShowHiringMenu(true);
     }
   }, [user]);
+
+  const [localCategory, setLocalCategory] = useState<string | null>(() => {
+    return localStorage.getItem("f2f_activeCategory");
+  });
+
+  useEffect(() => {
+    const handleCategoryChange = (e: Event) => {
+      setLocalCategory((e as CustomEvent).detail);
+    };
+    window.addEventListener("f2f:categoryChange", handleCategoryChange);
+    return () => window.removeEventListener("f2f:categoryChange", handleCategoryChange);
+  }, []);
+
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -368,9 +381,10 @@ export default function Profile() {
       : <Sparkles className="w-5 h-5 text-purple-400" />;
 
   // Determine which category to use for styling (reactive to form and user state)
+  const userCat = user?.category === 'friendships' ? 'friends' : user?.category;
   const activeCategory = isEditing 
     ? (selectedCategory === 'friendships' ? 'friends' : selectedCategory)
-    : (user.category === 'friendships' ? 'friends' : user.category);
+    : (localCategory || userCat);
 
   const themeConfig = {
     business: {
