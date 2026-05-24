@@ -33,6 +33,31 @@ export const users = pgTable("users", {
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
   safetyAcknowledged: boolean("safety_acknowledged").default(false),
+  
+  // Business fields
+  jobTitle: text("job_title"),
+  company: text("company"),
+  industry: text("industry"),
+  skills: text("skills"),
+  networkingGoal: text("networking_goal"),
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  professionalMotto: text("professional_motto"),
+  businessPhone: text("business_phone"),
+  businessNeed: text("business_need"),
+  businessPartners: text("business_partners"),
+  isNetworkingOpen: boolean("is_networking_open").default(true),
+  isHiring: boolean("is_hiring").default(false),
+  hiringRoles: text("hiring_roles"),
+  menuData: text("menu_data"),
+  businessService: text("business_service"),
+  businessSlogan: text("business_slogan"),
+  openPositions: integer("open_positions"),
+  
+  // Custom business links
+  websiteUrl: text("website_url"),
+  menuUrl: text("menu_url"),
+  bookingUrl: text("booking_url"),
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -134,6 +159,29 @@ export const updateUserSchema = createInsertSchema(users).pick({
   phoneNumber: true,
   isPhoneVerified: true,
   safetyAcknowledged: true,
+  
+  // Business fields
+  jobTitle: true,
+  company: true,
+  industry: true,
+  skills: true,
+  networkingGoal: true,
+  linkedinUrl: true,
+  portfolioUrl: true,
+  professionalMotto: true,
+  businessPhone: true,
+  businessNeed: true,
+  businessPartners: true,
+  isNetworkingOpen: true,
+  isHiring: true,
+  hiringRoles: true,
+  menuData: true,
+  businessService: true,
+  businessSlogan: true,
+  openPositions: true,
+  websiteUrl: true,
+  menuUrl: true,
+  bookingUrl: true,
 });
 
 export const insertBumpSchema = createInsertSchema(bumps).pick({

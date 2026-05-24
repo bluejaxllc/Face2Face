@@ -14,3 +14,6 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .vercel
+
+# AI Artifacts
+Evermor_tmp/
