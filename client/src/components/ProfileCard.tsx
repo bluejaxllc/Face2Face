@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistance } from "@/lib/distance";
-import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight, Eye, UserPlus, Briefcase, Zap, Target, Linkedin, Smile, MessageSquare, Flame } from "lucide-react";
+import { X, Music, Palette, BookOpen, Heart, Sparkles, Send, ChevronDown, Ruler, Weight, Eye, UserPlus, Briefcase, Zap, Target, Linkedin, Smile, MessageSquare, Flame, Gamepad2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,11 +67,12 @@ interface ProfileCardProps {
   user: User;
   onClose: () => void;
   onConnect: (message?: string) => void;
+  onChallenge?: () => void;
   distance: number | null;
   myLocation?: { latitude: number; longitude: number } | null;
 }
 
-export default function ProfileCard({ user, onClose, onConnect, distance, myLocation }: ProfileCardProps) {
+export default function ProfileCard({ user, onClose, onConnect, onChallenge, distance, myLocation }: ProfileCardProps) {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const [showBumpComposer, setShowBumpComposer] = useState(false);
@@ -366,7 +367,7 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
               </div>
             )}
 
-            {/* ═══════ BUMP BUTTON ═══════ */}
+            {/* ═══════ BUMP + CHALLENGE BUTTONS ═══════ */}
             <AnimatePresence mode="wait">
               {!showBumpComposer ? (
                 <motion.div
@@ -374,19 +375,30 @@ export default function ProfileCard({ user, onClose, onConnect, distance, myLoca
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mt-5"
+                  className="mt-5 w-full space-y-2"
                 >
-                  <Button
-                    onClick={() => setShowBumpComposer(true)}
-                    disabled={hasBumped && !hasMutualBumps}
-                    className={`w-full h-14 rounded-xl font-black text-base tracking-wider shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${hasBumped
-                      ? 'bg-slate-700 text-slate-400 shadow-none cursor-not-allowed'
-                      : 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 shadow-fuchsia-500/25 border border-fuchsia-400/30 text-white'
-                      }`}
-                  >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    {hasBumped ? "BUMPED ✓" : "BUMP"}
-                  </Button>
+                  <div className="flex gap-2 w-full">
+                    <Button
+                      onClick={() => setShowBumpComposer(true)}
+                      disabled={hasBumped && !hasMutualBumps}
+                      className={`flex-1 h-14 rounded-xl font-black text-base tracking-wider shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${hasBumped
+                        ? 'bg-slate-700 text-slate-400 shadow-none cursor-not-allowed'
+                        : 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 shadow-fuchsia-500/25 border border-fuchsia-400/30 text-white'
+                        }`}
+                    >
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      {hasBumped ? "BUMPED ✓" : "BUMP"}
+                    </Button>
+                    {onChallenge && (
+                      <Button
+                        onClick={onChallenge}
+                        className="h-14 px-5 rounded-xl font-black text-sm tracking-wider shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:via-orange-600 hover:to-red-600 shadow-amber-500/25 border border-amber-400/30 text-white"
+                      >
+                        <Gamepad2 className="w-5 h-5 mr-1.5" />
+                        PLAY
+                      </Button>
+                    )}
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div

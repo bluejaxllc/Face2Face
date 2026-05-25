@@ -14,7 +14,11 @@ import { useToast } from "@/hooks/use-toast";
 import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Circle, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
+import { lazy, Suspense } from 'react';
 // Leaflet CSS is inlined in index.css — do NOT import here to avoid duplicate rules
+
+const MapGamePicker = lazy(() => import('./MapGamePicker'));
+const MapGameOverlay = lazy(() => import('./MapGameOverlay'));
 
 interface User {
   id: number;
@@ -226,6 +230,8 @@ function Map() {
   const [radius, setRadius] = useState(filterOptions.radius);
   const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
   const [showReceivedBumps, setShowReceivedBumps] = useState(false);
+  const [showGamePicker, setShowGamePicker] = useState(false);
+  const [activeMapGame, setActiveMapGame] = useState<{ gameKey: string; opponent: User } | null>(null);
 
   // Listen for map style changes from the toolbar LAYERS button
   useEffect(() => {
@@ -569,6 +575,9 @@ function Map() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onConnect={handleBump}
+          onChallenge={() => {
+            setShowGamePicker(true);
+          }}
           distance={
             currentLocation
               ? calculateDistance(
@@ -582,6 +591,34 @@ function Map() {
           myLocation={currentLocation}
         />
       )}
+
+      {/* Game picker — select which game to play against the opponent */}
+      <Suspense fallback={null}>
+        {showGamePicker && selectedUser && (
+          <MapGamePicker
+            opponent={selectedUser}
+            category={(selectedUser.category === 'friendships' ? 'friends' : selectedUser.category === 'business' ? 'business' : 'dating') as any}
+            onSelectGame={(gameKey: string) => {
+              setActiveMapGame({ gameKey, opponent: selectedUser });
+              setShowGamePicker(false);
+              setSelectedUser(null);
+            }}
+            onClose={() => setShowGamePicker(false)}
+          />
+        )}
+      </Suspense>
+
+      {/* Game overlay — renders the active game on top of the map */}
+      <Suspense fallback={null}>
+        {activeMapGame && (
+          <MapGameOverlay
+            gameKey={activeMapGame.gameKey}
+            opponent={activeMapGame.opponent}
+            category={(activeMapGame.opponent.category === 'friendships' ? 'friends' : activeMapGame.opponent.category === 'business' ? 'business' : 'dating') as any}
+            onClose={() => setActiveMapGame(null)}
+          />
+        )}
+      </Suspense>
 
       {/* Received bumps sheet */}
       <ReceivedBumpsSheet
