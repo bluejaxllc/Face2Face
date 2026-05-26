@@ -1,26 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "wouter";
 import { useScrollSave } from "@/hooks/use-scroll-save";
 import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
-import IceBreaker from "@/components/IceBreaker";
-import TurfWars from "@/components/TurfWars";
-import BumpBattle from "@/components/BumpBattle";
-import ProximityTag from "@/components/ProximityTag";
-import RandomMatch from "@/components/RandomMatch";
-import KingOfTheHill from "@/components/KingOfTheHill";
-import Leaderboard from "@/components/Leaderboard";
-import TriviaClash from "@/components/TriviaClash";
-import EmojiDecode from "@/components/EmojiDecode";
-import TwoTruths from "@/components/TwoTruths";
 import {
   Gamepad2, Radio, Swords, Target, Trophy, Zap, Dice5, Crown,
   Flag, Sparkles, Lock, Brain, Smile, Eye, Star, Clock, Users,
-  TrendingUp, Flame, Award, ChevronRight,
+  TrendingUp, Flame, Award, ChevronRight, MapPin,
 } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
-type ActiveGame = null | "icebreaker" | "turfwars" | "bumpbattle" | "proximitytag" | "randommatch" | "kingofthehill" | "leaderboard" | "triviaclash" | "emojidecode" | "twotruths";
 type Category = "dating" | "friends" | "business";
 
 // ─── Category Colors ────────────────────────────────────────────────────────────
@@ -160,7 +150,7 @@ function DifficultyStars({ level, color }: { level: number; color: string }) {
 // ─── Game Card ──────────────────────────────────────────────────────────────────
 function GameCard({ game, index, onPlay, category }: {
   game: typeof gamesList[0]; index: number;
-  onPlay: (key: ActiveGame) => void; category: Category;
+  onPlay: () => void; category: Category;
 }) {
   const colors = gameColorMap[game.color] || gameColorMap.purple;
   const IconComp = game.icon;
@@ -172,7 +162,7 @@ function GameCard({ game, index, onPlay, category }: {
       transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileTap={{ scale: 0.97 }}
       whileHover={{ scale: 1.02 }}
-      onClick={() => game.ready && onPlay(game.gameKey)}
+      onClick={() => game.ready && onPlay()}
       className={`w-full text-left relative group ${!game.ready ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
       {/* Glassmorphic card */}
@@ -277,7 +267,7 @@ function SectionHeader({ emoji, title, category, delay = 0 }: {
 }
 
 // ─── Hero Carousel ──────────────────────────────────────────────────────────────
-function HeroCarousel({ category, onPlay }: { category: Category; onPlay: (key: ActiveGame) => void }) {
+function HeroCarousel({ category, onPlay }: { category: Category; onPlay: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const c = catColors[category];
 
@@ -380,7 +370,7 @@ function HeroCarousel({ category, onPlay }: { category: Category; onPlay: (key: 
           <motion.div
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.1 }}
-            onClick={(e) => { e.stopPropagation(); onPlay(slide.gameKey); }}
+            onClick={(e) => { e.stopPropagation(); onPlay(); }}
             className={`flex-shrink-0 w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center cursor-pointer`}
             style={{ boxShadow: `0 4px 20px ${c.glow}` }}
           >
@@ -456,7 +446,7 @@ function StatsBar({ category }: { category: Category }) {
 export default function Games() {
   const gamesScroll = useScrollSave("f2f_scroll_games");
   const [isLive, setIsLive] = useState(true);
-  const [activeGame, setActiveGame] = useState<ActiveGame>(null);
+  const [, navigate] = useLocation();
   const [category, setCategory] = useState<Category>(() => {
     return (localStorage.getItem("f2f_activeCategory") as Category) || "dating";
   });
@@ -477,57 +467,15 @@ export default function Games() {
 
   const c = catColors[category];
 
-  const handlePlay = useCallback((key: ActiveGame) => {
-    setActiveGame(key);
-  }, []);
+  // Navigate to the map — games are played there against nearby users
+  const handlePlay = useCallback(() => {
+    navigate("/map");
+  }, [navigate]);
 
   // ─── Sectioned game lists ──────────────────────────────────────────────────
   const competitiveGames = useMemo(() => gamesList.filter((g) => competitiveKeys.includes(g.gameKey)), []);
   const soloGames = useMemo(() => gamesList.filter((g) => soloKeys.includes(g.gameKey)), []);
   const rankingGames = useMemo(() => gamesList.filter((g) => rankingKeys.includes(g.gameKey)), []);
-
-  // ─── If a game is active, render it fullscreen ─────────────────────────────
-  if (activeGame === "icebreaker") {
-    return <IceBreaker onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "bumpbattle") {
-    return <BumpBattle onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "proximitytag") {
-    return <ProximityTag onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "randommatch") {
-    return <RandomMatch onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "kingofthehill") {
-    return <KingOfTheHill onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "leaderboard") {
-    return <Leaderboard onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "triviaclash") {
-    return <TriviaClash onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "emojidecode") {
-    return <EmojiDecode onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "twotruths") {
-    return <TwoTruths onBack={() => setActiveGame(null)} category={category} />;
-  }
-  if (activeGame === "turfwars") {
-    return (
-      <PageTransition className="h-screen w-full page-dark relative overflow-hidden">
-        <TurfWars />
-        <button
-          onClick={() => setActiveGame(null)}
-          className="absolute top-3 left-3 z-[60] w-9 h-9 rounded-full bg-slate-800/80 backdrop-blur-md border border-slate-700/50 flex items-center justify-center hover:bg-slate-700/80 transition-colors"
-        >
-          <span className="text-slate-300 text-lg">‹</span>
-        </button>
-        <BottomNavigation />
-      </PageTransition>
-    );
-  }
 
   // ─── Main Games Hub ────────────────────────────────────────────────────────
   return (
@@ -619,6 +567,37 @@ export default function Games() {
 
           {/* ─── Stats Bar ─── */}
           <StatsBar category={category} />
+
+          {/* ─── Go to Map CTA ─── */}
+          <motion.button
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={handlePlay}
+            className="w-full relative overflow-hidden rounded-2xl p-4 cursor-pointer group"
+            style={{
+              background: `linear-gradient(135deg, ${c.accent}15, ${c.accent}08)`,
+              border: `1px solid ${c.accent}25`,
+            }}
+          >
+            <div className="relative flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xl ${c.bgSoft} border ${c.border} flex items-center justify-center flex-shrink-0`}
+              >
+                <MapPin className={`w-5 h-5 ${c.text}`} />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-black text-white">Find Opponents on the Map</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Challenge nearby users to play any game</p>
+              </div>
+              <div
+                className={`w-8 h-8 rounded-lg ${c.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}
+              >
+                <ChevronRight className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </motion.button>
 
           {/* ─── Competitive Section ─── */}
           <div>
