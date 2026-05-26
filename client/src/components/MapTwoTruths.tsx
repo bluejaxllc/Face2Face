@@ -427,6 +427,26 @@ function MeshGradientBg({ color1, color2, speed = 1 }: { color1: string; color2:
   );
 }
 
+/* ── Ambient theme-colored particles ── */
+function AmbientParticles({ intensity = 1, color }: { intensity: number; color: string }) {
+  return <>{Array.from({length: Math.round(8 * intensity)}, (_, i) => (
+    <motion.div key={`dust-${i}`} className="absolute w-1 h-1 rounded-full pointer-events-none" style={{ background: color, left: `${10 + Math.random()*80}%`, top: `${10 + Math.random()*80}%`, opacity: 0.2 + Math.random()*0.3 }} animate={{ y: [0, -30 - Math.random()*50], x: [0, (Math.random()-0.5)*20], opacity: [0.3, 0] }} transition={{ duration: 3 + Math.random()*4, repeat: Infinity, delay: Math.random()*3, ease: 'linear' }} />
+  ))}</>;
+}
+
+/* ── Radial wipe transition between rounds ── */
+function RadialWipe({ color }: { color: string }) {
+  return (
+    <motion.div
+      className="absolute inset-0 rounded-full pointer-events-none z-50"
+      style={{ background: `radial-gradient(circle, ${color} 0%, transparent 70%)` }}
+      initial={{ scale: 0, opacity: 0.6 }}
+      animate={{ scale: 3, opacity: 0 }}
+      transition={{ duration: 0.6 }}
+    />
+  );
+}
+
 export default function MapTwoTruths({ opponent, category, onComplete }: MapGameChildProps) {
   const theme = THEMES[category];
   const opponentName = opponent.firstName;
@@ -477,6 +497,24 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
   const warmColor = "rgba(251,191,36,0.15)";
   const coolColor = "rgba(59,130,246,0.15)";
   const orbTint = totalAnswered === 0 ? theme.glow : isLeading ? warmColor : coolColor;
+
+  // ── Winner tint — HSL-based color temperature for orbs ──
+  const winnerTint = useMemo(() => {
+    if (correctCount > (totalAnswered - correctCount)) return { h1: '35', s1: '90%', l1: '55%' }; // warm amber
+    if (correctCount < (totalAnswered - correctCount)) return { h1: '230', s1: '80%', l1: '55%' }; // cool blue
+    return { h1: '270', s1: '70%', l1: '50%' }; // neutral purple
+  }, [correctCount, totalAnswered]);
+
+  // ── Progressive intensity scaling ──
+  const intensity = useMemo(() => {
+    const roundFactor = currentRound / TOTAL_ROUNDS;
+    const scoreDiff = Math.abs(correctCount - (totalAnswered - correctCount));
+    const closeness = 1 - Math.min(scoreDiff / 3, 1);
+    return 0.7 + roundFactor * 0.5 + closeness * 0.3;
+  }, [currentRound, correctCount, totalAnswered]);
+
+  // ── Radial wipe state ──
+  const [showRadialWipe, setShowRadialWipe] = useState(false);
 
   // Card fan rotation offsets
   const cardRotations = [-3, 0, 3];
@@ -548,6 +586,9 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
         if (currentRound + 1 >= TOTAL_ROUNDS) {
           setPhase("results");
         } else {
+          // Trigger radial wipe between rounds
+          setShowRadialWipe(true);
+          setTimeout(() => setShowRadialWipe(false), 600);
           setCurrentRound((r) => r + 1);
           setPhase("playing");
         }
@@ -614,7 +655,7 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
             y: [0, 15, 0],
             background: [orbTint, theme.glow, orbTint],
           }}
-          transition={{ duration: 8 / (0.8 + progressIntensity * 0.4), repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 8 / (0.8 + progressIntensity * 0.4) / intensity, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute w-32 h-32 rounded-full blur-3xl"
@@ -624,7 +665,7 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
             y: [0, -20, 0],
             background: [theme.glow, orbTint, theme.glow],
           }}
-          transition={{ duration: 10 / (0.8 + progressIntensity * 0.4), repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 10 / (0.8 + progressIntensity * 0.4) / intensity, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
@@ -633,6 +674,14 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
 
       {/* ── Ambient dust motes ── */}
       <DustMotes intensity={0.6 + progressIntensity * 0.6} />
+
+      {/* ── Ambient theme-colored particles ── */}
+      <AmbientParticles intensity={1 + currentRound * 0.15} color={`hsl(${winnerTint.h1}, ${winnerTint.s1}, ${winnerTint.l1})`} />
+
+      {/* ── Radial wipe transition between rounds ── */}
+      <AnimatePresence>
+        {showRadialWipe && <RadialWipe color={theme.color1} />}
+      </AnimatePresence>
 
       {/* ── PHASE: COUNTDOWN ── */}
       <AnimatePresence mode="wait">

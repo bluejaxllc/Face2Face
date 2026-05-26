@@ -761,6 +761,9 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
   // ── Depth blur ──
   const [showDepthBlur, setShowDepthBlur] = useState(false);
 
+  // ── Radial wipe between rounds ──
+  const [showWipe, setShowWipe] = useState(false);
+
   // ── Refs ──
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const submittedRef = useRef(false);
@@ -776,6 +779,12 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
   // ── Computed intensity (0-1) based on time remaining ──
   const intensity = phase === "playing" ? Math.max(0, 1 - timeLeft / TIME_PER_ROUND) : 0;
 
+  // ── useIntensity: progressive round-based intensity scaling ──
+  const roundIntensity = useMemo(() => {
+    const progress = (currentRound + 1) / TOTAL_ROUNDS;
+    return 0.7 + progress * 0.5;
+  }, [currentRound]);
+
   // ── Dynamic color temperature ──
   const colorTemp = useMemo(() => {
     if (phase !== "playing") return "transparent";
@@ -783,6 +792,13 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
     if (opponentScore > playerScore) return theme.coolHue;
     return "transparent";
   }, [phase, playerScore, opponentScore, theme]);
+
+  // ── winnerTint: score-based color temperature ──
+  const winnerTint = useMemo(() => {
+    if (playerScore > opponentScore) return 'warm';
+    if (playerScore < opponentScore) return 'cool';
+    return 'neutral';
+  }, [playerScore, opponentScore]);
 
   // ── Score ripple detection ──
   useEffect(() => {
@@ -962,6 +978,9 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
         if (currentRound + 1 >= TOTAL_ROUNDS) {
           setPhase("results");
         } else {
+          // Trigger radial wipe between rounds
+          setShowWipe(true);
+          setTimeout(() => setShowWipe(false), 700);
           setCurrentRound((r) => r + 1);
           setSubmitted(false);
           setShowResult(false);
@@ -1049,7 +1068,24 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
   return (
     <div className="flex flex-col w-full text-white select-none overflow-hidden relative">
       <NoiseTexture />
-      <AmbientParticles intensity={intensity} color={theme.solidHex} />
+      <AmbientParticles intensity={Math.max(intensity, roundIntensity * 0.5)} color={theme.solidHex} />
+
+      {/* ── Radial Wipe (between-round transition) ── */}
+      <AnimatePresence>
+        {showWipe && (
+          <motion.div
+            key="radial-wipe"
+            className="absolute inset-0 rounded-full pointer-events-none z-50"
+            style={{
+              background: `radial-gradient(circle, ${winnerTint === 'warm' ? theme.solidHex : winnerTint === 'cool' ? '#3b82f6' : theme.solidHex} 0%, transparent 70%)`,
+            }}
+            initial={{ scale: 0, opacity: 0.5 }}
+            animate={{ scale: 3, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Dynamic Color Temperature Overlay ── */}
       <motion.div

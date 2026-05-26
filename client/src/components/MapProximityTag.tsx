@@ -187,6 +187,35 @@ function DustMotes({ intensity = 1, round = 0 }: { intensity?: number; round?: n
   );
 }
 
+/* ── Ambient Particles (formal shared component) ── */
+function AmbientParticles({ intensity = 1, color }: { intensity: number; color: string }) {
+  return (
+    <>
+      {Array.from({ length: Math.round(8 * intensity) }, (_, i) => (
+        <motion.div
+          key={`dust-${i}`}
+          className="absolute w-1 h-1 rounded-full pointer-events-none z-[5]"
+          style={{
+            background: color,
+            left: `${10 + Math.random() * 80}%`,
+            top: `${10 + Math.random() * 80}%`,
+            opacity: 0.2 + Math.random() * 0.3,
+          }}
+          animate={{
+            y: [0, -30 - Math.random() * 50],
+            opacity: [0.3, 0],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 4,
+            repeat: Infinity,
+            delay: Math.random() * 3,
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 /* ── Dynamic Color Temperature Orbs ── */
 function DynamicOrbs({
   color1,
@@ -1067,6 +1096,9 @@ export default function MapProximityTag({
   // ── Depth of field blur ──
   const [depthBlur, setDepthBlur] = useState(false);
 
+  // ── Radial wipe between rounds ──
+  const [showWipe, setShowWipe] = useState(false);
+
   // ── Refs ──
   const sweepRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sweepAngleRef = useRef(0);
@@ -1074,9 +1106,22 @@ export default function MapProximityTag({
   // ── Progressive intensity ──
   const progressIntensity = Math.min((currentRound + 1) / TOTAL_ROUNDS, 1);
 
+  // ── useIntensity: progressive intensity scaling ──
+  const intensity = useMemo(() => {
+    const progress = (currentRound + 1) / TOTAL_ROUNDS;
+    return 0.7 + progress * 0.5;
+  }, [currentRound]);
+
   // ── Dynamic color temperature ──
   const avgPoints = results.length > 0 ? score / results.length : 0;
   const isLeading = avgPoints >= 75;
+
+  // ── winnerTint: score-based color temperature ──
+  const winnerTint = useMemo(() => {
+    if (score > 0 && avgPoints >= 75) return 'warm';
+    if (results.length > 0 && avgPoints < 50) return 'cool';
+    return 'neutral';
+  }, [score, avgPoints, results.length]);
 
   // ── Sweep speed (gets faster in later rounds) ──
   const sweepSpeed = useMemo(() => {
@@ -1217,6 +1262,9 @@ export default function MapProximityTag({
         if (currentRound + 1 >= TOTAL_ROUNDS) {
           setPhase("results");
         } else {
+          // Trigger radial wipe between rounds
+          setShowWipe(true);
+          setTimeout(() => setShowWipe(false), 700);
           setCurrentRound((r) => r + 1);
           startRound();
         }
@@ -1359,6 +1407,26 @@ export default function MapProximityTag({
         intensity={0.5 + progressIntensity * 0.7}
         round={currentRound}
       />
+
+      {/* ── Ambient particles (shared component) ── */}
+      <AmbientParticles intensity={intensity} color={theme.color1} />
+
+      {/* ── Radial Wipe (between-round transition) ── */}
+      <AnimatePresence>
+        {showWipe && (
+          <motion.div
+            key="radial-wipe"
+            className="absolute inset-0 rounded-full pointer-events-none z-50"
+            style={{
+              background: `radial-gradient(circle, ${winnerTint === 'warm' ? theme.color1 : winnerTint === 'cool' ? '#3b82f6' : theme.color1} 0%, transparent 70%)`,
+            }}
+            initial={{ scale: 0, opacity: 0.5 }}
+            animate={{ scale: 3, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ═══ PHASE: COUNTDOWN ═══ */}
       <AnimatePresence mode="wait">
