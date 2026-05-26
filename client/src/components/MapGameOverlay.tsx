@@ -1,6 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, Swords, Brain, MessageCircleQuestion, Mountain, Radar } from "lucide-react";
+import { X, Loader2, Swords, Brain, MessageCircleQuestion, Mountain, Radar, Flag, Smile } from "lucide-react";
 
 type Category = "dating" | "friends" | "business";
 
@@ -42,6 +42,8 @@ const MapTriviaClash = lazy(() => import("@/components/MapTriviaClash"));
 const MapTwoTruths = lazy(() => import("@/components/MapTwoTruths"));
 const MapKingOfTheHill = lazy(() => import("@/components/MapKingOfTheHill"));
 const MapProximityTag = lazy(() => import("@/components/MapProximityTag"));
+const MapTurfWars = lazy(() => import("@/components/MapTurfWars"));
+const MapEmojiDecode = lazy(() => import("@/components/MapEmojiDecode"));
 
 const GAME_META: Record<string, { name: string; icon: typeof Swords }> = {
   "bump-battle": { name: "Bump Battle", icon: Swords },
@@ -49,6 +51,8 @@ const GAME_META: Record<string, { name: string; icon: typeof Swords }> = {
   "two-truths": { name: "Two Truths", icon: MessageCircleQuestion },
   "king-of-the-hill": { name: "King of the Hill", icon: Mountain },
   "proximity-tag": { name: "Proximity Tag", icon: Radar },
+  "turf-wars": { name: "Turf Wars", icon: Flag },
+  "emoji-decode": { name: "Emoji Decode", icon: Smile },
 };
 
 const THEMES: Record<Category, { gradient: string; textAccent: string; borderAccent: string }> = {
@@ -130,6 +134,10 @@ export default function MapGameOverlay({ gameKey, opponent, category, onClose }:
         return <MapKingOfTheHill {...childProps} />;
       case "proximity-tag":
         return <MapProximityTag {...childProps} />;
+      case "turf-wars":
+        return <MapTurfWars {...childProps} />;
+      case "emoji-decode":
+        return <MapEmojiDecode {...childProps} />;
       default:
         return (
           <div className="flex-1 flex flex-col items-center justify-center p-6">
