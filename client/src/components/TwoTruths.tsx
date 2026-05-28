@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import {
   ChevronLeft,
   Eye,
@@ -21,6 +21,10 @@ import {
   MessageCircle,
   Shield,
 } from "lucide-react";
+
+/* ─────────────────────────────────────────────
+   Types & Interfaces (PRESERVED)
+   ───────────────────────────────────────────── */
 
 type Category = "dating" | "friends" | "business";
 
@@ -44,6 +48,10 @@ interface Round {
   };
   statements: Statement[];
 }
+
+/* ─────────────────────────────────────────────
+   Static Data (PRESERVED)
+   ───────────────────────────────────────────── */
 
 const ROUNDS_DATA: Record<Category, Round[]> = {
   dating: [
@@ -297,11 +305,419 @@ const ROUNDS_DATA: Record<Category, Round[]> = {
 const TOTAL_ROUNDS = 7;
 const TIME_PER_ROUND = 20;
 
-const themes: Record<Category, { gradient: string; text: string; accent: string; bg: string; glow: string }> = {
-  dating: { gradient: "from-pink-500 via-rose-500 to-red-500", text: "text-pink-400", accent: "border-pink-500/30", bg: "bg-pink-500/10", glow: "shadow-pink-500/20" },
-  friends: { gradient: "from-emerald-500 via-teal-500 to-cyan-500", text: "text-emerald-400", accent: "border-emerald-500/30", bg: "bg-emerald-500/10", glow: "shadow-emerald-500/20" },
-  business: { gradient: "from-blue-500 via-indigo-500 to-purple-500", text: "text-blue-400", accent: "border-blue-500/30", bg: "bg-blue-500/10", glow: "shadow-blue-500/20" },
+/* ─────────────────────────────────────────────
+   Theme Configuration (PRESERVED + Enhanced)
+   ───────────────────────────────────────────── */
+
+const themes: Record<Category, { gradient: string; text: string; accent: string; bg: string; glow: string; orbColors: string[] }> = {
+  dating: { gradient: "from-pink-500 via-rose-500 to-red-500", text: "text-pink-400", accent: "border-pink-500/30", bg: "bg-pink-500/10", glow: "shadow-pink-500/20", orbColors: ["#ec4899", "#f43f5e", "#fb7185", "#f472b6", "#e879f9"] },
+  friends: { gradient: "from-emerald-500 via-teal-500 to-cyan-500", text: "text-emerald-400", accent: "border-emerald-500/30", bg: "bg-emerald-500/10", glow: "shadow-emerald-500/20", orbColors: ["#10b981", "#14b8a6", "#06b6d4", "#34d399", "#2dd4bf"] },
+  business: { gradient: "from-blue-500 via-indigo-500 to-purple-500", text: "text-blue-400", accent: "border-blue-500/30", bg: "bg-blue-500/10", glow: "shadow-blue-500/20", orbColors: ["#3b82f6", "#6366f1", "#8b5cf6", "#818cf8", "#a78bfa"] },
 };
+
+/* ─────────────────────────────────────────────
+   SVG Noise Filter
+   ───────────────────────────────────────────── */
+
+const NoiseOverlay = () => (
+  <div className="pointer-events-none fixed inset-0 z-[100]" style={{ opacity: 0.03 }}>
+    <svg width="100%" height="100%">
+      <filter id="tt-noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#tt-noise)" />
+    </svg>
+  </div>
+);
+
+/* ─────────────────────────────────────────────
+   Floating Background Orbs
+   ───────────────────────────────────────────── */
+
+const FloatingOrbs = ({ colors }: { colors: string[] }) => {
+  const orbs = useMemo(() =>
+    colors.map((color, i) => ({
+      id: i,
+      color,
+      size: 180 + Math.random() * 200,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      duration: 18 + Math.random() * 14,
+      delay: i * 1.5,
+    })), [colors]
+  );
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      {orbs.map((orb) => (
+        <motion.div
+          key={orb.id}
+          className="absolute rounded-full"
+          style={{
+            width: orb.size,
+            height: orb.size,
+            left: `${orb.x}%`,
+            top: `${orb.y}%`,
+            background: `radial-gradient(circle, ${orb.color}18 0%, transparent 70%)`,
+            filter: "blur(60px)",
+          }}
+          animate={{
+            x: [0, 80, -60, 40, 0],
+            y: [0, -70, 50, -30, 0],
+            scale: [1, 1.2, 0.9, 1.1, 1],
+          }}
+          transition={{
+            duration: orb.duration,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: orb.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────
+   Ambient Dust Motes
+   ───────────────────────────────────────────── */
+
+const DustMotes = () => {
+  const motes = useMemo(() =>
+    Array.from({ length: 10 }, (_, i) => ({
+      id: i,
+      size: 2 + Math.random() * 3,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      duration: 12 + Math.random() * 18,
+      delay: Math.random() * 8,
+      opacity: 0.15 + Math.random() * 0.25,
+    })), []
+  );
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[1]">
+      {motes.map((m) => (
+        <motion.div
+          key={m.id}
+          className="absolute rounded-full bg-white"
+          style={{ width: m.size, height: m.size, left: `${m.x}%`, top: `${m.y}%` }}
+          animate={{
+            y: [0, -40, 20, -60, 0],
+            x: [0, 25, -15, 30, 0],
+            opacity: [m.opacity, m.opacity * 1.5, m.opacity * 0.5, m.opacity * 1.2, m.opacity],
+          }}
+          transition={{ duration: m.duration, repeat: Infinity, ease: "easeInOut", delay: m.delay }}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────
+   Cinematic Letterbox Countdown
+   ───────────────────────────────────────────── */
+
+const CinematicCountdown = ({ value }: { value: number }) => {
+  const label = value === 0 ? "GO!" : String(value);
+  const isGo = value === 0;
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center relative">
+      {/* Letterbox bars */}
+      <motion.div
+        className="absolute top-0 left-0 right-0 bg-black z-10"
+        initial={{ height: 0 }}
+        animate={{ height: "12%" }}
+        transition={{ duration: 0.4 }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 bg-black z-10"
+        initial={{ height: 0 }}
+        animate={{ height: "12%" }}
+        transition={{ duration: 0.4 }}
+      />
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={value}
+          initial={{ scale: 3, opacity: 0, rotateX: -90 }}
+          animate={{ scale: 1, opacity: 1, rotateX: 0 }}
+          exit={{ scale: 0.3, opacity: 0, rotateX: 90, filter: "blur(12px)" }}
+          transition={{ type: "spring", stiffness: 200, damping: 18, duration: 0.5 }}
+          className="relative z-20"
+        >
+          <span
+            className={`text-9xl font-black tracking-tight ${
+              isGo
+                ? "bg-gradient-to-r from-emerald-400 via-cyan-300 to-teal-400 bg-clip-text text-transparent"
+                : "bg-gradient-to-b from-white via-slate-200 to-slate-500 bg-clip-text text-transparent"
+            }`}
+          >
+            {label}
+          </span>
+          {/* Glow ring */}
+          <motion.div
+            className="absolute inset-0 -m-8 rounded-full"
+            style={{
+              background: isGo
+                ? "radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)"
+                : "radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)",
+            }}
+            animate={{ scale: [1, 1.6, 1], opacity: [0.6, 0, 0.6] }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.4 }}
+        className="text-xs text-slate-500 font-bold mt-12 uppercase tracking-[0.3em] z-20"
+      >
+        {isGo ? "Spot the faker!" : "Get ready…"}
+      </motion.p>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────
+   Glassmorphic Statement Card
+   ───────────────────────────────────────────── */
+
+interface StatementCardProps {
+  stmt: Statement;
+  idx: number;
+  showResult: boolean;
+  isSelected: boolean;
+  onSelect: (idx: number) => void;
+  roundIntensity: number;
+}
+
+const StatementCard = ({ stmt, idx, showResult, isSelected, onSelect, roundIntensity }: StatementCardProps) => {
+  const isLie = stmt.isLie;
+  const springConfig = { type: "spring" as const, stiffness: 300 + roundIntensity * 40, damping: 20 };
+
+  // Determine visual state
+  let borderColor = "border-white/[0.08]";
+  let bgStyle = "bg-white/[0.04] backdrop-blur-xl";
+  let glowShadow = "";
+  let labelText = "";
+  let labelIcon: React.ReactNode = null;
+
+  if (showResult) {
+    if (isLie) {
+      borderColor = "border-red-500/50";
+      bgStyle = "bg-red-500/[0.08] backdrop-blur-xl";
+      glowShadow = "shadow-[0_0_30px_rgba(239,68,68,0.2)]";
+      labelText = "THE LIE";
+      labelIcon = <ThumbsDown className="w-4 h-4 text-red-400" />;
+    } else {
+      borderColor = "border-emerald-500/30";
+      bgStyle = "bg-emerald-500/[0.04] backdrop-blur-xl";
+      glowShadow = "shadow-[0_0_20px_rgba(16,185,129,0.1)]";
+      labelText = "TRUTH";
+      labelIcon = <ThumbsUp className="w-4 h-4 text-emerald-400" />;
+    }
+    if (isSelected) {
+      if (isLie) {
+        borderColor = "border-emerald-400/60";
+        bgStyle = "bg-emerald-500/[0.12] backdrop-blur-xl";
+        glowShadow = "shadow-[0_0_40px_rgba(16,185,129,0.25)]";
+      } else {
+        borderColor = "border-red-400/60";
+        bgStyle = "bg-red-500/[0.12] backdrop-blur-xl";
+        glowShadow = "shadow-[0_0_40px_rgba(239,68,68,0.25)]";
+      }
+    }
+  }
+
+  const numberGradient = showResult
+    ? isLie
+      ? "from-red-500 to-rose-600"
+      : "from-emerald-500 to-teal-600"
+    : "from-violet-500 to-fuchsia-600";
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ ...springConfig, delay: idx * 0.12 }}
+      whileHover={!showResult ? { scale: 1.02, y: -2 } : {}}
+      whileTap={!showResult ? { scale: 0.97 } : {}}
+      onClick={() => !showResult && onSelect(idx)}
+      disabled={showResult}
+      className={`w-full text-left rounded-2xl p-4 border transition-all duration-300 ${borderColor} ${bgStyle} ${glowShadow} relative overflow-hidden group`}
+    >
+      {/* Hover shimmer for unselected */}
+      {!showResult && (
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent pointer-events-none" />
+      )}
+
+      {/* Reveal overlay icons */}
+      {showResult && isLie && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.08 }}
+          transition={{ delay: 0.3 }}
+          className="absolute right-4 top-1/2 -translate-y-1/2"
+        >
+          <XCircle className="w-16 h-16 text-red-400" />
+        </motion.div>
+      )}
+      {showResult && !isLie && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.06 }}
+          transition={{ delay: 0.3 }}
+          className="absolute right-4 top-1/2 -translate-y-1/2"
+        >
+          <CheckCircle2 className="w-16 h-16 text-emerald-400" />
+        </motion.div>
+      )}
+
+      <div className="flex items-start gap-3 relative z-10">
+        {/* Number indicator with gradient */}
+        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${numberGradient} flex items-center justify-center text-xs font-black text-white shrink-0 mt-0.5 shadow-lg`}>
+          {showResult ? (labelIcon || (idx + 1)) : (idx + 1)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium leading-relaxed ${showResult ? (isLie ? "text-red-300" : "text-emerald-300/80") : "text-slate-200"}`}>
+            "{stmt.text}"
+          </p>
+          {showResult && (
+            <motion.p
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className={`text-[10px] font-black uppercase tracking-wider mt-1.5 ${isLie ? "text-red-400" : "text-emerald-500"}`}
+            >
+              {labelText}
+              {isSelected && (
+                <span className={`ml-2 ${isLie ? "text-emerald-400" : "text-red-400"}`}>
+                  ← Your pick {isLie ? "✓ Correct!" : "✗ Wrong"}
+                </span>
+              )}
+            </motion.p>
+          )}
+        </div>
+      </div>
+    </motion.button>
+  );
+};
+
+/* ─────────────────────────────────────────────
+   Animated Score Display (Spring Physics)
+   ───────────────────────────────────────────── */
+
+const AnimatedScore = ({ value, className }: { value: number; className?: string }) => {
+  const motionVal = useMotionValue(0);
+  const springVal = useSpring(motionVal, { stiffness: 80, damping: 20 });
+  const display = useTransform(springVal, (v) => Math.round(v));
+  const [displayStr, setDisplayStr] = useState("0");
+
+  useEffect(() => {
+    motionVal.set(value);
+  }, [value, motionVal]);
+
+  useEffect(() => {
+    const unsub = display.on("change", (v) => setDisplayStr(String(v)));
+    return unsub;
+  }, [display]);
+
+  return <span className={className}>{displayStr}</span>;
+};
+
+/* ─────────────────────────────────────────────
+   Victory Rays Effect
+   ───────────────────────────────────────────── */
+
+const VictoryRays = () => (
+  <motion.div
+    className="absolute inset-0 pointer-events-none z-0"
+    initial={{ opacity: 0, rotate: 0 }}
+    animate={{ opacity: [0, 0.15, 0.08], rotate: 360 }}
+    transition={{ opacity: { duration: 1.5 }, rotate: { duration: 30, repeat: Infinity, ease: "linear" } }}
+    style={{
+      background: "conic-gradient(from 0deg, transparent, rgba(16,185,129,0.1), transparent, rgba(16,185,129,0.08), transparent, rgba(16,185,129,0.1), transparent)",
+    }}
+  />
+);
+
+/* ─────────────────────────────────────────────
+   Screen Shake Wrapper
+   ───────────────────────────────────────────── */
+
+const ScreenShake = ({ active, children }: { active: boolean; children: React.ReactNode }) => (
+  <motion.div
+    animate={active ? { x: [0, -6, 6, -4, 4, -2, 2, 0], y: [0, 3, -3, 2, -2, 1, -1, 0] } : {}}
+    transition={{ duration: 0.5 }}
+    className="w-full h-full"
+  >
+    {children}
+  </motion.div>
+);
+
+/* ─────────────────────────────────────────────
+   Radial Wipe Transition
+   ───────────────────────────────────────────── */
+
+const RadialWipe = ({ active }: { active: boolean }) => (
+  <AnimatePresence>
+    {active && (
+      <motion.div
+        className="fixed inset-0 z-[200] pointer-events-none"
+        initial={{ clipPath: "circle(0% at 50% 50%)" }}
+        animate={{ clipPath: "circle(150% at 50% 50%)" }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        style={{ background: "rgba(2, 6, 23, 0.95)" }}
+      />
+    )}
+  </AnimatePresence>
+);
+
+/* ─────────────────────────────────────────────
+   Particle Burst Effect
+   ───────────────────────────────────────────── */
+
+const ParticleBurst = ({ active }: { active: boolean }) => {
+  const particles = useMemo(() =>
+    Array.from({ length: 16 }, (_, i) => ({
+      id: i,
+      angle: (i / 16) * Math.PI * 2,
+      distance: 60 + Math.random() * 80,
+      size: 3 + Math.random() * 5,
+      color: ["#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#fbbf24", "#fcd34d"][Math.floor(Math.random() * 6)],
+    })), []
+  );
+
+  if (!active) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{ width: p.size, height: p.size, backgroundColor: p.color }}
+          initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+          animate={{
+            x: Math.cos(p.angle) * p.distance,
+            y: Math.sin(p.angle) * p.distance,
+            opacity: 0,
+            scale: 0,
+          }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        />
+      ))}
+    </div>
+  );
+};
+
+/* ═════════════════════════════════════════════
+   MAIN COMPONENT
+   ═════════════════════════════════════════════ */
 
 export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProps) {
   const theme = themes[category];
@@ -316,6 +732,9 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
   const [bestStreak, setBestStreak] = useState(0);
   const [playerResults, setPlayerResults] = useState<boolean[]>([]);
   const [countdown, setCountdown] = useState(3);
+  const [shakeActive, setShakeActive] = useState(false);
+  const [wipeActive, setWipeActive] = useState(false);
+  const [burstActive, setBurstActive] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const answeredRef = useRef(false);
@@ -323,13 +742,22 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
   const showResultRef = useRef(false);
 
   const r = rounds[currentRound];
+  const roundIntensity = Math.min(currentRound / TOTAL_ROUNDS, 1);
 
-  // Init rounds
+  // Dynamic color temperature
+  const tempClass = useMemo(() => {
+    if (playerResults.length === 0) return "";
+    const recent = playerResults.slice(-3);
+    const wins = recent.filter(Boolean).length;
+    if (wins >= 2) return ""; // warm - default
+    return ""; // cool tones handled by category
+  }, [playerResults]);
+
+  // Init rounds (PRESERVED)
   useEffect(() => {
     if (phase !== "intro") return;
     const pool = [...ROUNDS_DATA[category]];
     const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, TOTAL_ROUNDS);
-    // Shuffle statement order within each round
     const prepared = shuffled.map(round => ({
       ...round,
       statements: [...round.statements].sort(() => Math.random() - 0.5),
@@ -337,7 +765,7 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
     setRounds(prepared);
   }, [phase, category]);
 
-  // Countdown
+  // Countdown (PRESERVED)
   useEffect(() => {
     if (phase === "countdown") {
       setCountdown(3);
@@ -355,10 +783,9 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
     }
   }, [phase]);
 
-  // Round timer - keyed off currentRound and phase
+  // Round timer (PRESERVED)
   useEffect(() => {
     if (phase !== "playing") return;
-    // Only start timer for fresh rounds (not review)
     if (showResultRef.current) return;
 
     setTimeLeft(TIME_PER_ROUND);
@@ -375,6 +802,8 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
             setPlayerResults(pr => [...pr, false]);
             setStreak(0);
             setShowResult(true);
+            setShakeActive(true);
+            setTimeout(() => setShakeActive(false), 600);
             setPhase("review");
           }
           return 0;
@@ -388,6 +817,7 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
     };
   }, [phase, currentRound]);
 
+  // Handle select (PRESERVED + effects)
   const handleSelect = useCallback((idx: number) => {
     if (answeredRef.current || !r) return;
     answeredRef.current = true;
@@ -407,31 +837,40 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
         setBestStreak(bs => Math.max(bs, ns));
         return ns;
       });
+      setBurstActive(true);
+      setTimeout(() => setBurstActive(false), 900);
     } else {
       setStreak(0);
+      setShakeActive(true);
+      setTimeout(() => setShakeActive(false), 600);
     }
 
     setShowResult(true);
     setPhase("review");
   }, [r, timeLeft, streak]);
 
+  // Handle next (PRESERVED + wipe)
   const handleNext = useCallback(() => {
     if (currentRoundRef.current + 1 >= TOTAL_ROUNDS) {
       setPhase("results");
     } else {
-      // Reset state refs BEFORE updating state to prevent race conditions
-      showResultRef.current = false;
-      answeredRef.current = false;
-      setShowResult(false);
-      setCurrentRound(prev => {
-        const next = prev + 1;
-        currentRoundRef.current = next;
-        return next;
-      });
-      setPhase("playing");
+      setWipeActive(true);
+      setTimeout(() => {
+        showResultRef.current = false;
+        answeredRef.current = false;
+        setShowResult(false);
+        setWipeActive(false);
+        setCurrentRound(prev => {
+          const next = prev + 1;
+          currentRoundRef.current = next;
+          return next;
+        });
+        setPhase("playing");
+      }, 400);
     }
   }, []);
 
+  // Handle restart (PRESERVED)
   const handleRestart = () => {
     setPhase("intro");
     setRounds([]);
@@ -453,396 +892,414 @@ export default function TwoTruths({ onBack, category = "dating" }: TwoTruthsProp
   const correctCount = playerResults.filter(Boolean).length;
 
   return (
-    <div className="fixed inset-0 bg-slate-950 text-white overflow-hidden">
-      {/* ── HEADER ── */}
-      <div className="fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
-        <div className="px-4 py-3 flex items-center justify-between border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-md">
-          <button
-            onClick={onBack}
-            className="w-9 h-9 rounded-full bg-slate-800/80 backdrop-blur-md border border-slate-700/50 flex items-center justify-center hover:bg-slate-700/80 transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-slate-300" />
-          </button>
-          <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-violet-400" />
-            <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-              Two Truths & a Lie
-            </span>
-          </div>
-          {(phase === "playing" || phase === "review") ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
-              <span className="text-[10px] font-black text-slate-400">{currentRound + 1}/{TOTAL_ROUNDS}</span>
-            </div>
-          ) : (
-            <div style={{ width: "60px" }} />
-          )}
-        </div>
-      </div>
+    <div className={`fixed inset-0 bg-slate-950 text-white overflow-hidden ${tempClass}`}>
+      {/* ── Premium Background Layers ── */}
+      <NoiseOverlay />
+      <FloatingOrbs colors={theme.orbColors} />
+      <DustMotes />
+      <RadialWipe active={wipeActive} />
 
-      {/* ── MAIN CONTENT ── */}
-      <div className="absolute inset-0 flex flex-col" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-
-        {/* ── INTRO ── */}
-        {phase === "intro" && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8">
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/30 flex items-center justify-center"
-            >
-              <span className="text-4xl">🤥</span>
-            </motion.div>
-            <div className="text-center max-w-xs">
-              <h2 className="text-xl font-black text-slate-100 mb-2">Two Truths & a Lie</h2>
-              <p className="text-xs text-slate-400 leading-relaxed mb-6">
-                Meet new people! Read 3 statements about someone — two are true, one is a lie. Can you spot the faker?
-              </p>
-            </div>
-
-            {/* How to play */}
-            <div className="w-full max-w-xs space-y-3">
-              {[
-                { icon: "👤", text: "Meet a new person each round" },
-                { icon: "📖", text: "Read their 3 statements carefully" },
-                { icon: "🔍", text: "Tap the one you think is the LIE" },
-                { icon: "⚡", text: "Faster = more points!" },
-              ].map((step, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  className="flex items-center gap-3 bg-slate-900/50 rounded-xl px-4 py-2.5 border border-slate-800/50"
-                >
-                  <span className="text-lg">{step.icon}</span>
-                  <span className="text-xs text-slate-300 font-medium">{step.text}</span>
-                </motion.div>
-              ))}
-            </div>
-
+      <ScreenShake active={shakeActive}>
+        {/* ── HEADER (Glassmorphic) ── */}
+        <div className="fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+          <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.06] bg-white/[0.03] backdrop-blur-2xl">
             <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setPhase("countdown")}
-              className={`mt-4 px-10 py-4 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white font-black text-sm uppercase tracking-widest shadow-lg shadow-violet-500/20 active:scale-95 transition-transform`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={onBack}
+              className="w-9 h-9 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.1] transition-colors"
             >
-              <span className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                Start Playing
-              </span>
+              <ChevronLeft className="w-5 h-5 text-slate-300" />
             </motion.button>
-          </div>
-        )}
-
-        {/* ── COUNTDOWN ── */}
-        {phase === "countdown" && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-4">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={countdown}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 2, opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="text-8xl font-black text-violet-400"
-              >
-                {countdown}
-              </motion.div>
-            </AnimatePresence>
-            <p className="text-xs text-slate-500 font-bold mt-8">Get ready to spot the lies!</p>
-          </div>
-        )}
-
-        {/* ── PLAYING / REVIEW ── */}
-        {(phase === "playing" || phase === "review") && r && (
-          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-            {/* Top bar: score, timer, progress */}
-            <div className="px-4 pt-3 pb-2">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 flex-1">
-                  <Trophy className={`w-4 h-4 ${theme.text}`} />
-                  <span className={`text-sm font-black ${theme.text}`}>{playerScore}</span>
-                  {streak > 1 && (
-                    <span className="text-[10px] font-black text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
-                      🔥 {streak}x
-                    </span>
-                  )}
-                </div>
-
-                <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full border ${timerBg} ${showResult ? "opacity-50" : ""}`}>
-                  <Timer className={`w-3.5 h-3.5 ${timerColor}`} />
-                  <span className={`text-sm font-black tabular-nums ${timerColor}`}>
-                    {showResult ? "—" : timeLeft}
-                  </span>
-                </div>
-
-                <div className="flex gap-1 flex-1 justify-end">
-                  {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-2 rounded-full ${
-                        i < playerResults.length
-                          ? playerResults[i] ? "bg-emerald-400" : "bg-red-400"
-                          : i === currentRound ? "bg-violet-400 animate-pulse" : "bg-slate-700"
-                      }`}
-                    />
-                  ))}
-                </div>
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-violet-400" />
+              <span className="text-sm font-black uppercase tracking-[0.2em] bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+                Two Truths & a Lie
+              </span>
+            </div>
+            {(phase === "playing" || phase === "review") ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08] backdrop-blur-md">
+                <span className="text-[10px] font-black bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  Round {currentRound + 1}/{TOTAL_ROUNDS}
+                </span>
               </div>
-            </div>
-
-            {/* Person card + statements */}
-            <div className="flex flex-col items-center px-4 py-2 my-auto">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentRound}
-                  initial={{ x: 100, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -100, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full max-w-md"
-                >
-                  {/* Person header */}
-                  <div className="flex items-center gap-4 mb-5 bg-slate-900/60 rounded-2xl p-4 border border-slate-800/50">
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-violet-500/40 shadow-lg shadow-violet-500/10 shrink-0">
-                      <img src={r.person.photo} alt={r.person.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-black text-white">{r.person.name}</h3>
-                        <span className="text-sm">{r.person.emoji}</span>
-                        <span className="text-xs text-slate-500">{r.person.age}</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">{r.person.tagline}</p>
-                    </div>
-                  </div>
-
-                  {/* Instruction */}
-                  {!showResult && (
-                    <p className="text-center text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-3">
-                      Tap the statement you think is the <span className="text-red-400">LIE</span>
-                    </p>
-                  )}
-
-                  {/* Statements */}
-                  <div className="space-y-3">
-                    {r.statements.map((stmt, idx) => {
-                      const isSelected = selectedIdx === idx;
-                      const isLie = stmt.isLie;
-
-                      let cardClasses = "bg-slate-900/60 border-slate-700/40 hover:border-violet-500/50 hover:bg-slate-800/60 cursor-pointer";
-                      let labelText = "";
-                      let labelIcon = null;
-
-                      if (showResult) {
-                        if (isLie) {
-                          cardClasses = "bg-red-500/10 border-red-500/40";
-                          labelText = "THE LIE";
-                          labelIcon = <ThumbsDown className="w-4 h-4 text-red-400" />;
-                        } else {
-                          cardClasses = "bg-emerald-500/5 border-emerald-500/20";
-                          labelText = "TRUTH";
-                          labelIcon = <ThumbsUp className="w-4 h-4 text-emerald-400" />;
-                        }
-                        if (isSelected) {
-                          if (isLie) {
-                            cardClasses = "bg-emerald-500/15 border-emerald-500/50 ring-2 ring-emerald-500/30";
-                          } else {
-                            cardClasses = "bg-red-500/15 border-red-500/50 ring-2 ring-red-500/30";
-                          }
-                        }
-                      }
-
-                      return (
-                        <motion.button
-                          key={idx}
-                          initial={{ opacity: 0, y: 15 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                          onClick={() => !showResult && handleSelect(idx)}
-                          disabled={showResult}
-                          className={`w-full text-left rounded-2xl p-4 border transition-all ${cardClasses}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 mt-0.5 ${
-                              showResult
-                                ? isLie ? "bg-red-500/20 text-red-400" : "bg-emerald-500/20 text-emerald-400"
-                                : "bg-slate-800 text-slate-400"
-                            }`}>
-                              {showResult ? (labelIcon || (idx + 1)) : (idx + 1)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-medium leading-relaxed ${showResult ? (isLie ? "text-red-300" : "text-emerald-300/80") : "text-slate-200"}`}>
-                                "{stmt.text}"
-                              </p>
-                              {showResult && (
-                                <p className={`text-[10px] font-black uppercase tracking-wider mt-1.5 ${isLie ? "text-red-400" : "text-emerald-500"}`}>
-                                  {labelText}
-                                  {isSelected && (
-                                    <span className={`ml-2 ${isLie ? "text-emerald-400" : "text-red-400"}`}>
-                                      ← Your pick {isLie ? "✓ Correct!" : "✗ Wrong"}
-                                    </span>
-                                  )}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Result feedback */}
-                  {showResult && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-4"
-                    >
-                      {selectedIdx !== null ? (
-                        r.statements[selectedIdx].isLie ? (
-                          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center gap-3">
-                            <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-                            <div>
-                              <p className="text-sm font-black text-emerald-400">Nice catch! 🎯</p>
-                              <p className="text-[10px] text-emerald-400/60">+{100 + Math.round(timeLeft * 5) + streak * 15} points</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-center gap-3">
-                            <XCircle className="w-6 h-6 text-red-400 shrink-0" />
-                            <div>
-                              <p className="text-sm font-black text-red-400">Fooled! 😅</p>
-                              <p className="text-[10px] text-red-400/60">That was actually true</p>
-                            </div>
-                          </div>
-                        )
-                      ) : (
-                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center gap-3">
-                          <Timer className="w-6 h-6 text-amber-400 shrink-0" />
-                          <div>
-                            <p className="text-sm font-black text-amber-400">Time's up! ⏰</p>
-                            <p className="text-[10px] text-amber-400/60">The lie is highlighted in red</p>
-                          </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+            ) : (
+              <div style={{ width: "60px" }} />
+            )}
           </div>
-        )}
+        </div>
 
-        {/* ── REVIEW FOOTER ── */}
-        {showResult && r && phase === "review" && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="fixed bottom-0 left-0 right-0 z-[61] px-6 pb-6 pt-3 bg-slate-950/95 backdrop-blur-md border-t border-slate-800/50"
-            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
-          >
-            <button
-              onClick={handleNext}
-              className={`w-full py-4 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white font-black text-sm uppercase tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-lg`}
-            >
-              {currentRound + 1 >= TOTAL_ROUNDS ? (
-                <>
-                  <Trophy className="w-5 h-5" />
-                  <span>See Results</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-5 h-5" />
-                  <span>Next Person</span>
-                </>
-              )}
-            </button>
-          </motion.div>
-        )}
+        {/* ── MAIN CONTENT ── */}
+        <div className="absolute inset-0 flex flex-col" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
-        {/* ── RESULTS ── */}
-        {phase === "results" && (
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", damping: 15 }}
-              className="w-full max-w-sm bg-slate-900/80 rounded-3xl border border-slate-800/50 p-6 space-y-5"
-            >
-              {/* Result header */}
-              <div className="-mt-6 -mx-6 px-6 py-4 rounded-t-3xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-center">
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="text-4xl mb-1"
-                >
-                  {correctCount >= 5 ? "🕵️" : correctCount >= 3 ? "🤔" : "🤥"}
-                </motion.div>
-                <h2 className="text-xl font-black text-white uppercase tracking-wide">
-                  {correctCount >= 5 ? "Lie Detector!" : correctCount >= 3 ? "Not Bad!" : "Easily Fooled!"}
+          {/* ── INTRO (Premium) ── */}
+          {phase === "intro" && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8">
+              <motion.div
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className="w-24 h-24 rounded-3xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/20 backdrop-blur-xl flex items-center justify-center shadow-[0_0_40px_rgba(139,92,246,0.15)]"
+              >
+                <span className="text-5xl">🤥</span>
+              </motion.div>
+
+              <div className="text-center max-w-xs">
+                <h2 className="text-2xl font-black bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent mb-2 tracking-tight">
+                  Two Truths & a Lie
                 </h2>
-                <p className="text-xs text-white/70 font-bold mt-0.5">
-                  {correctCount >= 5
-                    ? "You can see through anyone!"
-                    : correctCount >= 3
-                    ? "You've got some good instincts"
-                    : "Better luck next time!"}
+                <p className="text-xs text-slate-400/80 leading-relaxed mb-6">
+                  Meet new people! Read 3 statements about someone — two are true, one is a lie. Can you spot the faker?
                 </p>
               </div>
 
-              {/* Score */}
-              <div className="text-center">
-                <p className="text-4xl font-black text-white">{playerScore}</p>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">Total Points</p>
-              </div>
-
-              {/* Stats */}
-              <div className="flex justify-center gap-6 text-center">
-                <div>
-                  <p className={`text-lg font-black ${theme.text}`}>{correctCount}/{TOTAL_ROUNDS}</p>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase">Detected</p>
-                </div>
-                <div>
-                  <p className={`text-lg font-black ${theme.text}`}>{bestStreak}</p>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase">Best Streak</p>
-                </div>
-                <div>
-                  <p className={`text-lg font-black ${theme.text}`}>{Math.round((correctCount / TOTAL_ROUNDS) * 100)}%</p>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase">Accuracy</p>
-                </div>
-              </div>
-
-              {/* Progress dots */}
-              <div className="flex justify-center gap-1.5">
-                {playerResults.map((correct, i) => (
-                  <div key={i} className={`w-3 h-3 rounded-full ${correct ? "bg-emerald-400" : "bg-red-400"}`} />
+              {/* How to play */}
+              <div className="w-full max-w-xs space-y-3">
+                {[
+                  { icon: "👤", text: "Meet a new person each round" },
+                  { icon: "📖", text: "Read their 3 statements carefully" },
+                  { icon: "🔍", text: "Tap the one you think is the LIE" },
+                  { icon: "⚡", text: "Faster = more points!" },
+                ].map((step, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + i * 0.12, type: "spring", stiffness: 200, damping: 20 }}
+                    className="flex items-center gap-3 bg-white/[0.03] backdrop-blur-xl rounded-xl px-4 py-3 border border-white/[0.06]"
+                  >
+                    <span className="text-lg">{step.icon}</span>
+                    <span className="text-xs text-slate-300 font-medium">{step.text}</span>
+                  </motion.div>
                 ))}
               </div>
 
-              {/* Buttons */}
-              <div className="space-y-2">
-                <button
-                  onClick={handleRestart}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Play Again
-                </button>
-                <button
-                  onClick={onBack}
-                  className="w-full py-3 rounded-2xl bg-slate-800/50 border border-slate-700/30 text-slate-400 font-bold text-sm hover:bg-slate-700/50 transition-colors"
-                >
-                  Exit to Games
-                </button>
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, type: "spring" }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setPhase("countdown")}
+                className="mt-4 px-10 py-4 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white font-black text-sm uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(139,92,246,0.3)] relative overflow-hidden group"
+              >
+                {/* Button shimmer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="flex items-center gap-2 relative z-10">
+                  <Sparkles className="w-5 h-5" />
+                  Start Playing
+                </span>
+              </motion.button>
+            </div>
+          )}
+
+          {/* ── COUNTDOWN (Cinematic) ── */}
+          {phase === "countdown" && <CinematicCountdown value={countdown} />}
+
+          {/* ── PLAYING / REVIEW ── */}
+          {(phase === "playing" || phase === "review") && r && (
+            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+              {/* Top bar: score, timer, progress */}
+              <div className="px-4 pt-3 pb-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 flex-1">
+                    <Trophy className={`w-4 h-4 ${theme.text}`} />
+                    <AnimatedScore value={playerScore} className={`text-sm font-black ${theme.text}`} />
+                    {streak > 1 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        className="text-[10px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20"
+                      >
+                        🔥 {streak}x
+                      </motion.span>
+                    )}
+                  </div>
+
+                  <motion.div
+                    animate={timeLeft <= 5 && !showResult ? { scale: [1, 1.05, 1] } : {}}
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full border backdrop-blur-md ${timerBg} ${showResult ? "opacity-50" : ""}`}
+                  >
+                    <Timer className={`w-3.5 h-3.5 ${timerColor}`} />
+                    <span className={`text-sm font-black tabular-nums ${timerColor}`}>
+                      {showResult ? "—" : timeLeft}
+                    </span>
+                  </motion.div>
+
+                  <div className="flex gap-1 flex-1 justify-end">
+                    {Array.from({ length: TOTAL_ROUNDS }).map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={i === currentRound ? { scale: 0 } : {}}
+                        animate={i === currentRound ? { scale: 1 } : {}}
+                        transition={{ type: "spring", stiffness: 300 }}
+                        className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                          i < playerResults.length
+                            ? playerResults[i] ? "bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.5)]" : "bg-red-400 shadow-[0_0_6px_rgba(239,68,68,0.5)]"
+                            : i === currentRound ? "bg-violet-400 animate-pulse shadow-[0_0_6px_rgba(139,92,246,0.5)]" : "bg-slate-700/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
+
+              {/* Person card + statements */}
+              <div className="flex flex-col items-center px-4 py-2 my-auto">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentRound}
+                    initial={{ x: 100, opacity: 0, filter: "blur(8px)" }}
+                    animate={{ x: 0, opacity: 1, filter: "blur(0px)" }}
+                    exit={{ x: -100, opacity: 0, filter: "blur(8px)" }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                    className="w-full max-w-md"
+                  >
+                    {/* Person header (Glassmorphic) */}
+                    <div className="flex items-center gap-4 mb-5 bg-white/[0.04] backdrop-blur-xl rounded-2xl p-4 border border-white/[0.06]">
+                      <div className="relative shrink-0">
+                        {/* Avatar ring glow */}
+                        <motion.div
+                          className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-violet-500/40 to-fuchsia-500/40"
+                          animate={{ opacity: [0.4, 0.7, 0.4] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          style={{ filter: "blur(4px)" }}
+                        />
+                        <div className="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-violet-500/40 shadow-lg shadow-violet-500/10">
+                          <img src={r.person.photo} alt={r.person.name} className="w-full h-full object-cover" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black text-white">{r.person.name}</h3>
+                          <span className="text-sm">{r.person.emoji}</span>
+                          <span className="text-xs text-slate-500 font-medium">{r.person.age}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-400/80 font-medium mt-0.5">{r.person.tagline}</p>
+                      </div>
+                    </div>
+
+                    {/* Instruction */}
+                    {!showResult && (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center text-[11px] font-bold uppercase tracking-[0.2em] mb-3"
+                      >
+                        <span className="text-slate-500">Tap the statement you think is the </span>
+                        <span className="bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">LIE</span>
+                      </motion.p>
+                    )}
+
+                    {/* Statements */}
+                    <div className="space-y-3 relative">
+                      <ParticleBurst active={burstActive} />
+                      {r.statements.map((stmt, idx) => (
+                        <StatementCard
+                          key={idx}
+                          stmt={stmt}
+                          idx={idx}
+                          showResult={showResult}
+                          isSelected={selectedIdx === idx}
+                          onSelect={handleSelect}
+                          roundIntensity={roundIntensity}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Result feedback (Glassmorphic) */}
+                    {showResult && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                        className="mt-4"
+                      >
+                        {selectedIdx !== null ? (
+                          r.statements[selectedIdx].isLie ? (
+                            <div className="bg-emerald-500/[0.08] backdrop-blur-xl border border-emerald-500/20 rounded-xl p-3.5 flex items-center gap-3 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                              <motion.div
+                                animate={{ rotate: [0, 10, -10, 0] }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
+                              </motion.div>
+                              <div>
+                                <p className="text-sm font-black text-emerald-400">Nice catch! 🎯</p>
+                                <p className="text-[10px] text-emerald-400/60">+{100 + Math.round(timeLeft * 5) + streak * 15} points</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-red-500/[0.08] backdrop-blur-xl border border-red-500/20 rounded-xl p-3.5 flex items-center gap-3 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                              <XCircle className="w-6 h-6 text-red-400 shrink-0" />
+                              <div>
+                                <p className="text-sm font-black text-red-400">Fooled! 😅</p>
+                                <p className="text-[10px] text-red-400/60">That was actually true</p>
+                              </div>
+                            </div>
+                          )
+                        ) : (
+                          <div className="bg-amber-500/[0.08] backdrop-blur-xl border border-amber-500/20 rounded-xl p-3.5 flex items-center gap-3">
+                            <Timer className="w-6 h-6 text-amber-400 shrink-0" />
+                            <div>
+                              <p className="text-sm font-black text-amber-400">Time's up! ⏰</p>
+                              <p className="text-[10px] text-amber-400/60">The lie is highlighted in red</p>
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          )}
+
+          {/* ── REVIEW FOOTER (Glassmorphic) ── */}
+          {showResult && r && phase === "review" && (
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="fixed bottom-0 left-0 right-0 z-[61] px-6 pb-6 pt-3 bg-white/[0.03] backdrop-blur-2xl border-t border-white/[0.06]"
+              style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(139,92,246,0.25)] relative overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                {currentRound + 1 >= TOTAL_ROUNDS ? (
+                  <span className="flex items-center gap-2 relative z-10">
+                    <Trophy className="w-5 h-5" />
+                    See Results
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2 relative z-10">
+                    <Zap className="w-5 h-5" />
+                    Next Person
+                  </span>
+                )}
+              </motion.button>
             </motion.div>
-          </div>
-        )}
-      </div>
+          )}
+
+          {/* ── RESULTS (Full Glassmorphic Overlay) ── */}
+          {phase === "results" && (
+            <div className="flex-1 flex flex-col items-center justify-center px-6 relative">
+              {correctCount >= 5 && <VictoryRays />}
+
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 150, damping: 18 }}
+                className="w-full max-w-sm relative"
+              >
+                {/* Rotating conic-gradient border */}
+                <motion.div
+                  className="absolute -inset-[1px] rounded-3xl z-0"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  style={{
+                    background: "conic-gradient(from 0deg, #8b5cf6, #ec4899, #6366f1, #f43f5e, #8b5cf6)",
+                    opacity: 0.4,
+                    filter: "blur(1px)",
+                  }}
+                />
+                <div className="relative z-10 bg-slate-950/90 backdrop-blur-2xl rounded-3xl border border-white/[0.06] p-6 space-y-5">
+                  {/* Result header */}
+                  <div className="-mt-6 -mx-6 px-6 py-5 rounded-t-3xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
+                    <motion.div
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                      className="text-5xl mb-2 relative z-10"
+                    >
+                      {correctCount >= 5 ? "🕵️" : correctCount >= 3 ? "🤔" : "🤥"}
+                    </motion.div>
+                    <h2 className="text-xl font-black text-white uppercase tracking-[0.15em] relative z-10">
+                      {correctCount >= 5 ? "Lie Detector!" : correctCount >= 3 ? "Not Bad!" : "Easily Fooled!"}
+                    </h2>
+                    <p className="text-xs text-white/70 font-bold mt-1 relative z-10">
+                      {correctCount >= 5
+                        ? "You can see through anyone!"
+                        : correctCount >= 3
+                        ? "You've got some good instincts"
+                        : "Better luck next time!"}
+                    </p>
+                  </div>
+
+                  {/* Score */}
+                  <div className="text-center">
+                    <AnimatedScore value={playerScore} className="text-5xl font-black bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent" />
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Total Points</p>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex justify-center gap-6 text-center">
+                    <div className="px-3">
+                      <p className={`text-lg font-black ${theme.text}`}>{correctCount}/{TOTAL_ROUNDS}</p>
+                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Detected</p>
+                    </div>
+                    <div className="w-px bg-white/[0.06]" />
+                    <div className="px-3">
+                      <p className={`text-lg font-black ${theme.text}`}>{bestStreak}</p>
+                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Best Streak</p>
+                    </div>
+                    <div className="w-px bg-white/[0.06]" />
+                    <div className="px-3">
+                      <p className={`text-lg font-black ${theme.text}`}>{Math.round((correctCount / TOTAL_ROUNDS) * 100)}%</p>
+                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Accuracy</p>
+                    </div>
+                  </div>
+
+                  {/* Progress dots */}
+                  <div className="flex justify-center gap-2">
+                    {playerResults.map((correct, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: i * 0.08, type: "spring", stiffness: 400 }}
+                        className={`w-3.5 h-3.5 rounded-full ${correct
+                          ? "bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                          : "bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.5)]"}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="space-y-2.5">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleRestart}
+                      className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(139,92,246,0.25)] relative overflow-hidden group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                      <span className="relative z-10 flex items-center gap-2">
+                        <RotateCcw className="w-4 h-4" />
+                        Play Again
+                      </span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={onBack}
+                      className="w-full py-3.5 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] text-slate-400 font-bold text-sm hover:bg-white/[0.08] transition-colors"
+                    >
+                      Exit to Games
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </div>
+      </ScreenShake>
     </div>
   );
 }

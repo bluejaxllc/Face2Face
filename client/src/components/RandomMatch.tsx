@@ -79,6 +79,10 @@ const THEMES: Record<Category, {
   ctaText: string;
   ctaIcon: typeof Heart;
   matchTitle: string;
+  orbColor1: string;
+  orbColor2: string;
+  orbColor3: string;
+  glowRgb: string;
 }> = {
   dating: {
     gradient: "from-pink-500 via-rose-500 to-red-500",
@@ -89,6 +93,10 @@ const THEMES: Record<Category, {
     ctaText: "Send a Heart",
     ctaIcon: Heart,
     matchTitle: "It's a Match!",
+    orbColor1: "rgba(236,72,153,0.25)",
+    orbColor2: "rgba(244,63,94,0.2)",
+    orbColor3: "rgba(168,85,247,0.15)",
+    glowRgb: "236,72,153",
   },
   friends: {
     gradient: "from-emerald-500 via-green-500 to-teal-500",
@@ -99,6 +107,10 @@ const THEMES: Record<Category, {
     ctaText: "Add Friend",
     ctaIcon: UserPlus,
     matchTitle: "New Friend Found!",
+    orbColor1: "rgba(16,185,129,0.25)",
+    orbColor2: "rgba(20,184,166,0.2)",
+    orbColor3: "rgba(6,182,212,0.15)",
+    glowRgb: "16,185,129",
   },
   business: {
     gradient: "from-blue-500 via-indigo-500 to-violet-500",
@@ -109,10 +121,165 @@ const THEMES: Record<Category, {
     ctaText: "Connect",
     ctaIcon: Briefcase,
     matchTitle: "Connection Found!",
+    orbColor1: "rgba(59,130,246,0.25)",
+    orbColor2: "rgba(99,102,241,0.2)",
+    orbColor3: "rgba(139,92,246,0.15)",
+    glowRgb: "59,130,246",
   },
 };
 
 type GameState = "idle" | "spinning" | "reveal" | "profile";
+
+/* ─── Noise SVG as inline data URI ─── */
+const NOISE_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`;
+
+/* ─── Floating Orb Component ─── */
+function FloatingOrb({ color, size, x, y, dur }: { color: string; size: number; x: string; y: string; dur: number }) {
+  return (
+    <motion.div
+      className="absolute rounded-full pointer-events-none"
+      style={{
+        width: size,
+        height: size,
+        background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+        left: x,
+        top: y,
+        filter: `blur(${size * 0.4}px)`,
+      }}
+      animate={{
+        x: [0, 30, -20, 15, 0],
+        y: [0, -25, 15, -10, 0],
+        scale: [1, 1.15, 0.9, 1.05, 1],
+        opacity: [0.6, 0.8, 0.5, 0.7, 0.6],
+      }}
+      transition={{
+        duration: dur,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+  );
+}
+
+/* ─── Ambient Dust Mote ─── */
+function DustMote({ delay, category }: { delay: number; category: Category }) {
+  const colors: Record<Category, string> = {
+    dating: "bg-pink-400/30",
+    friends: "bg-emerald-400/30",
+    business: "bg-blue-400/30",
+  };
+  return (
+    <motion.div
+      className={`absolute w-1 h-1 rounded-full ${colors[category]} pointer-events-none`}
+      style={{
+        left: `${10 + Math.random() * 80}%`,
+        top: `${10 + Math.random() * 80}%`,
+      }}
+      animate={{
+        y: [0, -60, -120],
+        x: [0, Math.random() * 40 - 20, Math.random() * 30 - 15],
+        opacity: [0, 0.6, 0],
+        scale: [0.5, 1.2, 0.3],
+      }}
+      transition={{
+        duration: 6 + Math.random() * 4,
+        delay,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    />
+  );
+}
+
+/* ─── Animated Gradient Ring for Avatars ─── */
+function GradientRing({ size, category, spinning = false }: { size: number; category: Category; spinning?: boolean }) {
+  const gradients: Record<Category, string> = {
+    dating: "conic-gradient(from 0deg, #ec4899, #f43f5e, #f97316, #ec4899)",
+    friends: "conic-gradient(from 0deg, #10b981, #14b8a6, #06b6d4, #10b981)",
+    business: "conic-gradient(from 0deg, #3b82f6, #6366f1, #8b5cf6, #3b82f6)",
+  };
+  return (
+    <motion.div
+      className="absolute rounded-full"
+      style={{
+        width: size + 6,
+        height: size + 6,
+        top: -3,
+        left: -3,
+        background: gradients[category],
+        padding: 3,
+      }}
+      animate={{ rotate: 360 }}
+      transition={{
+        duration: spinning ? 1.5 : 4,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    >
+      <div className="w-full h-full rounded-full bg-slate-950" />
+    </motion.div>
+  );
+}
+
+/* ─── Compatibility Counter ─── */
+function AnimatedCounter({ value, className }: { value: number; className?: string }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const duration = 1200;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      start = Math.round(eased * value);
+      setDisplay(start);
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [value]);
+
+  return <span className={className}>{display}%</span>;
+}
+
+/* ─── Particle Burst on Match ─── */
+function ParticleBurst({ colors }: { colors: string[] }) {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {Array.from({ length: 24 }).map((_, i) => {
+        const angle = (i / 24) * 360;
+        const rad = (angle * Math.PI) / 180;
+        const dist = 80 + Math.random() * 60;
+        return (
+          <motion.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: 4 + Math.random() * 4,
+              height: 4 + Math.random() * 4,
+              backgroundColor: colors[i % colors.length],
+              left: "50%",
+              top: "50%",
+            }}
+            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+            animate={{
+              x: Math.cos(rad) * dist,
+              y: Math.sin(rad) * dist,
+              opacity: 0,
+              scale: 0.2,
+            }}
+            transition={{
+              duration: 0.8 + Math.random() * 0.4,
+              delay: Math.random() * 0.15,
+              ease: "easeOut",
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 export default function RandomMatch({ onBack, category = "dating" }: RandomMatchProps) {
   const theme = THEMES[category];
@@ -125,6 +292,7 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
   const [matchedProfile, setMatchedProfile] = useState<MatchProfile | null>(null);
   const [matchHistory, setMatchHistory] = useState<MatchProfile[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
   const spinIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Slot machine rapid cycling
@@ -134,6 +302,7 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
     setGameState("spinning");
     setMatchedProfile(null);
     setShowConfetti(false);
+    setShowFlash(false);
 
     let speed = 60; // ms per frame
     let elapsed = 0;
@@ -159,6 +328,11 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
         setMatchedProfile(matched);
         setMatchHistory(prev => [matched, ...prev.slice(0, 9)]);
         setSpinsLeft(prev => prev - 1);
+
+        // White flash then reveal
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 400);
+
         setGameState("reveal");
         setShowConfetti(true);
 
@@ -208,27 +382,72 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
   return (
     <div className="absolute inset-0 overflow-hidden bg-slate-950 text-white select-none">
 
-      {/* Background effects */}
-      <div className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-[160px] opacity-15 bg-gradient-to-r ${theme.gradient}`} />
-      <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full blur-[140px] opacity-10 bg-indigo-500" />
+      {/* ── SVG Noise Overlay ── */}
+      <div
+        className="absolute inset-0 z-[1] pointer-events-none opacity-40"
+        style={{ backgroundImage: NOISE_SVG, backgroundRepeat: "repeat", backgroundSize: "128px 128px" }}
+      />
 
-      {/* Confetti layer */}
+      {/* ── Floating Background Orbs ── */}
+      <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
+        <FloatingOrb color={theme.orbColor1} size={220} x="5%" y="10%" dur={18} />
+        <FloatingOrb color={theme.orbColor2} size={180} x="70%" y="5%" dur={22} />
+        <FloatingOrb color={theme.orbColor3} size={160} x="15%" y="60%" dur={20} />
+        <FloatingOrb color={theme.orbColor1} size={140} x="80%" y="55%" dur={16} />
+        <FloatingOrb color={theme.orbColor2} size={120} x="50%" y="80%" dur={24} />
+        <FloatingOrb color={theme.orbColor3} size={100} x="35%" y="30%" dur={19} />
+      </div>
+
+      {/* ── Ambient Dust Motes ── */}
+      <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <DustMote key={i} delay={i * 0.8} category={category} />
+        ))}
+      </div>
+
+      {/* ── Radial gradient behind match area ── */}
+      <div
+        className="absolute z-[2] pointer-events-none"
+        style={{
+          width: 500,
+          height: 500,
+          left: "50%",
+          top: "40%",
+          transform: "translate(-50%, -50%)",
+          background: `radial-gradient(circle, rgba(${theme.glowRgb},0.08) 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* ── White Flash Overlay ── */}
+      <AnimatePresence>
+        {showFlash && (
+          <motion.div
+            className="absolute inset-0 z-[70] pointer-events-none bg-white"
+            initial={{ opacity: 0.9 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Confetti layer ── */}
       <AnimatePresence>
         {showConfetti && (
-          <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 z-[50] pointer-events-none overflow-hidden">
             {Array.from({ length: 40 }).map((_, i) => (
               <motion.div
                 key={i}
                 initial={{
-                  x: Math.random() * window.innerWidth,
+                  x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 400),
                   y: -20,
                   rotate: 0,
                   scale: Math.random() * 0.5 + 0.5,
                 }}
                 animate={{
-                  y: window.innerHeight + 20,
+                  y: (typeof window !== "undefined" ? window.innerHeight : 800) + 20,
                   rotate: Math.random() * 720 - 360,
-                  x: Math.random() * window.innerWidth,
+                  x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 400),
                 }}
                 exit={{ opacity: 0 }}
                 transition={{
@@ -251,29 +470,44 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
 
       {/* ── HEADER ── */}
       <div className="fixed top-0 left-0 right-0 z-[60]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
-        <div className="px-4 py-3 flex items-center justify-between border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-md">
-          <button
+        <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.06] bg-slate-950/60 backdrop-blur-xl">
+          <motion.button
             onClick={onBack}
-            className="w-9 h-9 rounded-full bg-slate-800/80 backdrop-blur-md border border-slate-700/50 flex items-center justify-center hover:bg-slate-700/80 transition-colors"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-9 h-9 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/[0.08] flex items-center justify-center hover:bg-white/[0.1] transition-colors"
           >
             <ChevronLeft className="w-5 h-5 text-slate-300" />
-          </button>
+          </motion.button>
           <div className="flex items-center gap-2">
-            <Dice5 className={`w-4 h-4 ${theme.textAccent}`} />
-            <span className={`text-sm font-black uppercase tracking-widest bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`}>
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Dice5 className={`w-4 h-4 ${theme.textAccent}`} />
+            </motion.div>
+            <span className={`text-sm font-black uppercase tracking-[0.2em] bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`}>
               Random Match
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={`px-2.5 py-1 rounded-full ${theme.bgAccent} border ${theme.borderAccent}`}>
+            <motion.div
+              className={`px-2.5 py-1 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/[0.08]`}
+              animate={{
+                boxShadow: spinsLeft > 0
+                  ? [`0 0 0 rgba(${theme.glowRgb},0)`, `0 0 12px rgba(${theme.glowRgb},0.3)`, `0 0 0 rgba(${theme.glowRgb},0)`]
+                  : "none",
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
               <span className={`text-[10px] font-black ${theme.textAccent}`}>{spinsLeft} left</span>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="absolute inset-0 flex flex-col" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div className="absolute inset-0 flex flex-col z-[10]" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
         {/* ── IDLE / SPINNING STATE ── */}
         {(gameState === "idle" || gameState === "spinning") && (
@@ -285,110 +519,179 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 text-center"
             >
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-[0.2em]">
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-[0.25em]">
                 {gameState === "spinning" ? "Finding someone special..." : "Tap to spin the wheel"}
               </p>
             </motion.div>
 
-            {/* Slot Machine Display */}
-            <div className="relative w-full max-w-[280px] mb-8">
-              {/* Frame outer glow */}
-              <div className={`absolute -inset-2 rounded-[28px] ${gameState === "spinning" ? theme.spinGlow : ""} transition-shadow duration-300`} />
+            {/* ── Glassmorphic Slot Machine ── */}
+            <div className="relative w-full max-w-[300px] mb-8">
+              {/* Outer breathing glow */}
+              <motion.div
+                className="absolute -inset-3 rounded-[32px] pointer-events-none"
+                animate={gameState === "spinning" ? {
+                  boxShadow: [
+                    `0 0 40px rgba(${theme.glowRgb},0.15)`,
+                    `0 0 80px rgba(${theme.glowRgb},0.35)`,
+                    `0 0 40px rgba(${theme.glowRgb},0.15)`,
+                  ],
+                } : {
+                  boxShadow: `0 0 30px rgba(${theme.glowRgb},0.1)`,
+                }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+              />
 
-              {/* Slot window */}
-              <div className={`relative rounded-3xl border-2 overflow-hidden backdrop-blur-md transition-all duration-300 ${
-                gameState === "spinning"
-                  ? `${theme.borderAccent} bg-slate-900/90`
-                  : "border-slate-800 bg-slate-900/60"
-              }`}>
-                {/* Decorative top bar */}
-                <div className={`h-1.5 w-full bg-gradient-to-r ${theme.gradient} opacity-60`} />
+              {/* Glassmorphic card */}
+              <div
+                className={`relative rounded-3xl overflow-hidden backdrop-blur-xl transition-all duration-300 border ${
+                  gameState === "spinning"
+                    ? "border-white/[0.12] bg-white/[0.06]"
+                    : "border-white/[0.08] bg-white/[0.04]"
+                }`}
+                style={{
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 60px rgba(0,0,0,0.4)`,
+                }}
+              >
+                {/* Top accent bar */}
+                <div className={`h-[2px] w-full bg-gradient-to-r ${theme.gradient}`}
+                  style={{ opacity: gameState === "spinning" ? 0.9 : 0.5 }}
+                />
 
                 {/* Profile Display */}
-                <div className="p-6 flex flex-col items-center relative">
-                  {/* Spinning glow ring */}
+                <div className="p-7 flex flex-col items-center relative">
+
+                  {/* Spinning glow ring behind avatar */}
                   {gameState === "spinning" && (
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    >
-                      <div className={`w-40 h-40 rounded-full border-2 border-t-transparent bg-gradient-to-r ${theme.gradient} opacity-20`}
-                        style={{ borderImage: `linear-gradient(to right, transparent, ${category === "dating" ? "#ec4899" : category === "friends" ? "#10b981" : "#3b82f6"}, transparent) 1` }}
-                      />
-                    </motion.div>
+                      animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                      transition={{ rotate: { duration: 1.2, repeat: Infinity, ease: "linear" }, scale: { duration: 0.6, repeat: Infinity } }}
+                      className="absolute top-6 pointer-events-none"
+                      style={{
+                        width: 140,
+                        height: 140,
+                        borderRadius: "50%",
+                        background: `conic-gradient(from 0deg, rgba(${theme.glowRgb},0.4), transparent, rgba(${theme.glowRgb},0.4))`,
+                        filter: "blur(8px)",
+                      }}
+                    />
                   )}
 
-                  {/* Avatar */}
+                  {/* Avatar with animated gradient ring */}
                   <motion.div
                     animate={gameState === "spinning" ? {
                       scale: [1, 1.05, 0.95, 1],
                     } : {}}
                     transition={{ duration: 0.15, repeat: Infinity }}
-                    className="relative mb-4"
+                    className="relative mb-5"
                   >
-                    <div className={`w-28 h-28 rounded-full overflow-hidden border-3 ${
-                      gameState === "spinning" ? theme.borderAccent : "border-slate-700"
-                    } shadow-xl transition-all duration-200`}>
+                    {/* Gradient ring */}
+                    <GradientRing size={112} category={category} spinning={gameState === "spinning"} />
+
+                    <div className={`w-28 h-28 rounded-full overflow-hidden shadow-2xl relative z-10`}>
                       <img
                         src={currentProfile.photo}
                         alt={currentProfile.name}
                         className={`w-full h-full object-cover transition-all duration-100 ${
-                          gameState === "spinning" ? "blur-[2px] scale-110" : ""
+                          gameState === "spinning" ? "blur-[3px] scale-110 brightness-110" : ""
                         }`}
                       />
                     </div>
+
                     {/* Emoji badge */}
-                    <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-base">
+                    <motion.div
+                      className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-slate-900/90 backdrop-blur-md border border-white/[0.1] flex items-center justify-center text-base z-20"
+                      animate={gameState === "spinning" ? { scale: [1, 1.2, 1] } : {}}
+                      transition={{ duration: 0.3, repeat: Infinity }}
+                    >
                       {currentProfile.emoji}
-                    </div>
+                    </motion.div>
                   </motion.div>
 
                   {/* Name cycling */}
                   <div className="text-center">
-                    <motion.h2
-                      key={currentIndex}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: gameState === "spinning" ? 0.5 : 1, y: 0 }}
-                      className={`text-xl font-black tracking-tight ${
-                        gameState === "spinning" ? "text-slate-400" : "text-white"
-                      }`}
-                    >
-                      {currentProfile.name}, {currentProfile.age}
-                    </motion.h2>
-                    <p className={`text-xs mt-1 ${
+                    <AnimatePresence mode="wait">
+                      <motion.h2
+                        key={currentIndex}
+                        initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+                        animate={{
+                          opacity: gameState === "spinning" ? 0.5 : 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                        }}
+                        exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+                        transition={{ duration: 0.1 }}
+                        className={`text-xl font-black tracking-tight ${
+                          gameState === "spinning"
+                            ? "text-slate-400"
+                            : `bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`
+                        }`}
+                      >
+                        {currentProfile.name}, {currentProfile.age}
+                      </motion.h2>
+                    </AnimatePresence>
+                    <p className={`text-xs mt-1.5 ${
                       gameState === "spinning" ? "text-slate-600" : "text-slate-400"
                     }`}>
                       {gameState === "spinning" ? "..." : currentProfile.bio}
                     </p>
                   </div>
 
-                  {/* Proximity badge */}
+                  {/* Proximity badge — glassmorphic pill */}
                   {gameState !== "spinning" && (
-                    <div className="flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/50">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-full bg-white/[0.05] backdrop-blur-md border border-white/[0.08]"
+                    >
                       <MapPin className="w-3 h-3 text-slate-500" />
-                      <span className="text-[10px] text-slate-400 font-bold">{currentProfile.distance} away</span>
-                    </div>
+                      <span className="text-[10px] text-slate-400 font-bold tracking-wide">{currentProfile.distance} away</span>
+                    </motion.div>
                   )}
                 </div>
 
-                {/* Decorative bottom bar */}
-                <div className={`h-1.5 w-full bg-gradient-to-r ${theme.gradient} opacity-40`} />
+                {/* Bottom accent */}
+                <div className={`h-[2px] w-full bg-gradient-to-r ${theme.gradient}`}
+                  style={{ opacity: gameState === "spinning" ? 0.7 : 0.3 }}
+                />
               </div>
             </div>
 
-            {/* Spin Button */}
+            {/* ── Spin Button — Large Glassmorphic ── */}
             {spinsLeft > 0 ? (
               <motion.button
                 onClick={handleSpin}
                 disabled={gameState === "spinning"}
-                whileTap={{ scale: 0.95 }}
-                className={`w-full max-w-[280px] py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${
+                whileHover={gameState !== "spinning" ? { scale: 1.02 } : {}}
+                whileTap={gameState !== "spinning" ? { scale: 0.95 } : {}}
+                className={`w-full max-w-[300px] py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 relative overflow-hidden ${
                   gameState === "spinning"
-                    ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                    : `bg-gradient-to-r ${theme.gradient} text-white shadow-xl active:scale-95`
+                    ? "bg-white/[0.04] border border-white/[0.06] text-slate-500 cursor-not-allowed"
+                    : `bg-gradient-to-r ${theme.gradient} text-white`
                 }`}
+                style={gameState !== "spinning" ? {
+                  boxShadow: `0 0 30px rgba(${theme.glowRgb},0.3), 0 10px 40px rgba(0,0,0,0.3)`,
+                } : undefined}
+                animate={gameState !== "spinning" ? {
+                  boxShadow: [
+                    `0 0 20px rgba(${theme.glowRgb},0.2), 0 10px 40px rgba(0,0,0,0.3)`,
+                    `0 0 40px rgba(${theme.glowRgb},0.4), 0 10px 40px rgba(0,0,0,0.3)`,
+                    `0 0 20px rgba(${theme.glowRgb},0.2), 0 10px 40px rgba(0,0,0,0.3)`,
+                  ],
+                } : {}}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
+                {/* Shimmer sweep */}
+                {gameState !== "spinning" && (
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)",
+                    }}
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+                  />
+                )}
+
                 {gameState === "spinning" ? (
                   <>
                     <motion.div
@@ -408,27 +711,37 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
               </motion.button>
             ) : (
               <div className="text-center">
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">No spins left</p>
-                <button
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-[0.2em] mb-3">No spins left</p>
+                <motion.button
                   onClick={handleReset}
-                  className="px-6 py-3 rounded-2xl bg-slate-800/80 border border-slate-700/50 text-slate-200 text-xs font-bold active:scale-95 transition-all flex items-center gap-2 mx-auto"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-3 rounded-2xl bg-white/[0.05] backdrop-blur-md border border-white/[0.08] text-slate-200 text-xs font-bold transition-all flex items-center gap-2 mx-auto"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>Reset Spins</span>
-                </button>
+                </motion.button>
               </div>
             )}
 
             {/* Spin counter dots */}
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2.5 mt-5">
               {[1, 2, 3].map((i) => (
-                <div
+                <motion.div
                   key={i}
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                     i <= spinsLeft
-                      ? `bg-gradient-to-r ${theme.gradient} shadow-sm`
-                      : "bg-slate-800 border border-slate-700"
+                      ? `bg-gradient-to-r ${theme.gradient}`
+                      : "bg-white/[0.06] border border-white/[0.08]"
                   }`}
+                  animate={i <= spinsLeft ? {
+                    boxShadow: [
+                      `0 0 0 rgba(${theme.glowRgb},0)`,
+                      `0 0 8px rgba(${theme.glowRgb},0.5)`,
+                      `0 0 0 rgba(${theme.glowRgb},0)`,
+                    ],
+                  } : {}}
+                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
                 />
               ))}
             </div>
@@ -439,102 +752,183 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
         {gameState === "reveal" && matchedProfile && (
           <div className="flex-1 flex flex-col items-center justify-center px-6">
             <motion.div
-              initial={{ scale: 0, rotate: -15 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className="w-full max-w-sm"
+              initial={{ scale: 0, rotate: -10, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 180, damping: 14, mass: 1.2 }}
+              className="w-full max-w-sm relative"
             >
-              {/* Match card */}
-              <div className={`rounded-3xl border border-white/10 overflow-hidden shadow-2xl ${theme.spinGlow}`}>
-                {/* Top gradient bar */}
-                <div className={`h-2 bg-gradient-to-r ${theme.gradient}`} />
+              {/* Particle burst */}
+              <ParticleBurst colors={confettiColors} />
 
-                <div className="bg-slate-900/90 backdrop-blur-md p-6">
-                  {/* Title */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-center mb-5"
-                  >
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <Sparkles className={`w-5 h-5 ${theme.textAccent} animate-pulse`} />
-                      <h2 className={`text-xl font-black bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`}>
-                        {theme.matchTitle}
-                      </h2>
-                      <Sparkles className={`w-5 h-5 ${theme.textAccent} animate-pulse`} />
-                    </div>
-                  </motion.div>
+              {/* ── Glassmorphic Match Card with conic-gradient border ── */}
+              <div className="relative rounded-3xl p-[2px] overflow-hidden"
+                style={{
+                  background: `conic-gradient(from 0deg, rgba(${theme.glowRgb},0.5), transparent 30%, rgba(${theme.glowRgb},0.3) 50%, transparent 70%, rgba(${theme.glowRgb},0.5))`,
+                }}
+              >
+                {/* Rotating border glow */}
+                <motion.div
+                  className="absolute inset-0 rounded-3xl"
+                  style={{
+                    background: `conic-gradient(from 0deg, rgba(${theme.glowRgb},0.6), transparent 25%, rgba(${theme.glowRgb},0.4) 50%, transparent 75%, rgba(${theme.glowRgb},0.6))`,
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                />
 
-                  {/* Profile */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="flex flex-col items-center"
-                  >
-                    <div className="relative mb-4">
-                      <div className={`w-24 h-24 rounded-full overflow-hidden border-3 ${theme.borderAccent} shadow-xl`}>
-                        <img src={matchedProfile.photo} alt={matchedProfile.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-base">
-                        {matchedProfile.emoji}
-                      </div>
-                    </div>
+                {/* Inner card */}
+                <div
+                  className="relative rounded-[22px] overflow-hidden bg-slate-950/80 backdrop-blur-2xl"
+                  style={{
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(${theme.glowRgb},0.15)`,
+                  }}
+                >
+                  {/* Top gradient bar */}
+                  <div className={`h-[3px] bg-gradient-to-r ${theme.gradient}`} />
 
-                    <h3 className="text-lg font-black text-white">{matchedProfile.name}, {matchedProfile.age}</h3>
-                    <p className="text-xs text-slate-400 mt-1">{matchedProfile.bio}</p>
-
-                    {/* Quick stats */}
-                    <div className="flex items-center gap-3 mt-3">
-                      <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/50 text-[10px] text-slate-400 font-bold">
-                        <MapPin className="w-3 h-3" /> {matchedProfile.distance}
-                      </span>
-                      <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full ${theme.bgAccent} border ${theme.borderAccent} text-[10px] ${theme.textAccent} font-bold`}>
-                        <Star className="w-3 h-3" /> {matchedProfile.compatibility}% match
-                      </span>
-                    </div>
-
-                    {/* Interests */}
-                    <div className="flex flex-wrap justify-center gap-1.5 mt-4">
-                      {matchedProfile.interests.map((interest) => (
-                        <span
-                          key={interest}
-                          className="px-2.5 py-1 rounded-full bg-slate-800/60 border border-slate-700/30 text-[10px] text-slate-300 font-medium"
-                        >
-                          {interest}
-                        </span>
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Actions */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-6 space-y-3"
-                  >
-                    {/* Primary CTA */}
-                    <button
-                      onClick={handleViewProfile}
-                      className={`w-full py-4 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white font-black text-sm uppercase tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-lg`}
+                  <div className="p-6">
+                    {/* Title */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25, type: "spring", stiffness: 200 }}
+                      className="text-center mb-5"
                     >
-                      <CtaIcon className="w-5 h-5" />
-                      <span>{theme.ctaText}</span>
-                    </button>
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <motion.div
+                          animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <Sparkles className={`w-5 h-5 ${theme.textAccent}`} />
+                        </motion.div>
+                        <h2 className={`text-2xl font-black bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent tracking-tight`}>
+                          {theme.matchTitle}
+                        </h2>
+                        <motion.div
+                          animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <Sparkles className={`w-5 h-5 ${theme.textAccent}`} />
+                        </motion.div>
+                      </div>
+                    </motion.div>
 
-                    {/* Secondary: Spin Again */}
-                    {spinsLeft > 0 && (
-                      <button
-                        onClick={handleSpinAgain}
-                        className="w-full py-3 rounded-2xl bg-slate-800/80 border border-slate-700/50 text-slate-200 text-sm font-bold active:scale-95 transition-all flex items-center justify-center gap-2"
+                    {/* Profile */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35, type: "spring" }}
+                      className="flex flex-col items-center"
+                    >
+                      {/* Avatar with gradient ring — 96px */}
+                      <div className="relative mb-4">
+                        <GradientRing size={96} category={category} />
+                        <div className="w-24 h-24 rounded-full overflow-hidden relative z-10 shadow-2xl">
+                          <img src={matchedProfile.photo} alt={matchedProfile.name} className="w-full h-full object-cover" />
+                        </div>
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5, type: "spring", stiffness: 300 }}
+                          className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-slate-900/90 backdrop-blur-md border border-white/[0.1] flex items-center justify-center text-base z-20"
+                        >
+                          {matchedProfile.emoji}
+                        </motion.div>
+                      </div>
+
+                      {/* Name — gradient text */}
+                      <h3 className={`text-lg font-black bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`}>
+                        {matchedProfile.name}, {matchedProfile.age}
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-1 italic">{matchedProfile.bio}</p>
+
+                      {/* Quick stats as glassmorphic pills */}
+                      <div className="flex items-center gap-2.5 mt-3">
+                        <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/[0.05] backdrop-blur-md border border-white/[0.08] text-[10px] text-slate-400 font-bold">
+                          <MapPin className="w-3 h-3" /> {matchedProfile.distance}
+                        </span>
+                        <motion.span
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-full ${theme.bgAccent} backdrop-blur-md border ${theme.borderAccent} text-[10px] ${theme.textAccent} font-black`}
+                          animate={{
+                            boxShadow: [
+                              `0 0 0 rgba(${theme.glowRgb},0)`,
+                              `0 0 16px rgba(${theme.glowRgb},0.3)`,
+                              `0 0 0 rgba(${theme.glowRgb},0)`,
+                            ],
+                          }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <Star className="w-3 h-3" />
+                          <AnimatedCounter value={matchedProfile.compatibility} />
+                          <span className="ml-0.5">match</span>
+                        </motion.span>
+                      </div>
+
+                      {/* Interests as glassmorphic pills */}
+                      <div className="flex flex-wrap justify-center gap-1.5 mt-4">
+                        {matchedProfile.interests.map((interest, idx) => (
+                          <motion.span
+                            key={interest}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5 + idx * 0.1, type: "spring" }}
+                            className="px-3 py-1.5 rounded-full bg-white/[0.05] backdrop-blur-md border border-white/[0.08] text-[10px] text-slate-300 font-medium"
+                          >
+                            {interest}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </motion.div>
+
+                    {/* Actions */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="mt-6 space-y-3"
+                    >
+                      {/* Primary CTA — breathing glow */}
+                      <motion.button
+                        onClick={handleViewProfile}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`w-full py-4 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 relative overflow-hidden`}
+                        animate={{
+                          boxShadow: [
+                            `0 0 20px rgba(${theme.glowRgb},0.25)`,
+                            `0 0 40px rgba(${theme.glowRgb},0.5)`,
+                            `0 0 20px rgba(${theme.glowRgb},0.25)`,
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <Dice5 className="w-4 h-4" />
-                        <span>Spin Again ({spinsLeft} left)</span>
-                      </button>
-                    )}
-                  </motion.div>
+                        {/* Shimmer */}
+                        <motion.div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)",
+                          }}
+                          animate={{ x: ["-100%", "200%"] }}
+                          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
+                        />
+                        <CtaIcon className="w-5 h-5" />
+                        <span>{theme.ctaText}</span>
+                      </motion.button>
+
+                      {/* Secondary: Spin Again — glassmorphic outline */}
+                      {spinsLeft > 0 && (
+                        <motion.button
+                          onClick={handleSpinAgain}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="w-full py-3 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/[0.1] text-slate-200 text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
+                        >
+                          <Dice5 className="w-4 h-4" />
+                          <span>Spin Again ({spinsLeft} left)</span>
+                        </motion.button>
+                      )}
+                    </motion.div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -549,47 +943,99 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
               animate={{ opacity: 1, y: 0 }}
               className="w-full max-w-sm mx-auto"
             >
-              {/* Profile hero */}
-              <div className={`rounded-3xl overflow-hidden border border-white/10 mb-4 bg-gradient-to-br ${
-                category === "dating" ? "from-pink-950/60 via-rose-950/30 to-slate-950" :
-                category === "friends" ? "from-emerald-950/60 via-green-950/30 to-slate-950" :
-                "from-blue-950/60 via-indigo-950/30 to-slate-950"
-              }`}>
-                <div className="p-6 flex flex-col items-center">
+              {/* ── Profile Hero — glassmorphic card ── */}
+              <div
+                className="rounded-3xl overflow-hidden border border-white/[0.08] mb-4 bg-white/[0.03] backdrop-blur-xl"
+                style={{
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(${theme.glowRgb},0.08)`,
+                }}
+              >
+                {/* Top gradient line */}
+                <div className={`h-[2px] bg-gradient-to-r ${theme.gradient} opacity-60`} />
+
+                <div className="p-6 flex flex-col items-center relative">
+                  {/* Background radial glow */}
+                  <div
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-60 h-60 pointer-events-none"
+                    style={{
+                      background: `radial-gradient(circle, rgba(${theme.glowRgb},0.06) 0%, transparent 70%)`,
+                    }}
+                  />
+
+                  {/* Avatar with gradient ring */}
                   <div className="relative mb-4">
-                    <div className={`w-32 h-32 rounded-full overflow-hidden border-3 ${theme.borderAccent} shadow-2xl`}>
+                    <GradientRing size={128} category={category} />
+                    <div className="w-32 h-32 rounded-full overflow-hidden relative z-10 shadow-2xl">
                       <img src={matchedProfile.photo} alt={matchedProfile.name} className="w-full h-full object-cover" />
                     </div>
-                    <div className="absolute -bottom-1 -right-2 w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xl">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                      className="absolute -bottom-1 -right-2 w-10 h-10 rounded-full bg-slate-900/90 backdrop-blur-md border border-white/[0.1] flex items-center justify-center text-xl z-20"
+                    >
                       {matchedProfile.emoji}
-                    </div>
+                    </motion.div>
                   </div>
 
-                  <h2 className="text-2xl font-black text-white">{matchedProfile.name}, {matchedProfile.age}</h2>
+                  {/* Name — gradient text */}
+                  <h2 className={`text-2xl font-black bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent tracking-tight`}>
+                    {matchedProfile.name}, {matchedProfile.age}
+                  </h2>
                   <p className="text-sm text-slate-400 mt-1 italic">{matchedProfile.bio}</p>
+
+                  {/* Category tag with accent */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className={`mt-3 px-3 py-1 rounded-full ${theme.bgAccent} border ${theme.borderAccent}`}
+                  >
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${theme.textAccent}`}>
+                      {category === "dating" ? "💕 Dating" : category === "friends" ? "🤝 Friends" : "💼 Business"}
+                    </span>
+                  </motion.div>
 
                   {/* Compatibility bar */}
                   <div className="w-full mt-5">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Compatibility</span>
-                      <span className={`text-sm font-black ${theme.textAccent}`}>{matchedProfile.compatibility}%</span>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Compatibility</span>
+                      <span className={`text-sm font-black ${theme.textAccent}`}>
+                        <AnimatedCounter value={matchedProfile.compatibility} />
+                      </span>
                     </div>
-                    <div className="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div className="w-full h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${matchedProfile.compatibility}%` }}
                         transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-                        className={`h-full rounded-full bg-gradient-to-r ${theme.gradient}`}
-                      />
+                        className={`h-full rounded-full bg-gradient-to-r ${theme.gradient} relative overflow-hidden`}
+                      >
+                        {/* Shimmer on bar */}
+                        <motion.div
+                          className="absolute inset-0"
+                          style={{
+                            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                          }}
+                          animate={{ x: ["-100%", "200%"] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+                        />
+                      </motion.div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Info cards */}
+              {/* ── Info Cards — glassmorphic ── */}
               <div className="space-y-3">
                 {/* Distance */}
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 flex items-center gap-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1, type: "spring" }}
+                  className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-4"
+                  style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+                >
                   <div className={`w-10 h-10 rounded-xl ${theme.bgAccent} border ${theme.borderAccent} flex items-center justify-center shrink-0`}>
                     <MapPin className={`w-5 h-5 ${theme.textAccent}`} />
                   </div>
@@ -597,10 +1043,16 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
                     <p className="text-xs font-black text-slate-200 uppercase tracking-wider">Distance</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">{matchedProfile.distance} away from you</p>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Interests */}
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                  className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4"
+                  style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+                >
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`w-10 h-10 rounded-xl ${theme.bgAccent} border ${theme.borderAccent} flex items-center justify-center shrink-0`}>
                       <Sparkles className={`w-5 h-5 ${theme.textAccent}`} />
@@ -608,19 +1060,28 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
                     <p className="text-xs font-black text-slate-200 uppercase tracking-wider">Interests</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {matchedProfile.interests.map((interest) => (
-                      <span
+                    {matchedProfile.interests.map((interest, idx) => (
+                      <motion.span
                         key={interest}
-                        className={`px-3 py-1.5 rounded-xl ${theme.bgAccent} border ${theme.borderAccent} text-xs ${theme.textAccent} font-bold`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 + idx * 0.1, type: "spring" }}
+                        className={`px-3 py-1.5 rounded-xl ${theme.bgAccent} backdrop-blur-md border ${theme.borderAccent} text-xs ${theme.textAccent} font-bold`}
                       >
                         {interest}
-                      </span>
+                      </motion.span>
                     ))}
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Safety note */}
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 flex items-center gap-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3, type: "spring" }}
+                  className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4 flex items-center gap-4"
+                  style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)" }}
+                >
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
                     <Shield className="w-5 h-5 text-amber-400" />
                   </div>
@@ -628,53 +1089,107 @@ export default function RandomMatch({ onBack, category = "dating" }: RandomMatch
                     <p className="text-xs font-black text-slate-200 uppercase tracking-wider">Safety First</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">Meet in public places · Share your location</p>
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* Actions */}
-              <div className="mt-6 space-y-3">
-                <button
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-6 space-y-3"
+              >
+                {/* Start Conversation — shimmer gradient */}
+                <motion.button
                   onClick={() => {
                     alert(`${category === "dating" ? "Sending a heart to" : category === "friends" ? "Adding" : "Connecting with"} ${matchedProfile.name}!`);
                     onBack();
                   }}
-                  className={`w-full py-4 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white font-black text-sm uppercase tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-lg`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-full py-4 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-2 relative overflow-hidden`}
+                  animate={{
+                    boxShadow: [
+                      `0 0 20px rgba(${theme.glowRgb},0.25)`,
+                      `0 0 40px rgba(${theme.glowRgb},0.5)`,
+                      `0 0 20px rgba(${theme.glowRgb},0.25)`,
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)",
+                    }}
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
+                  />
                   <MessageSquare className="w-5 h-5" />
                   <span>Start Conversation</span>
-                </button>
+                </motion.button>
 
-                <button
+                {/* Back to Match — glassmorphic outline */}
+                <motion.button
                   onClick={() => setGameState("reveal")}
-                  className="w-full py-3 rounded-2xl bg-slate-800/80 border border-slate-700/50 text-slate-200 text-sm font-bold active:scale-95 transition-all"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full py-3 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/[0.1] text-slate-200 text-sm font-bold hover:bg-white/[0.08] transition-colors"
                 >
                   Back to Match
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             </motion.div>
           </div>
         )}
 
-        {/* ── MATCH HISTORY BAR (shows at bottom in idle/spinning) ── */}
+        {/* ── MATCH HISTORY BAR — Glassmorphic with mini rings ── */}
         {(gameState === "idle" || gameState === "spinning") && matchHistory.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="px-4 pb-6"
           >
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <div
+              className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4"
+              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 40px rgba(0,0,0,0.3)" }}
+            >
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Recent Matches</h4>
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Recent Matches</h4>
                 <Clock className="w-3.5 h-3.5 text-slate-600" />
               </div>
               <div className="flex items-center gap-3 overflow-x-auto pb-1">
                 {matchHistory.map((profile, idx) => (
-                  <div key={`${profile.name}-${idx}`} className="flex flex-col items-center shrink-0">
-                    <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${theme.borderAccent} shadow-md`}>
-                      <img src={profile.photo} alt={profile.name} className="w-full h-full object-cover" />
+                  <motion.div
+                    key={`${profile.name}-${idx}`}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.08, type: "spring" }}
+                    className="flex flex-col items-center shrink-0"
+                  >
+                    {/* Mini gradient ring */}
+                    <div className="relative">
+                      <div
+                        className="absolute -inset-[2px] rounded-full"
+                        style={{
+                          background: category === "dating"
+                            ? "conic-gradient(from 0deg, #ec4899, #f43f5e, #ec4899)"
+                            : category === "friends"
+                            ? "conic-gradient(from 0deg, #10b981, #14b8a6, #10b981)"
+                            : "conic-gradient(from 0deg, #3b82f6, #6366f1, #3b82f6)",
+                          padding: 2,
+                        }}
+                      >
+                        <div className="w-full h-full rounded-full bg-slate-950" />
+                      </div>
+                      <div className="w-12 h-12 rounded-full overflow-hidden relative z-10 shadow-md">
+                        <img src={profile.photo} alt={profile.name} className="w-full h-full object-cover" />
+                      </div>
+                      {/* Status indicator */}
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950 z-20 bg-gradient-to-r ${theme.gradient}`} />
                     </div>
-                    <span className="text-[9px] text-slate-400 font-bold mt-1">{profile.name}</span>
-                  </div>
+                    <span className="text-[9px] text-slate-400 font-bold mt-1.5">{profile.name}</span>
+                  </motion.div>
                 ))}
               </div>
             </div>

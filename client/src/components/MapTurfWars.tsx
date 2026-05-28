@@ -953,11 +953,13 @@ export default function MapTurfWars({ opponent, category, onComplete }: MapGameC
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 relative z-10"
+          className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] relative z-10"
           style={{
             background: timeLeft <= 10
-              ? `rgba(239,68,68,${0.05 + intensity * 0.05})`
-              : "transparent",
+              ? `linear-gradient(180deg, rgba(239,68,68,${0.08 + intensity * 0.06}) 0%, rgba(15,23,42,0.85) 100%)`
+              : "linear-gradient(180deg, rgba(15,23,42,0.7) 0%, rgba(15,23,42,0.5) 100%)",
+            backdropFilter: "blur(16px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(16px) saturate(1.4)",
             transition: "background 0.5s",
           }}
         >
@@ -992,31 +994,43 @@ export default function MapTurfWars({ opponent, category, onComplete }: MapGameC
 
           {/* Timer */}
           <motion.div
-            animate={timeLeft <= 10 ? { scale: [1, 1.06, 1] } : {}}
-            transition={timeLeft <= 10 ? { duration: 0.8 - intensity * 0.3, repeat: Infinity, ease: "easeInOut" } : {}}
-            className={`px-4 py-1.5 rounded-full border backdrop-blur-sm transition-colors ${
-              timeLeft <= 10
-                ? "bg-red-500/15 border-red-500/40"
-                : "bg-slate-800/60 border-slate-700/50"
-            }`}
+            animate={timeLeft <= 10 ? { scale: [1, 1.08, 1] } : {}}
+            transition={timeLeft <= 10 ? { duration: 0.6 - intensity * 0.2, repeat: Infinity, ease: "easeInOut" } : {}}
+            className="relative px-4 py-1.5 rounded-full border backdrop-blur-md transition-colors"
             style={{
+              background: timeLeft <= 10
+                ? "rgba(239,68,68,0.12)"
+                : "rgba(15,23,42,0.6)",
+              borderColor: timeLeft <= 10
+                ? `rgba(239,68,68,${0.4 + intensity * 0.3})`
+                : "rgba(51,65,85,0.5)",
               boxShadow: timeLeft <= 10
-                ? `0 0 ${20 + intensity * 20}px rgba(239,68,68,${0.25 + intensity * 0.2})`
-                : "none",
+                ? `0 0 ${20 + intensity * 25}px rgba(239,68,68,${0.25 + intensity * 0.25}), inset 0 0 12px rgba(239,68,68,${0.05 + intensity * 0.1})`
+                : "inset 0 1px 0 rgba(255,255,255,0.04)",
             }}
           >
+            {/* Urgency ring pulse */}
+            {timeLeft <= 10 && (
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ border: `1.5px solid rgba(239,68,68,${0.3 + intensity * 0.4})` }}
+                animate={{ scale: [1, 1.35, 1.5], opacity: [0.6, 0.15, 0] }}
+                transition={{ duration: 1.2 - intensity * 0.4, repeat: Infinity, ease: "easeOut" }}
+              />
+            )}
             <div className="flex items-center gap-1.5">
               <Timer
                 className={`w-3.5 h-3.5 ${
                   timeLeft <= 10 ? "text-red-400" : "text-slate-400"
                 }`}
+                style={timeLeft <= 10 ? { filter: `drop-shadow(0 0 4px rgba(239,68,68,${0.5 + intensity * 0.3}))` } : {}}
               />
               <span
                 className={`text-lg font-black tabular-nums ${
                   timeLeft <= 10 ? "text-red-400" : "text-white"
                 }`}
                 style={{
-                  textShadow: timeLeft <= 10 ? `0 0 ${12 + intensity * 12}px rgba(239,68,68,0.6)` : "none",
+                  textShadow: timeLeft <= 10 ? `0 0 ${14 + intensity * 14}px rgba(239,68,68,0.7)` : "none",
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
@@ -1491,13 +1505,26 @@ export default function MapTurfWars({ opponent, category, onComplete }: MapGameC
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.1 * i, type: "spring" }}
-                  className="bg-slate-900/60 backdrop-blur-sm border border-slate-800/60 rounded-xl p-2 text-center"
+                  className="relative rounded-xl p-2 text-center overflow-hidden"
                   style={{
+                    background: "rgba(15,23,42,0.55)",
+                    backdropFilter: "blur(12px) saturate(1.3)",
+                    WebkitBackdropFilter: "blur(12px) saturate(1.3)",
+                    border: stat.isThemed && playerZones > 0
+                      ? `1px solid ${theme.playerHex}25`
+                      : "1px solid rgba(255,255,255,0.06)",
                     boxShadow: stat.isThemed && playerZones > 0
-                      ? `0 0 10px ${theme.playerHex}15`
-                      : "none",
+                      ? `0 0 14px ${theme.playerHex}18, inset 0 1px 0 rgba(255,255,255,0.04)`
+                      : "inset 0 1px 0 rgba(255,255,255,0.04)",
                   }}
                 >
+                  {/* Subtle gradient accent line at top */}
+                  {stat.isThemed && playerZones > 0 && (
+                    <div
+                      className="absolute top-0 left-0 right-0 h-[1px]"
+                      style={{ background: `linear-gradient(90deg, transparent, ${theme.playerHex}40, transparent)` }}
+                    />
+                  )}
                   <p
                     className="text-[7px] text-slate-500 uppercase font-bold mb-0.5"
                     style={{ letterSpacing: "0.25em" }}
@@ -1650,13 +1677,18 @@ export default function MapTurfWars({ opponent, category, onComplete }: MapGameC
                     className="text-xl font-black uppercase mb-1"
                     style={{
                       letterSpacing: "0.15em",
-                      ...(playerWon
-                        ? {
-                            background: "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                          }
-                        : {}),
+                      background: playerWon
+                        ? "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)"
+                        : isTie
+                        ? "linear-gradient(135deg, #94a3b8, #cbd5e1, #94a3b8)"
+                        : "linear-gradient(135deg, #fb7185, #ef4444, #dc2626)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      filter: playerWon
+                        ? "drop-shadow(0 0 12px rgba(245,158,11,0.3))"
+                        : !isTie
+                        ? "drop-shadow(0 0 10px rgba(239,68,68,0.25))"
+                        : "none",
                     }}
                   >
                     {playerWon
@@ -1821,11 +1853,12 @@ export default function MapTurfWars({ opponent, category, onComplete }: MapGameC
                   {/* Action buttons — improved */}
                   <div className="space-y-2">
                     <motion.button
-                      whileTap={{ scale: 0.93 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={handlePlayAgain}
                       className={`w-full py-3 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white font-black text-xs uppercase tracking-widest transition-transform flex items-center justify-center gap-2 relative overflow-hidden`}
                       style={{
-                        boxShadow: `0 4px 16px ${theme.solidHex}40, inset 0 1px 0 rgba(255,255,255,0.15)`,
+                        boxShadow: `0 4px 20px ${theme.solidHex}45, 0 0 40px ${theme.solidHex}15, inset 0 1px 0 rgba(255,255,255,0.18)`,
                         letterSpacing: "0.15em",
                         textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                       }}
@@ -1835,18 +1868,23 @@ export default function MapTurfWars({ opponent, category, onComplete }: MapGameC
                         animate={{ x: ["-100%", "200%"] }}
                         transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                         className="absolute inset-0 w-1/3 skew-x-[-20deg]"
-                        style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)" }}
+                        style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)" }}
                       />
                       <RefreshCcw className="w-4 h-4" />
                       <span>Play Again</span>
                     </motion.button>
                     <motion.button
-                      whileTap={{ scale: 0.93 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={onComplete}
-                      className="w-full py-2.5 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 text-slate-300 text-xs font-bold transition-all"
+                      className="w-full py-2.5 rounded-xl backdrop-blur-md border text-slate-300 text-xs font-bold transition-all relative overflow-hidden"
                       style={{
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+                        background: "rgba(30,41,59,0.7)",
+                        borderColor: "rgba(255,255,255,0.08)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.2)",
                         textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
                       }}
                     >
                       Done

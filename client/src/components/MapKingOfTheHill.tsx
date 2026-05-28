@@ -864,9 +864,10 @@ export default function MapKingOfTheHill({ opponent, category, onComplete, onBac
         <div
           className="flex items-center justify-between px-4 py-3"
           style={{
-            borderBottom: "1px solid rgba(30,41,59,0.6)",
-            background: "rgba(15,23,42,0.4)",
-            backdropFilter: "blur(10px)",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(15,23,42,0.55)",
+            backdropFilter: "blur(16px)",
+            boxShadow: "inset 0 -1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.15)",
           }}
         >
           {/* Player with crown */}
@@ -1236,6 +1237,22 @@ export default function MapKingOfTheHill({ opponent, category, onComplete, onBac
       {/* ── PHASE: PLAYING ── */}
       {phase === "playing" && (
         <div className="relative flex flex-col items-center px-4 py-4 flex-1">
+          {/* Red urgency vignette when time is low */}
+          <AnimatePresence>
+            {timeLeft <= 3 && (
+              <motion.div
+                key="urgency-vignette"
+                className="absolute inset-0 pointer-events-none z-30 rounded-none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  background: "radial-gradient(ellipse at center, transparent 50%, rgba(239,68,68,0.12) 100%)",
+                }}
+              />
+            )}
+          </AnimatePresence>
 
           {/* Timer pill with glow */}
           <motion.div
@@ -1538,6 +1555,29 @@ export default function MapKingOfTheHill({ opponent, category, onComplete, onBac
             transition={{ type: "spring", stiffness: 200, damping: 18 }}
             className="w-full max-w-sm"
           >
+           {/* Glassmorphic card wrapper with rotating conic border */}
+           <div className="relative rounded-2xl overflow-visible">
+            <motion.div
+              className="absolute -inset-[1px] rounded-2xl pointer-events-none z-0"
+              style={{
+                background: zoneWinner === "player"
+                  ? `conic-gradient(from 0deg, rgba(16,185,129,0.3), transparent, rgba(52,211,153,0.2), transparent, rgba(16,185,129,0.3))`
+                  : zoneWinner === "tie"
+                  ? `conic-gradient(from 0deg, rgba(245,158,11,0.3), transparent, rgba(251,191,36,0.2), transparent, rgba(245,158,11,0.3))`
+                  : `conic-gradient(from 0deg, rgba(244,63,94,0.3), transparent, rgba(251,113,133,0.2), transparent, rgba(244,63,94,0.3))`,
+              }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+            />
+            <div
+              className="relative rounded-2xl overflow-hidden z-10 p-1"
+              style={{
+                background: "rgba(15,23,42,0.8)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                boxShadow: `0 20px 50px rgba(0,0,0,0.4), 0 0 30px ${zoneWinner === "player" ? "rgba(16,185,129,0.08)" : zoneWinner === "tie" ? "rgba(245,158,11,0.08)" : "rgba(244,63,94,0.08)"}`,
+              }}
+            >
             {/* Result icon with glow */}
             <div className="relative flex justify-center mb-4">
               {zoneWinner === "player" && <ConfettiBurst color1={theme.color1} color2={theme.color2} />}
@@ -1645,6 +1685,7 @@ export default function MapKingOfTheHill({ opponent, category, onComplete, onBac
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
               onClick={handleNextZone}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95, background: `linear-gradient(135deg, ${theme.color2}, ${theme.color1})` }}
               className="relative w-full py-3.5 rounded-2xl text-white font-black text-xs uppercase overflow-hidden"
               style={{
@@ -1667,6 +1708,8 @@ export default function MapKingOfTheHill({ opponent, category, onComplete, onBac
                 {currentZone >= TOTAL_ZONES ? "See Final Results" : "Next Zone"}
               </span>
             </motion.button>
+            </div>{/* end glassmorphic inner */}
+           </div>{/* end glassmorphic wrapper */}
           </motion.div>
         </div>
       )}
@@ -1961,6 +2004,7 @@ export default function MapKingOfTheHill({ opponent, category, onComplete, onBac
                     </motion.button>
                     <motion.button
                       onClick={onComplete}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
                       className="w-full py-2.5 rounded-xl text-slate-300 text-xs font-bold"
                       style={{

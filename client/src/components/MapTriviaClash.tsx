@@ -1074,12 +1074,13 @@ export default function MapTriviaClash({ opponent, category, onComplete, onBack 
                   transition={{ duration: timeLeft <= 3 && phase === "question" ? 0.5 : 1.5, repeat: Infinity }}
                 />
                 <div
-                  className="relative px-3.5 py-1.5 rounded-full overflow-hidden"
+                  className="relative px-3.5 py-1.5 rounded-full overflow-hidden backdrop-blur-xl"
                   style={{
                     background: timeLeft <= 3 && phase === "question"
-                      ? "rgba(239,68,68,0.1)"
-                      : "rgba(30,41,59,0.6)",
-                    border: `1px solid ${timeLeft <= 3 && phase === "question" ? "rgba(239,68,68,0.4)" : "rgba(51,65,85,0.5)"}`,
+                      ? "rgba(239,68,68,0.08)"
+                      : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${timeLeft <= 3 && phase === "question" ? "rgba(239,68,68,0.4)" : "rgba(255,255,255,0.06)"}`,
+                    boxShadow: timeLeft <= 3 && phase === "question" ? "0 0 15px rgba(239,68,68,0.1)" : "inset 0 1px 0 rgba(255,255,255,0.04)",
                   }}
                 >
                   {/* Animated shimmer gradient */}
@@ -1667,25 +1668,27 @@ function ResultsScreen({
         transition={{ type: "spring", stiffness: 200, damping: 18 }}
         className="w-full max-w-sm relative z-10"
       >
-        {/* Animated gradient border card */}
+        {/* Animated gradient border card — glassmorphic */}
         <div
           className="relative rounded-2xl p-[1.5px]"
           style={{
             background: playerWon
-              ? `conic-gradient(from ${rotation}deg, #fbbf24, #f59e0b, #fbbf24)`
-              : `conic-gradient(from ${rotation}deg, ${theme.hex}, ${theme.hexAlt}, ${theme.hex})`,
+              ? `conic-gradient(from ${rotation}deg, #fbbf24, rgba(245,158,11,0.6), #fbbf24, rgba(251,191,36,0.3), #fbbf24)`
+              : `conic-gradient(from ${rotation}deg, ${theme.hex}, ${theme.hexAlt}, rgba(255,255,255,0.08), ${theme.hex})`,
+            filter: `drop-shadow(0 0 ${playerWon ? '18px' : '10px'} ${playerWon ? 'rgba(251,191,36,0.15)' : theme.glowSoft})`,
           }}
         >
           <div
-            className="rounded-2xl overflow-hidden backdrop-blur-md"
+            className="rounded-2xl overflow-hidden backdrop-blur-xl"
             style={{
-              background: "rgba(15,23,42,0.92)",
+              background: "rgba(255,255,255,0.04)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4)",
             }}
           >
             {/* Top gradient bar */}
             <div
-              className="h-1.5"
-              style={{ background: `linear-gradient(90deg, ${theme.hex}, ${theme.hexAlt})` }}
+              className="h-1"
+              style={{ background: `linear-gradient(90deg, ${theme.hex}, ${theme.hexAlt}, ${theme.hex})`, opacity: 0.8 }}
             />
             <div className="p-5 text-center">
               {/* Result icon */}
@@ -1772,20 +1775,24 @@ function ResultsScreen({
                 className="grid grid-cols-3 gap-2 mb-4"
               >
                 <div
-                  className="rounded-xl p-3 backdrop-blur-sm"
+                  className="rounded-xl p-3 backdrop-blur-xl"
                   style={{
-                    background: "rgba(30,41,59,0.5)",
-                    border: `1px solid ${playerWon ? "rgba(251,191,36,0.3)" : "rgba(51,65,85,0.4)"}`,
-                    boxShadow: playerWon ? "0 0 15px rgba(251,191,36,0.1)" : "none",
+                    background: playerWon ? "rgba(251,191,36,0.06)" : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${playerWon ? "rgba(251,191,36,0.25)" : "rgba(255,255,255,0.06)"}`,
+                    boxShadow: playerWon ? "0 0 20px rgba(251,191,36,0.08), inset 0 1px 0 rgba(255,255,255,0.06)" : "inset 0 1px 0 rgba(255,255,255,0.04)",
                     transform: "perspective(800px) rotateX(2deg)",
                   }}
                 >
-                  <div className="w-7 h-7 rounded-full bg-slate-700/60 flex items-center justify-center mx-auto mb-1.5">
+                  <div className="w-7 h-7 rounded-full bg-slate-700/40 backdrop-blur-sm flex items-center justify-center mx-auto mb-1.5" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
                     <User className="w-4 h-4 text-slate-400" />
                   </div>
                   <p
                     className="text-xl font-black"
-                    style={{ color: playerWon ? "#fbbf24" : "white", fontVariantNumeric: "tabular-nums" }}
+                    style={{
+                      color: playerWon ? "#fbbf24" : "white",
+                      fontVariantNumeric: "tabular-nums",
+                      textShadow: playerWon ? "0 0 12px rgba(251,191,36,0.4)" : "none",
+                    }}
                   >
                     {animPlayerScore}
                   </p>
@@ -1795,17 +1802,17 @@ function ResultsScreen({
                   <span className="font-black text-slate-600 uppercase" style={{ fontSize: "10px", letterSpacing: "0.15em" }}>vs</span>
                 </div>
                 <div
-                  className="rounded-xl p-3 backdrop-blur-sm"
+                  className="rounded-xl p-3 backdrop-blur-xl"
                   style={{
-                    background: "rgba(30,41,59,0.5)",
-                    border: `1px solid ${!playerWon && !isTie ? "rgba(251,191,36,0.3)" : "rgba(51,65,85,0.4)"}`,
-                    boxShadow: !playerWon && !isTie ? "0 0 15px rgba(251,191,36,0.1)" : "none",
+                    background: !playerWon && !isTie ? "rgba(251,191,36,0.06)" : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${!playerWon && !isTie ? "rgba(251,191,36,0.25)" : "rgba(255,255,255,0.06)"}`,
+                    boxShadow: !playerWon && !isTie ? "0 0 20px rgba(251,191,36,0.08), inset 0 1px 0 rgba(255,255,255,0.06)" : "inset 0 1px 0 rgba(255,255,255,0.04)",
                     transform: "perspective(800px) rotateX(2deg)",
                   }}
                 >
                   <div
-                    className="w-7 h-7 rounded-full overflow-hidden bg-slate-800 mx-auto mb-1.5 flex items-center justify-center"
-                    style={{ border: `1.5px solid ${theme.hex}` }}
+                    className="w-7 h-7 rounded-full overflow-hidden bg-slate-800/60 backdrop-blur-sm mx-auto mb-1.5 flex items-center justify-center"
+                    style={{ border: `1.5px solid ${theme.hex}`, boxShadow: `0 0 8px ${theme.glowSoft}` }}
                   >
                     {avatarUrl ? (
                       <img src={avatarUrl} alt={opponentName} className="w-full h-full object-cover" />
@@ -1815,7 +1822,11 @@ function ResultsScreen({
                   </div>
                   <p
                     className="text-xl font-black"
-                    style={{ color: !playerWon && !isTie ? "#fbbf24" : "white", fontVariantNumeric: "tabular-nums" }}
+                    style={{
+                      color: !playerWon && !isTie ? "#fbbf24" : "white",
+                      fontVariantNumeric: "tabular-nums",
+                      textShadow: !playerWon && !isTie ? "0 0 12px rgba(251,191,36,0.4)" : "none",
+                    }}
                   >
                     {animOpponentScore}
                   </p>
@@ -1881,28 +1892,37 @@ function ResultsScreen({
                 className="space-y-2.5"
               >
                 <motion.button
-                  whileTap={{ scale: 0.93 }}
+                  whileHover={{ scale: 1.02, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handlePlayAgain}
-                  className={`w-full py-3.5 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white text-xs uppercase transition-transform flex items-center justify-center gap-2`}
+                  className={`w-full py-3.5 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white text-xs uppercase transition-transform flex items-center justify-center gap-2 relative overflow-hidden`}
                   style={{
-                    boxShadow: `0 4px 25px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.15)`,
+                    boxShadow: `0 4px 25px ${theme.glow}, 0 0 40px ${theme.glowSoft}, inset 0 1px 0 rgba(255,255,255,0.2)`,
                     fontWeight: 900,
                     letterSpacing: "0.15em",
                     transform: "perspective(600px) translateZ(0)",
                     textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                   }}
                 >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Play Again</span>
+                  {/* Shimmer sweep */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%)" }}
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                  />
+                  <RotateCcw className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10">Play Again</span>
                 </motion.button>
                 <motion.button
-                  whileTap={{ scale: 0.93 }}
+                  whileHover={{ scale: 1.02, transition: { type: "spring", stiffness: 400, damping: 17 } }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onComplete}
-                  className="w-full py-3 rounded-xl text-slate-300 text-xs font-bold transition-all backdrop-blur-sm"
+                  className="w-full py-3 rounded-xl text-slate-300 text-xs font-bold transition-all backdrop-blur-xl"
                   style={{
-                    background: "rgba(30,41,59,0.6)",
-                    border: "1px solid rgba(51,65,85,0.4)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.2)",
                     textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                   }}
                 >

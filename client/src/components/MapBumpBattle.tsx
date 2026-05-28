@@ -851,7 +851,14 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
                   <User className="w-5 h-5 text-slate-400" />
                 </div>
               </div>
-              <div>
+              <div
+                className="rounded-lg px-2.5 py-1.5 backdrop-blur-md"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: `1px solid ${playerScore > opponentScore ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.06)'}`,
+                  boxShadow: playerScore > opponentScore ? '0 0 12px rgba(52,211,153,0.08)' : 'none',
+                }}
+              >
                 <p className="text-[10px] font-black text-slate-400 uppercase" style={{ letterSpacing: "0.25em", fontSize: "7px" }}>You</p>
                 <div className="text-base font-black" style={{ fontVariantNumeric: "tabular-nums" }}>
                   <ScoreWithRipple
@@ -925,7 +932,14 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
 
             {/* Opponent */}
             <div className="flex items-center gap-2.5">
-              <div className="text-right">
+              <div
+                className="text-right rounded-lg px-2.5 py-1.5 backdrop-blur-md"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: `1px solid ${opponentScore > playerScore ? 'rgba(251,113,133,0.15)' : 'rgba(255,255,255,0.06)'}`,
+                  boxShadow: opponentScore > playerScore ? '0 0 12px rgba(251,113,133,0.08)' : 'none',
+                }}
+              >
                 <p className="text-[10px] font-black text-slate-400 uppercase" style={{ letterSpacing: "0.25em", fontSize: "7px" }}>{opponentName}</p>
                 <div className="text-base font-black" style={{ fontVariantNumeric: "tabular-nums" }}>
                   <ScoreWithRipple
@@ -1355,6 +1369,9 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -20 }}
             className="flex flex-col items-center px-4 py-6 relative"
+            style={{
+              background: "radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.02) 0%, transparent 60%)",
+            }}
           >
             <motion.div
               initial={{ scale: 0, opacity: 0, y: 30 }}
@@ -1562,9 +1579,10 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
                   initial={{ y: 15, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.55 }}
-                  whileTap={{ scale: 0.93 }}
+                  whileHover={{ scale: 1.02, boxShadow: `0 6px 35px ${theme.glow}` }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleNextRound}
-                  className={`w-full py-3.5 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white text-xs uppercase transition-transform`}
+                  className={`w-full py-3.5 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white text-xs uppercase transition-transform relative overflow-hidden`}
                   style={{
                     boxShadow: `0 4px 25px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.15)`,
                     fontWeight: 900,
@@ -1573,9 +1591,18 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
                     textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                   }}
                 >
-                  {currentRound >= TOTAL_ROUNDS || playerScore >= 2 || opponentScore >= 2
-                    ? "See Final Results"
-                    : "Next Round →"}
+                  {/* Shimmer sweep */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)" }}
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                  />
+                  <span className="relative z-10">
+                    {currentRound >= TOTAL_ROUNDS || playerScore >= 2 || opponentScore >= 2
+                      ? "See Final Results"
+                      : "Next Round →"}
+                  </span>
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -1799,9 +1826,10 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
                       className="space-y-2.5"
                     >
                       <motion.button
-                        whileTap={{ scale: 0.93 }}
+                        whileHover={{ scale: 1.02, boxShadow: `0 6px 35px ${theme.glow}` }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={handlePlayAgain}
-                        className={`w-full py-3.5 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white text-xs uppercase transition-transform flex items-center justify-center gap-2`}
+                        className={`w-full py-3.5 rounded-2xl bg-gradient-to-r ${theme.gradient} text-white text-xs uppercase transition-transform flex items-center justify-center gap-2 relative overflow-hidden`}
                         style={{
                           boxShadow: `0 4px 25px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.15)`,
                           fontWeight: 900,
@@ -1810,11 +1838,19 @@ export default function MapBumpBattle({ opponent, category, onComplete, onBack }
                           textShadow: "0 1px 2px rgba(0,0,0,0.3)",
                         }}
                       >
-                        <RefreshCcw className="w-4 h-4" />
-                        <span>Play Again</span>
+                        {/* Shimmer sweep */}
+                        <motion.div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{ background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)" }}
+                          animate={{ x: ["-100%", "200%"] }}
+                          transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }}
+                        />
+                        <RefreshCcw className="w-4 h-4 relative z-10" />
+                        <span className="relative z-10">Play Again</span>
                       </motion.button>
                       <motion.button
-                        whileTap={{ scale: 0.93 }}
+                        whileHover={{ scale: 1.02, background: "rgba(30,41,59,0.8)" }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={onComplete}
                         className="w-full py-3 rounded-xl text-slate-300 text-xs font-bold transition-all backdrop-blur-sm"
                         style={{

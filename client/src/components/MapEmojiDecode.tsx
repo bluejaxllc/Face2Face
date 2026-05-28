@@ -192,6 +192,47 @@ function AmbientParticles({ intensity, color }: { intensity: number; color: stri
   );
 }
 
+/* ── Floating Background Orbs ── */
+function FloatingOrbs({ color, secondColor }: { color: string; secondColor: string }) {
+  const orbs = useMemo(
+    () => [
+      { size: 120, x: 15, y: 20, color, dur: 18, dx: 30, dy: 25 },
+      { size: 90, x: 75, y: 60, color: secondColor, dur: 22, dx: -25, dy: 35 },
+      { size: 70, x: 50, y: 80, color, dur: 15, dx: 20, dy: -30 },
+    ],
+    [color, secondColor]
+  );
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+      {orbs.map((orb, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            width: orb.size,
+            height: orb.size,
+            left: `${orb.x}%`,
+            top: `${orb.y}%`,
+            background: `radial-gradient(circle, ${orb.color}18 0%, ${orb.color}06 50%, transparent 70%)`,
+            filter: 'blur(30px)',
+          }}
+          animate={{
+            x: [0, orb.dx, -orb.dx * 0.6, 0],
+            y: [0, -orb.dy, orb.dy * 0.8, 0],
+            scale: [1, 1.15, 0.9, 1],
+            opacity: [0.4, 0.7, 0.35, 0.4],
+          }}
+          transition={{
+            duration: orb.dur,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 /* ── Levenshtein Distance ── */
 
 function levenshteinDistance(a: string, b: string): number {
@@ -1069,6 +1110,7 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
     <div className="flex flex-col w-full text-white select-none overflow-hidden relative">
       <NoiseTexture />
       <AmbientParticles intensity={Math.max(intensity, roundIntensity * 0.5)} color={theme.solidHex} />
+      <FloatingOrbs color={theme.solidHex} secondColor={theme.secondHex} />
 
       {/* ── Radial Wipe (between-round transition) ── */}
       <AnimatePresence>
@@ -1281,7 +1323,15 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
       {phase === "playing" && puzzle && (
         <div className="flex flex-col">
           {/* Score bar */}
-          <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+          <div
+            className="flex items-center gap-2 px-4 pt-3 pb-2 mx-2 mt-1 rounded-2xl"
+            style={{
+              background: 'rgba(15,23,42,0.5)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.2), 0 0 40px ${theme.glowColorSoft}`,
+            }}
+          >
             {/* Player */}
             <div className="flex items-center gap-1.5 flex-1">
               <div className="relative">
@@ -1300,7 +1350,24 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
             </div>
 
             {/* Circular timer ring with round counter */}
-            <div className="flex items-center gap-2">
+            <motion.div
+              className="flex items-center gap-2 px-2 py-1 rounded-xl"
+              style={{
+                background: 'rgba(15,23,42,0.4)',
+                border: `1px solid ${timeLeft <= 5 ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.05)'}`,
+                transition: 'border-color 0.3s',
+              }}
+              animate={
+                timeLeft <= 5
+                  ? { boxShadow: ['0 0 0px rgba(239,68,68,0)', '0 0 16px rgba(239,68,68,0.3)', '0 0 0px rgba(239,68,68,0)'] }
+                  : { boxShadow: '0 0 0px transparent' }
+              }
+              transition={
+                timeLeft <= 5
+                  ? { duration: 0.6, repeat: Infinity, ease: 'easeInOut' }
+                  : { duration: 0.3 }
+              }
+            >
               <CircularTimerRing
                 timeLeft={timeLeft}
                 totalTime={TIME_PER_ROUND}
@@ -1362,7 +1429,7 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
                   R{currentRound + 1}/{TOTAL_ROUNDS}
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Opponent */}
             <div className="flex items-center gap-1.5 flex-1 justify-end">
@@ -2002,13 +2069,13 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
                     className="text-xl font-black uppercase mb-1"
                     style={{
                       letterSpacing: "0.15em",
-                      ...(playerWon
-                        ? {
-                            background: "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                          }
-                        : {}),
+                      background: playerWon
+                        ? "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)"
+                        : isTie
+                        ? `linear-gradient(135deg, #94a3b8, ${theme.solidHex}, #94a3b8)`
+                        : "linear-gradient(135deg, #f87171, #ef4444, #dc2626)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
                     }}
                   >
                     {playerWon ? "You Win!" : isTie ? "It's a Tie!" : "Defeated!"}
@@ -2229,7 +2296,8 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.9 }}
-                      whileTap={{ scale: 0.93 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={handlePlayAgain}
                       className="w-full py-3 rounded-2xl text-white font-black text-xs uppercase flex items-center justify-center gap-2 relative overflow-hidden"
                       style={{
@@ -2262,7 +2330,8 @@ export default function MapEmojiDecode({ opponent, category, onComplete }: MapGa
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 1 }}
-                      whileTap={{ scale: 0.93 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={onComplete}
                       className="w-full py-2.5 rounded-xl text-slate-300 text-xs font-bold transition-all"
                       style={{

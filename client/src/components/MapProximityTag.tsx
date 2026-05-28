@@ -1666,10 +1666,16 @@ export default function MapProximityTag({
 
           {/* Top bar: avatar + round tracker + score */}
           <motion.div
-            className="w-full flex items-center justify-between mb-3 relative z-10"
+            className="w-full flex items-center justify-between mb-3 relative z-10 px-3 py-2 rounded-2xl"
             initial={{ y: -10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.3 }}
+            style={{
+              background: 'rgba(15,23,42,0.45)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 20px rgba(0,0,0,0.25)',
+            }}
           >
             {/* Left: Avatar + Name */}
             <div className="flex items-center gap-2">
@@ -2558,14 +2564,14 @@ export default function MapProximityTag({
               <div
                 className="relative rounded-2xl overflow-hidden z-10"
                 style={{
-                  background: "rgba(15,23,42,0.88)",
-                  backdropFilter: "blur(24px)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: 'rgba(255,255,255,0.04)',
+                  backdropFilter: 'blur(32px) saturate(1.3)',
+                  border: '1px solid rgba(255,255,255,0.06)',
                   boxShadow: `0 30px 70px rgba(0,0,0,0.55), 0 0 50px ${
                     scorePercent >= 80
-                      ? "rgba(251,191,36,0.12)"
-                      : theme.glow.replace("0.4", "0.1")
-                  }`,
+                      ? 'rgba(251,191,36,0.12)'
+                      : theme.glow.replace('0.4', '0.1')
+                  }, inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)`,
                 }}
               >
                 {/* Top accent bar */}
@@ -2840,9 +2846,10 @@ export default function MapProximityTag({
                         transition={{ delay: 0.8 + i * 0.08 }}
                         className="text-center py-2 rounded-lg"
                         style={{
-                          background: `${stat.color}08`,
-                          border: `1px solid ${stat.color}18`,
-                          backdropFilter: "blur(8px)",
+                          background: `${stat.color}0a`,
+                          border: `1px solid ${stat.color}20`,
+                          backdropFilter: 'blur(12px) saturate(1.2)',
+                          boxShadow: `0 2px 8px ${stat.color}08, inset 0 1px 0 rgba(255,255,255,0.04)`,
                         }}
                       >
                         <p
@@ -2872,11 +2879,11 @@ export default function MapProximityTag({
                     transition={{ delay: 0.9 }}
                     className="rounded-xl p-3 mb-4"
                     style={{
-                      background: "rgba(30,41,59,0.35)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      backdropFilter: "blur(12px)",
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                      backdropFilter: 'blur(16px) saturate(1.2)',
                       boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,0.04)",
+                        'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.15)',
                     }}
                   >
                     <div className="flex items-center justify-between">
@@ -2963,15 +2970,16 @@ export default function MapProximityTag({
                       onClick={onComplete}
                       whileTap={{ scale: 0.93 }}
                       whileHover={{ scale: 1.01 }}
-                      className="w-full py-2.5 rounded-xl text-slate-300 text-xs font-bold"
+                      className="w-full py-2.5 rounded-xl text-slate-300 text-xs font-bold uppercase"
                       style={{
-                        background: "rgba(30,41,59,0.6)",
-                        border: "1px solid rgba(51,65,85,0.4)",
-                        backdropFilter: "blur(12px)",
+                        letterSpacing: '0.1em',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(16px) saturate(1.2)',
                         boxShadow:
-                          "inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 10px rgba(0,0,0,0.2)",
+                          'inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 10px rgba(0,0,0,0.2)',
                         textShadow:
-                          "0 1px 2px rgba(0,0,0,0.3)",
+                          '0 1px 2px rgba(0,0,0,0.3)',
                       }}
                     >
                       Done

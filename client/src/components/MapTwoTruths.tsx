@@ -1243,17 +1243,33 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
             </AnimatePresence>
           </div>
 
-          {/* Timer bar with shimmer — blurs during reveal (depth-of-field) */}
+          {/* Timer bar with shimmer — glassmorphic + urgency pulse */}
           <motion.div
             className="px-4 pt-1 pb-3"
             animate={phase === "reveal" ? { filter: "blur(3px)", opacity: 0.5 } : { filter: "blur(0px)", opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="flex items-center gap-2 mb-1.5">
+            {/* Glassmorphic timer pill */}
+            <motion.div
+              className="flex items-center gap-2 mb-1.5 px-3 py-1.5 rounded-full w-fit"
+              style={{
+                background: timeLeft <= 5 && phase === "playing" ? "rgba(239,68,68,0.08)" : "rgba(15,23,42,0.5)",
+                backdropFilter: "blur(12px)",
+                border: `1px solid ${timeLeft <= 5 && phase === "playing" ? "rgba(239,68,68,0.3)" : "rgba(51,65,85,0.4)"}`,
+                boxShadow: timeLeft <= 5 && phase === "playing" ? "0 0 15px rgba(239,68,68,0.15)" : "0 2px 8px rgba(0,0,0,0.2)",
+                transition: "background 0.3s, border-color 0.3s, box-shadow 0.3s",
+              }}
+              animate={
+                timeLeft <= 3 && phase === "playing"
+                  ? { scale: [1, 1.04, 1], boxShadow: ["0 0 15px rgba(239,68,68,0.15)", "0 0 25px rgba(239,68,68,0.35)", "0 0 15px rgba(239,68,68,0.15)"] }
+                  : {}
+              }
+              transition={{ duration: 0.6, repeat: Infinity }}
+            >
               <motion.div
                 animate={
                   timeLeft <= 5 && phase === "playing"
-                    ? { scale: [1, 1.2, 1] }
+                    ? { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }
                     : {}
                 }
                 transition={{ duration: 0.5, repeat: Infinity }}
@@ -1262,18 +1278,31 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
                   className={`w-3.5 h-3.5 ${
                     timeLeft <= 5 && phase === "playing" ? "text-red-400" : "text-slate-400"
                   }`}
+                  style={{
+                    filter: timeLeft <= 3 && phase === "playing" ? "drop-shadow(0 0 4px rgba(239,68,68,0.6))" : "none",
+                  }}
                 />
               </motion.div>
               <span
                 className={`text-xs font-black ${
                   timeLeft <= 5 && phase === "playing" ? "text-red-400" : "text-slate-300"
                 }`}
-                style={{ fontVariantNumeric: 'tabular-nums' }}
+                style={{
+                  fontVariantNumeric: 'tabular-nums',
+                  textShadow: timeLeft <= 3 && phase === "playing" ? "0 0 8px rgba(239,68,68,0.5)" : "none",
+                }}
               >
                 {phase === "reveal" ? "—" : `${timeLeft}s`}
               </span>
-            </div>
-            <div className="relative w-full h-2 rounded-full bg-slate-800/60 overflow-hidden">
+            </motion.div>
+            <div
+              className="relative w-full h-2 rounded-full overflow-hidden"
+              style={{
+                background: "rgba(15,23,42,0.6)",
+                backdropFilter: "blur(4px)",
+                border: "1px solid rgba(30,41,59,0.5)",
+              }}
+            >
               <motion.div
                 className="h-full rounded-full relative overflow-hidden"
                 style={{
@@ -1490,23 +1519,31 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
                     </div>
                   </motion.div>
 
-                  {/* Title with gradient */}
+                  {/* Title with gradient + glow */}
                   <motion.h2
-                    initial={{ y: 10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 }}
+                    initial={{ y: 10, opacity: 0, scale: 0.95 }}
+                    animate={{ y: 0, opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4, type: "spring", stiffness: 200, damping: 15 }}
                     className="text-xl font-black uppercase mb-1"
                     style={{
                       letterSpacing: '0.15em',
                       background:
                         correctCount >= 4
-                          ? "linear-gradient(90deg, #fbbf24, #f59e0b)"
+                          ? "linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24)"
                           : correctCount >= 3
-                          ? `linear-gradient(90deg, ${theme.color1}, ${theme.color2})`
-                          : undefined,
-                      WebkitBackgroundClip: correctCount >= 3 ? "text" : undefined,
-                      WebkitTextFillColor: correctCount >= 3 ? "transparent" : undefined,
-                      color: correctCount < 3 ? "#e2e8f0" : undefined,
+                          ? `linear-gradient(135deg, ${theme.color1}, ${theme.color2}, ${theme.color1})`
+                          : correctCount >= 2
+                          ? "linear-gradient(135deg, #94a3b8, #e2e8f0, #94a3b8)"
+                          : "linear-gradient(135deg, #f87171, #fca5a5, #f87171)",
+                      backgroundSize: "200% 100%",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      filter:
+                        correctCount >= 4
+                          ? "drop-shadow(0 0 12px rgba(251,191,36,0.4))"
+                          : correctCount >= 3
+                          ? `drop-shadow(0 0 10px ${theme.glow})`
+                          : "none",
                     }}
                   >
                     {correctCount >= 4
@@ -1618,33 +1655,45 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
                     })}
                   </div>
 
-                  {/* Stats with glassmorphic cards */}
+                  {/* Stats with glassmorphic cards + gradient accents */}
                   <div className="flex items-center justify-center gap-3 mb-4">
                     {[
-                      { label: "Correct", value: correctCount, color: "#34d399" },
-                      { label: "Wrong", value: TOTAL_ROUNDS - correctCount, color: "#f87171" },
-                      { label: "Accuracy", value: `${scorePercent}%`, color: "#fff" },
+                      { label: "Correct", value: correctCount, color: "#34d399", accent: "rgba(16,185,129,0.15)" },
+                      { label: "Wrong", value: TOTAL_ROUNDS - correctCount, color: "#f87171", accent: "rgba(239,68,68,0.15)" },
+                      { label: "Accuracy", value: `${scorePercent}%`, color: "#fff", accent: `${theme.glow.replace('0.4','0.1')}` },
                     ].map((stat, i) => (
                       <motion.div
                         key={stat.label}
-                        initial={{ y: 15, opacity: 0, rotateX: 2 }}
+                        initial={{ y: 15, opacity: 0, rotateX: 8 }}
                         animate={{ y: 0, opacity: 1, rotateX: 0 }}
-                        transition={{ delay: 0.7 + i * 0.1 }}
-                        className="text-center px-3 py-2 rounded-xl"
+                        transition={{ delay: 0.7 + i * 0.1, type: "spring", stiffness: 200 }}
+                        className="relative text-center px-4 py-2.5 rounded-xl flex-1 overflow-hidden"
                         style={{
-                          background: "rgba(30,41,59,0.4)",
-                          border: "1px solid rgba(51,65,85,0.4)",
+                          background: "rgba(15,23,42,0.5)",
+                          backdropFilter: "blur(16px)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                          boxShadow: `0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)`,
                           perspective: '800px',
                         }}
                       >
-                        <p className="text-sm font-black" style={{ color: stat.color, fontVariantNumeric: 'tabular-nums' }}>
+                        {/* Gradient accent glow at top */}
+                        <div
+                          className="absolute top-0 left-0 right-0 h-[2px]"
+                          style={{ background: `linear-gradient(90deg, transparent, ${stat.color}80, transparent)` }}
+                        />
+                        {/* Subtle radial glow behind value */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{ background: `radial-gradient(ellipse at 50% 30%, ${stat.accent}, transparent 70%)` }}
+                        />
+                        <p className="relative text-sm font-black" style={{ color: stat.color, fontVariantNumeric: 'tabular-nums', textShadow: `0 0 10px ${stat.accent}` }}>
                           {typeof stat.value === "number" ? (
                             <AnimatedCounter value={stat.value} />
                           ) : (
                             stat.value
                           )}
                         </p>
-                        <p className="text-[6px] text-slate-500 uppercase font-bold" style={{ letterSpacing: '0.2em' }}>
+                        <p className="relative text-[6px] text-slate-500 uppercase font-bold" style={{ letterSpacing: '0.2em' }}>
                           {stat.label}
                         </p>
                       </motion.div>
@@ -1682,11 +1731,14 @@ export default function MapTwoTruths({ opponent, category, onComplete }: MapGame
                     <motion.button
                       onClick={onComplete}
                       whileTap={{ scale: 0.95 }}
-                      className="w-full py-2.5 rounded-xl text-slate-300 text-xs font-bold backdrop-blur-sm"
+                      whileHover={{ scale: 1.02, borderColor: "rgba(148,163,184,0.3)" }}
+                      className="w-full py-2.5 rounded-xl text-slate-300 text-xs font-bold uppercase relative overflow-hidden"
                       style={{
-                        background: "rgba(30,41,59,0.6)",
+                        letterSpacing: '0.1em',
+                        background: "rgba(15,23,42,0.6)",
+                        backdropFilter: "blur(12px)",
                         border: "1px solid rgba(51,65,85,0.4)",
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
                         textShadow: "0 1px 2px rgba(0,0,0,0.2)",
                       }}
                     >
