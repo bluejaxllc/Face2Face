@@ -150,7 +150,7 @@ function DifficultyStars({ level, color }: { level: number; color: string }) {
 // ─── Game Card ──────────────────────────────────────────────────────────────────
 function GameCard({ game, index, onPlay, category }: {
   game: typeof gamesList[0]; index: number;
-  onPlay: () => void; category: Category;
+  onPlay: (gameKey: string) => void; category: Category;
 }) {
   const colors = gameColorMap[game.color] || gameColorMap.purple;
   const IconComp = game.icon;
@@ -162,7 +162,7 @@ function GameCard({ game, index, onPlay, category }: {
       transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileTap={{ scale: 0.97 }}
       whileHover={{ scale: 1.02 }}
-      onClick={() => game.ready && onPlay()}
+      onClick={() => game.ready && onPlay(game.gameKey)}
       className={`w-full text-left relative group ${!game.ready ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
       {/* Glassmorphic card */}
@@ -267,7 +267,7 @@ function SectionHeader({ emoji, title, category, delay = 0 }: {
 }
 
 // ─── Hero Carousel ──────────────────────────────────────────────────────────────
-function HeroCarousel({ category, onPlay }: { category: Category; onPlay: () => void }) {
+function HeroCarousel({ category, onPlay }: { category: Category; onPlay: (gameKey: string) => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const c = catColors[category];
 
@@ -370,7 +370,7 @@ function HeroCarousel({ category, onPlay }: { category: Category; onPlay: () => 
           <motion.div
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.1 }}
-            onClick={(e) => { e.stopPropagation(); onPlay(); }}
+            onClick={(e) => { e.stopPropagation(); onPlay(slide.gameKey); }}
             className={`flex-shrink-0 w-12 h-12 rounded-xl ${c.bg} flex items-center justify-center cursor-pointer`}
             style={{ boxShadow: `0 4px 20px ${c.glow}` }}
           >
@@ -468,8 +468,20 @@ export default function Games() {
   const c = catColors[category];
 
   // Navigate to the map — games are played there against nearby users
-  const handlePlay = useCallback(() => {
-    navigate("/map");
+  const handlePlay = useCallback((gameKey?: string) => {
+    if (gameKey) {
+      let paramKey = gameKey;
+      if (gameKey === "bumpbattle") paramKey = "bump-battle";
+      else if (gameKey === "triviaclash") paramKey = "trivia-clash";
+      else if (gameKey === "twotruths") paramKey = "two-truths";
+      else if (gameKey === "kingofthehill") paramKey = "king-of-the-hill";
+      else if (gameKey === "proximitytag") paramKey = "proximity-tag";
+      else if (gameKey === "turfwars") paramKey = "turf-wars";
+      else if (gameKey === "emojidecode") paramKey = "emoji-decode";
+      navigate(`/map?game=${paramKey}`);
+    } else {
+      navigate("/map");
+    }
   }, [navigate]);
 
   // ─── Sectioned game lists ──────────────────────────────────────────────────
@@ -574,7 +586,7 @@ export default function Games() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.15 }}
             whileTap={{ scale: 0.97 }}
-            onClick={handlePlay}
+            onClick={() => handlePlay()}
             className="w-full relative overflow-hidden rounded-2xl p-4 cursor-pointer group"
             style={{
               background: `linear-gradient(135deg, ${c.accent}15, ${c.accent}08)`,

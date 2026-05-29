@@ -11,6 +11,7 @@ import { Locate, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation as useRouteLocation } from "wouter";
 import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Circle, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -277,6 +278,48 @@ function Map() {
     retry: 2,
     retryDelay: 3000,
   });
+
+  const [routeLocation] = useRouteLocation();
+  const params = useMemo(() => new URLSearchParams(window.location.search), [routeLocation]);
+  const gameParam = params.get("game");
+  const lastLaunchedGameRef = useRef<string | null>(null);
+
+  // Auto-launch game overlay if game parameter is present in URL
+  useEffect(() => {
+    if (gameParam) {
+      if (lastLaunchedGameRef.current === gameParam) {
+        return;
+      }
+      
+      // Prioritize challengeable demo users
+      let opponent = nearbyUsers.find(u => u.username.startsWith("demo_"));
+      if (!opponent && nearbyUsers.length > 0) {
+        opponent = nearbyUsers[0];
+      }
+      
+      // Fallback: If no users are nearby, create a mock opponent
+      if (!opponent) {
+        opponent = {
+          id: 9999,
+          username: "demo_challenger",
+          firstName: "Dallas",
+          lastName: "Challenger",
+          category: user?.category === "dating" ? "dating" : user?.category === "business" ? "business" : "friendships",
+          isActive: true,
+          latitude: currentLocation?.latitude || 32.7767,
+          longitude: currentLocation?.longitude || -96.7970,
+          sex: "female",
+          age: 24,
+          selfRating: 8
+        };
+      }
+      
+      lastLaunchedGameRef.current = gameParam;
+      setActiveMapGame({ gameKey: gameParam, opponent });
+    } else {
+      lastLaunchedGameRef.current = null;
+    }
+  }, [gameParam, nearbyUsers, currentLocation, user?.category]);
 
   const mockUsers: User[] = [];
 
@@ -615,7 +658,10 @@ function Map() {
             gameKey={activeMapGame.gameKey}
             opponent={activeMapGame.opponent}
             category={(activeMapGame.opponent.category === 'friendships' ? 'friends' : activeMapGame.opponent.category === 'business' ? 'business' : 'dating') as any}
-            onClose={() => setActiveMapGame(null)}
+            onClose={() => {
+              setActiveMapGame(null);
+              window.history.replaceState(null, "", "/map");
+            }}
           />
         )}
       </Suspense>
