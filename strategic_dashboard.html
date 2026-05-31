@@ -1035,24 +1035,173 @@
                 <p>Establishing healthy partnerships without "dating hack" gimmicks</p>
             </div>
             <div class="grid-2">
-                <div class="card">
+                <div class="card" style="display: flex; flex-direction: column;">
                     <h3><span class="emoji">💌</span> The Pitch Strategy</h3>
-                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <ul style="margin-left: 1.5rem; margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
                         <li><strong>The Hook:</strong> "Dating apps are actively damaging mental health. We built the antidote."</li>
                         <li><strong>The Ask:</strong> "We want your raw psychological feedback, and to advocate for a return to real life."</li>
                         <li><strong>The Tone:</strong> Professional, clinical, anti-pickup artist.</li>
                         <li><strong>Compensation:</strong> Advisory board equity (Apex targets) or sponsored content integration outlining the mental tax of swiping (Tier 2).</li>
                     </ul>
                 </div>
-                <div class="card">
-                    <h3><span class="emoji">📬</span> Email Template (Apex / Tier 1)</h3>
-                    <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-muted); line-height: 1.5;">
-                        Subject: The antidote to dating app fatigue (Feedback Request)<br/><br/>
-                        Hi [Name],<br/><br/>
-                        I follow your insights closely, especially on how algorithmic swiping creates a paradox of choice. We decided to build the antidote. <br/><br/>
-                        Face 2 Face is an "anti-dating app." No algorithms, no swiping, no paywalls. Just a live proximity grid to encourage real-world interaction. Given your expertise in modern relational health, we'd love for you to review our thesis to see if we're on the right track solving the isolation epidemic.<br/><br/>
-                        Open to a 5-minute review?
-                    </p>
+                <div class="card" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                        <h3 style="margin-bottom: 0;"><span class="emoji">📬</span> Outreach Templates</h3>
+                        <select id="template-selector" onchange="switchEmailTemplate(this.value)" style="
+                            padding: 0.4rem 0.75rem;
+                            background: var(--bg-elevated); border: 1px solid var(--border);
+                            border-radius: 8px; color: var(--text-primary);
+                            font-family: inherit; font-size: 0.8rem; outline: none;
+                            cursor: pointer;
+                        ">
+                            <option value="1">Template 1: Direct Professional Approach (Apex / Tier 1)</option>
+                            <option value="2">Template 2: The "Burnout" Angle (Coaches / Podcasts)</option>
+                            <option value="3">Template 3: Local IRL / Lifestyle Creator (Gen-Z / Millennial)</option>
+                            <option value="4">Template 4: B2B Venue Partnership (Coffee Shops, Bars, Cafes)</option>
+                            <option value="5">Template 5: B2B Event/Conference (Trade Shows, Organizers)</option>
+                            <option value="6">Template 6: Local Ambassador Seed (Phase 0 Liquidity)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Template 1 -->
+                    <div id="email-template-1" class="email-template-view">
+                        <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"><strong>Subject:</strong> The antidote to dating app fatigue (Feedback Request)
+
+Hi [Name],
+
+I follow your content closely, especially your insights on [Insert specific topic they recently covered, e.g., how algorithmic swiping creates a paradox of choice]. 
+
+We entirely agree. In fact, we believe the current dating app model is fundamentally broken—designed for retention rather than connection. 
+
+We are launching **Face 2 Face**, an "anti-dating app." There are no algorithms, no swiping, and no paywalls. It’s simply a live proximity grid that shows who is around you in real-time, encouraging people to look up from their phones and walk up to each other in the real world. We've replaced the anxiety of "read receipts" with the natural grace of a polite, in-person interaction.
+
+Given your expertise in modern relational health, your feedback would be invaluable. We are not asking for a promotion—we are asking if you’d be willing to briefly review our platform thesis and tell us if we are on the right track in solving the digital isolation epidemic.
+
+Would you be open to a 10-minute preview call or reviewing a brief executive summary?
+
+Best regards,
+
+[Your Name]
+Founder, Face 2 Face</p>
+                    </div>
+
+                    <!-- Template 2 -->
+                    <div id="email-template-2" class="email-template-view" style="display: none;">
+                        <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"><strong>Subject:</strong> Stop Swiping. Start Walking Up. (Face 2 Face)
+
+Hi [Name],
+
+A recurring theme in your recent [posts/podcasts] is how burnt out everyone is from dating apps. The gamification, the ghosting, the endless swiping—it's exhausting your audience.
+
+We decided to build the exact opposite. 
+
+**Face 2 Face** eliminates the algorithm. It functions strictly as a real-world utility—like a radar for social life. You open it, see who is at the same coffee shop, festival, or bar, and you go talk to them. Direct, honest, and grounded in reality.
+
+We’re putting together a coalition of relationship voices who want to champion a return to real life. We respect your voice in this space and want to show you what we're building. 
+
+Are you open to connecting later this week to see how Face 2 Face aligns with your message?
+
+Best,
+
+[Your Name]
+Founder, Face 2 Face</p>
+                    </div>
+
+                    <!-- Template 3 -->
+                    <div id="email-template-3" class="email-template-view" style="display: none;">
+                        <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"><strong>Subject:</strong> Bringing [City Name] back to the real world (F2F Partner Invite)
+
+Hi [Name],
+
+I love your guides on local spots in [City Name]—you really highlight the best spaces for people to connect.
+
+The irony is that while everyone is looking at your posts to find where to go, once they get there, they are still glued to their phones, swiping on apps designed to keep them single and isolated.
+
+We are launching **Face 2 Face**, an "anti-dating and social utility app" in [City Name]. It’s a live map showing who is at the same venue, festival, or coffee shop right now—no algorithms, no swiping, no digital barriers. It's built to encourage people to look up, make eye contact, and just walk up to each other in the real world.
+
+We are partnering with local creators who champion the "IRL" lifestyle. We’d love to host an exclusive meetup at [popular local venue] or give you early partner access to see how F2F can help your audience find real-world connection.
+
+Would you be open to a quick chat this week about bringing [City Name] back to the real world?
+
+Best,
+
+[Your Name]
+Founder, Face 2 Face</p>
+                    </div>
+
+                    <!-- Template 4 -->
+                    <div id="email-template-4" class="email-template-view" style="display: none;">
+                        <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"><strong>Subject:</strong> Driving physical foot traffic to [Venue Name] (F2F Hotspot)
+
+Hi [Name/Owner],
+
+I'm the founder of **Face 2 Face**, a new location-based social and business utility app. 
+
+We are launching a hyper-local campaign in [Neighborhood/City] and want to feature [Venue Name] as a sponsored **"Hotspot"** on our live map.
+
+Unlike traditional social networks that keep people on their screens, F2F is designed to get people *out* of their houses and into local venues. The app shows active users who is physically around them in real-time, encouraging direct interaction. By designating [Venue Name] as a featured Hotspot, we will drive our local user base directly to your tables for meetups, games, and networking.
+
+We would cover 100% of the promotion costs and provide a glowing badge on the map for your venue to encourage active pings. In exchange, we'd love to discuss hosting a weekly "Face 2 Face Social Hour" at your space.
+
+Are you open to a brief 5-minute call to see how we can drive more offline traffic to your doors?
+
+Cheers,
+
+[Your Name]
+Founder, Face 2 Face</p>
+                    </div>
+
+                    <!-- Template 5 -->
+                    <div id="email-template-5" class="email-template-view" style="display: none;">
+                        <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"><strong>Subject:</strong> Upgrading attendee networking at [Event Name] (F2F Business)
+
+Hi [Organizer Name],
+
+I’m reaching out because we’ve noticed that at large industry events like [Event Name], attendees often struggle to connect organically. People spend hours scrolling attendee lists or swapping paper business cards that end up in the trash.
+
+We’ve built **Face 2 Face (F2F) Business**, a real-time proximity networking grid.
+
+Attendees open the app on the exhibition floor, immediately see a live grid of other professionals around them, and can click to swap digital cards, LinkedIn profiles, or launch a quick meeting. It functions as a real-time, zero-friction networking radar built specifically for trade shows.
+
+We’d love to discuss a partnership to designate [Event Name] as a premium F2F Networking Zone. We can provide a custom map layer of your venue, coordinate interactive check-ins, and help your attendees maximize their event ROI.
+
+Would you be open to a quick call to preview the F2F Business module for your upcoming event?
+
+Best regards,
+
+[Your Name]
+Founder, Face 2 Face</p>
+                    </div>
+
+                    <!-- Template 6 -->
+                    <div id="email-template-6" class="email-template-view" style="display: none;">
+                        <p style="font-size: 0.8rem; font-family: monospace; background: var(--bg-deep); padding: 1rem; border-radius: 8px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;"><strong>Subject:</strong> Paid Brand Ambassador Roles at [University/City Name]
+
+Hi [Name],
+
+We found your profile and love your energy and connection to the [University/Local Community] scene.
+
+We are launching **Face 2 Face**, a location-centric social utility app built to destroy the "digital isolation" of traditional swiping apps. We are hiring a select group of **F2F Ambassadors** to seed our network and build map liquidity in [University/City].
+
+**What you'll do:**
+*   Host weekly local meetups at popular cafes, campus hubs, and spots.
+*   Keep your location active on the map during peak social hours to seed local pings.
+*   Onboard your friend groups and squads to the F2F network.
+
+**What’s in it for you:**
+*   Competitive weekly stipend + referral bonuses.
+*   F2F merch and sponsorship for local meetups.
+*   Direct startup experience working with the founding team.
+
+If you are passionate about getting people off their phones and back to real-world connection, we'd love to chat. 
+
+Are you free for a 5-minute call this week?
+
+Best,
+
+[Your Name]
+Founding Team, Face 2 Face</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1582,7 +1731,18 @@
             }
         });
     });
+
+    // Email template switching architecture
+    function switchEmailTemplate(val) {
+        document.querySelectorAll('.email-template-view').forEach(el => {
+            el.style.display = 'none';
+        });
+        var target = document.getElementById('email-template-' + val);
+        if (target) {
+            target.style.display = 'block';
+        }
+    }
 </script>
 
 </body>
-</html>
+</html><!-- cache-bust: 1 -->

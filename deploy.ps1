@@ -16,7 +16,7 @@ Copy-Item "C:\Users\edgar\OneDrive\Desktop\Face 2 Face\strategic_dashboard.html"
 
 $zipPath = Join-Path $env:TEMP "netlify_deploy.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath }
-Compress-Archive -Path "$tempDir\*" -DestinationPath $zipPath
+tar.exe -a -cf $zipPath -C $tempDir index.html
 
 # Deploy via API
 $deployHeaders = @{
