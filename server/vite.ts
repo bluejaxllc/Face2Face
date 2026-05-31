@@ -58,8 +58,17 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Deprecating the Railway layout: redirect all non-API frontend traffic to Vercel
-  app.use("*", (req, res) => {
-    res.redirect(301, `https://bump.bluejax.ai${req.originalUrl || '/'}`);
+  const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+
+  if (!fs.existsSync(distPath)) {
+    throw new Error(`Could not find build directory: ${distPath}. Did you run build?`);
+  }
+
+  // Serve static assets
+  app.use(express.static(distPath, { index: false }));
+
+  // Fallback catch-all for single-page app (SPA) routing
+  app.use("*", (_req, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
