@@ -131,8 +131,11 @@ var users = pgTable("users", {
   isHiring: boolean("is_hiring").default(false),
   openPositions: integer("open_positions").default(0),
   hiringRoles: text("hiring_roles"),
-  menuData: text("menu_data")
+  menuData: text("menu_data"),
   // JSON string of menu items: [{name, price, desc}]
+  websiteUrl: text("website_url"),
+  menuUrl: text("menu_url"),
+  bookingUrl: text("booking_url")
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -322,7 +325,10 @@ var updateUserSchema = createInsertSchema(users).pick({
   businessSlogan: true,
   openPositions: true,
   hiringRoles: true,
-  menuData: true
+  menuData: true,
+  websiteUrl: true,
+  menuUrl: true,
+  bookingUrl: true
 });
 var insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,
@@ -419,8 +425,11 @@ var DatabaseStorage = class {
       sql`${users.longitude} IS NOT NULL`,
       // Exclude users who still have the default 0,0 coordinates (never set location)
       sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
-      // Only show users who have been active/pinged location in the last 30 minutes
-      sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`
+      // Only show users who have been active/pinged location in the last 30 minutes OR are demo users
+      or(
+        sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`,
+        sql`${users.username} LIKE 'demo_%'`
+      )
     ];
     return await db.select().from(users).where(and(...conditions));
   }
@@ -817,6 +826,266 @@ This code expires in 5 minutes. Do not share it with anyone.`;
   }
 }
 
+// shared/moderation.ts
+var DATING_ONLY_TAGS = /* @__PURE__ */ new Set([
+  "romance",
+  "hookup",
+  "soulmate",
+  "monogamy",
+  "polyamory",
+  "dating",
+  "boyfriend",
+  "girlfriend",
+  "partner",
+  "love",
+  "kiss",
+  "cuddle",
+  "relationship",
+  "dates",
+  "romantic",
+  "marriage",
+  "husband",
+  "wife",
+  "flirt",
+  "nsfw"
+]);
+var BUSINESS_ONLY_TAGS = /* @__PURE__ */ new Set([
+  "react",
+  "node",
+  "ai",
+  "saas",
+  "investing",
+  "marketing",
+  "figma",
+  "finance",
+  "strategy",
+  "recruiting",
+  "hiring",
+  "coding",
+  "software",
+  "product",
+  "sales",
+  "consulting",
+  "startup",
+  "developer",
+  "founder",
+  "networking",
+  "b2b",
+  "vc",
+  "venture capital",
+  "enterprise",
+  "accounting",
+  "hr",
+  "seo",
+  "skills",
+  "job",
+  "career"
+]);
+var FRIENDSHIP_ONLY_TAGS = /* @__PURE__ */ new Set([
+  "gym buddy",
+  "running partner",
+  "study group",
+  "friendship",
+  "touch grass",
+  "bff",
+  "friends only",
+  "platonic",
+  "buddy",
+  "buddies",
+  "hangout",
+  "activity partner"
+]);
+var BLOCKED_WORDS = [
+  // English
+  "nsfw",
+  "porn",
+  "naked",
+  "sex",
+  "fuck",
+  "fucking",
+  "fucker",
+  "fucks",
+  "shit",
+  "shitty",
+  "shits",
+  "bitch",
+  "bitches",
+  "bitchy",
+  "asshole",
+  "assholes",
+  "bastard",
+  "bastards",
+  "cunt",
+  "cunts",
+  "dick",
+  "dicks",
+  "cock",
+  "cocks",
+  "pussy",
+  "pussies",
+  "faggot",
+  "nigger",
+  "slut",
+  "whore",
+  "boobs",
+  "vagina",
+  "penis",
+  "horny",
+  "erotic",
+  // Spanish
+  "puto",
+  "puta",
+  "putas",
+  "putos",
+  "putazo",
+  "putero",
+  "mierda",
+  "mierdas",
+  "mierdero",
+  "mierdoso",
+  "cabron",
+  "cabrona",
+  "cabrones",
+  "pendejo",
+  "pendeja",
+  "pendejos",
+  "pendejas",
+  "culero",
+  "culera",
+  "culeros",
+  "chingar",
+  "chinga",
+  "chingado",
+  "chingada",
+  "chingon",
+  "chingona",
+  "chingando",
+  "chingue",
+  "verga",
+  "vergas",
+  "pito",
+  "pitos",
+  "panocha",
+  "chichi",
+  "chichis",
+  "culazo",
+  "mamon",
+  "mamona",
+  "cojer",
+  "coger",
+  "joder",
+  "jodiendo",
+  "jodido",
+  "pene",
+  "vagina",
+  "desnudo",
+  "desnuda",
+  "porno",
+  "sexo",
+  "caliente",
+  "cachondo",
+  "cachonda"
+];
+function normalizeTag(tag) {
+  return tag.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+function validateTags(category, interests, seeking, skills) {
+  const getTagsList = (str) => {
+    if (!str) return [];
+    return str.split(",").map(normalizeTag).filter((t) => t.length > 0);
+  };
+  const interestsTags = getTagsList(interests);
+  const seekingTags = getTagsList(seeking);
+  const skillsTags = getTagsList(skills);
+  if (category === "business") {
+    if (interestsTags.length > 0 || seekingTags.length > 0) {
+      return {
+        isValid: false,
+        error: "Interests and seeking tags are not allowed on business profiles."
+      };
+    }
+    for (const tag of skillsTags) {
+      if (DATING_ONLY_TAGS.has(tag)) {
+        return {
+          isValid: false,
+          error: `Dating tag "${tag}" is not allowed in business skills.`
+        };
+      }
+      if (FRIENDSHIP_ONLY_TAGS.has(tag)) {
+        return {
+          isValid: false,
+          error: `Friendship tag "${tag}" is not allowed in business skills.`
+        };
+      }
+    }
+  } else if (category === "friendships") {
+    if (skillsTags.length > 0) {
+      return {
+        isValid: false,
+        error: "Skills tags are not allowed on friendship profiles."
+      };
+    }
+    const allFriendsTags = [...interestsTags, ...seekingTags];
+    for (const tag of allFriendsTags) {
+      if (DATING_ONLY_TAGS.has(tag)) {
+        return {
+          isValid: false,
+          error: `Dating tag "${tag}" is not allowed on friendship profiles.`
+        };
+      }
+      if (BUSINESS_ONLY_TAGS.has(tag)) {
+        return {
+          isValid: false,
+          error: `Business tag "${tag}" is not allowed on friendship profiles.`
+        };
+      }
+    }
+  } else if (category === "dating") {
+    if (skillsTags.length > 0) {
+      return {
+        isValid: false,
+        error: "Skills tags are not allowed on dating profiles."
+      };
+    }
+    const allDatingTags = [...interestsTags, ...seekingTags];
+    for (const tag of allDatingTags) {
+      if (FRIENDSHIP_ONLY_TAGS.has(tag)) {
+        return {
+          isValid: false,
+          error: `Friendship tag "${tag}" is not allowed on dating profiles.`
+        };
+      }
+      if (BUSINESS_ONLY_TAGS.has(tag)) {
+        return {
+          isValid: false,
+          error: `Business tag "${tag}" is not allowed on dating profiles.`
+        };
+      }
+    }
+  }
+  return { isValid: true };
+}
+function validateModeration(fields) {
+  for (const [fieldName, val] of Object.entries(fields)) {
+    if (!val) continue;
+    const normalizedText = val.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    for (const blocked of BLOCKED_WORDS) {
+      const normalizedBlocked = blocked.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (normalizedBlocked.length <= 3) {
+        const regex = new RegExp(`\\b${normalizedBlocked}\\b`, "i");
+        if (regex.test(normalizedText)) {
+          return { isValid: false, blockedWord: blocked, field: fieldName };
+        }
+      } else {
+        if (normalizedText.includes(normalizedBlocked)) {
+          return { isValid: false, blockedWord: blocked, field: fieldName };
+        }
+      }
+    }
+  }
+  return { isValid: true };
+}
+
 // server/routes.ts
 function sanitizeInput(input, maxLength) {
   return input.replace(/<[^>]*>/g, "").trim().slice(0, maxLength);
@@ -829,7 +1098,37 @@ async function registerRoutes(app2) {
       if (!req.session || !req.session.userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       const raw = updateUserSchema.partial().parse(req.body);
+      const activeCategory = raw.category !== void 0 ? raw.category : user.category || "friendships";
+      const activeInterests = raw.interests !== void 0 ? raw.interests : user.interests;
+      const activeSeeking = raw.seeking !== void 0 ? raw.seeking : user.seeking;
+      const activeSkills = raw.skills !== void 0 ? raw.skills : user.skills;
+      if (activeCategory) {
+        const tagValidation = validateTags(activeCategory, activeInterests, activeSeeking, activeSkills);
+        if (!tagValidation.isValid) {
+          return res.status(400).json({ message: tagValidation.error });
+        }
+      }
+      if (activeCategory === "friendships") {
+        const fieldsToModerate = {
+          bio: raw.bio !== void 0 ? raw.bio : user.bio,
+          currentActivity: raw.currentActivity !== void 0 ? raw.currentActivity : user.currentActivity,
+          vibeStatus: raw.vibeStatus !== void 0 ? raw.vibeStatus : user.vibeStatus,
+          interests: activeInterests,
+          seeking: activeSeeking,
+          icebreaker: raw.icebreaker !== void 0 ? raw.icebreaker : user.icebreaker
+        };
+        const modValidation = validateModeration(fieldsToModerate);
+        if (!modValidation.isValid) {
+          return res.status(400).json({
+            message: `Appropriate content required. Offensive language detected in ${modValidation.field}: "${modValidation.blockedWord}" is not allowed on friendship profiles.`
+          });
+        }
+      }
       const updates = {
         ...raw,
         ...raw.bio !== void 0 ? { bio: sanitizeInput(raw.bio ?? "", 500) } : {}

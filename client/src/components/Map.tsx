@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation as useRouteLocation } from "wouter";
+import LocationService from "@/services/location-service";
 import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Circle, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -263,8 +264,8 @@ function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapKey, setMapKey] = useState(Date.now());
-  const hasCenteredInitially = useRef(!!savedCenter);
-  const userHasInteracted = useRef(!!savedCenter);
+  const hasCenteredInitially = useRef(false);
+  const userHasInteracted = useRef(false);
 
   const { data: nearbyUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/users/nearby", {
@@ -597,9 +598,10 @@ function Map() {
             onClick={async () => {
               userHasInteracted.current = false;
               await updateLocation();
-              if (mapRef.current && currentLocation) {
+              const freshLoc = LocationService.getInstance().getLocation();
+              if (mapRef.current && freshLoc) {
                 mapRef.current.flyTo(
-                  [currentLocation.latitude, currentLocation.longitude],
+                  [freshLoc.latitude, freshLoc.longitude],
                   16,
                   { duration: 1.5 }
                 );

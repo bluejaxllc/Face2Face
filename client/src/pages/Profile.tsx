@@ -304,7 +304,6 @@ export default function Profile() {
         websiteUrl: user.websiteUrl || "",
         menuUrl: user.menuUrl || "",
         bookingUrl: user.bookingUrl || "",
-        displayAge: user.displayAge || "",
       });
     }
   }, [user, form, isEditing]);

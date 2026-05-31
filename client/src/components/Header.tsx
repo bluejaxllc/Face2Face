@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Settings } from "lucide-react";
+import { Bell, Settings, Gauge } from "lucide-react";
 import { Logo } from "./Logo";
 import SettingsModal from "./SettingsModal";
 import NotificationsModal from "./NotificationsModal";
@@ -38,6 +38,16 @@ export default function Header() {
       </div>
 
       <div className="flex items-center" style={{ gap: "12px" }}>
+        {/* Debug Diagnostics Dashboard */}
+        <button
+          onClick={() => navigate('/dev')}
+          className="relative flex items-center justify-center hover:bg-slate-700/50 rounded-lg transition-colors"
+          aria-label="Diagnostics"
+          style={{ padding: "6px" }}
+        >
+          <Gauge style={{ width: "16px", height: "16px" }} className="text-amber-400 animate-pulse" />
+        </button>
+
         <button
           onClick={() => setShowSettings(true)}
           className="relative flex items-center justify-center hover:bg-slate-700/50 rounded-lg transition-colors"
