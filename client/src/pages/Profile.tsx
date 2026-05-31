@@ -47,6 +47,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useScrollSave } from "@/hooks/use-scroll-save";
 import BottomNavigation, { CategoryKey, categoryConfig } from "@/components/BottomNavigation";
+import { validateTags, validateModeration } from "@shared/moderation";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -327,13 +328,51 @@ export default function Profile() {
 
 
   const onSubmit = async (values: ProfileFormValues) => {
+    // 1. Validate tag category isolation
+    const tagValidation = validateTags(
+      values.category || "friendships",
+      values.interests,
+      values.seeking,
+      values.skills
+    );
+    if (!tagValidation.isValid) {
+      toast({
+        title: "Validation Error",
+        description: tagValidation.error || "Invalid tag category configuration.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // 2. Validate moderation for friendships category
+    if (values.category === "friendships") {
+      const fieldsToModerate = {
+        bio: values.bio,
+        currentActivity: values.currentActivity,
+        vibeStatus: values.vibeStatus,
+        interests: values.interests,
+        seeking: values.seeking,
+        icebreaker: values.icebreaker,
+      };
+      const modValidation = validateModeration(fieldsToModerate);
+      if (!modValidation.isValid) {
+        toast({
+          title: "Content Restricted",
+          description: `Appropriate content required. Offensive language detected in ${modValidation.field}: "${modValidation.blockedWord}" is not allowed on friendship profiles.`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     try {
       await updateProfile({ ...values, profileCompleted: true });
       setIsEditing(false);
       toast({ title: "Profile updated", description: "Your profile has been successfully updated." });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update profile:", error);
-      toast({ title: "Update failed", description: "There was a problem updating your profile.", variant: "destructive" });
+      const errMsg = error?.message || "There was a problem updating your profile.";
+      toast({ title: "Update failed", description: errMsg, variant: "destructive" });
     }
   };
 

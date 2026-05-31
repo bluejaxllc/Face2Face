@@ -11,6 +11,7 @@ import {
 import { z } from "zod";
 import { setupAuth } from "./auth";
 import { sendVerificationSMS } from "./ghl";
+import { validateTags, validateModeration } from "@shared/moderation";
 
 /** Strip HTML tags and trim to maxLength */
 function sanitizeInput(input: string, maxLength: number): string {
@@ -32,7 +33,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       const raw = updateUserSchema.partial().parse(req.body);
+
+      // Determine active category and fields for tag validation
+      const activeCategory = raw.category !== undefined ? raw.category : (user.category || "friendships");
+      const activeInterests = raw.interests !== undefined ? raw.interests : user.interests;
+      const activeSeeking = raw.seeking !== undefined ? raw.seeking : user.seeking;
+      const activeSkills = raw.skills !== undefined ? raw.skills : user.skills;
+
+      // Validate category tag isolation
+      if (activeCategory) {
+        const tagValidation = validateTags(activeCategory, activeInterests, activeSeeking, activeSkills);
+        if (!tagValidation.isValid) {
+          return res.status(400).json({ message: tagValidation.error });
+        }
+      }
+
+      // Moderate friendship-related fields
+      if (activeCategory === "friendships") {
+        const fieldsToModerate = {
+          bio: raw.bio !== undefined ? raw.bio : user.bio,
+          currentActivity: raw.currentActivity !== undefined ? raw.currentActivity : user.currentActivity,
+          vibeStatus: raw.vibeStatus !== undefined ? raw.vibeStatus : user.vibeStatus,
+          interests: activeInterests,
+          seeking: activeSeeking,
+          icebreaker: raw.icebreaker !== undefined ? raw.icebreaker : user.icebreaker,
+        };
+
+        const modValidation = validateModeration(fieldsToModerate);
+        if (!modValidation.isValid) {
+          return res.status(400).json({
+            message: `Appropriate content required. Offensive language detected in ${modValidation.field}: "${modValidation.blockedWord}" is not allowed on friendship profiles.`
+          });
+        }
+      }
+
       const updates = {
         ...raw,
         ...(raw.bio !== undefined ? { bio: sanitizeInput(raw.bio ?? "", 500) } : {}),
