@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Flame, MapPin, Eye, Layers, Settings, ChevronDown, Heart, Handshake, Briefcase } from "lucide-react";
+import { Flame, MapPin, Eye, Layers, Settings, ChevronDown, Heart, Handshake, Briefcase, Gauge } from "lucide-react";
+import { useLocation } from "wouter";
 import SettingsModal from "./SettingsModal";
 import { FilterOptions } from "./FilterDrawer";
 
@@ -28,6 +29,7 @@ export default function TopToolbar({
   mapStyle = 'street',
   onToggleMapStyle,
 }: TopToolbarProps) {
+  const [, navigate] = useLocation();
   const [showSettings, setShowSettings] = useState(false);
   const [showDistance, setShowDistance] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -90,6 +92,15 @@ export default function TopToolbar({
       hasDropdown: false,
       onClick: () => setShowSettings(true),
       activeColor: accentColor,
+    },
+    {
+      id: "dev",
+      icon: Gauge,
+      label: "DEV",
+      active: false,
+      hasDropdown: false,
+      onClick: () => navigate("/dev"),
+      activeColor: "text-amber-400 animate-pulse",
     },
   ];
 

@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone, Eye, EyeOff } from "lucide-react";
+import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone, Eye, EyeOff, Gauge } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
@@ -207,6 +207,14 @@ export default function Register() {
   if (showVerification) {
     return (
       <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
+        {/* Dev Diagnostics Bypass Button */}
+        <button
+          onClick={() => navigate("/dev")}
+          className="absolute top-4 right-4 z-50 p-3 rounded-full bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 transition-colors shadow-lg"
+          aria-label="Developer Diagnostics"
+        >
+          <Gauge className="w-5 h-5 text-amber-400 animate-pulse" />
+        </button>
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -283,6 +291,14 @@ export default function Register() {
 
   return (
     <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
+      {/* Dev Diagnostics Bypass Button */}
+      <button
+        onClick={() => navigate("/dev")}
+        className="absolute top-4 right-4 z-50 p-3 rounded-full bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 transition-colors shadow-lg"
+        aria-label="Developer Diagnostics"
+      >
+        <Gauge className="w-5 h-5 text-amber-400 animate-pulse" />
+      </button>
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-4 md:py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
