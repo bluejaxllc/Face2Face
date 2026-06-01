@@ -384,13 +384,7 @@ export default function Profile() {
     return `${firstName[0]}${lastName[0]}`;
   };
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      setLocation("/auth");
-    }
-  }, [isLoading, user, setLocation]);
-
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <PageTransition className="h-screen page-dark">
         <Header />
@@ -405,6 +399,30 @@ export default function Profile() {
           </div>
           <p className="mt-8 text-xl font-black text-white tracking-[0.2em] animate-pulse uppercase">Syncing Profile</p>
           <p className="mt-2 text-slate-500 text-xs font-medium tracking-widest uppercase">Connecting to Face 2 Face</p>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  if (!user) {
+    return (
+      <PageTransition className="h-screen page-dark">
+        <Header />
+        <div className="h-full flex flex-col items-center justify-center pb-20 px-6 text-center">
+          <div className="w-20 h-20 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-6">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <p className="text-xl font-bold text-white mb-2">Not Logged In</p>
+          <p className="text-slate-400 text-sm mb-6">Sign in to view and edit your profile</p>
+          <button
+            onClick={() => setLocation("/auth")}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold text-sm hover:opacity-90 active:scale-95 transition-all"
+          >
+            Sign In
+          </button>
         </div>
       </PageTransition>
     );

@@ -27,6 +27,8 @@ const Evangelists = lazy(() => import("@/pages/Evangelists"));
 const BusinessWaitlist = lazy(() => import("@/pages/BusinessWaitlist"));
 const DebugLayouts = lazy(() => import("@/pages/DebugLayouts"));
 const Games = lazy(() => import("@/pages/Games"));
+const Analytics = lazy(() => import("@/pages/Analytics"));
+const CommandCenter = lazy(() => import("@/pages/CommandCenter"));
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
@@ -99,6 +101,12 @@ function AppRouter() {
         <Route path="/dev">
           <ProtectedRoute component={DevDiagnostics} />
         </Route>
+        <Route path="/analytics">
+          <Analytics />
+        </Route>
+        <Route path="/command-center">
+          <CommandCenter />
+        </Route>
         <Route path="/debug-layouts">
           <DebugLayouts />
         </Route>
@@ -134,7 +142,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 function AuthenticatedApp() {
   const { isAuthenticated } = useAuth();
   return (
-    <LocationProvider enabled={isAuthenticated}>
+    <LocationProvider enabled={true}>
       <SensorPermissionGate>
         <div className="app-container">
           <ErrorBoundary>

@@ -429,6 +429,10 @@ function Map() {
   }, [currentLocation]);
 
   const center: [number, number] = useMemo(() => {
+    // On initial render, prefer GPS location over saved center
+    if (currentLocation && !hasCenteredInitially.current) {
+      return [currentLocation.latitude, currentLocation.longitude];
+    }
     if (savedCenter) return savedCenter;
     if (currentLocation) {
       return [currentLocation.latitude, currentLocation.longitude];
@@ -458,15 +462,19 @@ function Map() {
 
 
   useEffect(() => {
-    if (currentLocation && mapRef.current && !userHasInteracted.current && !hasCenteredInitially.current) {
-      // CRITICAL: Use animate:false on iOS Safari — animated setView triggers
-      // a CSS transition on the tile container that corrupts rendering.
+    if (currentLocation && mapRef.current && !hasCenteredInitially.current) {
+      // First GPS fix — always center, regardless of user interaction.
+      // This fixes the issue where touching the map while waiting for GPS
+      // would permanently prevent centering.
       mapRef.current.setView(
         [currentLocation.latitude, currentLocation.longitude], 
         15, // Force zoom in when GPS locks
         { animate: false }
       );
       hasCenteredInitially.current = true;
+      // Clear saved center so fresh GPS takes priority
+      setSavedCenter(null);
+      localStorage.removeItem("f2f_map_state");
     }
   }, [currentLocation]);
 
@@ -597,14 +605,19 @@ function Map() {
             className="w-10 h-10 rounded-xl bg-white/90 border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all duration-200"
             onClick={async () => {
               userHasInteracted.current = false;
-              await updateLocation();
-              const freshLoc = LocationService.getInstance().getLocation();
-              if (mapRef.current && freshLoc) {
-                mapRef.current.flyTo(
-                  [freshLoc.latitude, freshLoc.longitude],
-                  16,
-                  { duration: 1.5 }
-                );
+              try {
+                await updateLocation();
+                // After the Promise resolves, GPS has actually arrived
+                const freshLoc = LocationService.getInstance().getLocation();
+                if (mapRef.current && freshLoc) {
+                  mapRef.current.flyTo(
+                    [freshLoc.latitude, freshLoc.longitude],
+                    16,
+                    { duration: 1.5 }
+                  );
+                }
+              } catch (err) {
+                console.error('[Map] Locate button GPS error:', err);
               }
             }}
             aria-label="Get current location"

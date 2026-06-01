@@ -18,14 +18,10 @@ export function getApiBaseUrl(): string {
     if (Capacitor.isNativePlatform()) {
         return PRODUCTION_API_URL;
     }
-    // If we're on a web browser and the hostname is localhost, 127.0.0.1, or local IP, use relative URLs (same origin)
-    if (typeof window !== 'undefined' && 
-        (window.location.hostname === 'localhost' || 
-         window.location.hostname === '127.0.0.1' || 
-         window.location.hostname.startsWith('192.168.'))) {
-        return '';
-    }
-    return PRODUCTION_API_URL;
+    // On web: always use relative URLs (same origin) since the API is deployed
+    // alongside the frontend as a Vercel serverless function. This avoids
+    // cross-origin cookie blocking on iOS Safari and modern browsers.
+    return '';
 }
 
 /**

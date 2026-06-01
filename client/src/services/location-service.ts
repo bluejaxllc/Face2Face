@@ -90,15 +90,11 @@ class LocationService {
       this.updateLocation();
     }
 
-    // ON IOS THIS CAN TRIGGER CRASH LOOPS IF PERMISSION DIALOGUES CONFLICT WITH ANIMATIONS
-    // EXPERIMENT: Temporarily turn off all background sensor tracking
-    /*
-    if (Capacitor.isNativePlatform() && !this.watchId) {
-      this.startNativeWatch();
-    } else if (!Capacitor.isNativePlatform() && this.webWatchId === null) {
+    // Re-enable web watch for continuous GPS tracking.
+    // Native watch is kept disabled to avoid iOS crash loops with permission dialogues.
+    if (!Capacitor.isNativePlatform() && this.webWatchId === null) {
       this.startWebWatch();
     }
-    */
   }
 
   // Start web continuous location watching
@@ -135,7 +131,7 @@ class LocationService {
         this.isError = true;
         this.notifyErrorListeners();
       },
-      { enableHighAccuracy: false, timeout: 30000, maximumAge: 10000 }
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 }
     );
     console.log('[LocationService] Web watch position started');
   }
@@ -194,8 +190,8 @@ class LocationService {
     }
   }
 
-  // Debounced update location private implementation
-  private debouncedLocationUpdate = debounce(async () => {
+  // Public update location method — returns a Promise that resolves when GPS arrives
+  public async updateLocation(): Promise<void> {
     try {
       const position = await this.getCurrentPosition();
       const location = {
@@ -219,11 +215,6 @@ class LocationService {
       this.isError = true;
       this.notifyErrorListeners();
     }
-  }, 1000);
-
-  // Public update location method
-  public async updateLocation(): Promise<void> {
-    this.debouncedLocationUpdate();
   }
 
   // Get current position — native or web
@@ -253,7 +244,7 @@ class LocationService {
         navigator.geolocation.getCurrentPosition(
           position => resolve(position),
           error => reject(error),
-          { enableHighAccuracy: false, timeout: 30000, maximumAge: 10000 }
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
         );
       });
     }
