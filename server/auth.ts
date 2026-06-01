@@ -57,12 +57,28 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: "Email already exists" });
       }
 
+      // Age Gate: Enforce 18+ minimum age
+      let calculatedAge = userData.age;
+      if (userData.dateOfBirth) {
+        const birthDate = new Date(userData.dateOfBirth);
+        const today = new Date();
+        calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          calculatedAge--;
+        }
+      }
+      if (calculatedAge < 18) {
+        return res.status(400).json({ message: "You must be 18 or older to use Face 2 Face" });
+      }
+
       // Hash the password
       const hashedPassword = await hashPassword(userData.password);
 
       // Create user with hashed password
       const user = await storage.createUser({
         ...userData,
+        age: calculatedAge,
         password: hashedPassword,
         dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth) : null
       });

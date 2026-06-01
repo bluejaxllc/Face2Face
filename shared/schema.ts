@@ -81,6 +81,7 @@ export const users = pgTable("users", {
   websiteUrl: text("website_url"),
   menuUrl: text("menu_url"),
   bookingUrl: text("booking_url"),
+  deletedAt: timestamp("deleted_at"), // Soft delete timestamp
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -207,6 +208,29 @@ export const insertWaitlistSchema = createInsertSchema(waitlists);
 export type Waitlist = typeof waitlists.$inferSelect;
 export type InsertWaitlist = typeof waitlists.$inferInsert;
 
+export const blocks = pgTable("blocks", {
+  id: serial("id").primaryKey(),
+  blockerId: integer("blocker_id").notNull(),
+  blockedId: integer("blocked_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  blockerIdx: index("block_blocker_idx").on(table.blockerId),
+  blockedIdx: index("block_blocked_idx").on(table.blockedId),
+}));
+
+export const reports = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  reporterId: integer("reporter_id").notNull(),
+  reportedId: integer("reported_id").notNull(),
+  reason: text("reason").notNull(), // 'harassment', 'fake_profile', 'inappropriate', 'spam', 'underage', 'other'
+  details: text("details"),
+  status: text("status").default("pending"), // 'pending', 'reviewed', 'action_taken', 'dismissed'
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  reporterIdx: index("report_reporter_idx").on(table.reporterId),
+  reportedIdx: index("report_reported_idx").on(table.reportedId),
+}));
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -322,3 +346,10 @@ export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 
 export type VerificationCode = typeof verificationCodes.$inferSelect;
+
+export const insertBlockSchema = createInsertSchema(blocks).pick({ blockerId: true, blockedId: true });
+export const insertReportSchema = createInsertSchema(reports).pick({ reporterId: true, reportedId: true, reason: true, details: true });
+export type Block = typeof blocks.$inferSelect;
+export type InsertBlock = z.infer<typeof insertBlockSchema>;
+export type Report = typeof reports.$inferSelect;
+export type InsertReport = z.infer<typeof insertReportSchema>;

@@ -247,8 +247,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
 
+      // Filter out blocked users (bidirectional: I blocked them OR they blocked me)
+      const myBlockedIds = await storage.getBlockedUsers(req.session.userId);
+      const filteredUsers = [];
+      for (const u of nearbyUsers) {
+        if (myBlockedIds.includes(u.id)) continue;
+        const theyBlockedMe = await storage.isBlocked(u.id, req.session.userId);
+        if (theyBlockedMe) continue;
+        filteredUsers.push(u);
+      }
+
       // Don't return sensitive information about other users
-      const sanitizedUsers = nearbyUsers.map(({ password, email, phoneNumber, ...rest }) => ({
+      const sanitizedUsers = filteredUsers.map(({ password, email, phoneNumber, ...rest }) => ({
         ...rest,
         profilePhoto: rest.profilePhoto ? `/api/users/${rest.id}/photo` : null
       }));
@@ -533,6 +543,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const otherUserId = parseInt(req.params.userId);
+
+      // Check if either user has blocked the other
+      const iBlockedThem = await storage.isBlocked(req.session.userId, otherUserId);
+      const theyBlockedMe = await storage.isBlocked(otherUserId, req.session.userId);
+      if (iBlockedThem || theyBlockedMe) {
+        return res.status(403).json({ message: "Cannot view messages with this user" });
+      }
+
       const messages = await storage.getMessagesBetweenUsers(req.session.userId, otherUserId);
       await storage.markMessagesAsRead(req.session.userId, otherUserId);
 
@@ -554,15 +572,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing receiverId or content" });
       }
 
+      const targetId = parseInt(receiverId);
+
+      // Check if either user has blocked the other
+      const iBlockedThem = await storage.isBlocked(req.session.userId, targetId);
+      const theyBlockedMe = await storage.isBlocked(targetId, req.session.userId);
+      if (iBlockedThem || theyBlockedMe) {
+        return res.status(403).json({ message: "Cannot send messages to this user" });
+      }
+
       const message = await storage.createMessage({
         senderId: req.session.userId,
-        receiverId: parseInt(receiverId),
+        receiverId: targetId,
         content
       });
 
       const sender = await storage.getUser(req.session.userId);
       await storage.createNotification({
-        userId: receiverId,
+        userId: targetId,
         type: "message",
         relatedId: req.session.userId,
         content: `${sender?.firstName} sent you a message`
@@ -731,6 +758,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get dating events error:", error);
       res.status(500).json({ message: "Failed to fetch dating events" });
+    }
+  });
+
+  // ---- Account Deletion ----
+  apiRouter.delete("/users/account", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { confirm } = req.body;
+      if (confirm !== true) {
+        return res.status(400).json({ message: "You must confirm account deletion by sending { confirm: true }" });
+      }
+
+      const userId = req.session.userId;
+
+      // Verify user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Soft-delete: clear sensitive data, mark inactive
+      await storage.deleteAccount(userId);
+
+      // Destroy session
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destroy error during account deletion:", err);
+        }
+      });
+
+      res.status(200).json({ message: "Account deleted successfully" });
+    } catch (error) {
+      console.error("Account deletion error:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
+
+  // ---- Block & Report Routes ----
+
+  // Block a user
+  apiRouter.post("/users/:id/block", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const blockedId = parseInt(req.params.id);
+      if (isNaN(blockedId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      if (blockedId === req.session.userId) {
+        return res.status(400).json({ message: "Cannot block yourself" });
+      }
+
+      // Check if already blocked
+      const alreadyBlocked = await storage.isBlocked(req.session.userId, blockedId);
+      if (alreadyBlocked) {
+        return res.status(400).json({ message: "User is already blocked" });
+      }
+
+      // Create block record
+      const block = await storage.blockUser(req.session.userId, blockedId);
+
+      // Remove any existing bumps and messages between them
+      await storage.deleteBumpsBetweenUsers(req.session.userId, blockedId);
+      await storage.deleteMessagesBetweenUsers(req.session.userId, blockedId);
+
+      res.status(201).json({ message: "User blocked successfully", block });
+    } catch (error) {
+      console.error("Block user error:", error);
+      res.status(500).json({ message: "Failed to block user" });
+    }
+  });
+
+  // Unblock a user
+  apiRouter.delete("/users/:id/block", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const blockedId = parseInt(req.params.id);
+      if (isNaN(blockedId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      await storage.unblockUser(req.session.userId, blockedId);
+
+      res.status(200).json({ message: "User unblocked successfully" });
+    } catch (error) {
+      console.error("Unblock user error:", error);
+      res.status(500).json({ message: "Failed to unblock user" });
+    }
+  });
+
+  // Get blocked user IDs
+  apiRouter.get("/users/blocked", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const blockedIds = await storage.getBlockedUsers(req.session.userId);
+
+      res.status(200).json(blockedIds);
+    } catch (error) {
+      console.error("Get blocked users error:", error);
+      res.status(500).json({ message: "Failed to get blocked users" });
+    }
+  });
+
+  // Report a user
+  apiRouter.post("/users/:id/report", async (req: Request, res: Response) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const reportedId = parseInt(req.params.id);
+      if (isNaN(reportedId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      if (reportedId === req.session.userId) {
+        return res.status(400).json({ message: "Cannot report yourself" });
+      }
+
+      const { reason, details } = req.body;
+      const validReasons = ['harassment', 'fake_profile', 'inappropriate', 'spam', 'underage', 'other'];
+      if (!reason || !validReasons.includes(reason)) {
+        return res.status(400).json({ message: "Invalid or missing reason. Must be one of: " + validReasons.join(", ") });
+      }
+
+      const report = await storage.createReport({
+        reporterId: req.session.userId,
+        reportedId,
+        reason,
+        details: details ? sanitizeInput(details, 1000) : undefined,
+      });
+
+      res.status(201).json({ message: "Report submitted successfully", report });
+    } catch (error) {
+      console.error("Report user error:", error);
+      res.status(500).json({ message: "Failed to submit report" });
     }
   });
 

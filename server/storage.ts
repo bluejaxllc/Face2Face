@@ -20,6 +20,12 @@ import {
   datingEvents,
   type DatingEvent,
   type InsertDatingEvent,
+  blocks,
+  type Block,
+  type InsertBlock,
+  reports,
+  type Report,
+  type InsertReport,
 } from "@shared/schema";
 import { eq, or, and, desc, asc, sql, SQL } from "drizzle-orm";
 import { db } from "./db";
@@ -80,6 +86,20 @@ export interface IStorage {
   // Dating Event operations
   createDatingEvent(event: InsertDatingEvent & { userId: number }): Promise<DatingEvent>;
   getDatingEvents(params?: { type?: string; location?: string }): Promise<DatingEvent[]>;
+
+  // Block operations
+  blockUser(blockerId: number, blockedId: number): Promise<Block>;
+  unblockUser(blockerId: number, blockedId: number): Promise<void>;
+  getBlockedUsers(userId: number): Promise<number[]>;
+  isBlocked(blockerId: number, blockedId: number): Promise<boolean>;
+  deleteBumpsBetweenUsers(userId1: number, userId2: number): Promise<void>;
+  deleteMessagesBetweenUsers(userId1: number, userId2: number): Promise<void>;
+
+  // Report operations
+  createReport(report: InsertReport): Promise<Report>;
+
+  // Account deletion
+  deleteAccount(userId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -150,16 +170,12 @@ export class DatabaseStorage implements IStorage {
       ageRange?: { min: number; max: number };
     } = {}
   ): Promise<User[]> {
-    // Show ALL active users with real coordinates (not default 0,0)
-    // No distance or preference filtering — everyone should be visible on the map
     const conditions: SQL[] = [
       sql`${users.id} != ${userId}`,
       eq(users.isActive, true),
       sql`${users.latitude} IS NOT NULL`,
       sql`${users.longitude} IS NOT NULL`,
-      // Exclude users who still have the default 0,0 coordinates (never set location)
       sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
-      // Only show users who have been active/pinged location in the last 30 minutes OR are demo users
       or(
         sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`,
         sql`${users.username} LIKE 'demo_%'`
@@ -228,7 +244,6 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  // Message Operations
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const result = await db.insert(messages).values(insertMessage).returning();
     return result[0];
@@ -284,7 +299,6 @@ export class DatabaseStorage implements IStorage {
       if (b.bumpedUserId !== userId) connectedSet.add(b.bumpedUserId);
     }
 
-    // Also include anyone who has exchanged messages just in case
     const chatHistory = await db.select()
       .from(messages)
       .where(or(
@@ -299,12 +313,7 @@ export class DatabaseStorage implements IStorage {
 
     if (connectedSet.size === 0) return [];
 
-    // Fallback if there are too many or we need a specific query array format
-    // Because IN clause requires array.
     const userIds = Array.from(connectedSet);
-
-    // We fetch one by one or chunk if needed, but for simplicity here use JS filter/map or multiple ORs.
-    // Alternatively, Drizzle `inArray`:
     const { inArray } = await import('drizzle-orm');
 
     const connectedUsers = await db.select()
@@ -353,7 +362,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(notifications.userId, userId));
   }
 
-  // Verification code operations
   async createVerificationCode(phoneNumber: string, code: string, expiresAt: Date): Promise<VerificationCode> {
     const result = await db.insert(verificationCodes).values({
       phoneNumber,
@@ -399,11 +407,6 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  /**
-   * Deactivate users who have exceeded their personal inactiveTimeout.
-   * Compares lastLocation timestamp against inactiveTimeout (in minutes).
-   * Returns the number of users deactivated.
-   */
   async deactivateInactiveUsers(): Promise<number> {
     const result = await db.update(users)
       .set({ isActive: false })
@@ -440,7 +443,6 @@ export class DatabaseStorage implements IStorage {
     if (params?.type) conditions.push(eq(datingEvents.type, params.type));
     if (params?.location) conditions.push(eq(datingEvents.location, params.location));
     
-    // Always filter for active events
     conditions.push(eq(datingEvents.isActive, true));
 
     if (conditions.length > 0) {
@@ -448,6 +450,74 @@ export class DatabaseStorage implements IStorage {
     }
     
     return await db.select().from(datingEvents).where(eq(datingEvents.isActive, true)).orderBy(desc(datingEvents.timestamp));
+  }
+
+  async blockUser(blockerId: number, blockedId: number): Promise<Block> {
+    const result = await db.insert(blocks).values({
+      blockerId,
+      blockedId,
+    }).returning();
+    return result[0];
+  }
+
+  async unblockUser(blockerId: number, blockedId: number): Promise<void> {
+    await db.delete(blocks).where(
+      and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId))
+    );
+  }
+
+  async getBlockedUsers(userId: number): Promise<number[]> {
+    const result = await db.select({ blockedId: blocks.blockedId })
+      .from(blocks)
+      .where(eq(blocks.blockerId, userId));
+    return result.map(r => r.blockedId);
+  }
+
+  async isBlocked(blockerId: number, blockedId: number): Promise<boolean> {
+    const result = await db.select()
+      .from(blocks)
+      .where(
+        and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId))
+      )
+      .limit(1);
+    return result.length > 0;
+  }
+
+  async deleteBumpsBetweenUsers(userId1: number, userId2: number): Promise<void> {
+    await db.delete(bumps).where(
+      or(
+        and(eq(bumps.userId, userId1), eq(bumps.bumpedUserId, userId2)),
+        and(eq(bumps.userId, userId2), eq(bumps.bumpedUserId, userId1))
+      )
+    );
+  }
+
+  async deleteMessagesBetweenUsers(userId1: number, userId2: number): Promise<void> {
+    await db.delete(messages).where(
+      or(
+        and(eq(messages.senderId, userId1), eq(messages.receiverId, userId2)),
+        and(eq(messages.senderId, userId2), eq(messages.receiverId, userId1))
+      )
+    );
+  }
+
+  async createReport(report: InsertReport): Promise<Report> {
+    const result = await db.insert(reports).values(report).returning();
+    return result[0];
+  }
+
+  async deleteAccount(userId: number): Promise<void> {
+    await db.update(users)
+      .set({
+        deletedAt: new Date(),
+        isActive: false,
+        profilePhoto: null,
+        bannerPhoto: null,
+        bio: null,
+        email: `deleted_${userId}@deleted.com`,
+        phoneNumber: null,
+      })
+      .where(eq(users.id, userId));
   }
 }
 

@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone, Eye, EyeOff, Gauge } from "lucide-react";
+import { Loader2, Smartphone, MapPin, MessageSquare, ShieldCheck, Phone, Eye, EyeOff, Gauge, AlertTriangle } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
@@ -33,7 +33,7 @@ const registerSchema = z.object({
   sex: z.string().min(1, "Required"),
   customSex: z.string().optional(),
   dateOfBirth: z.string().optional().or(z.literal("")),
-  age: z.number().min(13, "Must be at least 13"),
+  age: z.number().min(18, "You must be 18 or older to use Face 2 Face"),
   datingPreference: z.string().default("all"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -638,6 +638,17 @@ export default function Register() {
                         <h2 className="text-2xl font-black text-white mb-2">When is your birthday?</h2>
                         <p className="text-slate-400 text-sm">This confirms you're eligible for all app features</p>
                       </div>
+
+                      {/* 18+ Age Gate Notice */}
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/25"
+                      >
+                        <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                        <p className="text-amber-300 text-xs font-semibold text-left">You must be 18 or older to create an account on Face 2 Face.</p>
+                      </motion.div>
+
                       <FormField
                         control={registerForm.control}
                         name="dateOfBirth"
@@ -647,13 +658,27 @@ export default function Register() {
                               <Input type="date" {...field} className="auth-input h-14 text-lg text-center" />
                             </FormControl>
                             <FormDescription className="text-slate-500 text-sm mt-2">Current age: {registerForm.watch("age")}</FormDescription>
+                            {registerForm.watch("age") < 18 && dobValue && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-red-400 text-sm font-semibold mt-2"
+                              >
+                                You must be 18 or older to use Face 2 Face
+                              </motion.p>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                       <div className="flex gap-4">
                         <Button type="button" onClick={prevStep} variant="ghost" className="h-14 px-6 text-slate-400">Back</Button>
-                        <Button type="button" onClick={() => nextStep(["dateOfBirth"])} className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20">Next</Button>
+                        <Button
+                          type="button"
+                          onClick={() => nextStep(["dateOfBirth"])}
+                          disabled={!dobValue || registerForm.watch("age") < 18}
+                          className="flex-1 h-14 bg-pink-500 hover:bg-pink-600 text-white font-black text-lg rounded-2xl shadow-lg shadow-pink-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >Next</Button>
                       </div>
                     </motion.div>
                   )}
