@@ -14,6 +14,7 @@ import { sendVerificationSMS } from "./ghl";
 import { validateTags, validateModeration } from "@shared/moderation";
 import { uploadImageFromBase64 } from "./lib/storage-client";
 import { notifyUser } from "./websocket";
+import { stripe, handleStripeWebhook, isStripeConfigured } from "./stripe";
 
 /** Strip HTML tags and trim to maxLength */
 function sanitizeInput(input: string, maxLength: number): string {
@@ -153,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.checkIn(req.session.userId);
       res.json(result);
     } catch (err) {
-      log("Check-in error: " + err);
+      console.error("Check-in error: " + err);
       res.status(500).json({ message: "Check-in failed" });
     }
   });
@@ -1013,6 +1014,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Use the API router with prefix
   app.use("/api", apiRouter);
+
+  // ────────────────────────────────────────────────────────
+  // STRIPE MONETIZATION API
+  // ────────────────────────────────────────────────────────
+
+  app.post("/api/stripe/create-checkout", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!isStripeConfigured()) {
+      return res.status(503).json({ message: "Stripe is not configured on this server." });
+    }
+
+    const { type } = req.body; // 'bump_pack' or 'subscription'
+    const user = req.user as any;
+
+    try {
+      let priceId;
+      let mode: 'payment' | 'subscription' = 'payment';
+      let successUrl = `${process.env.PUBLIC_URL || req.headers.origin}/store?success=true`;
+      let cancelUrl = `${process.env.PUBLIC_URL || req.headers.origin}/store?canceled=true`;
+
+      if (type === 'subscription') {
+        priceId = process.env.STRIPE_PRICE_PREMIUM || 'price_premium_placeholder';
+        mode = 'subscription';
+      } else {
+        priceId = process.env.STRIPE_PRICE_BUMP_PACK_5 || 'price_bump_pack_5_placeholder';
+        mode = 'payment';
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        client_reference_id: user.id.toString(),
+        customer_email: user.email,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Stripe Checkout error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Stripe requires raw body for webhook verification
+  app.post('/api/stripe/webhook', express.raw({type: 'application/json'}), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    
+    let event;
+
+    try {
+      if (endpointSecret && sig) {
+        // Verify signature if secret exists
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+      } else {
+        // Fallback for dev mode
+        event = JSON.parse(req.body.toString());
+      }
+      
+      await handleStripeWebhook(event);
+      res.json({ received: true });
+    } catch (err: any) {
+      console.error(`Webhook Error: ${err.message}`);
+      res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+  });
 
   const httpServer = createServer(app);
 

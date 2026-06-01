@@ -575,7 +575,18 @@ export default function Profile() {
             </span>
             <Switch 
               checked={user.isPublic ?? true} 
-              onCheckedChange={(checked) => updateProfile({ isPublic: checked })}
+              onCheckedChange={(checked) => {
+                if (user.isPremium) {
+                  updateProfile({ isPublic: checked });
+                } else {
+                  toast({
+                    title: "Premium Feature",
+                    description: "Get F2F+ to unlock Stealth Mode and browse invisibly.",
+                    variant: "default",
+                  });
+                  setLocation("/store");
+                }
+              }}
               className="scale-75 data-[state=checked]:bg-emerald-500"
             />
           </div>
@@ -1412,14 +1423,25 @@ export default function Profile() {
               {isEditing ? "Cancel" : "Edit Profile"}
             </Button>
             {!isEditing && (
-              <Button
-                variant="ghost"
-                aria-label="Log out"
-                className="w-full h-9 rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-950/10 transition-all font-bold uppercase tracking-widest text-[10px]"
-                onClick={handleLogout}
-              >
-                Log Out
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  aria-label="F2F Store"
+                  className="w-full h-11 rounded-xl border-yellow-500/50 bg-yellow-950/20 text-yellow-400 hover:bg-yellow-500/20 hover:text-yellow-300 transition-all font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                  onClick={() => setLocation("/store")}
+                >
+                  <Star className="w-4 h-4" />
+                  {user.isPremium ? "Premium Active" : "Get F2F+ / Buy Bumps"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  aria-label="Log out"
+                  className="w-full h-9 rounded-xl text-slate-500 hover:text-red-400 hover:bg-red-950/10 transition-all font-bold uppercase tracking-widest text-[10px]"
+                  onClick={handleLogout}
+                >
+                  Log Out
+                </Button>
+              </>
             )}
           </motion.div>
 

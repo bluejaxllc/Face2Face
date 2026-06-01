@@ -7,6 +7,7 @@ interface User {
   company?: string;
   category: string;
   profilePhoto?: string | null;
+  isPremium?: boolean;
 }
 
 interface UserMarkerProps {
@@ -15,11 +16,13 @@ interface UserMarkerProps {
   onClick: () => void;
 }
 
+import { Crown } from "lucide-react";
+
 export default function UserMarker({ user, position, onClick }: UserMarkerProps) {
   const style: CSSProperties = {
     top: position.top,
     left: position.left,
-    zIndex: 40,
+    zIndex: user.isPremium ? 50 : 40,
   };
 
   const getInitials = (firstName: string, lastName: string, company?: string, category?: string) => {
@@ -31,10 +34,15 @@ export default function UserMarker({ user, position, onClick }: UserMarkerProps)
 
   return (
     <div
-      className={`user-marker ${user.category === "dating" ? "intimate-marker" : user.category === "business" ? "casual-marker" : "casual-marker"}`}
+      className={`user-marker relative ${user.category === "dating" ? "intimate-marker" : user.category === "business" ? "casual-marker" : "casual-marker"}`}
       style={style}
       onClick={onClick}
     >
+      {user.isPremium && (
+        <div className="absolute -top-3 -right-2 bg-yellow-500 rounded-full p-0.5 shadow-lg shadow-yellow-500/50 z-10 border border-yellow-200">
+          <Crown className="w-3 h-3 text-white fill-yellow-200" />
+        </div>
+      )}
       {user.profilePhoto ? (
         <img src={user.profilePhoto} alt={user.category === 'business' ? (user.company || user.firstName) : user.firstName} className="w-full h-full rounded-full object-cover" />
       ) : (

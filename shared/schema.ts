@@ -90,6 +90,11 @@ export const users = pgTable("users", {
   lastLoginDate: timestamp("last_login_date"),
   badges: text("badges"), // JSON string array of badges
   
+  // Monetization Fields
+  isPremium: boolean("is_premium").default(false),
+  availableBumps: integer("available_bumps").default(3),
+  stripeCustomerId: text("stripe_customer_id"),
+  
   deletedAt: timestamp("deleted_at"), // Soft delete timestamp
 }, (table) => {
   return {
@@ -338,6 +343,16 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
   content: true,
 });
 
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  stripeSessionId: text("stripe_session_id").notNull().unique(),
+  amount: integer("amount").notNull(), // in cents
+  status: text("status").notNull(), // 'pending', 'completed', 'failed'
+  type: text("type").notNull(), // 'bump_pack', 'subscription'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertNotificationSchema = createInsertSchema(notifications).pick({
   userId: true,
   type: true,
@@ -347,10 +362,12 @@ export const insertNotificationSchema = createInsertSchema(notifications).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type UpdateUser = Partial<Omit<User, "id" | "username" | "password">>;
-
-export type InsertBump = z.infer<typeof insertBumpSchema>;
-export type Bump = typeof bumps.$inferSelect;
+export type ProfileReview = typeof profileReviews.$inferSelect;
+export type Message = typeof messages.$inferSelect;
+export type UserBump = typeof userBumps.$inferSelect;
+export type ChatSession = typeof chatSessions.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = typeof transactions.$inferInsert;
 
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
