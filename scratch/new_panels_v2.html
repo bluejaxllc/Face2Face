@@ -1,0 +1,279 @@
+
+<!-- ═════ SPRINT BOARD TAB ═════ -->
+<div class="tab-panel" id="tab-sprint">
+    <div class="section-header">
+        <h2>📋 Sprint Board — MVP Gap Closure</h2>
+        <p>Drag items between columns or click checkboxes to track progress. Data persists in localStorage.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;" id="sprint-board">
+        <div class="card" style="border-top:3px solid var(--danger);min-height:300px;">
+            <h3 style="font-size:1rem;"><span class="emoji">🔴</span> To Do</h3>
+            <div id="sprint-todo" class="sprint-col" ondrop="sprintDrop(event)" ondragover="event.preventDefault()">
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-1" data-priority="P0"><span class="tag danger">P0</span> Block User System <span style="color:var(--text-muted);font-size:0.75rem;">3-5 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-2" data-priority="P0"><span class="tag danger">P0</span> Report User System <span style="color:var(--text-muted);font-size:0.75rem;">3-5 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-3" data-priority="P0"><span class="tag danger">P0</span> Account Deletion Flow <span style="color:var(--text-muted);font-size:0.75rem;">2-3 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-4" data-priority="P0"><span class="tag danger">P0</span> Privacy Policy + ToS <span style="color:var(--text-muted);font-size:0.75rem;">1-2 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-5" data-priority="P0"><span class="tag danger">P0</span> Age Gate (18+) Enforcement <span style="color:var(--text-muted);font-size:0.75rem;">2-3 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-6" data-priority="P1"><span class="tag warning">P1</span> Update Capacitor Config <span style="color:var(--text-muted);font-size:0.75rem;">1 day</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-7" data-priority="P1"><span class="tag warning">P1</span> Remove Stack Trace Leak <span style="color:var(--text-muted);font-size:0.75rem;">1 hour</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-8" data-priority="P1"><span class="tag warning">P1</span> Move Photos to Object Storage <span style="color:var(--text-muted);font-size:0.75rem;">3-5 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-9" data-priority="P2"><span class="tag">P2</span> Push Notifications <span style="color:var(--text-muted);font-size:0.75rem;">3-5 days</span></div>
+                <div class="sprint-item" draggable="true" ondragstart="sprintDrag(event)" id="si-10" data-priority="P2"><span class="tag">P2</span> Photo Verification <span style="color:var(--text-muted);font-size:0.75rem;">1-2 weeks</span></div>
+            </div>
+        </div>
+        <div class="card" style="border-top:3px solid var(--warning);min-height:300px;">
+            <h3 style="font-size:1rem;"><span class="emoji">🟡</span> In Progress</h3>
+            <div id="sprint-wip" class="sprint-col" ondrop="sprintDrop(event)" ondragover="event.preventDefault()"></div>
+        </div>
+        <div class="card" style="border-top:3px solid var(--success);min-height:300px;">
+            <h3 style="font-size:1rem;"><span class="emoji">🟢</span> Done</h3>
+            <div id="sprint-done" class="sprint-col" ondrop="sprintDrop(event)" ondragover="event.preventDefault()"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═════ FINANCIAL CALCULATOR TAB ═════ -->
+<div class="tab-panel" id="tab-calculator">
+    <div class="section-header">
+        <h2>💹 Financial Calculator</h2>
+        <p>Adjust the sliders to model revenue, valuation, and runway scenarios in real-time</p>
+    </div>
+    <div class="grid-2">
+        <div class="card">
+            <h3><span class="emoji">🎛️</span> Input Parameters</h3>
+            <div style="margin:1rem 0;">
+                <label style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.9rem;">MAU <strong id="calc-mau-val" style="color:var(--accent);">10,000</strong></label>
+                <input type="range" id="calc-mau" min="1000" max="1000000" value="10000" step="1000" oninput="updateCalc()" style="width:100%;accent-color:var(--accent);">
+            </div>
+            <div style="margin:1rem 0;">
+                <label style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.9rem;">Free→Paid Conversion % <strong id="calc-conv-val" style="color:var(--success);">5%</strong></label>
+                <input type="range" id="calc-conv" min="1" max="20" value="5" step="0.5" oninput="updateCalc()" style="width:100%;accent-color:var(--success);">
+            </div>
+            <div style="margin:1rem 0;">
+                <label style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.9rem;">Monthly Price (USD) <strong id="calc-price-val" style="color:var(--gold);">$9.99</strong></label>
+                <input type="range" id="calc-price" min="4.99" max="29.99" value="9.99" step="1" oninput="updateCalc()" style="width:100%;accent-color:var(--gold);">
+            </div>
+            <div style="margin:1rem 0;">
+                <label style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.9rem;">Monthly Churn % <strong id="calc-churn-val" style="color:var(--danger);">15%</strong></label>
+                <input type="range" id="calc-churn" min="5" max="30" value="15" step="1" oninput="updateCalc()" style="width:100%;accent-color:var(--danger);">
+            </div>
+            <div style="margin:1rem 0;">
+                <label style="display:flex;justify-content:space-between;color:var(--text-secondary);font-size:0.9rem;">Monthly Burn (USD) <strong id="calc-burn-val" style="color:var(--warning);">$2,000</strong></label>
+                <input type="range" id="calc-burn" min="500" max="50000" value="2000" step="500" oninput="updateCalc()" style="width:100%;accent-color:var(--warning);">
+            </div>
+        </div>
+        <div class="card" style="border:2px solid var(--accent);">
+            <h3><span class="emoji">📊</span> Projected Metrics</h3>
+            <div class="grid-2" style="margin-top:1rem;">
+                <div class="stat-block"><div class="stat-val" style="color:var(--success);" id="calc-mrr">$4,995</div><div class="stat-lbl">MRR</div></div>
+                <div class="stat-block"><div class="stat-val" style="color:var(--gold);" id="calc-arr">$59,940</div><div class="stat-lbl">ARR</div></div>
+                <div class="stat-block"><div class="stat-val" style="color:var(--accent);" id="calc-arpu">$0.50</div><div class="stat-lbl">ARPU</div></div>
+                <div class="stat-block"><div class="stat-val" style="color:var(--teal);" id="calc-ltv">$33.30</div><div class="stat-lbl">LTV</div></div>
+                <div class="stat-block"><div class="stat-val" style="color:var(--accent-secondary);" id="calc-payback">4.0 mo</div><div class="stat-lbl">Payback Period</div></div>
+                <div class="stat-block"><div class="stat-val" style="color:var(--warning);" id="calc-runway">∞</div><div class="stat-lbl">Runway (months)</div></div>
+            </div>
+            <div style="margin-top:1.5rem;padding:1rem;background:var(--bg-elevated);border-radius:8px;">
+                <p style="font-size:0.85rem;color:var(--text-muted);">Implied Valuation (at multiple):</p>
+                <div style="display:flex;gap:1rem;margin-top:0.5rem;flex-wrap:wrap;">
+                    <span style="color:var(--text-secondary);">3x: <strong id="calc-val-3x" style="color:var(--warning);">$180K</strong></span>
+                    <span style="color:var(--text-secondary);">5x: <strong id="calc-val-5x" style="color:var(--accent);">$300K</strong></span>
+                    <span style="color:var(--text-secondary);">8x: <strong id="calc-val-8x" style="color:var(--success);">$480K</strong></span>
+                    <span style="color:var(--text-secondary);">10x: <strong id="calc-val-10x" style="color:var(--gold);">$599K</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═════ HIRING & ORG CHART TAB ═════ -->
+<div class="tab-panel" id="tab-hiring">
+    <div class="section-header">
+        <h2>🧑‍💼 Hiring & Org Chart</h2>
+        <p>When to hire, role priorities, salary benchmarks, and team scaling plan</p>
+    </div>
+    <div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,rgba(251,191,36,0.06),var(--bg-card));">
+        <h3><span class="emoji">👤</span> Current Team: Solo Founder</h3>
+        <p>Bus factor = 1. First hires should reduce single-point-of-failure risk while accelerating growth.</p>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Hiring Priority by Phase</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Role</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">When</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">🇲🇽 Salary</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">🇺🇸 Salary</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Why</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--danger);font-weight:700;border-bottom:1px solid var(--border);">Community Manager</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">1K MAU</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$800-1.5K/mo</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$3-5K/mo</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Moderation, user trust, campus outreach</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">React Native Dev</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag warning">5K MAU</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$2-4K/mo</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$8-12K/mo</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">iOS build, Capacitor→RN migration</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">Growth Marketer</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag">10K MAU</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$1.5-3K/mo</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$5-8K/mo</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">ASO, paid acquisition, influencer mgmt</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent-secondary);font-weight:700;border-bottom:1px solid var(--border);">Backend Engineer</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag purple">25K MAU</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$2.5-5K/mo</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">$10-15K/mo</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">PostGIS, Redis, scaling infra</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;">Designer (UI/UX)</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag success">50K MAU</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);">$1.5-3K/mo</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);">$6-10K/mo</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Brand consistency, premium feel</td></tr>
+        </tbody>
+    </table>
+    <div class="card" style="margin-top:1.5rem;border-left:4px solid var(--success);">
+        <h3><span class="emoji">💡</span> Key Insight: Hire in Mexico First</h3>
+        <p>Mexico salaries are 3-5x lower than US equivalents. GDL tech talent pool is deep (Oracle, HP, Intel HQs). Hire remote MX talent while bootstrapping, transition to US hires after Series A.</p>
+    </div>
+</div>
+
+<!-- ═════ ASO TAB ═════ -->
+<div class="tab-panel" id="tab-aso">
+    <div class="section-header">
+        <h2>📱 App Store Optimization (ASO)</h2>
+        <p>Keyword strategy, screenshot optimization, and A/B test frameworks for iOS & Android</p>
+    </div>
+    <div class="section-header"><h2>Target Keywords (Ranked by Volume)</h2></div>
+    <div class="grid-2">
+        <div class="card"><h3><span class="emoji">🇺🇸</span> English Keywords</h3>
+            <table style="width:100%;border-collapse:collapse;">
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">meet people nearby</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag success">High</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">make friends app</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag success">High</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">local networking app</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag warning">Medium</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">dating without swiping</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag warning">Medium</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">people near me</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag success">High</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);">anti dating app</td><td style="padding:0.5rem;text-align:right;"><span class="tag">Growing</span></td></tr>
+            </table>
+        </div>
+        <div class="card"><h3><span class="emoji">🇲🇽</span> Spanish Keywords</h3>
+            <table style="width:100%;border-collapse:collapse;">
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">conocer gente cerca</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag success">High</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">app para hacer amigos</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag success">High</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">citas sin swipe</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag warning">Medium</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">personas cerca de mi</td><td style="padding:0.5rem;text-align:right;border-bottom:1px solid var(--border);"><span class="tag success">High</span></td></tr>
+                <tr><td style="padding:0.5rem;color:var(--text-secondary);">app social mapa</td><td style="padding:0.5rem;text-align:right;"><span class="tag">Niche</span></td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Screenshot Strategy (5 Screens)</h2></div>
+    <div class="grid-3">
+        <div class="card" style="text-align:center;"><h3>Screen 1</h3><p style="color:var(--accent);font-weight:700;">"See Who's Around You — Right Now"</p><p>Live map with pins. Hero shot.</p></div>
+        <div class="card" style="text-align:center;"><h3>Screen 2</h3><p style="color:var(--success);font-weight:700;">"3 Pillars: Social · Business · Love"</p><p>Pillar selection UI.</p></div>
+        <div class="card" style="text-align:center;"><h3>Screen 3</h3><p style="color:var(--warning);font-weight:700;">"No Swiping. No Algorithms."</p><p>Anti-swipe messaging + map.</p></div>
+    </div>
+</div>
+
+<!-- ═════ GAMIFICATION TAB ═════ -->
+<div class="tab-panel" id="tab-gamification">
+    <div class="section-header">
+        <h2>🎮 Gamification Playbook</h2>
+        <p>8 built-in games, engagement loops, streak mechanics, and leaderboard psychology</p>
+    </div>
+    <div class="grid-4" style="margin-bottom:2rem;">
+        <div class="stat-block"><div class="stat-val" style="color:var(--accent);">8</div><div class="stat-lbl">Games Built</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--success);">3x</div><div class="stat-lbl">Session Boost</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--warning);">+40%</div><div class="stat-lbl">D7 Retention Lift</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--accent-secondary);">2.5x</div><div class="stat-lbl">Social Sharing</div></div>
+    </div>
+    <div class="section-header"><h2>Core Engagement Loops</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:3px solid var(--accent);"><h3><span class="emoji">🔄</span> Daily Loop</h3><p>Open app → Check map → See who's nearby → Play daily game → Earn points → Check leaderboard → Share score → Return tomorrow</p></div>
+        <div class="card" style="border-left:3px solid var(--success);"><h3><span class="emoji">🔥</span> Streak Mechanics</h3><ul><li>3-day streak: Profile boost badge</li><li>7-day streak: Extended radius unlock</li><li>30-day streak: Gold profile frame</li><li>Break streak = lose progress (loss aversion)</li></ul></div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Leaderboard Psychology</h2></div>
+    <div class="grid-3">
+        <div class="card"><h3><span class="emoji">🏆</span> Competitive</h3><p>Top 10 visible. Shows progress bar to next rank. Weekly reset prevents discouragement.</p></div>
+        <div class="card"><h3><span class="emoji">👥</span> Social</h3><p>Friends-only leaderboard. "Beat your friend" nudge notifications. Share victories.</p></div>
+        <div class="card"><h3><span class="emoji">📍</span> Local</h3><p>Per-city leaderboards. University vs University. Neighborhood battles. City pride.</p></div>
+    </div>
+</div>
+
+<!-- ═════ UNIT ECONOMICS TAB ═════ -->
+<div class="tab-panel" id="tab-uniteconomics">
+    <div class="section-header">
+        <h2>📊 Unit Economics Deep Dive</h2>
+        <p>LTV/CAC breakdown by pillar, cohort modeling, and churn analysis</p>
+    </div>
+    <div class="section-header"><h2>LTV by Pillar</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Metric</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--accent);border-bottom:1px solid var(--border);">Social</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--teal);border-bottom:1px solid var(--border);">Business</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--danger);border-bottom:1px solid var(--border);">Love</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Avg Lifespan</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">8-12 months</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">12-24 months</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">3-6 months</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Monthly Churn</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--success);border-bottom:1px solid var(--border);">8-12%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--success);border-bottom:1px solid var(--border);">5-8%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--danger);border-bottom:1px solid var(--border);">15-25%</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Paid Conversion</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">3-5%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">8-12%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">5-8%</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Est. LTV</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--accent);font-weight:700;">$15-25</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--teal);font-weight:700;">$40-80</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--danger);font-weight:700;">$20-35</td></tr>
+        </tbody>
+    </table>
+    <div class="card" style="margin-top:1.5rem;border:2px solid var(--teal);">
+        <h3><span class="emoji">💡</span> Key Insight: Business Pillar = Best Unit Economics</h3>
+        <p>Business users have 2-3x longer lifespans and 2x higher conversion rates. Monetize Business first → fund Social & Love growth. This is the POF playbook — advertising before subscriptions.</p>
+    </div>
+</div>
+
+<!-- ═════ LEGAL TEMPLATES TAB ═════ -->
+<div class="tab-panel" id="tab-legal">
+    <div class="section-header">
+        <h2>🏛️ Legal Templates & Compliance</h2>
+        <p>Privacy policy framework, ToS outline, COPPA checklist, and LFPDPPP 2025 requirements</p>
+    </div>
+    <div class="section-header"><h2>Compliance Checklist</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:4px solid var(--danger);">
+            <h3><span class="emoji">🔴</span> CRITICAL (Before Launch)</h3>
+            <ul style="list-style:none;line-height:2.2;">
+                <li><input type="checkbox" id="lc-1" onchange="saveLegalChecklist()"> <label for="lc-1">Privacy Policy (bilingual EN/ES)</label></li>
+                <li><input type="checkbox" id="lc-2" onchange="saveLegalChecklist()"> <label for="lc-2">Terms of Service</label></li>
+                <li><input type="checkbox" id="lc-3" onchange="saveLegalChecklist()"> <label for="lc-3">Age gate 18+ enforcement</label></li>
+                <li><input type="checkbox" id="lc-4" onchange="saveLegalChecklist()"> <label for="lc-4">Ephemeral location storage only</label></li>
+                <li><input type="checkbox" id="lc-5" onchange="saveLegalChecklist()"> <label for="lc-5">Opt-in consent flow for location</label></li>
+                <li><input type="checkbox" id="lc-6" onchange="saveLegalChecklist()"> <label for="lc-6">Block/Report system</label></li>
+            </ul>
+        </div>
+        <div class="card" style="border-left:4px solid var(--warning);">
+            <h3><span class="emoji">🟡</span> HIGH (Within 30 Days)</h3>
+            <ul style="list-style:none;line-height:2.2;">
+                <li><input type="checkbox" id="lc-7" onchange="saveLegalChecklist()"> <label for="lc-7">ARCO rights (Mexico data subject)</label></li>
+                <li><input type="checkbox" id="lc-8" onchange="saveLegalChecklist()"> <label for="lc-8">Data deletion API endpoint</label></li>
+                <li><input type="checkbox" id="lc-9" onchange="saveLegalChecklist()"> <label for="lc-9">Safety center page</label></li>
+                <li><input type="checkbox" id="lc-10" onchange="saveLegalChecklist()"> <label for="lc-10">Cookie consent banner</label></li>
+                <li><input type="checkbox" id="lc-11" onchange="saveLegalChecklist()"> <label for="lc-11">CCPA "Do Not Sell" link</label></li>
+                <li><input type="checkbox" id="lc-12" onchange="saveLegalChecklist()"> <label for="lc-12">App Store rating 17+</label></li>
+            </ul>
+        </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem;border:1px solid var(--success);">
+        <h3><span class="emoji">✅</span> F2F Architectural Advantages</h3>
+        <ul><li><strong>No algorithms</strong> = no profiling liability under GDPR/CCPA</li><li><strong>No biometric data</strong> = no BIPA exposure ($5K/violation)</li><li><strong>Proximity-only</strong> = no historical tracking to subpoena</li><li><strong>No ad model</strong> = no third-party data sharing issues</li></ul>
+    </div>
+</div>
+
+<!-- ═════ SECURITY AUDIT TAB ═════ -->
+<div class="tab-panel" id="tab-security">
+    <div class="section-header">
+        <h2>🔐 Security Audit Checklist</h2>
+        <p>Interactive hardening checklist based on the technical architecture audit. Progress saves locally.</p>
+    </div>
+    <div class="grid-4" style="margin-bottom:2rem;">
+        <div class="stat-block" style="border:1px solid rgba(239,68,68,0.3);"><div class="stat-val" style="color:var(--danger);" id="sec-critical">6</div><div class="stat-lbl">Critical</div></div>
+        <div class="stat-block" style="border:1px solid rgba(245,158,11,0.3);"><div class="stat-val" style="color:var(--warning);" id="sec-high">5</div><div class="stat-lbl">High</div></div>
+        <div class="stat-block" style="border:1px solid rgba(16,185,129,0.3);"><div class="stat-val" style="color:var(--success);" id="sec-done">0</div><div class="stat-lbl">Completed</div></div>
+        <div class="stat-block" style="border:1px solid rgba(59,130,246,0.3);"><div class="stat-val" style="color:var(--accent);" id="sec-pct">0%</div><div class="stat-lbl">Progress</div></div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--danger);">
+        <h3><span class="emoji">🔴</span> Critical Security Items</h3>
+        <ul style="list-style:none;line-height:2.5;">
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Remove stack trace leak in error responses</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Encrypt lat/lng at rest in database</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Move photos from base64 in DB to object storage</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Implement location fuzzing (±200m noise)</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Migrate from session cookies to JWT auth</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Rate limit all API endpoints</li>
+        </ul>
+    </div>
+    <div class="card" style="border-left:4px solid var(--warning);">
+        <h3><span class="emoji">🟡</span> High Priority Items</h3>
+        <ul style="list-style:none;line-height:2.5;">
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Anti-trilateration defenses (distance bands, random noise)</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Content moderation pipeline (auto-block + human review)</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> NSFW photo detection</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Input sanitization on all user-submitted fields</li>
+            <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Implement CSP headers</li>
+        </ul>
+    </div>
+</div>

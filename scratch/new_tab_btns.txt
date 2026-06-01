@@ -1,0 +1,30 @@
+        <li><button class="tab-btn" data-tab="sprint" style="color:var(--success);">📋 Sprint Board</button></li>
+        <li><button class="tab-btn" data-tab="calculator" style="color:var(--gold);">💹 Calculator</button></li>
+        <li><button class="tab-btn" data-tab="hiring" style="color:var(--teal);">🧑‍💼 Hiring</button></li>
+        <li><button class="tab-btn" data-tab="aso" style="color:var(--accent-secondary);">📱 ASO</button></li>
+        <li><button class="tab-btn" data-tab="gamification" style="color:var(--warning);">🎮 Gamification</button></li>
+        <li><button class="tab-btn" data-tab="uniteconomics" style="color:var(--accent);">📊 Unit Economics</button></li>
+        <li><button class="tab-btn" data-tab="legal" style="color:var(--danger);">🏛️ Legal</button></li>
+        <li><button class="tab-btn" data-tab="security" style="color:var(--teal);">🔐 Security Audit</button></li>
+        <li><button class="tab-btn" data-tab="captable" style="color:var(--gold);">💰 Cap Table</button></li>
+        <li><button class="tab-btn" data-tab="okr" style="color:var(--success);">🎯 OKRs</button></li>
+        <li><button class="tab-btn" data-tab="abtest" style="color:var(--accent-secondary);">🧪 A/B Tests</button></li>
+        <li><button class="tab-btn" data-tab="contentcal" style="color:var(--danger);">📅 Content Cal</button></li>
+        <li><button class="tab-btn" data-tab="meetingprep" style="color:var(--warning);">🎤 Meeting Prep</button></li>
+        <li><button class="tab-btn" data-tab="duediligence" style="color:var(--teal);">💼 Due Diligence</button></li>
+        <li><button class="tab-btn" data-tab="advisors" style="color:var(--accent);">👥 Advisors</button></li>
+        <li><button class="tab-btn" data-tab="featurematrix" style="color:var(--gold);">⚔️ Feature Matrix</button></li>
+        <li><button class="tab-btn" data-tab="comprevenue" style="color:var(--danger);">📊 Comp Revenue</button></li>
+        <li><button class="tab-btn" data-tab="outreach" style="color:var(--success);">📧 Outreach</button></li>
+        <li><button class="tab-btn" data-tab="demoscript" style="color:var(--accent-secondary);">🎬 Demo Script</button></li>
+        <li><button class="tab-btn" data-tab="milestones" style="color:var(--warning);">🏆 Milestones</button></li>
+        <li><button class="tab-btn" data-tab="citylaunch" style="color:var(--success);">🗺️ City Launch</button></li>
+        <li><button class="tab-btn" data-tab="campus" style="color:var(--accent);">🏫 Campus Reps</button></li>
+        <li><button class="tab-btn" data-tab="pushnotif" style="color:var(--warning);">🔔 Notifications</button></li>
+        <li><button class="tab-btn" data-tab="community" style="color:var(--teal);">💬 Community</button></li>
+        <li><button class="tab-btn" data-tab="events" style="color:var(--danger);">🎪 Events</button></li>
+        <li><button class="tab-btn" data-tab="support" style="color:var(--accent-secondary);">📞 Support</button></li>
+        <li><button class="tab-btn" data-tab="designsystem" style="color:var(--gold);">🎨 Design System</button></li>
+        <li><button class="tab-btn" data-tab="monetize" style="color:var(--success);">💳 Monetization</button></li>
+        <li><button class="tab-btn" data-tab="appstore" style="color:var(--accent);">📱 App Store</button></li>
+        <li><button class="tab-btn" data-tab="apiref" style="color:var(--teal);">🌐 API Reference</button></li>

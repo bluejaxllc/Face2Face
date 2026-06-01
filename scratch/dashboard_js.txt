@@ -1,0 +1,142 @@
+    // ======= FINANCIAL CALCULATOR =======
+    function updateCalc() {
+        var mau = +document.getElementById('calc-mau').value;
+        var conv = +document.getElementById('calc-conv').value / 100;
+        var price = +document.getElementById('calc-price').value;
+        var churn = +document.getElementById('calc-churn').value / 100;
+        var burn = +document.getElementById('calc-burn').value;
+        var paidUsers = Math.round(mau * conv);
+        var mrr = paidUsers * price;
+        var arr = mrr * 12;
+        var arpu = mrr / mau;
+        var ltv = price / churn;
+        var netMRR = mrr - burn;
+        document.getElementById('calc-mau-val').textContent = mau.toLocaleString();
+        document.getElementById('calc-conv-val').textContent = (conv*100).toFixed(1) + '%';
+        document.getElementById('calc-price-val').textContent = '$' + price.toFixed(2);
+        document.getElementById('calc-churn-val').textContent = (churn*100) + '%';
+        document.getElementById('calc-burn-val').textContent = '$' + burn.toLocaleString();
+        document.getElementById('calc-mrr').textContent = '$' + mrr.toLocaleString(undefined, {maximumFractionDigits:0});
+        document.getElementById('calc-arr').textContent = '$' + arr.toLocaleString(undefined, {maximumFractionDigits:0});
+        document.getElementById('calc-arpu').textContent = '$' + arpu.toFixed(2);
+        document.getElementById('calc-ltv').textContent = '$' + ltv.toFixed(2);
+        document.getElementById('calc-payback').textContent = (1/conv).toFixed(1) + ' mo';
+        document.getElementById('calc-runway').textContent = netMRR > 0 ? 'Infinite' : Math.ceil(10000/Math.abs(netMRR)) + ' mo';
+        document.getElementById('calc-val-3x').textContent = '$' + (arr*3/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-5x').textContent = '$' + (arr*5/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-8x').textContent = '$' + (arr*8/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-10x').textContent = '$' + (arr*10/1000).toFixed(0) + 'K';
+    }
+    // ======= SPRINT BOARD =======
+    function sprintDrag(ev) { ev.dataTransfer.setData('text', ev.target.id); }
+    function sprintDrop(ev) {
+        ev.preventDefault();
+        var id = ev.dataTransfer.getData('text');
+        var el = document.getElementById(id);
+        var col = ev.target.closest('.sprint-col');
+        if (col && el) { col.appendChild(el); saveSprintState(); }
+    }
+    function saveSprintState() {
+        var state = {};
+        document.querySelectorAll('.sprint-col').forEach(function(col) {
+            state[col.id] = Array.from(col.children).map(function(c) { return c.id; });
+        });
+        localStorage.setItem('f2f-sprint', JSON.stringify(state));
+    }
+    (function loadSprint() {
+        var saved = localStorage.getItem('f2f-sprint');
+        if (!saved) return;
+        try {
+            var state = JSON.parse(saved);
+            Object.keys(state).forEach(function(colId) {
+                var col = document.getElementById(colId);
+                if (!col) return;
+                state[colId].forEach(function(itemId) {
+                    var item = document.getElementById(itemId);
+                    if (item) col.appendChild(item);
+                });
+            });
+        } catch(e) {}
+    })();
+    // ======= GLOBAL SEARCH =======
+    function globalSearchHandler(query) {
+        if (!query || query.length < 2) return;
+        var panels = document.querySelectorAll('.tab-panel');
+        var found = [];
+        panels.forEach(function(panel) {
+            if (panel.textContent.toLowerCase().includes(query.toLowerCase())) {
+                found.push(panel.id.replace('tab-', ''));
+            }
+        });
+        if (found.length > 0) {
+            var btn = document.querySelector('[data-tab="' + found[0] + '"]');
+            if (btn) btn.click();
+            document.getElementById('globalSearch').title = 'Found in ' + found.length + ' tabs: ' + found.join(', ');
+        }
+    }
+    // ======= THEME TOGGLE =======
+    function toggleTheme() {
+        document.documentElement.classList.toggle('light');
+        var isLight = document.documentElement.classList.contains('light');
+        document.getElementById('themeToggle').textContent = isLight ? '\uD83C\uDF19 Dark Mode' : '\uD83C\uDF13 Light Mode';
+        localStorage.setItem('f2f-theme', isLight ? 'light' : 'dark');
+    }
+    if (localStorage.getItem('f2f-theme') === 'light') {
+        document.documentElement.classList.add('light');
+        var tb = document.getElementById('themeToggle');
+        if (tb) tb.textContent = '\uD83C\uDF19 Dark Mode';
+    }
+    // ======= EXPORT PNG =======
+    function exportToPDF() {
+        var activePanel = document.querySelector('.tab-panel.active');
+        if (!activePanel) return;
+        var tabName = activePanel.id.replace('tab-', '');
+        if (typeof html2canvas !== 'undefined') {
+            html2canvas(activePanel, {backgroundColor:'#050a14', scale:2, useCORS:true}).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = 'F2F_' + tabName + '_' + new Date().toISOString().slice(0,10) + '.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        } else { window.print(); }
+    }
+    // ======= COUNTDOWN =======
+    function updateCountdown() {
+        var saved = localStorage.getItem('f2f-launch-date');
+        var launch = saved ? new Date(saved) : new Date(Date.now() + 21*86400000);
+        if (!saved) localStorage.setItem('f2f-launch-date', launch.toISOString());
+        var diff = launch - new Date();
+        if (diff <= 0) { document.getElementById('cd-days').textContent = '0'; document.getElementById('cd-hours').textContent = '0'; document.getElementById('cd-mins').textContent = '0'; return; }
+        document.getElementById('cd-days').textContent = Math.floor(diff/86400000);
+        document.getElementById('cd-hours').textContent = Math.floor((diff%86400000)/3600000);
+        document.getElementById('cd-mins').textContent = Math.floor((diff%3600000)/60000);
+    }
+    updateCountdown(); setInterval(updateCountdown, 60000);
+    // ======= SECURITY PROGRESS =======
+    function updateSecurityProgress() {
+        var checks = document.querySelectorAll('.sec-check');
+        var done = Array.from(checks).filter(function(c){return c.checked;}).length;
+        var total = checks.length;
+        var pct = Math.round((done/total)*100);
+        var critLeft = Array.from(checks).slice(0,6).filter(function(c){return !c.checked;}).length;
+        var highLeft = Array.from(checks).slice(6).filter(function(c){return !c.checked;}).length;
+        document.getElementById('sec-critical').textContent = critLeft;
+        document.getElementById('sec-high').textContent = highLeft;
+        document.getElementById('sec-done').textContent = done;
+        document.getElementById('sec-pct').textContent = pct + '%';
+        localStorage.setItem('f2f-security', JSON.stringify(Array.from(checks).map(function(c){return c.checked;})));
+    }
+    (function(){var s=localStorage.getItem('f2f-security');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.sec-check').forEach(function(c,i){if(st[i])c.checked=true;});updateSecurityProgress();}catch(e){}}})();
+    // ======= LEGAL CHECKLIST =======
+    function saveLegalChecklist() {
+        var checks = [];
+        for (var i=1;i<=12;i++){var el=document.getElementById('lc-'+i);if(el)checks.push(el.checked);}
+        localStorage.setItem('f2f-legal', JSON.stringify(checks));
+    }
+    (function(){var s=localStorage.getItem('f2f-legal');if(s){try{var st=JSON.parse(s);st.forEach(function(v,i){var el=document.getElementById('lc-'+(i+1));if(el)el.checked=v;});}catch(e){}}})();
+    // ======= CITY LAUNCH CHECKLIST =======
+    function saveCityLaunch() {
+        var checks = Array.from(document.querySelectorAll('.cl-check')).map(function(c){return c.checked;});
+        localStorage.setItem('f2f-citylaunch', JSON.stringify(checks));
+    }
+    (function(){var s=localStorage.getItem('f2f-citylaunch');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.cl-check').forEach(function(c,i){if(st[i])c.checked=true;});}catch(e){}}})();

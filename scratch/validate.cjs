@@ -1,0 +1,13 @@
+const fs = require('fs');
+const c = fs.readFileSync('c:\\Users\\edgar\\OneDrive\\Desktop\\Face 2 Face\\strategic_dashboard.html','utf8');
+const btns = [...c.matchAll(/data-tab="([^"]+)"/g)].map(m=>m[1]);
+const panels = [...c.matchAll(/id="tab-([^"]+)"/g)].map(m=>m[1]);
+const btnSet = [...new Set(btns)];
+const panelSet = [...new Set(panels)];
+console.log('Unique buttons:', btnSet.length, '| Unique panels:', panelSet.length);
+const missingPanels = btnSet.filter(b => !panelSet.includes(b));
+const missingBtns = panelSet.filter(p => !btnSet.includes(p));
+if (missingPanels.length) console.log('Buttons without panels:', missingPanels);
+if (missingBtns.length) console.log('Panels without buttons:', missingBtns);
+if (!missingPanels.length && !missingBtns.length) console.log('PERFECT MATCH!');
+console.log('Size:', c.length, 'bytes | Lines:', c.split('\n').length);

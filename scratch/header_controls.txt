@@ -1,0 +1,6 @@
+        <div class="header-controls">
+            <div class="global-search"><input type="text" id="globalSearch" placeholder="Search all tabs..." oninput="globalSearchHandler(this.value)"></div>
+            <button onclick="toggleTheme()" id="themeToggle">🌓 Light Mode</button>
+            <button onclick="exportToPDF()">📤 Export PNG</button>
+            <div class="countdown-display" id="countdown-box">🚀 MVP: <span class="cd-num" id="cd-days">--</span>d <span class="cd-num" id="cd-hours">--</span>h <span class="cd-num" id="cd-mins">--</span>m</div>
+        </div>

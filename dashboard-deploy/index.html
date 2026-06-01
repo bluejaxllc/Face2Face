@@ -534,6 +534,13 @@
             }
         }
         
+        .sprint-col{min-height:200px}.sprint-item{padding:.75rem;margin:.5rem 0;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;cursor:grab;font-size:.85rem;color:var(--text-secondary);transition:all .2s}.sprint-item:hover{border-color:var(--accent);transform:translateY(-1px)}
+        .global-search{position:relative}.global-search input{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);padding:.5rem 1rem .5rem 2.2rem;border-radius:8px;font-size:.85rem;width:220px;outline:none;transition:all .3s}.global-search input:focus{border-color:var(--accent);width:320px;box-shadow:0 0 20px rgba(59,130,246,.15)}
+        .header-controls{display:flex;align-items:center;gap:.75rem;margin-top:.75rem;flex-wrap:wrap}.header-controls button{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);padding:.4rem .75rem;border-radius:6px;cursor:pointer;font-size:.75rem;transition:all .2s}.header-controls button:hover{border-color:var(--accent);color:var(--text-primary)}
+        .countdown-display{display:inline-flex;gap:.5rem;align-items:center;font-size:.8rem;color:var(--text-muted);background:var(--bg-elevated);padding:.4rem .75rem;border-radius:6px;border:1px solid var(--border)}.countdown-display .cd-num{color:var(--accent);font-weight:700;font-size:1rem}
+        html.light{--bg-deep:#f0f2f5;--bg-primary:#fff;--bg-card:#f8f9fa;--bg-elevated:#edf0f4;--border:rgba(0,0,0,.1);--border-bright:rgba(0,0,0,.2);--text-primary:#1a1a2e;--text-secondary:#4a5568;--text-muted:#718096}html.light .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}html.light .tab-nav{background:#fff;border-bottom:1px solid rgba(0,0,0,.1)}html.light .footer{background:#1a1a2e}
+
+
         /* ===== CATEGORY NAV ===== */
         .tab-nav{position:sticky;top:0;z-index:100;background:rgba(5,10,20,0.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:0}
         .cat-bar{display:flex;gap:0;justify-content:center;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:rgba(5,10,20,0.6);padding:0 1rem}
@@ -558,6 +565,146 @@
         html.light{--bg-deep:#f0f2f5;--bg-primary:#fff;--bg-card:#f8f9fa;--bg-elevated:#edf0f4;--border:rgba(0,0,0,.1);--border-bright:rgba(0,0,0,.2);--text-primary:#1a1a2e;--text-secondary:#4a5568;--text-muted:#718096}html.light .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}html.light .tab-nav{background:rgba(255,255,255,0.95)}html.light .cat-bar{background:rgba(240,242,245,0.8)}html.light .footer{background:#1a1a2e}
 
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js">
+    // ======= FINANCIAL CALCULATOR =======
+    function updateCalc() {
+        var mau = +document.getElementById('calc-mau').value;
+        var conv = +document.getElementById('calc-conv').value / 100;
+        var price = +document.getElementById('calc-price').value;
+        var churn = +document.getElementById('calc-churn').value / 100;
+        var burn = +document.getElementById('calc-burn').value;
+        var paidUsers = Math.round(mau * conv);
+        var mrr = paidUsers * price;
+        var arr = mrr * 12;
+        var arpu = mrr / mau;
+        var ltv = price / churn;
+        var netMRR = mrr - burn;
+        document.getElementById('calc-mau-val').textContent = mau.toLocaleString();
+        document.getElementById('calc-conv-val').textContent = (conv*100).toFixed(1) + '%';
+        document.getElementById('calc-price-val').textContent = '$' + price.toFixed(2);
+        document.getElementById('calc-churn-val').textContent = (churn*100) + '%';
+        document.getElementById('calc-burn-val').textContent = '$' + burn.toLocaleString();
+        document.getElementById('calc-mrr').textContent = '$' + mrr.toLocaleString(undefined, {maximumFractionDigits:0});
+        document.getElementById('calc-arr').textContent = '$' + arr.toLocaleString(undefined, {maximumFractionDigits:0});
+        document.getElementById('calc-arpu').textContent = '$' + arpu.toFixed(2);
+        document.getElementById('calc-ltv').textContent = '$' + ltv.toFixed(2);
+        document.getElementById('calc-payback').textContent = (1/conv).toFixed(1) + ' mo';
+        document.getElementById('calc-runway').textContent = netMRR > 0 ? 'Infinite' : Math.ceil(10000/Math.abs(netMRR)) + ' mo';
+        document.getElementById('calc-val-3x').textContent = '$' + (arr*3/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-5x').textContent = '$' + (arr*5/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-8x').textContent = '$' + (arr*8/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-10x').textContent = '$' + (arr*10/1000).toFixed(0) + 'K';
+    }
+    // ======= SPRINT BOARD =======
+    function sprintDrag(ev) { ev.dataTransfer.setData('text', ev.target.id); }
+    function sprintDrop(ev) {
+        ev.preventDefault();
+        var id = ev.dataTransfer.getData('text');
+        var el = document.getElementById(id);
+        var col = ev.target.closest('.sprint-col');
+        if (col && el) { col.appendChild(el); saveSprintState(); }
+    }
+    function saveSprintState() {
+        var state = {};
+        document.querySelectorAll('.sprint-col').forEach(function(col) {
+            state[col.id] = Array.from(col.children).map(function(c) { return c.id; });
+        });
+        localStorage.setItem('f2f-sprint', JSON.stringify(state));
+    }
+    (function loadSprint() {
+        var saved = localStorage.getItem('f2f-sprint');
+        if (!saved) return;
+        try {
+            var state = JSON.parse(saved);
+            Object.keys(state).forEach(function(colId) {
+                var col = document.getElementById(colId);
+                if (!col) return;
+                state[colId].forEach(function(itemId) {
+                    var item = document.getElementById(itemId);
+                    if (item) col.appendChild(item);
+                });
+            });
+        } catch(e) {}
+    })();
+    // ======= GLOBAL SEARCH =======
+    function globalSearchHandler(query) {
+        if (!query || query.length < 2) return;
+        var panels = document.querySelectorAll('.tab-panel');
+        var found = [];
+        panels.forEach(function(panel) {
+            if (panel.textContent.toLowerCase().includes(query.toLowerCase())) {
+                found.push(panel.id.replace('tab-', ''));
+            }
+        });
+        if (found.length > 0) {
+            var btn = document.querySelector('[data-tab="' + found[0] + '"]');
+            if (btn) btn.click();
+            document.getElementById('globalSearch').title = 'Found in ' + found.length + ' tabs: ' + found.join(', ');
+        }
+    }
+    // ======= THEME TOGGLE =======
+    function toggleTheme() {
+        document.documentElement.classList.toggle('light');
+        var isLight = document.documentElement.classList.contains('light');
+        document.getElementById('themeToggle').textContent = isLight ? '\uD83C\uDF19 Dark Mode' : '\uD83C\uDF13 Light Mode';
+        localStorage.setItem('f2f-theme', isLight ? 'light' : 'dark');
+    }
+    if (localStorage.getItem('f2f-theme') === 'light') {
+        document.documentElement.classList.add('light');
+        var tb = document.getElementById('themeToggle');
+        if (tb) tb.textContent = '\uD83C\uDF19 Dark Mode';
+    }
+    // ======= EXPORT PNG =======
+    function exportToPDF() {
+        var activePanel = document.querySelector('.tab-panel.active');
+        if (!activePanel) return;
+        var tabName = activePanel.id.replace('tab-', '');
+        if (typeof html2canvas !== 'undefined') {
+            html2canvas(activePanel, {backgroundColor:'#050a14', scale:2, useCORS:true}).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = 'F2F_' + tabName + '_' + new Date().toISOString().slice(0,10) + '.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        } else { window.print(); }
+    }
+    // ======= COUNTDOWN =======
+    function updateCountdown() {
+        var saved = localStorage.getItem('f2f-launch-date');
+        var launch = saved ? new Date(saved) : new Date(Date.now() + 21*86400000);
+        if (!saved) localStorage.setItem('f2f-launch-date', launch.toISOString());
+        var diff = launch - new Date();
+        if (diff <= 0) { document.getElementById('cd-days').textContent = '0'; document.getElementById('cd-hours').textContent = '0'; document.getElementById('cd-mins').textContent = '0'; return; }
+        document.getElementById('cd-days').textContent = Math.floor(diff/86400000);
+        document.getElementById('cd-hours').textContent = Math.floor((diff%86400000)/3600000);
+        document.getElementById('cd-mins').textContent = Math.floor((diff%3600000)/60000);
+    }
+    updateCountdown(); setInterval(updateCountdown, 60000);
+    // ======= SECURITY PROGRESS =======
+    function updateSecurityProgress() {
+        var checks = document.querySelectorAll('.sec-check');
+        var done = Array.from(checks).filter(function(c){return c.checked;}).length;
+        var total = checks.length;
+        var pct = Math.round((done/total)*100);
+        var critLeft = Array.from(checks).slice(0,6).filter(function(c){return !c.checked;}).length;
+        var highLeft = Array.from(checks).slice(6).filter(function(c){return !c.checked;}).length;
+        document.getElementById('sec-critical').textContent = critLeft;
+        document.getElementById('sec-high').textContent = highLeft;
+        document.getElementById('sec-done').textContent = done;
+        document.getElementById('sec-pct').textContent = pct + '%';
+        localStorage.setItem('f2f-security', JSON.stringify(Array.from(checks).map(function(c){return c.checked;})));
+    }
+    (function(){var s=localStorage.getItem('f2f-security');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.sec-check').forEach(function(c,i){if(st[i])c.checked=true;});updateSecurityProgress();}catch(e){}}})();
+    // ======= LEGAL CHECKLIST =======
+    function saveLegalChecklist() {
+        var checks = [];
+        for (var i=1;i<=12;i++){var el=document.getElementById('lc-'+i);if(el)checks.push(el.checked);}
+        localStorage.setItem('f2f-legal', JSON.stringify(checks));
+    }
+    (function(){var s=localStorage.getItem('f2f-legal');if(s){try{var st=JSON.parse(s);st.forEach(function(v,i){var el=document.getElementById('lc-'+(i+1));if(el)el.checked=v;});}catch(e){}}})();
+
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -592,6 +739,13 @@
             </div>
         </div>
     </div>
+        <div class="header-controls">
+            <div class="global-search"><input type="text" id="globalSearch" placeholder="Search all tabs..." oninput="globalSearchHandler(this.value)"></div>
+            <button onclick="toggleTheme()" id="themeToggle">🌓 Light Mode</button>
+            <button onclick="exportToPDF()">📤 Export PNG</button>
+            <div class="countdown-display" id="countdown-box">🚀 MVP: <span class="cd-num" id="cd-days">--</span>d <span class="cd-num" id="cd-hours">--</span>h <span class="cd-num" id="cd-mins">--</span>m</div>
+        </div>
+
         <div class="header-controls">
             <div class="global-search"><input type="text" id="globalSearch" placeholder="Search all tabs..." oninput="globalSearchHandler(this.value)"></div>
             <button onclick="toggleTheme()" id="themeToggle">🌓 Light Mode</button>
@@ -690,67 +844,7 @@
 <!-- ═══════════ MAIN CONTENT ═══════════ -->
 <main class="main">
 
-    <!-- ═════ OVERVIEW TAB ═════ -->
-    <div class="tab-panel active" id="tab-overview">
-        <div class="section-header">
-            <h2>Mission Control</h2>
-            <p>Real-time status of all Face 2 Face strategic workstreams and thesis foundation</p>
-        </div>
-
-        <div class="grid-4" style="margin-bottom: 2rem;">
-            <div class="stat-block">
-                <div class="stat-val">$575M</div>
-                <div class="stat-lbl">POF Exit Benchmark</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-val">3</div>
-                <div class="stat-lbl">Modules (Social · Biz · Love)</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-val">15M</div>
-                <div class="stat-lbl">Target Users Pre-Hire</div>
-            </div>
-            <div class="stat-block">
-                <div class="stat-val">$0</div>
-                <div class="stat-lbl">VC Raised (Bootstrapped)</div>
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="card">
-                <h3><span class="emoji">🎯</span> Core Thesis</h3>
-                <p>Face 2 Face is the <strong>antidote to the dating app</strong>. It restores traditional rules of engagement — walking up to someone, shaking hands, speaking face to face — in a digital format. No swipes. No paywalls. No algorithmic gatekeeping. Just a live map of real people around you, and the freedom to approach them directly.</p>
-                <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <span class="tag">Utility App</span>
-                    <span class="tag success">Real-world First</span>
-                    <span class="tag purple">Anti-Algorithm</span>
-                </div>
-            </div>
-            <div class="card">
-                <h3><span class="emoji">⚡</span> Competitive Edge</h3>
-                <ul>
-                    <li><strong>Three Pillars:</strong> Social, Business, and Love — not just a dating silo.</li>
-                    <li><strong>Live Proximity Grid vs. Timelines:</strong> Direct real-world location tracking, unlike Happn's historical "crossed paths".</li>
-                    <li><strong>Open Communication:</strong> Eliminates the traditional "mutual swipe" or paywall required by Match Group apps.</li>
-                    <li><strong>"Pass By":</strong> Graceful and silent rejection mechanics without awkwardness.</li>
-                    <li><strong>Squad Dynamics:</strong> Built for group-level interaction and hyper-efficient viral acquisition.</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="card" style="margin-top: 2rem; border-left: 4px solid var(--gold);">
-            <h3><span class="emoji">📖</span> The Ultimate Solo Founder Blueprint: Plenty of Fish</h3>
-            <p><strong>Markus Frind</strong> built Plenty of Fish as a solo founder in 2003 as a simple ASP.NET side project. For <strong>5 straight years</strong>, he operated the company entirely solo from his apartment. He aggressively automated infrastructure, eliminating the need for VC funding or initial customer support teams.</p>
-            <ul style="margin-top: 1rem;">
-                <li>By 2008 (Day 1 of hiring), POF had <strong>15M users</strong> and <strong>$10M in annual revenue</strong> (AdSense).</li>
-                <li>Pivoted ruthlessly to native mobile in 2012, adapting to the "mobile-first" era.</li>
-                <li>Sold 100% of the equity to Match Group in 2015 for <strong>$575M in pure cash</strong>.</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- ═════ MARKET & FATIGUE TAB ═════ -->
-    <div class="tab-panel" id="tab-market">
+<div class="tab-panel" id="tab-market">
         <div class="section-header">
             <h2>Market & Dating App Fatigue Intel (2025-2026)</h2>
             <p>Analysis of a contracting market facing severe user burnout and shifting paradigms</p>
@@ -797,8 +891,7 @@
         </div>
     </div>
 
-    <!-- ═════ COMPETITOR WEAKNESSES TAB ═════ -->
-    <div class="tab-panel" id="tab-competitors">
+<div class="tab-panel" id="tab-competitors">
         <div class="section-header">
             <h2>Competitor Weaknesses & Liability</h2>
             <p>Detailed legal exposure, product failures, and class action liabilities for incumbents</p>
@@ -851,8 +944,7 @@
         </div>
     </div>
 
-    <!-- ═════ PROXIMITY MODELS TAB ═════ -->
-    <div class="tab-panel" id="tab-proximity">
+<div class="tab-panel" id="tab-proximity">
         <div class="section-header">
             <h2>Location & Proximity Competitor Analysis</h2>
             <p>How Face 2 Face's direct location approach differs from other geo-social leaders</p>
@@ -888,8 +980,7 @@
         </div>
     </div>
 
-    <!-- ═════ SAFETY & SCAM DATA TAB ═════ -->
-    <div class="tab-panel" id="tab-safety">
+<div class="tab-panel" id="tab-safety">
         <div class="section-header">
             <h2>Romance Scams & Safety (FTC/FBI 2025 Data)</h2>
             <p>Highlighting the critical failure of algorithmic apps to protect users from fraud</p>
@@ -927,8 +1018,7 @@
         </div>
     </div>
 
-    <!-- ═════ STRATEGY TAB ═════ -->
-    <div class="tab-panel" id="tab-strategy">
+<div class="tab-panel" id="tab-strategy">
         <div class="section-header">
             <h2>User Acquisition Strategy</h2>
             <p>Four-phase go-to-market anchored in hyper-local liquidity, real-world utility, and anti-dating app viral dynamics</p>
@@ -1001,8 +1091,7 @@
         </div>
     </div>
 
-    <!-- ═════ CONTENT SCRIPTS TAB ═════ -->
-    <div class="tab-panel" id="tab-content">
+<div class="tab-panel" id="tab-content">
         <div class="section-header">
             <h2>Phase 3 "Anti-Dating App" Scripts</h2>
             <p>Ready-to-shoot short-form video concepts spoofing Match Group algorithms and highlighting real-world connections</p>
@@ -1048,8 +1137,7 @@
         </div>
     </div>
 
-    <!-- ═════ INFLUENCERS TAB ═════ -->
-    <div class="tab-panel" id="tab-influencers">
+<div class="tab-panel" id="tab-influencers">
         <div class="section-header">
             <h2>Influencer Outreach Targets</h2>
             <p>Curated list of rational, mature professionals to bypass the cheap "pick-up artist/dating hack" stigma</p>
@@ -1307,8 +1395,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ LOGOS TAB ═════ -->
-    <div class="tab-panel" id="tab-logos">
+<div class="tab-panel" id="tab-logos">
         <div class="section-header">
             <h2>Brand Assets</h2>
             <p>Logo concepts for core app modules</p>
@@ -1338,8 +1425,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ QUESTIONNAIRE TAB ═════ -->
-    <div class="tab-panel" id="tab-questionnaire">
+<div class="tab-panel" id="tab-questionnaire">
         <div class="section-header">
             <h2>Prospect Questionnaire</h2>
             <p>50-question strategic questionnaire deployed to gather pre-launch intelligence</p>
@@ -1378,9 +1464,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-
-    <!-- COURT CASES TAB -->
-    <div class="tab-panel" id="tab-courtcases">
+<div class="tab-panel" id="tab-courtcases">
         <div class="section-header">
             <h2>Dating App Court Cases & Legal Exposure</h2>
             <p>10 landmark lawsuits that expose the systemic failures Face 2 Face is designed to eliminate</p>
@@ -1670,8 +1754,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ INVESTOR PITCH TAB ═════ -->
-    <div class="tab-panel" id="tab-pitch">
+<div class="tab-panel" id="tab-pitch">
         <div class="section-header">
             <h2>The Investor Pitch: F2F's Asymmetric Bet</h2>
             <p>Why the dating app incumbent crash of 2025-2026 creates the perfect vacuum for a bootstrapped utility network</p>
@@ -1744,8 +1827,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ SERVER ECONOMICS TAB ═════ -->
-    <div class="tab-panel" id="tab-economics">
+<div class="tab-panel" id="tab-economics">
         <div class="section-header">
             <h2>Server Economics & Optimization</h2>
             <p>Strategies to offset server costs and bootstrap infrastructure during the beta phase</p>
@@ -1810,8 +1892,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ COMPETITOR TEARDOWN TAB ═════ -->
-    <div class="tab-panel" id="tab-teardown">
+<div class="tab-panel" id="tab-teardown">
         <div class="section-header">
             <h2>Competitor Teardown — 2026 State of Play</h2>
             <p>Deep-dive product, financial, and strategic analysis of every major competitor and emerging threat</p>
@@ -2012,8 +2093,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ REGULATORY INTEL TAB ═════ -->
-    <div class="tab-panel" id="tab-regulatory">
+<div class="tab-panel" id="tab-regulatory">
         <div class="section-header">
             <h2>Regulatory & Legal Compliance Landscape</h2>
             <p>Comprehensive compliance mapping across US states, international jurisdictions, and platform requirements</p>
@@ -2168,8 +2248,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ REVENUE MODEL TAB ═════ -->
-    <div class="tab-panel" id="tab-revenue">
+<div class="tab-panel" id="tab-revenue">
         <div class="section-header">
             <h2>Revenue Model & Monetization Intelligence</h2>
             <p>ARPU benchmarks, subscription pricing, server economics, B2B venue models, and F2F projections</p>
@@ -2368,8 +2447,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ COLD START PLAYBOOK TAB ═════ -->
-    <div class="tab-panel" id="tab-coldstart">
+<div class="tab-panel" id="tab-coldstart">
         <div class="section-header">
             <h2>Cold Start Playbook — Case Studies & Launch Strategy</h2>
             <p>Battle-tested go-to-market patterns from Tinder, Grindr, Pokémon GO, Nextdoor, and Clubhouse applied to F2F</p>
@@ -2611,8 +2689,7 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-    <!-- ═════ EVIDENCE BASE TAB ═════ -->
-    <div class="tab-panel" id="tab-evidence">
+<div class="tab-panel" id="tab-evidence">
         <div class="section-header">
             <h2>Evidence Base — Academic Citations & Research</h2>
             <p>Peer-reviewed studies, government data, and institutional research supporting the F2F thesis</p>
@@ -2897,8 +2974,6 @@ Founding Team, Face 2 Face</p>
         </div>
     </div>
 
-
-<!-- ═════ USER PERSONAS TAB ═════ -->
 <div class="tab-panel" id="tab-personas">
     <div class="section-header">
         <h2>👤 User Personas & Market Data</h2>
@@ -3004,7 +3079,6 @@ Founding Team, Face 2 Face</p>
     </table>
 </div>
 
-<!-- ═════ KPI FRAMEWORK TAB ═════ -->
 <div class="tab-panel" id="tab-kpis">
     <div class="section-header">
         <h2>📊 KPI Framework & Metrics Benchmarks</h2>
@@ -3050,7 +3124,8 @@ Founding Team, Face 2 Face</p>
         <div class="card"><h3><span class="emoji">💰</span> Revenue KPIs</h3>
             <ul style="list-style:none;"><li>ARPU: <span class="tag gold">
 
-<!-- ═════ SPRINT BOARD TAB ═════ -->
+</div></div></div>
+
 <div class="tab-panel" id="tab-sprint">
     <div class="section-header">
         <h2>📋 Sprint Board — MVP Gap Closure</h2>
@@ -3083,7 +3158,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ FINANCIAL CALCULATOR TAB ═════ -->
 <div class="tab-panel" id="tab-calculator">
     <div class="section-header">
         <h2>💹 Financial Calculator</h2>
@@ -3136,7 +3210,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ HIRING & ORG CHART TAB ═════ -->
 <div class="tab-panel" id="tab-hiring">
     <div class="section-header">
         <h2>🧑‍💼 Hiring & Org Chart</h2>
@@ -3169,7 +3242,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ ASO TAB ═════ -->
 <div class="tab-panel" id="tab-aso">
     <div class="section-header">
         <h2>📱 App Store Optimization (ASO)</h2>
@@ -3205,7 +3277,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ GAMIFICATION TAB ═════ -->
 <div class="tab-panel" id="tab-gamification">
     <div class="section-header">
         <h2>🎮 Gamification Playbook</h2>
@@ -3230,7 +3301,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ UNIT ECONOMICS TAB ═════ -->
 <div class="tab-panel" id="tab-uniteconomics">
     <div class="section-header">
         <h2>📊 Unit Economics Deep Dive</h2>
@@ -3257,7 +3327,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ LEGAL TEMPLATES TAB ═════ -->
 <div class="tab-panel" id="tab-legal">
     <div class="section-header">
         <h2>🏛️ Legal Templates & Compliance</h2>
@@ -3294,7 +3363,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ SECURITY AUDIT TAB ═════ -->
 <div class="tab-panel" id="tab-security">
     <div class="section-header">
         <h2>🔐 Security Audit Checklist</h2>
@@ -3329,9 +3397,356 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
+<div class="tab-panel" id="tab-roadmap">
+    <div class="section-header">
+        <h2>🗺️ Product Roadmap</h2>
+        <p>Current state, gaps, and phased development plan from MVP to v3.0</p>
+    </div>
+    <div class="grid-2">
+        <div class="card" style="border-top:3px solid var(--success);">
+            <h3><span class="emoji">✅</span> Already Built (20 Features)</h3>
+            <ul style="list-style:none;line-height:2;">
+                <li>✅ Live Map (Leaflet) with nearby users</li><li>✅ 3-pillar profiles (Dating, Business, Friendships)</li><li>✅ Phone verification (OTP)</li><li>✅ Open messaging (WebSocket)</li><li>✅ Bump system (likes/pokes)</li><li>✅ Content moderation (EN+ES)</li><li>✅ Safety modal + acknowledgment</li><li>✅ Filter system</li><li>✅ Profile photos + banner</li><li>✅ Location-based games (8 games!)</li><li>✅ Community groups</li><li>✅ Push notification tokens</li><li>✅ Subscription tier fields</li><li>✅ Dating events system</li><li>✅ Leaderboard</li><li>✅ Capacitor Android app</li>
+            </ul>
+        </div>
+        <div class="card" style="border-top:3px solid var(--danger);">
+            <h3><span class="emoji">❌</span> Critical Gaps (8 Missing)</h3>
+            <ul style="list-style:none;line-height:2;">
+                <li>❌ Block/Report system <span class="tag danger">P0</span></li><li>❌ Age gate enforcement <span class="tag danger">P0</span></li><li>❌ Photo/liveness verification</li><li>❌ Account deletion flow <span class="tag danger">P0</span></li><li>❌ iOS build</li><li>❌ Payment/subscription processing</li><li>❌ Venue check-in / hotspot system</li><li>❌ Safety center</li>
+            </ul>
+        </div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>v1.0 MVP — Day 1 Launch (2-3 weeks)</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Feature</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Status</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Effort</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Priority</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Age Gate (18+)</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag warning">Partial</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">2-3 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Block User</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">3-5 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Report User</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">3-5 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Account Deletion</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">2-3 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Privacy Policy + ToS</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);">1-2 days</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag danger">P0</span></td></tr>
+        </tbody>
+    </table>
+    <div class="section-header" style="margin-top:2rem;"><h2>Premium Features (v2.0 Conversion Drivers)</h2></div>
+    <div class="grid-2">
+        <div class="card"><h3><span class="emoji">👑</span> Premium at $9.99/mo</h3>
+            <ul style="list-style:none;line-height:2.2;">
+                <li><span class="tag gold">#1</span> See Who Bumped You</li><li><span class="tag gold">#2</span> Profile Boost (30 min highlight)</li><li><span class="tag gold">#3</span> Extended Range (10mi → 50mi)</li><li><span class="tag gold">#4</span> Unlimited Bumps</li><li><span class="tag gold">#5</span> Incognito Mode</li>
+            </ul>
+        </div>
+        <div class="card"><h3><span class="emoji">⏱️</span> Solo Dev Timeline</h3>
+            <ul style="list-style:none;line-height:2.2;">
+                <li>MVP Gap Closure: <span class="tag success">2-3 weeks</span></li><li>Android Store: <span class="tag">1-2 weeks</span></li><li>iOS Build: <span class="tag warning">3-4 weeks</span></li><li>v1.5 Push+Games: <span class="tag">4-6 weeks</span></li><li>v2.0 Events+Premium: <span class="tag purple">8-12 weeks</span></li>
+            </ul>
+        </div>
+    </div>
+</div>
 
+<div class="tab-panel" id="tab-funding">
+    <div class="section-header">
+        <h2>🏦 Funding Strategy & Financial Planning</h2>
+        <p>Bootstrapping milestones, accelerators, grants, and 4-phase funding roadmap</p>
+    </div>
+    <div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,rgba(251,191,36,0.06),var(--bg-card));">
+        <h3><span class="emoji">🎯</span> Bootstrapping Precedents</h3>
+        <div class="grid-2" style="margin-top:1rem;">
+            <div style="padding:1rem;background:var(--bg-elevated);border-radius:8px;"><strong style="color:var(--gold);">POF:</strong><br>Solo founder,  investment, $10M+/yr revenue, sold for <span style="color:var(--success);font-weight:700;">$575M</span></div>
+            <div style="padding:1rem;background:var(--bg-elevated);border-radius:8px;"><strong style="color:var(--gold);">Grindr:</strong><br>$5K personal savings, profitable Day 1, 60% sold for <span style="color:var(--success);font-weight:700;">$93M</span></div>
+        </div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Investor-Ready Metrics Targets</h2></div>
+    <div class="grid-4" style="margin-bottom:1.5rem;">
+        <div class="stat-block"><div class="stat-val" style="color:var(--accent);">10K+</div><div class="stat-lbl">MAU for Seed</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--success);">25-40%</div><div class="stat-lbl">DAU/MAU</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--warning);">3:1+</div><div class="stat-lbl">LTV:CAC</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--gold);">$50-200K</div><div class="stat-lbl">ARR Target</div></div>
+    </div>
+    <div class="section-header"><h2>Accelerator Programs</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Program</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Deal</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Acceptance</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--gold);font-weight:700;border-bottom:1px solid var(--border);">Y Combinator</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-secondary);border-bottom:1px solid var(--border);">$500K for 7%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">~1.5-3%</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">Techstars</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-secondary);border-bottom:1px solid var(--border);">$120K for 6%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);"><1%</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">500 Global</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-secondary);border-bottom:1px solid var(--border);">$150K for 6%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">~1%</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">MassChallenge</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--success);border-bottom:1px solid var(--border);">Equity-free</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">8-18%</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;">Start-Up Chile</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--success);">$15-100K equity-free + visa</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);">Varies</td></tr>
+        </tbody>
+    </table>
+    <div class="section-header" style="margin-top:2rem;"><h2>4-Phase Funding Roadmap</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:4px solid var(--success);"><h3><span class="emoji">1️⃣</span> Bootstrap (Now → Month 6-12)</h3><ul><li>Burn &lt;$2K/mo</li><li>Apply AWS/GCP credits ($1K-$350K)</li><li>Launch 1-2 Mexican cities → 1K-5K users</li><li>Apply Start-Up Chile ($15-40K equity-free)</li></ul></div>
+        <div class="card" style="border-left:4px solid var(--warning);"><h3><span class="emoji">2️⃣</span> Grants + Angels (Month 6-18)</h3><ul><li>NSF SBIR Phase I ($305K non-dilutive)</li><li>Angel round ($100-300K) via AngelList</li><li>Apply to YC or MassChallenge</li><li>Target: 10K+ MAU, 25%+ D30 retention</li></ul></div>
+        <div class="card" style="border-left:4px solid var(--accent);"><h3><span class="emoji">3️⃣</span> Pre-Seed (Month 12-24)</h3><ul><li>Raise $750K-$1.5M via SAFE at $4-6M cap</li><li>Target: a16z Speedrun, Antler, Precursor</li><li>Optional: Republic crowdfunding ($200-500K)</li></ul></div>
+        <div class="card" style="border-left:4px solid var(--gold);"><h3><span class="emoji">4️⃣</span> Seed (Month 18-30)</h3><ul><li>Raise $2.5-3.5M at $12-15M valuation</li><li>Requirements: $50-200K ARR, 10K+ active</li><li>Begin US expansion</li></ul></div>
+    </div>
+</div>
 
-<!-- ═════ CAP TABLE SIMULATOR TAB ═════ -->
+<div class="tab-panel" id="tab-presskit">
+    <div class="section-header">
+        <h2>📰 Press Kit & Media Room</h2>
+        <p>Sound bites, press angles, journalist targets, and crisis communications</p>
+    </div>
+    <div class="section-header"><h2>🎤 Sound Bites (Ready-to-Use)</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:3px solid var(--accent);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Dating apps are designed to keep you single. Face 2 Face is designed to make itself unnecessary."</p></div>
+        <div class="card" style="border-left:3px solid var(--accent-secondary);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"We're the only social app that succeeds when you put your phone down."</p></div>
+        <div class="card" style="border-left:3px solid var(--teal);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"The Surgeon General called loneliness a public health crisis. We built the prescription."</p></div>
+        <div class="card" style="border-left:3px solid var(--warning);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Americans lost $1.3 billion to romance scams last year. You can't catfish someone standing three feet away."</p></div>
+        <div class="card" style="border-left:3px solid var(--danger);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Tinder is designed like a slot machine. We're designed like a compass."</p></div>
+        <div class="card" style="border-left:3px solid var(--gold);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Every other app shows you a grid of photos. We show you a map of your neighborhood."</p></div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>📧 Elevator Pitches</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-top:3px solid var(--accent);"><h3><span class="emoji">⚡</span> 30-Second Pitch</h3><p>"Face 2 Face is a live map that shows you real people near you, right now — for friendship, business, or love. No swiping, no algorithms, no fake profiles. In a world where half of Americans report feeling lonely and dating apps are designed to keep you addicted, we built the antidote."</p></div>
+        <div class="card" style="border-top:3px solid var(--gold);"><h3><span class="emoji">🎯</span> 60-Second Pitch</h3><p>"The Surgeon General called loneliness a public health crisis. Americans lost $1.3 billion to dating app scams. The birth rate just hit a historic low. Face 2 Face takes a radically different approach. We use a live map with three pillars — Social, Business, and Love. You open the app, see who's around, and walk up to introduce yourself. We're the first social platform designed to make itself unnecessary."</p></div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>🎯 Journalist Targets</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Journalist</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Outlet</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Pitch Angle</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Sarah Perez</td><td style="padding:0.75rem 1rem;color:var(--success);border-bottom:1px solid var(--border);">TechCrunch</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Anti-algorithm architecture</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Mia Sato</td><td style="padding:0.75rem 1rem;color:var(--accent);border-bottom:1px solid var(--border);">The Verge</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Platform addiction challenge</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Lauren Goode</td><td style="padding:0.75rem 1rem;color:var(--accent-secondary);border-bottom:1px solid var(--border);">Wired</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">"App that wants you to stop using it"</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Daniel Jones</td><td style="padding:0.75rem 1rem;color:var(--warning);">NYT Modern Love</td><td style="padding:0.75rem 1rem;color:var(--text-muted);">Founder/user stories</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="tab-panel" id="tab-ma">
+    <div class="section-header">
+        <h2>🤝 M&A Intelligence & Comparable Exits</h2>
+        <p>Major acquisitions, valuation multiples, strategic buyers, and F2F exit scenarios</p>
+    </div>
+    <div class="section-header"><h2>Major Acquisitions</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Deal</th>
+            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Price</th>
+            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Revenue</th>
+            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Multiple</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">POF → Match (2015)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$575M</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~$80-100M</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag gold">5.75-7.2x</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Hyperconnect → Match (2021)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$1.725B</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$200M+</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag gold">8.6x</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Grindr SPAC IPO (2022)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$2.1B</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~$260M</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag gold">~8x</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Bumble IPO → Crash</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--danger);font-weight:700;border-bottom:1px solid var(--border);">$8.2B→$480M</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$965M</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">&lt;1x</span></td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">The League → Match (2022)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--warning);font-weight:700;">$29.9M</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);">Small</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag">Niche</span></td></tr>
+        </tbody>
+    </table>
+    <div class="section-header" style="margin-top:2rem;"><h2>F2F Exit Scenarios</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Scenario</th>
+            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Valuation</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Requirements</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Early M&A (League model)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">$20-50M</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$1-5M ARR, niche UVP</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Growth M&A (Hinge early)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$50-200M</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$5-20M ARR, 100%+ growth</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">PE Buyout</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">$100-500M</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$20M+ ARR, positive unit economics</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Late M&A (POF model)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--gold);font-weight:700;border-bottom:1px solid var(--border);">$200M-1B</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$50M+ ARR, profitable</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">IPO</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;">$1B+</td><td style="padding:0.75rem 1rem;color:var(--text-muted);">$200M+ ARR, 30%+ growth</td></tr>
+        </tbody>
+    </table>
+    <div class="section-header" style="margin-top:2rem;"><h2>Strategic Buyer Landscape</h2></div>
+    <div class="grid-3">
+        <div class="card" style="border-top:3px solid var(--accent);"><h3><span class="emoji">🏢</span> Match Group</h3><p>Portfolio strategy is core playbook. Acquired: Hinge, POF, OkCupid, The League, HER, Sniffies. Seeks niche demographics + geographic expansion.</p></div>
+        <div class="card" style="border-top:3px solid var(--danger);"><h3><span class="emoji">📉</span> Bumble</h3><p>Desperate for growth — stock down 90%+. Trading at &lt;1x revenue = prime acquisition or PE target.</p></div>
+        <div class="card" style="border-top:3px solid var(--warning);"><h3><span class="emoji">🌏</span> Hello Group</h3><p>Active acquirer — bought Happn (2025). Operates Momo, Tantan, Soulchill. Asian/global expansion strategy.</p></div>
+    </div>
+</div>
+
+<div class="tab-panel" id="tab-partnerships">
+    <div class="section-header">
+        <h2>🔗 Partnership Pipeline</h2>
+        <p>Venue chains, events, universities, safety partnerships, and startup credits</p>
+    </div>
+    <div class="grid-2">
+        <div class="card" style="border-top:3px solid var(--accent);"><h3><span class="emoji">🇺🇸</span> US Venue Partners</h3>
+            <ul><li><strong>Applebee's</strong> — Loyalty app, foot-traffic co-marketing</li><li><strong>Dave & Buster's</strong> — Social gathering focus</li><li><strong>Topgolf</strong> — IRL social alignment</li><li><strong>WeWork</strong> — Community-first, best Business pillar fit</li><li><strong>Starbucks</strong> — Requires significant traction</li></ul>
+        </div>
+        <div class="card" style="border-top:3px solid var(--success);"><h3><span class="emoji">🇲🇽</span> Mexico Venue Partners</h3>
+            <ul><li><strong>OXXO</strong> (FEMSA) — 20,000+ stores, Spin wallet <span class="tag danger">HIGH PRIORITY</span></li><li><strong>Starbucks Mexico</strong> (Alsea) — Also runs Domino's, Burger King</li><li><strong>Caffenio</strong> — QR payments, tech-forward</li></ul>
+        </div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>🎓 University Ambassador Program</h2></div>
+    <div class="grid-2">
+        <div class="card"><h3><span class="emoji">🇲🇽</span> Mexico Universities</h3><ul><li><strong>Tec de Monterrey</strong> — Entrepreneurship Institute + AI Hub</li><li><strong>UNAM</strong> — InnovaUNAM startup incubator</li><li><strong>ITAM</strong> — EPIC Lab (MIT framework)</li></ul><p style="margin-top:0.5rem;"><span class="tag teal">$2-10K/semester/campus</span> <span class="tag success">500-2K signups at .50-2/user</span></p></div>
+        <div class="card"><h3><span class="emoji">🛡️</span> Safety Partnerships</h3><ul><li><strong>Noonlight</strong> — <span class="tag success">✅ ACTIVE</span> Dispatch API, ~10s response, covers US/Canada/UK</li><li><strong>RAINN</strong> — <span class="tag success">✅ ACTIVE</span> Match Group partner since 2020</li><li><strong>Garbo</strong> — <span class="tag danger">⚠️ SHUT DOWN (Aug 2023)</span></li></ul></div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>💰 Startup Credits (FREE MONEY)</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Provider</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Tier</th>
+            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Credits</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--warning);border-bottom:1px solid var(--border);">AWS Activate</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Founders → Portfolio</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$1K → $100K</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent);border-bottom:1px solid var(--border);">Google Startups</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Early → AI</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$2K → $350K</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent-secondary);border-bottom:1px solid var(--border);">Microsoft Founders Hub</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Starting → Scaling</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$1K → $150K</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--danger);">Twilio</td><td style="padding:0.75rem 1rem;color:var(--text-muted);">Startup + AI Searchlight</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;">$5K → $10K</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="tab-panel" id="tab-localization">
+    <div class="section-header">
+        <h2>🌎 Localization & Expansion Strategy</h2>
+        <p>Mexico launch, LATAM expansion waves, US entry plan, and cultural adaptation</p>
+    </div>
+    <div class="grid-4" style="margin-bottom:2rem;">
+        <div class="stat-block"><div class="stat-val" style="color:var(--accent);">110M</div><div class="stat-lbl">MX Smartphones</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--warning);">$343M</div><div class="stat-lbl">MX Market 2030</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--danger);">51%</div><div class="stat-lbl">Unbanked (OXXO!)</div></div>
+        <div class="stat-block"><div class="stat-val" style="color:var(--success);">29.6</div><div class="stat-lbl">Median Age</div></div>
+    </div>
+    <div class="card" style="border:2px solid var(--success);background:linear-gradient(135deg,rgba(16,185,129,0.06),var(--bg-card));">
+        <h3><span class="emoji">🏙️</span> Guadalajara — THE Perfect Launch City</h3>
+        <div class="grid-2" style="margin-top:1rem;">
+            <ul><li>Tech-savvy (Oracle, HP, IBM, Intel, Cisco)</li><li>350-400K+ combined students</li><li>5.5M metro — big enough but winnable</li></ul>
+            <ul><li>Strong nightlife (Colonia Americana, Chapultepec)</li><li>Lower CPI than CDMX</li><li>Tequila country = embedded social gathering</li></ul>
+        </div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Key Mexican Cities</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">City</th>
+            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Metro Pop</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">F2F Fit</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">Guadalajara</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~5.5M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Silicon Valley of Mexico, university-dense</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">CDMX</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~22-23M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Largest market, 800+ startups</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">Monterrey</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~4-6M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Business hub, nearshoring boom</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Puebla</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~2-4M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">University population, lower competition</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Tijuana</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);">~1.5-2.6M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);">US border, bicultural bridge</td></tr>
+        </tbody>
+    </table>
+    <div class="section-header" style="margin-top:2rem;"><h2>LATAM Payment Methods (CRITICAL)</h2></div>
+    <div class="grid-3">
+        <div class="card"><h3><span class="emoji">🇲🇽</span> Mexico</h3><p><span class="tag danger">OXXO Pay</span> via Conekta/Stripe</p><p><span class="tag warning">Mercado Pago</span></p></div>
+        <div class="card"><h3><span class="emoji">🇧🇷</span> Brazil</h3><p><span class="tag danger">PIX</span> via EBANX (mandatory!)</p></div>
+        <div class="card"><h3><span class="emoji">🇨🇴</span> Colombia</h3><p><span class="tag warning">PSE</span> via PayU/dLocal</p></div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Expansion Timeline</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:4px solid var(--success);"><h3>Mo 1-3: Guadalajara</h3><p>Target: 10-25K registered, 5K MAU. University ambassadors + nightlife venues.</p></div>
+        <div class="card" style="border-left:4px solid var(--accent);"><h3>Mo 4-6: Mexico Expansion</h3><p>CDMX → Monterrey → Puebla. Target: 100K+ MAU. OXXO Pay live.</p></div>
+        <div class="card" style="border-left:4px solid var(--warning);"><h3>Mo 7-12: LATAM</h3><p>São Paulo + Bogotá (Wave 1) → Buenos Aires + Santiago. Target: 500K+ MAU.</p></div>
+        <div class="card" style="border-left:4px solid var(--gold);"><h3>Year 2: US Entry</h3><p>Miami → Austin/Houston → LA. Hispanic cultural bridge strategy. Target: 1M+ global MAU.</p></div>
+    </div>
+</div>
+
+<div class="tab-panel" id="tab-risks">
+    <div class="section-header">
+        <h2>⚠️ Risk Register — 30 Identified Risks</h2>
+        <p>Scored risk matrix (Probability × Impact). 5 Critical, 6 High, 12 Medium-High, 9 Medium.</p>
+    </div>
+    <div class="grid-4" style="margin-bottom:2rem;">
+        <div class="stat-block" style="border:1px solid rgba(239,68,68,0.3);"><div class="stat-val" style="color:var(--danger);">5</div><div class="stat-lbl">Critical (12)</div></div>
+        <div class="stat-block" style="border:1px solid rgba(245,158,11,0.3);"><div class="stat-val" style="color:var(--warning);">6</div><div class="stat-lbl">High (9-11)</div></div>
+        <div class="stat-block" style="border:1px solid rgba(59,130,246,0.3);"><div class="stat-val" style="color:var(--accent);">12</div><div class="stat-lbl">Medium-High (6-8)</div></div>
+        <div class="stat-block" style="border:1px solid rgba(139,92,246,0.3);"><div class="stat-val" style="color:var(--accent-secondary);">9</div><div class="stat-lbl">Medium (3-5)</div></div>
+    </div>
+    <div class="section-header"><h2>🔴 CRITICAL RISKS (Score 12)</h2></div>
+    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">🗺️</span> R-001 · Cold Start / Empty Map <span class="tag danger">Score: 12</span></h3><p>Users see zero pins → delete in 60 seconds.</p><p><strong>Mitigation:</strong> Launch city-by-city, seed with waitlisted businesses, guerrilla activations, "scheduled meetup" feature.</p></div>
+    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">😵</span> R-002 · Solo Founder Burnout <span class="tag danger">Score: 12</span></h3><p>Bus factor of 1. Zero development/moderation/support if founder unavailable.</p><p><strong>Mitigation:</strong> Document runbooks, automate CI/CD, monitoring alerts, identify backup developers.</p></div>
+    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">🚨</span> R-003 · Safety Incident <span class="tag danger">Score: 12</span></h3><p>Predator can physically see where targets are in real-time. One viral story kills app.</p><p><strong>Mitigation:</strong> Fuzzy location (500m radius), panic button, phone verification, block/report with 24hr SLA.</p></div>
+    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">💸</span> R-004 · Runway Depletion <span class="tag danger">Score: 12</span></h3><p>No revenue model implemented yet. Personal funds only.</p><p><strong>Mitigation:</strong> Implement freemium ASAP, monetize Business pillar first, keep burn &lt;$200/mo pre-PMF.</p></div>
+    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">📱</span> R-005 · Viral Safety Backlash <span class="tag danger">Score: 12</span></h3><p>TikTok/Twitter can generate millions of impressions calling F2F "the stalker app".</p><p><strong>Mitigation:</strong> Pre-draft crisis comms, build journalist relationships, quarterly safety reports.</p></div>
+    <div class="section-header" style="margin-top:2rem;"><h2>🟠 HIGH PRIORITY RISKS</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-006 · Data Breach <span class="tag warning">Score: 8</span></h3><p>Raw lat/lng in DB. Base64 photos. Stack traces leaked.</p></div>
+        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-007 · 3-Pillar Chicken-and-Egg <span class="tag warning">Score: 9</span></h3><p>Each pillar needs own critical mass.</p></div>
+        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-009 · App Store Rejection <span class="tag warning">Score: 9</span></h3><p>Still says "Bump & Grind". Age gate allows 13+.</p></div>
+        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-012 · Gender Imbalance <span class="tag warning">Score: 9</span></h3><p>70-80% male historically. Death spiral if women leave.</p></div>
+        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-014 · COPPA Violation <span class="tag warning">Score: 8</span></h3><p>Register allows age 13+. Minors on live map with adults.</p></div>
+        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-010 · Competitor Copies Map <span class="tag warning">Score: 9</span></h3><p>Bumble/Tinder could add map feature with 100x resources.</p></div>
+    </div>
+    <div class="card" style="margin-top:2rem;border:2px solid var(--danger);background:linear-gradient(135deg,rgba(239,68,68,0.06),var(--bg-card));">
+        <h3><span class="emoji">🔥</span> TOP 5 IMMEDIATE ACTIONS</h3>
+        <ol style="padding-left:1.5rem;">
+            <li><strong>Raise minimum age to 18</strong> in auth.ts registerSchema (COPPA)</li>
+            <li><strong>Update Capacitor config</strong> — remove "Bump & Grind" references</li>
+            <li><strong>Remove stack trace leak</strong> in routes.ts:100</li>
+            <li><strong>Move photos from base64-in-DB</strong> to object storage</li>
+            <li><strong>Draft privacy policy</strong> for LFPDPPP 2025 compliance</li>
+        </ol>
+    </div>
+</div>
+
+<div class="tab-panel" id="tab-techarch">
+    <div class="section-header">
+        <h2>⚙️ Technical Architecture</h2>
+        <p>Current stack audit, critical gaps, scaling strategy, privacy & security hardening</p>
+    </div>
+    <div class="card" style="border:1px solid var(--accent);"><h3><span class="emoji">🏗️</span> Current Stack</h3>
+        <div class="grid-3" style="margin-top:1rem;">
+            <div><span class="tag">Frontend</span> React (Vite) + Capacitor</div>
+            <div><span class="tag teal">Backend</span> Express.js + Drizzle ORM</div>
+            <div><span class="tag purple">Database</span> PostgreSQL (Neon Serverless)</div>
+            <div><span class="tag warning">Auth</span> Session-based (scrypt)</div>
+            <div><span class="tag">Map</span> Leaflet (react-leaflet)</div>
+            <div><span class="tag success">Mobile</span> Capacitor Android</div>
+        </div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>🔴 6 Critical Architecture Gaps</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 1</span> No PostGIS</h3><p>Nearby query = full table scan + JS filtering O(n). PostGIS = spatial index O(log n).</p></div>
+        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 2</span> Base64 Photos in DB</h3><p>No CDN. Moving photos out = 80%+ DB size reduction.</p></div>
+        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 3</span> No WebSocket Broadcast</h3><p>ws dependency exists but NOT wired up. Clients must poll.</p></div>
+        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 4</span> No Redis Cache</h3><p>No caching layer for hot geospatial queries.</p></div>
+        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 5</span> No Spatial Indexing</h3><p>No GiST index, no geohashing, no H3 hexagons.</p></div>
+        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 6</span> Session-Cookie Auth</h3><p>Won't work for native mobile apps. Migrate to JWT.</p></div>
+    </div>
+    <div class="section-header" style="margin-top:2rem;"><h2>Scaling by User Count</h2></div>
+    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:var(--bg-elevated);">
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Scale</th>
+            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Architecture</th>
+            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Cost/mo</th>
+        </tr></thead>
+        <tbody>
+            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">10K users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Supabase Pro + single server</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$25-75</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">100K users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">+ Redis cache + CDN</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$200-500</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">1M users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">+ Redis Cluster + dedicated DB</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$2K-5K</td></tr>
+            <tr><td style="padding:0.75rem 1rem;color:var(--danger);font-weight:700;">10M users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Custom PG cluster + Kafka + K8s</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);">$20K-50K</td></tr>
+        </tbody>
+    </table>
+    <div class="section-header" style="margin-top:2rem;"><h2>💡 Simplicity = Advantage</h2></div>
+    <div class="grid-2">
+        <div class="card" style="border:1px solid var(--gold);"><h3><span class="emoji">🐟</span> POF Precedent</h3><p>1.5B pageviews on &lt;10 servers. No frameworks. 2 web + 3 DB servers. CDN for images. Result: $10M/yr → sold $575M, never raised VC.</p></div>
+        <div class="card" style="border:1px solid var(--success);"><h3><span class="emoji">🧠</span> No-Algorithm = 10-100x Savings</h3><p>Tinder: ML per-swipe = .001-0.01/user/day<br>F2F: Single PostGIS query per refresh = .0001/user/day</p></div>
+    </div>
+    <div class="card" style="margin-top:1.5rem;border:2px solid var(--accent);background:linear-gradient(135deg,rgba(59,130,246,0.06),var(--bg-card));">
+        <h3><span class="emoji">🚀</span> 8 IMMEDIATE ACTION ITEMS</h3>
+        <ol style="padding-left:1.5rem;line-height:2;">
+            <li>Move photos out of DB → Supabase Storage (biggest win)</li>
+            <li>Enable PostGIS → spatial index on users table</li>
+            <li>Migrate auth to JWT → Supabase Auth phone OTP</li>
+            <li>Add Supabase Realtime → replace polling</li>
+            <li>Apply for startup credits → Microsoft + AWS (free money)</li>
+            <li>Implement location fuzzing → never expose exact coords</li>
+            <li>Add Redis cache → GEOSEARCH for hot queries</li>
+            <li>Plan React Native migration → Capacitor bottlenecks map</li>
+        </ol>
+    </div>
+</div>
+
 <div class="tab-panel" id="tab-captable">
     <div class="section-header">
         <h2>💰 Cap Table Simulator</h2>
@@ -3362,7 +3777,6 @@ Founding Team, Face 2 Face</p>
     <div class="card" style="margin-top:1.5rem;border:1px solid var(--success);"><h3><span class="emoji">💡</span> POF Benchmark: Markus Frind kept 100% → sold for $575M</h3><p>If F2F reaches $50M ARR bootstrapped at 8x multiple = <strong style="color:var(--gold);">$400M at 100% ownership</strong></p></div>
 </div>
 
-<!-- ═════ OKR TRACKER TAB ═════ -->
 <div class="tab-panel" id="tab-okr">
     <div class="section-header">
         <h2>🎯 OKR Tracker — Q3 2025</h2>
@@ -3387,7 +3801,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ A/B TEST LAB TAB ═════ -->
 <div class="tab-panel" id="tab-abtest">
     <div class="section-header">
         <h2>🧪 A/B Test Lab</h2>
@@ -3411,7 +3824,6 @@ Founding Team, Face 2 Face</p>
     </table>
 </div>
 
-<!-- ═════ CONTENT CALENDAR TAB ═════ -->
 <div class="tab-panel" id="tab-contentcal">
     <div class="section-header">
         <h2>📅 Content Calendar — Launch Month</h2>
@@ -3441,7 +3853,6 @@ Founding Team, Face 2 Face</p>
     </table>
 </div>
 
-<!-- ═════ MEETING PREP TAB ═════ -->
 <div class="tab-panel" id="tab-meetingprep">
     <div class="section-header">
         <h2>🎤 Investor Meeting Prep</h2>
@@ -3455,7 +3866,6 @@ Founding Team, Face 2 Face</p>
     <div class="card" style="border-left:3px solid var(--accent);margin-top:1rem;"><h3><span class="emoji">❓</span> "What's your path to $100M ARR?"</h3><p style="color:var(--success);font-weight:600;">Answer:</p><p>"5M MAU × 6% conversion × $12/mo ARPU = ~$43M ARR from subscriptions alone. Add venue partnerships ($2-5 ARPU from Business pillar) + event ticketing (10% take rate) = $80-120M blended. Bumble hit $1B ARR with 50M users. We need 1/10th of that."</p></div>
 </div>
 
-<!-- ═════ DUE DILIGENCE TAB ═════ -->
 <div class="tab-panel" id="tab-duediligence">
     <div class="section-header">
         <h2>💼 Due Diligence Vault</h2>
@@ -3499,7 +3909,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ ADVISORY BOARD TAB ═════ -->
 <div class="tab-panel" id="tab-advisors">
     <div class="section-header">
         <h2>👥 Advisory Board Targets</h2>
@@ -3523,7 +3932,6 @@ Founding Team, Face 2 Face</p>
     </table>
 </div>
 
-<!-- ═════ FEATURE MATRIX TAB ═════ -->
 <div class="tab-panel" id="tab-featurematrix">
     <div class="section-header">
         <h2>⚔️ Feature Comparison Matrix</h2>
@@ -3553,7 +3961,6 @@ Founding Team, Face 2 Face</p>
     </div>
 </div>
 
-<!-- ═════ COMPETITOR REVENUE TAB ═════ -->
 <div class="tab-panel" id="tab-comprevenue">
     <div class="section-header">
         <h2>📊 Competitor Financial Intelligence</h2>
@@ -3578,7 +3985,6 @@ Founding Team, Face 2 Face</p>
     <div class="card" style="margin-top:1.5rem;border:2px solid var(--danger);"><h3><span class="emoji">📉</span> Key Insight: The Industry is CRASHING</h3><p>Match Group and Bumble are both in revenue decline. Bumble lost 94% of its market cap. This is the BEST time to enter — incumbents are weakened, users are fleeing, and investors are looking for the next paradigm.</p></div>
 </div>
 
-<!-- ═════ OUTREACH TEMPLATES TAB ═════ -->
 <div class="tab-panel" id="tab-outreach">
     <div class="section-header">
         <h2>📧 Outreach Templates</h2>
@@ -3626,7 +4032,6 @@ No cost, no commitment. Just more people discovering your space.
 Can I send you a 2-minute demo video?</pre></div>
 </div>
 
-<!-- ═════ DEMO STORYBOARD TAB ═════ -->
 <div class="tab-panel" id="tab-demoscript">
     <div class="section-header">
         <h2>🎬 Demo Storyboard</h2>
@@ -3639,7 +4044,6 @@ Can I send you a 2-minute demo video?</pre></div>
     <div class="card" style="border-left:4px solid var(--gold);margin-top:1rem;"><h3>Scene 5 — The Closer (1:00-1:15)</h3><p style="color:var(--text-secondary);">🎬 <strong>Visual:</strong> Phone being put down on table. Two people meeting IRL. F2F logo.</p><p style="color:var(--accent);font-style:italic;">"Face 2 Face. The app that succeeds when you put your phone down."</p></div>
 </div>
 
-<!-- ═════ MILESTONES TAB ═════ -->
 <div class="tab-panel" id="tab-milestones">
     <div class="section-header">
         <h2>🏆 Milestone Timeline</h2>
@@ -3656,9 +4060,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-
-
-<!-- ═════ CITY LAUNCH PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-citylaunch">
     <div class="section-header">
         <h2>🗺️ City Launch Playbook</h2>
@@ -3707,7 +4108,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-<!-- ═════ CAMPUS AMBASSADOR TAB ═════ -->
 <div class="tab-panel" id="tab-campus">
     <div class="section-header">
         <h2>🏫 Campus Ambassador Program</h2>
@@ -3750,7 +4150,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </table>
 </div>
 
-<!-- ═════ PUSH NOTIFICATION STRATEGY TAB ═════ -->
 <div class="tab-panel" id="tab-pushnotif">
     <div class="section-header">
         <h2>🔔 Push Notification Strategy</h2>
@@ -3775,7 +4174,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </table>
 </div>
 
-<!-- ═════ COMMUNITY PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-community">
     <div class="section-header">
         <h2>💬 Community Playbook</h2>
@@ -3806,7 +4204,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-<!-- ═════ EVENT PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-events">
     <div class="section-header">
         <h2>🎪 Event Playbook</h2>
@@ -3846,7 +4243,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-<!-- ═════ SUPPORT PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-support">
     <div class="section-header">
         <h2>📞 Customer Support Playbook</h2>
@@ -3874,7 +4270,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-<!-- ═════ DESIGN SYSTEM TAB ═════ -->
 <div class="tab-panel" id="tab-designsystem">
     <div class="section-header">
         <h2>🎨 Design System</h2>
@@ -3900,7 +4295,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-<!-- ═════ MONETIZATION LAB TAB ═════ -->
 <div class="tab-panel" id="tab-monetize">
     <div class="section-header">
         <h2>💳 Monetization Lab</h2>
@@ -3955,7 +4349,6 @@ Can I send you a 2-minute demo video?</pre></div>
     </div>
 </div>
 
-<!-- ═════ APP STORE PAGE TAB ═════ -->
 <div class="tab-panel" id="tab-appstore">
     <div class="section-header">
         <h2>📱 App Store Listing</h2>
@@ -3997,7 +4390,6 @@ Download now and discover who's around you.</p>
     </div>
 </div>
 
-<!-- ═════ API REFERENCE TAB ═════ -->
 <div class="tab-panel" id="tab-apiref">
     <div class="section-header">
         <h2>🌐 API Reference</h2>
@@ -4038,9 +4430,6 @@ Download now and discover who's around you.</p>
     </div>
 </div>
 
-
-
-<!-- ═════ USER PSYCHOLOGY TAB ═════ -->
 <div class="tab-panel" id="tab-psychology">
     <div class="section-header">
         <h2>🧠 User Psychology & Behavioral Design</h2>
@@ -4057,7 +4446,6 @@ Download now and discover who's around you.</p>
     <div class="card" style="margin-top:1.5rem;border:2px solid var(--danger);"><h3><span class="emoji">⚠️</span> Anti-Dark-Pattern Commitment</h3><p style="font-size:0.85rem;color:var(--text-secondary);">F2F explicitly rejects: infinite scroll, like counts as vanity metrics, hidden unsubscribe flows, and notification spam. We use psychology to connect people, not to extract attention. <strong>Our success metric is meetups, not screen time.</strong></p></div>
 </div>
 
-<!-- ═════ GROWTH LOOPS TAB ═════ -->
 <div class="tab-panel" id="tab-growthloops">
     <div class="section-header">
         <h2>📈 Growth Loops & Viral Mechanics</h2>
@@ -4097,7 +4485,6 @@ Download now and discover who's around you.</p>
     </div>
 </div>
 
-<!-- ═════ DATABASE SCHEMA TAB ═════ -->
 <div class="tab-panel" id="tab-dbschema">
     <div class="section-header">
         <h2>🏗️ Database Schema</h2>
@@ -4146,7 +4533,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     <div class="card" style="margin-top:1.5rem;border:2px solid var(--danger);"><h3><span class="emoji">⚠️</span> Critical Migration Needed</h3><p style="font-size:0.85rem;color:var(--text-secondary);"><strong>Photos:</strong> Currently stored as base64 in the <code>users.photo</code> column. A single 2MB photo = 2.67MB base64 string in the DB. At 10K users, that's 26GB of photo data in PostgreSQL. <strong>Must migrate to S3/R2 object storage.</strong></p></div>
 </div>
 
-<!-- ═════ USER JOURNEY MAP TAB ═════ -->
 <div class="tab-panel" id="tab-journey">
     <div class="section-header">
         <h2>📋 User Journey Map</h2>
@@ -4163,7 +4549,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     </div>
 </div>
 
-<!-- ═════ PITCH DECK TAB ═════ -->
 <div class="tab-panel" id="tab-pitchdeck">
     <div class="section-header">
         <h2>🎓 Pitch Deck — 12 Slides</h2>
@@ -4183,7 +4568,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     <div class="card" style="border-left:4px solid var(--accent);"><h3>Slide 12 — Vision</h3><p style="font-size:1rem;font-weight:700;color:var(--text-primary);">"A world where meeting someone new is as easy as looking up from your phone."</p><p style="font-size:0.85rem;color:var(--text-muted);">edgar@bluejax.ai · bluejax.com · @face2faceapp</p></div>
 </div>
 
-<!-- ═════ EXPANSION PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-expansion">
     <div class="section-header">
         <h2>🌍 International Expansion Playbook</h2>
@@ -4210,7 +4594,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     <div class="card" style="margin-top:1.5rem;border-left:4px solid var(--gold);"><h3><span class="emoji">📊</span> Scoring Criteria (0-100)</h3><p style="font-size:0.85rem;color:var(--text-secondary);">Smartphone penetration (25%) + Dating app market size (25%) + Language compatibility (20%) + Population density in target cities (15%) + Regulatory friendliness (15%)</p></div>
 </div>
 
-<!-- ═════ ANALYTICS SETUP TAB ═════ -->
 <div class="tab-panel" id="tab-analytics">
     <div class="section-header">
         <h2>📊 Analytics Setup</h2>
@@ -4261,7 +4644,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     </div>
 </div>
 
-<!-- ═════ AUTOMATION WORKFLOWS TAB ═════ -->
 <div class="tab-panel" id="tab-automations">
     <div class="section-header">
         <h2>🤖 Automation Workflows</h2>
@@ -4304,7 +4686,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     </div>
 </div>
 
-<!-- ═════ SEO BLOG CONTENT TAB ═════ -->
 <div class="tab-panel" id="tab-blogcontent">
     <div class="section-header">
         <h2>📝 Blog & SEO Content Strategy</h2>
@@ -4344,7 +4725,6 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     </div>
 </div>
 
-<!-- ═════ RETENTION PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-retention">
     <div class="section-header">
         <h2>🎯 Retention Playbook</h2>
@@ -4389,378 +4769,10 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
     </div>
 </div>
 
-
-</main>.70-$5.00/month</span></li><li>ARPPU: <span class="tag success">$15-$25/month</span></li><li>Free → Paid: <span class="tag">3-8%</span></li><li>LTV:CAC: <span class="tag warning">3:1 minimum</span></li><li>Payback: <span class="tag teal">5-7 months</span></li></ul>
-        </div>
-        <div class="card"><h3><span class="emoji">📍</span> F2F-Specific KPIs</h3>
-            <ul style="list-style:none;"><li>🗺️ Map Interaction Rate (taps on pins)</li><li>🔄 Pillar Switching Rate</li><li>📍 Venue Discovery Rate</li><li>🔔 Proximity Alert Engagement</li><li>💬 Map-to-Chat Conversion</li><li>🤝 Real-World Meetup Rate</li></ul>
-        </div>
-    </div>
-</div>
-
-<!-- ═════ PRODUCT ROADMAP TAB ═════ -->
-<div class="tab-panel" id="tab-roadmap">
-    <div class="section-header">
-        <h2>🗺️ Product Roadmap</h2>
-        <p>Current state, gaps, and phased development plan from MVP to v3.0</p>
-    </div>
-    <div class="grid-2">
-        <div class="card" style="border-top:3px solid var(--success);">
-            <h3><span class="emoji">✅</span> Already Built (20 Features)</h3>
-            <ul style="list-style:none;line-height:2;">
-                <li>✅ Live Map (Leaflet) with nearby users</li><li>✅ 3-pillar profiles (Dating, Business, Friendships)</li><li>✅ Phone verification (OTP)</li><li>✅ Open messaging (WebSocket)</li><li>✅ Bump system (likes/pokes)</li><li>✅ Content moderation (EN+ES)</li><li>✅ Safety modal + acknowledgment</li><li>✅ Filter system</li><li>✅ Profile photos + banner</li><li>✅ Location-based games (8 games!)</li><li>✅ Community groups</li><li>✅ Push notification tokens</li><li>✅ Subscription tier fields</li><li>✅ Dating events system</li><li>✅ Leaderboard</li><li>✅ Capacitor Android app</li>
-            </ul>
-        </div>
-        <div class="card" style="border-top:3px solid var(--danger);">
-            <h3><span class="emoji">❌</span> Critical Gaps (8 Missing)</h3>
-            <ul style="list-style:none;line-height:2;">
-                <li>❌ Block/Report system <span class="tag danger">P0</span></li><li>❌ Age gate enforcement <span class="tag danger">P0</span></li><li>❌ Photo/liveness verification</li><li>❌ Account deletion flow <span class="tag danger">P0</span></li><li>❌ iOS build</li><li>❌ Payment/subscription processing</li><li>❌ Venue check-in / hotspot system</li><li>❌ Safety center</li>
-            </ul>
-        </div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>v1.0 MVP — Day 1 Launch (2-3 weeks)</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Feature</th>
-            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Status</th>
-            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Effort</th>
-            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Priority</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Age Gate (18+)</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag warning">Partial</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">2-3 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Block User</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">3-5 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Report User</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">3-5 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Account Deletion</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">2-3 days</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">P0</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Privacy Policy + ToS</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag danger">Missing</span></td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);">1-2 days</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag danger">P0</span></td></tr>
-        </tbody>
-    </table>
-    <div class="section-header" style="margin-top:2rem;"><h2>Premium Features (v2.0 Conversion Drivers)</h2></div>
-    <div class="grid-2">
-        <div class="card"><h3><span class="emoji">👑</span> Premium at $9.99/mo</h3>
-            <ul style="list-style:none;line-height:2.2;">
-                <li><span class="tag gold">#1</span> See Who Bumped You</li><li><span class="tag gold">#2</span> Profile Boost (30 min highlight)</li><li><span class="tag gold">#3</span> Extended Range (10mi → 50mi)</li><li><span class="tag gold">#4</span> Unlimited Bumps</li><li><span class="tag gold">#5</span> Incognito Mode</li>
-            </ul>
-        </div>
-        <div class="card"><h3><span class="emoji">⏱️</span> Solo Dev Timeline</h3>
-            <ul style="list-style:none;line-height:2.2;">
-                <li>MVP Gap Closure: <span class="tag success">2-3 weeks</span></li><li>Android Store: <span class="tag">1-2 weeks</span></li><li>iOS Build: <span class="tag warning">3-4 weeks</span></li><li>v1.5 Push+Games: <span class="tag">4-6 weeks</span></li><li>v2.0 Events+Premium: <span class="tag purple">8-12 weeks</span></li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<!-- ═════ FUNDING STRATEGY TAB ═════ -->
-<div class="tab-panel" id="tab-funding">
-    <div class="section-header">
-        <h2>🏦 Funding Strategy & Financial Planning</h2>
-        <p>Bootstrapping milestones, accelerators, grants, and 4-phase funding roadmap</p>
-    </div>
-    <div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,rgba(251,191,36,0.06),var(--bg-card));">
-        <h3><span class="emoji">🎯</span> Bootstrapping Precedents</h3>
-        <div class="grid-2" style="margin-top:1rem;">
-            <div style="padding:1rem;background:var(--bg-elevated);border-radius:8px;"><strong style="color:var(--gold);">POF:</strong><br>Solo founder, </main> investment, $10M+/yr revenue, sold for <span style="color:var(--success);font-weight:700;">$575M</span></div>
-            <div style="padding:1rem;background:var(--bg-elevated);border-radius:8px;"><strong style="color:var(--gold);">Grindr:</strong><br>$5K personal savings, profitable Day 1, 60% sold for <span style="color:var(--success);font-weight:700;">$93M</span></div>
-        </div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>Investor-Ready Metrics Targets</h2></div>
-    <div class="grid-4" style="margin-bottom:1.5rem;">
-        <div class="stat-block"><div class="stat-val" style="color:var(--accent);">10K+</div><div class="stat-lbl">MAU for Seed</div></div>
-        <div class="stat-block"><div class="stat-val" style="color:var(--success);">25-40%</div><div class="stat-lbl">DAU/MAU</div></div>
-        <div class="stat-block"><div class="stat-val" style="color:var(--warning);">3:1+</div><div class="stat-lbl">LTV:CAC</div></div>
-        <div class="stat-block"><div class="stat-val" style="color:var(--gold);">$50-200K</div><div class="stat-lbl">ARR Target</div></div>
-    </div>
-    <div class="section-header"><h2>Accelerator Programs</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Program</th>
-            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Deal</th>
-            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Acceptance</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--gold);font-weight:700;border-bottom:1px solid var(--border);">Y Combinator</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-secondary);border-bottom:1px solid var(--border);">$500K for 7%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">~1.5-3%</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">Techstars</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-secondary);border-bottom:1px solid var(--border);">$120K for 6%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);"><1%</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">500 Global</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-secondary);border-bottom:1px solid var(--border);">$150K for 6%</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">~1%</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">MassChallenge</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--success);border-bottom:1px solid var(--border);">Equity-free</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);border-bottom:1px solid var(--border);">8-18%</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;">Start-Up Chile</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--success);">$15-100K equity-free + visa</td><td style="padding:0.75rem 1rem;text-align:center;color:var(--text-muted);">Varies</td></tr>
-        </tbody>
-    </table>
-    <div class="section-header" style="margin-top:2rem;"><h2>4-Phase Funding Roadmap</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border-left:4px solid var(--success);"><h3><span class="emoji">1️⃣</span> Bootstrap (Now → Month 6-12)</h3><ul><li>Burn &lt;$2K/mo</li><li>Apply AWS/GCP credits ($1K-$350K)</li><li>Launch 1-2 Mexican cities → 1K-5K users</li><li>Apply Start-Up Chile ($15-40K equity-free)</li></ul></div>
-        <div class="card" style="border-left:4px solid var(--warning);"><h3><span class="emoji">2️⃣</span> Grants + Angels (Month 6-18)</h3><ul><li>NSF SBIR Phase I ($305K non-dilutive)</li><li>Angel round ($100-300K) via AngelList</li><li>Apply to YC or MassChallenge</li><li>Target: 10K+ MAU, 25%+ D30 retention</li></ul></div>
-        <div class="card" style="border-left:4px solid var(--accent);"><h3><span class="emoji">3️⃣</span> Pre-Seed (Month 12-24)</h3><ul><li>Raise $750K-$1.5M via SAFE at $4-6M cap</li><li>Target: a16z Speedrun, Antler, Precursor</li><li>Optional: Republic crowdfunding ($200-500K)</li></ul></div>
-        <div class="card" style="border-left:4px solid var(--gold);"><h3><span class="emoji">4️⃣</span> Seed (Month 18-30)</h3><ul><li>Raise $2.5-3.5M at $12-15M valuation</li><li>Requirements: $50-200K ARR, 10K+ active</li><li>Begin US expansion</li></ul></div>
-    </div>
-</div>
-
-<!-- ═════ PRESS KIT TAB ═════ -->
-<div class="tab-panel" id="tab-presskit">
-    <div class="section-header">
-        <h2>📰 Press Kit & Media Room</h2>
-        <p>Sound bites, press angles, journalist targets, and crisis communications</p>
-    </div>
-    <div class="section-header"><h2>🎤 Sound Bites (Ready-to-Use)</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border-left:3px solid var(--accent);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Dating apps are designed to keep you single. Face 2 Face is designed to make itself unnecessary."</p></div>
-        <div class="card" style="border-left:3px solid var(--accent-secondary);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"We're the only social app that succeeds when you put your phone down."</p></div>
-        <div class="card" style="border-left:3px solid var(--teal);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"The Surgeon General called loneliness a public health crisis. We built the prescription."</p></div>
-        <div class="card" style="border-left:3px solid var(--warning);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Americans lost $1.3 billion to romance scams last year. You can't catfish someone standing three feet away."</p></div>
-        <div class="card" style="border-left:3px solid var(--danger);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Tinder is designed like a slot machine. We're designed like a compass."</p></div>
-        <div class="card" style="border-left:3px solid var(--gold);"><p style="font-size:1rem;font-weight:600;color:var(--text-primary);">"Every other app shows you a grid of photos. We show you a map of your neighborhood."</p></div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>📧 Elevator Pitches</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border-top:3px solid var(--accent);"><h3><span class="emoji">⚡</span> 30-Second Pitch</h3><p>"Face 2 Face is a live map that shows you real people near you, right now — for friendship, business, or love. No swiping, no algorithms, no fake profiles. In a world where half of Americans report feeling lonely and dating apps are designed to keep you addicted, we built the antidote."</p></div>
-        <div class="card" style="border-top:3px solid var(--gold);"><h3><span class="emoji">🎯</span> 60-Second Pitch</h3><p>"The Surgeon General called loneliness a public health crisis. Americans lost $1.3 billion to dating app scams. The birth rate just hit a historic low. Face 2 Face takes a radically different approach. We use a live map with three pillars — Social, Business, and Love. You open the app, see who's around, and walk up to introduce yourself. We're the first social platform designed to make itself unnecessary."</p></div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>🎯 Journalist Targets</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Journalist</th>
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Outlet</th>
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Pitch Angle</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Sarah Perez</td><td style="padding:0.75rem 1rem;color:var(--success);border-bottom:1px solid var(--border);">TechCrunch</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Anti-algorithm architecture</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Mia Sato</td><td style="padding:0.75rem 1rem;color:var(--accent);border-bottom:1px solid var(--border);">The Verge</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Platform addiction challenge</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Lauren Goode</td><td style="padding:0.75rem 1rem;color:var(--accent-secondary);border-bottom:1px solid var(--border);">Wired</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">"App that wants you to stop using it"</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Daniel Jones</td><td style="padding:0.75rem 1rem;color:var(--warning);">NYT Modern Love</td><td style="padding:0.75rem 1rem;color:var(--text-muted);">Founder/user stories</td></tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- ═════ M&A INTELLIGENCE TAB ═════ -->
-<div class="tab-panel" id="tab-ma">
-    <div class="section-header">
-        <h2>🤝 M&A Intelligence & Comparable Exits</h2>
-        <p>Major acquisitions, valuation multiples, strategic buyers, and F2F exit scenarios</p>
-    </div>
-    <div class="section-header"><h2>Major Acquisitions</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Deal</th>
-            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Price</th>
-            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Revenue</th>
-            <th style="padding:0.75rem 1rem;text-align:center;color:var(--text-primary);border-bottom:1px solid var(--border);">Multiple</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">POF → Match (2015)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$575M</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~$80-100M</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag gold">5.75-7.2x</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Hyperconnect → Match (2021)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$1.725B</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$200M+</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag gold">8.6x</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Grindr SPAC IPO (2022)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$2.1B</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~$260M</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag gold">~8x</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Bumble IPO → Crash</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--danger);font-weight:700;border-bottom:1px solid var(--border);">$8.2B→$480M</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$965M</td><td style="padding:0.75rem 1rem;text-align:center;border-bottom:1px solid var(--border);"><span class="tag danger">&lt;1x</span></td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">The League → Match (2022)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--warning);font-weight:700;">$29.9M</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);">Small</td><td style="padding:0.75rem 1rem;text-align:center;"><span class="tag">Niche</span></td></tr>
-        </tbody>
-    </table>
-    <div class="section-header" style="margin-top:2rem;"><h2>F2F Exit Scenarios</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Scenario</th>
-            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Valuation</th>
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Requirements</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Early M&A (League model)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">$20-50M</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$1-5M ARR, niche UVP</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Growth M&A (Hinge early)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$50-200M</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$5-20M ARR, 100%+ growth</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">PE Buyout</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">$100-500M</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$20M+ ARR, positive unit economics</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Late M&A (POF model)</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--gold);font-weight:700;border-bottom:1px solid var(--border);">$200M-1B</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">$50M+ ARR, profitable</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">IPO</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;">$1B+</td><td style="padding:0.75rem 1rem;color:var(--text-muted);">$200M+ ARR, 30%+ growth</td></tr>
-        </tbody>
-    </table>
-    <div class="section-header" style="margin-top:2rem;"><h2>Strategic Buyer Landscape</h2></div>
-    <div class="grid-3">
-        <div class="card" style="border-top:3px solid var(--accent);"><h3><span class="emoji">🏢</span> Match Group</h3><p>Portfolio strategy is core playbook. Acquired: Hinge, POF, OkCupid, The League, HER, Sniffies. Seeks niche demographics + geographic expansion.</p></div>
-        <div class="card" style="border-top:3px solid var(--danger);"><h3><span class="emoji">📉</span> Bumble</h3><p>Desperate for growth — stock down 90%+. Trading at &lt;1x revenue = prime acquisition or PE target.</p></div>
-        <div class="card" style="border-top:3px solid var(--warning);"><h3><span class="emoji">🌏</span> Hello Group</h3><p>Active acquirer — bought Happn (2025). Operates Momo, Tantan, Soulchill. Asian/global expansion strategy.</p></div>
-    </div>
-</div>
-
-<!-- ═════ PARTNERSHIPS TAB ═════ -->
-<div class="tab-panel" id="tab-partnerships">
-    <div class="section-header">
-        <h2>🔗 Partnership Pipeline</h2>
-        <p>Venue chains, events, universities, safety partnerships, and startup credits</p>
-    </div>
-    <div class="grid-2">
-        <div class="card" style="border-top:3px solid var(--accent);"><h3><span class="emoji">🇺🇸</span> US Venue Partners</h3>
-            <ul><li><strong>Applebee's</strong> — Loyalty app, foot-traffic co-marketing</li><li><strong>Dave & Buster's</strong> — Social gathering focus</li><li><strong>Topgolf</strong> — IRL social alignment</li><li><strong>WeWork</strong> — Community-first, best Business pillar fit</li><li><strong>Starbucks</strong> — Requires significant traction</li></ul>
-        </div>
-        <div class="card" style="border-top:3px solid var(--success);"><h3><span class="emoji">🇲🇽</span> Mexico Venue Partners</h3>
-            <ul><li><strong>OXXO</strong> (FEMSA) — 20,000+ stores, Spin wallet <span class="tag danger">HIGH PRIORITY</span></li><li><strong>Starbucks Mexico</strong> (Alsea) — Also runs Domino's, Burger King</li><li><strong>Caffenio</strong> — QR payments, tech-forward</li></ul>
-        </div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>🎓 University Ambassador Program</h2></div>
-    <div class="grid-2">
-        <div class="card"><h3><span class="emoji">🇲🇽</span> Mexico Universities</h3><ul><li><strong>Tec de Monterrey</strong> — Entrepreneurship Institute + AI Hub</li><li><strong>UNAM</strong> — InnovaUNAM startup incubator</li><li><strong>ITAM</strong> — EPIC Lab (MIT framework)</li></ul><p style="margin-top:0.5rem;"><span class="tag teal">$2-10K/semester/campus</span> <span class="tag success">500-2K signups at </main>.50-2/user</span></p></div>
-        <div class="card"><h3><span class="emoji">🛡️</span> Safety Partnerships</h3><ul><li><strong>Noonlight</strong> — <span class="tag success">✅ ACTIVE</span> Dispatch API, ~10s response, covers US/Canada/UK</li><li><strong>RAINN</strong> — <span class="tag success">✅ ACTIVE</span> Match Group partner since 2020</li><li><strong>Garbo</strong> — <span class="tag danger">⚠️ SHUT DOWN (Aug 2023)</span></li></ul></div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>💰 Startup Credits (FREE MONEY)</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Provider</th>
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Tier</th>
-            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Credits</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--warning);border-bottom:1px solid var(--border);">AWS Activate</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Founders → Portfolio</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$1K → $100K</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--accent);border-bottom:1px solid var(--border);">Google Startups</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Early → AI</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$2K → $350K</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--accent-secondary);border-bottom:1px solid var(--border);">Microsoft Founders Hub</td><td style="padding:0.75rem 1rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Starting → Scaling</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">$1K → $150K</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--danger);">Twilio</td><td style="padding:0.75rem 1rem;color:var(--text-muted);">Startup + AI Searchlight</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--success);font-weight:700;">$5K → $10K</td></tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- ═════ LOCALIZATION TAB ═════ -->
-<div class="tab-panel" id="tab-localization">
-    <div class="section-header">
-        <h2>🌎 Localization & Expansion Strategy</h2>
-        <p>Mexico launch, LATAM expansion waves, US entry plan, and cultural adaptation</p>
-    </div>
-    <div class="grid-4" style="margin-bottom:2rem;">
-        <div class="stat-block"><div class="stat-val" style="color:var(--accent);">110M</div><div class="stat-lbl">MX Smartphones</div></div>
-        <div class="stat-block"><div class="stat-val" style="color:var(--warning);">$343M</div><div class="stat-lbl">MX Market 2030</div></div>
-        <div class="stat-block"><div class="stat-val" style="color:var(--danger);">51%</div><div class="stat-lbl">Unbanked (OXXO!)</div></div>
-        <div class="stat-block"><div class="stat-val" style="color:var(--success);">29.6</div><div class="stat-lbl">Median Age</div></div>
-    </div>
-    <div class="card" style="border:2px solid var(--success);background:linear-gradient(135deg,rgba(16,185,129,0.06),var(--bg-card));">
-        <h3><span class="emoji">🏙️</span> Guadalajara — THE Perfect Launch City</h3>
-        <div class="grid-2" style="margin-top:1rem;">
-            <ul><li>Tech-savvy (Oracle, HP, IBM, Intel, Cisco)</li><li>350-400K+ combined students</li><li>5.5M metro — big enough but winnable</li></ul>
-            <ul><li>Strong nightlife (Colonia Americana, Chapultepec)</li><li>Lower CPI than CDMX</li><li>Tequila country = embedded social gathering</li></ul>
-        </div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>Key Mexican Cities</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">City</th>
-            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Metro Pop</th>
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">F2F Fit</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">Guadalajara</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~5.5M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Silicon Valley of Mexico, university-dense</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">CDMX</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~22-23M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Largest market, 800+ startups</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">Monterrey</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~4-6M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Business hub, nearshoring boom</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Puebla</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">~2-4M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">University population, lower competition</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Tijuana</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);">~1.5-2.6M</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);">US border, bicultural bridge</td></tr>
-        </tbody>
-    </table>
-    <div class="section-header" style="margin-top:2rem;"><h2>LATAM Payment Methods (CRITICAL)</h2></div>
-    <div class="grid-3">
-        <div class="card"><h3><span class="emoji">🇲🇽</span> Mexico</h3><p><span class="tag danger">OXXO Pay</span> via Conekta/Stripe</p><p><span class="tag warning">Mercado Pago</span></p></div>
-        <div class="card"><h3><span class="emoji">🇧🇷</span> Brazil</h3><p><span class="tag danger">PIX</span> via EBANX (mandatory!)</p></div>
-        <div class="card"><h3><span class="emoji">🇨🇴</span> Colombia</h3><p><span class="tag warning">PSE</span> via PayU/dLocal</p></div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>Expansion Timeline</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border-left:4px solid var(--success);"><h3>Mo 1-3: Guadalajara</h3><p>Target: 10-25K registered, 5K MAU. University ambassadors + nightlife venues.</p></div>
-        <div class="card" style="border-left:4px solid var(--accent);"><h3>Mo 4-6: Mexico Expansion</h3><p>CDMX → Monterrey → Puebla. Target: 100K+ MAU. OXXO Pay live.</p></div>
-        <div class="card" style="border-left:4px solid var(--warning);"><h3>Mo 7-12: LATAM</h3><p>São Paulo + Bogotá (Wave 1) → Buenos Aires + Santiago. Target: 500K+ MAU.</p></div>
-        <div class="card" style="border-left:4px solid var(--gold);"><h3>Year 2: US Entry</h3><p>Miami → Austin/Houston → LA. Hispanic cultural bridge strategy. Target: 1M+ global MAU.</p></div>
-    </div>
-</div>
-
-<!-- ═════ RISK REGISTER TAB ═════ -->
-<div class="tab-panel" id="tab-risks">
-    <div class="section-header">
-        <h2>⚠️ Risk Register — 30 Identified Risks</h2>
-        <p>Scored risk matrix (Probability × Impact). 5 Critical, 6 High, 12 Medium-High, 9 Medium.</p>
-    </div>
-    <div class="grid-4" style="margin-bottom:2rem;">
-        <div class="stat-block" style="border:1px solid rgba(239,68,68,0.3);"><div class="stat-val" style="color:var(--danger);">5</div><div class="stat-lbl">Critical (12)</div></div>
-        <div class="stat-block" style="border:1px solid rgba(245,158,11,0.3);"><div class="stat-val" style="color:var(--warning);">6</div><div class="stat-lbl">High (9-11)</div></div>
-        <div class="stat-block" style="border:1px solid rgba(59,130,246,0.3);"><div class="stat-val" style="color:var(--accent);">12</div><div class="stat-lbl">Medium-High (6-8)</div></div>
-        <div class="stat-block" style="border:1px solid rgba(139,92,246,0.3);"><div class="stat-val" style="color:var(--accent-secondary);">9</div><div class="stat-lbl">Medium (3-5)</div></div>
-    </div>
-    <div class="section-header"><h2>🔴 CRITICAL RISKS (Score 12)</h2></div>
-    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">🗺️</span> R-001 · Cold Start / Empty Map <span class="tag danger">Score: 12</span></h3><p>Users see zero pins → delete in 60 seconds.</p><p><strong>Mitigation:</strong> Launch city-by-city, seed with waitlisted businesses, guerrilla activations, "scheduled meetup" feature.</p></div>
-    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">😵</span> R-002 · Solo Founder Burnout <span class="tag danger">Score: 12</span></h3><p>Bus factor of 1. Zero development/moderation/support if founder unavailable.</p><p><strong>Mitigation:</strong> Document runbooks, automate CI/CD, monitoring alerts, identify backup developers.</p></div>
-    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">🚨</span> R-003 · Safety Incident <span class="tag danger">Score: 12</span></h3><p>Predator can physically see where targets are in real-time. One viral story kills app.</p><p><strong>Mitigation:</strong> Fuzzy location (500m radius), panic button, phone verification, block/report with 24hr SLA.</p></div>
-    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">💸</span> R-004 · Runway Depletion <span class="tag danger">Score: 12</span></h3><p>No revenue model implemented yet. Personal funds only.</p><p><strong>Mitigation:</strong> Implement freemium ASAP, monetize Business pillar first, keep burn &lt;$200/mo pre-PMF.</p></div>
-    <div class="card" style="border-left:4px solid var(--danger);"><h3><span class="emoji">📱</span> R-005 · Viral Safety Backlash <span class="tag danger">Score: 12</span></h3><p>TikTok/Twitter can generate millions of impressions calling F2F "the stalker app".</p><p><strong>Mitigation:</strong> Pre-draft crisis comms, build journalist relationships, quarterly safety reports.</p></div>
-    <div class="section-header" style="margin-top:2rem;"><h2>🟠 HIGH PRIORITY RISKS</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-006 · Data Breach <span class="tag warning">Score: 8</span></h3><p>Raw lat/lng in DB. Base64 photos. Stack traces leaked.</p></div>
-        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-007 · 3-Pillar Chicken-and-Egg <span class="tag warning">Score: 9</span></h3><p>Each pillar needs own critical mass.</p></div>
-        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-009 · App Store Rejection <span class="tag warning">Score: 9</span></h3><p>Still says "Bump & Grind". Age gate allows 13+.</p></div>
-        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-012 · Gender Imbalance <span class="tag warning">Score: 9</span></h3><p>70-80% male historically. Death spiral if women leave.</p></div>
-        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-014 · COPPA Violation <span class="tag warning">Score: 8</span></h3><p>Register allows age 13+. Minors on live map with adults.</p></div>
-        <div class="card" style="border-left:3px solid var(--warning);"><h3>R-010 · Competitor Copies Map <span class="tag warning">Score: 9</span></h3><p>Bumble/Tinder could add map feature with 100x resources.</p></div>
-    </div>
-    <div class="card" style="margin-top:2rem;border:2px solid var(--danger);background:linear-gradient(135deg,rgba(239,68,68,0.06),var(--bg-card));">
-        <h3><span class="emoji">🔥</span> TOP 5 IMMEDIATE ACTIONS</h3>
-        <ol style="padding-left:1.5rem;">
-            <li><strong>Raise minimum age to 18</strong> in auth.ts registerSchema (COPPA)</li>
-            <li><strong>Update Capacitor config</strong> — remove "Bump & Grind" references</li>
-            <li><strong>Remove stack trace leak</strong> in routes.ts:100</li>
-            <li><strong>Move photos from base64-in-DB</strong> to object storage</li>
-            <li><strong>Draft privacy policy</strong> for LFPDPPP 2025 compliance</li>
-        </ol>
-    </div>
-</div>
-
-<!-- ═════ TECH ARCHITECTURE TAB ═════ -->
-<div class="tab-panel" id="tab-techarch">
-    <div class="section-header">
-        <h2>⚙️ Technical Architecture</h2>
-        <p>Current stack audit, critical gaps, scaling strategy, privacy & security hardening</p>
-    </div>
-    <div class="card" style="border:1px solid var(--accent);"><h3><span class="emoji">🏗️</span> Current Stack</h3>
-        <div class="grid-3" style="margin-top:1rem;">
-            <div><span class="tag">Frontend</span> React (Vite) + Capacitor</div>
-            <div><span class="tag teal">Backend</span> Express.js + Drizzle ORM</div>
-            <div><span class="tag purple">Database</span> PostgreSQL (Neon Serverless)</div>
-            <div><span class="tag warning">Auth</span> Session-based (scrypt)</div>
-            <div><span class="tag">Map</span> Leaflet (react-leaflet)</div>
-            <div><span class="tag success">Mobile</span> Capacitor Android</div>
-        </div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>🔴 6 Critical Architecture Gaps</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 1</span> No PostGIS</h3><p>Nearby query = full table scan + JS filtering O(n). PostGIS = spatial index O(log n).</p></div>
-        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 2</span> Base64 Photos in DB</h3><p>No CDN. Moving photos out = 80%+ DB size reduction.</p></div>
-        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 3</span> No WebSocket Broadcast</h3><p>ws dependency exists but NOT wired up. Clients must poll.</p></div>
-        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 4</span> No Redis Cache</h3><p>No caching layer for hot geospatial queries.</p></div>
-        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 5</span> No Spatial Indexing</h3><p>No GiST index, no geohashing, no H3 hexagons.</p></div>
-        <div class="card" style="border-left:3px solid var(--danger);"><h3><span class="tag danger">GAP 6</span> Session-Cookie Auth</h3><p>Won't work for native mobile apps. Migrate to JWT.</p></div>
-    </div>
-    <div class="section-header" style="margin-top:2rem;"><h2>Scaling by User Count</h2></div>
-    <table style="width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <thead><tr style="background:var(--bg-elevated);">
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Scale</th>
-            <th style="padding:0.75rem 1rem;text-align:left;color:var(--text-primary);border-bottom:1px solid var(--border);">Architecture</th>
-            <th style="padding:0.75rem 1rem;text-align:right;color:var(--text-primary);border-bottom:1px solid var(--border);">Cost/mo</th>
-        </tr></thead>
-        <tbody>
-            <tr><td style="padding:0.75rem 1rem;color:var(--success);font-weight:700;border-bottom:1px solid var(--border);">10K users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">Supabase Pro + single server</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$25-75</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--accent);font-weight:700;border-bottom:1px solid var(--border);">100K users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">+ Redis cache + CDN</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$200-500</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--warning);font-weight:700;border-bottom:1px solid var(--border);">1M users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);border-bottom:1px solid var(--border);">+ Redis Cluster + dedicated DB</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);border-bottom:1px solid var(--border);">$2K-5K</td></tr>
-            <tr><td style="padding:0.75rem 1rem;color:var(--danger);font-weight:700;">10M users</td><td style="padding:0.75rem 1rem;color:var(--text-secondary);">Custom PG cluster + Kafka + K8s</td><td style="padding:0.75rem 1rem;text-align:right;color:var(--text-muted);">$20K-50K</td></tr>
-        </tbody>
-    </table>
-    <div class="section-header" style="margin-top:2rem;"><h2>💡 Simplicity = Advantage</h2></div>
-    <div class="grid-2">
-        <div class="card" style="border:1px solid var(--gold);"><h3><span class="emoji">🐟</span> POF Precedent</h3><p>1.5B pageviews on &lt;10 servers. No frameworks. 2 web + 3 DB servers. CDN for images. Result: $10M/yr → sold $575M, never raised VC.</p></div>
-        <div class="card" style="border:1px solid var(--success);"><h3><span class="emoji">🧠</span> No-Algorithm = 10-100x Savings</h3><p>Tinder: ML per-swipe = </main>.001-0.01/user/day<br>F2F: Single PostGIS query per refresh = </main>.0001/user/day</p></div>
-    </div>
-    <div class="card" style="margin-top:1.5rem;border:2px solid var(--accent);background:linear-gradient(135deg,rgba(59,130,246,0.06),var(--bg-card));">
-        <h3><span class="emoji">🚀</span> 8 IMMEDIATE ACTION ITEMS</h3>
-        <ol style="padding-left:1.5rem;line-height:2;">
-            <li>Move photos out of DB → Supabase Storage (biggest win)</li>
-            <li>Enable PostGIS → spatial index on users table</li>
-            <li>Migrate auth to JWT → Supabase Auth phone OTP</li>
-            <li>Add Supabase Realtime → replace polling</li>
-            <li>Apply for startup credits → Microsoft + AWS (free money)</li>
-            <li>Implement location fuzzing → never expose exact coords</li>
-            <li>Add Redis cache → GEOSEARCH for hot queries</li>
-            <li>Plan React Native migration → Capacitor bottlenecks map</li>
-        </ol>
-    </div>
-</div>
-
-
 </main>
 
 <footer class="footer">
-    Face 2 Face Strategic Command Center V3.0 &nbsp;·&nbsp; Engineered by BlueJax LLC &nbsp;·&nbsp; 68 Tabs · 8 Categories · 35+ Reports · Full Strategic Intelligence
+    Face 2 Face Strategic Command Center V3.0 &nbsp;·&nbsp; Engineered by BlueJax LLC &nbsp;·&nbsp; 36 Tabs · 8 Categories · 35+ Reports · Full Strategic Intelligence
 </footer>
 
 <script>
