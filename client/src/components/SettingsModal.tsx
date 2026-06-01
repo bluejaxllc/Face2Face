@@ -21,9 +21,9 @@ const catColors: Record<Category, { accent: string; glow: string; bg: string; te
 
 interface SettingsModalProps {
   onClose: () => void;
-  mapStyle?: 'street' | 'satellite';
+  mapStyle?: 'street' | 'satellite' | 'radar' | 'heatmap';
   onToggleMapStyle?: () => void;
-  onSetMapStyle?: (style: 'street' | 'satellite') => void;
+  onSetMapStyle?: (style: 'street' | 'satellite' | 'radar' | 'heatmap') => void;
 }
 
 // ─── Animated Toggle ───────────────────────────────────────────────────────────
@@ -48,7 +48,7 @@ function AnimatedToggle({ checked, onToggle, accent }: { checked: boolean; onTog
 }
 
 export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMapStyle, onSetMapStyle }: SettingsModalProps) {
-  const handleMapStyleSelect = (style: 'street' | 'satellite') => {
+  const handleMapStyleSelect = (style: 'street' | 'satellite' | 'radar' | 'heatmap') => {
     if (onSetMapStyle) {
       onSetMapStyle(style);
     } else if (onToggleMapStyle && mapStyle !== style) {
@@ -254,6 +254,8 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
                 {[
                   { key: 'street' as const, icon: Map, label: 'Street', img: '/images/street_style.png' },
                   { key: 'satellite' as const, icon: Satellite, label: 'Satellite', img: '/images/satellite_style.png' },
+                  { key: 'radar' as const, icon: Eye, label: 'Radar', img: '/images/radar_style.png' },
+                  { key: 'heatmap' as const, icon: Flame, label: 'Heatmap', img: '/images/heatmap_style.png' },
                 ].map((s) => (
                   <motion.button
                     key={s.key}

@@ -13,6 +13,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation as useRouteLocation } from "wouter";
 import LocationService from "@/services/location-service";
+import HeatmapLayer from './HeatmapLayer';
+import RadarOverlay from './RadarOverlay';
 import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl, Circle, useMapEvents } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
@@ -230,7 +232,7 @@ function Map() {
   const [showBusiness, setShowBusiness] = useState(filterOptions.showBusiness);
   const [showFriendships, setShowFriendships] = useState(filterOptions.showFriendships);
   const [radius, setRadius] = useState(filterOptions.radius);
-  const [mapStyle, setMapStyle] = useState<'street' | 'satellite'>('street');
+  const [mapStyle, setMapStyle] = useState<'street' | 'satellite' | 'radar' | 'heatmap'>('street');
   const [showReceivedBumps, setShowReceivedBumps] = useState(false);
   const [showGamePicker, setShowGamePicker] = useState(false);
   const [activeMapGame, setActiveMapGame] = useState<{ gameKey: string; opponent: User } | null>(null);
@@ -238,7 +240,7 @@ function Map() {
   // Listen for map style changes from the toolbar LAYERS button
   useEffect(() => {
     const handler = (e: Event) => {
-      setMapStyle((e as CustomEvent).detail as 'street' | 'satellite');
+      setMapStyle((e as CustomEvent).detail as 'street' | 'satellite' | 'radar' | 'heatmap');
     };
     window.addEventListener('f2f:mapStyleChange', handler);
     return () => window.removeEventListener('f2f:mapStyleChange', handler);
@@ -554,6 +556,14 @@ function Map() {
               updateWhenZooming={false}
               updateWhenIdle={true}
             />
+          ) : mapStyle === 'radar' || mapStyle === 'heatmap' ? (
+            <TileLayer
+              attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              maxZoom={19}
+              updateWhenZooming={false}
+              updateWhenIdle={true}
+            />
           ) : (
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -589,7 +599,21 @@ function Map() {
             </>
           )}
 
-          {isActive && filteredUsers.map((user) => (
+          {mapStyle === 'heatmap' && (
+            <HeatmapLayer 
+              points={filteredUsers.map(u => ({ lat: Number(u.latitude), lng: Number(u.longitude) }))}
+            />
+          )}
+
+          {mapStyle === 'radar' && currentLocation && (
+            <RadarOverlay 
+              latitude={currentLocation.latitude}
+              longitude={currentLocation.longitude}
+              color={user?.category === 'dating' ? '#f43f5e' : user?.category === 'business' ? '#3b82f6' : '#10b981'}
+            />
+          )}
+
+          {isActive && mapStyle !== 'heatmap' && filteredUsers.map((user) => (
             <UserMarker
               key={user.id}
               user={user}
