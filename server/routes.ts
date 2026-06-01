@@ -145,6 +145,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  apiRouter.post("/users/check-in", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    try {
+      const result = await storage.checkIn(req.session.userId);
+      res.json(result);
+    } catch (err) {
+      log("Check-in error: " + err);
+      res.status(500).json({ message: "Check-in failed" });
+    }
+  });
+
   // Waitlist route
   apiRouter.post("/waitlist", async (req: Request, res: Response) => {
     try {

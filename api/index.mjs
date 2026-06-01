@@ -412,7 +412,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 
 // server/log.ts
-function log(message, source = "express") {
+function log2(message, source = "express") {
   const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -434,7 +434,7 @@ var DatabaseStorage = class {
       conString: process.env.DATABASE_URL,
       createTableIfMissing: true
     });
-    log("Database connection established", "storage");
+    log2("Database connection established", "storage");
   }
   async getUser(id) {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
@@ -482,6 +482,7 @@ var DatabaseStorage = class {
       timestamp: /* @__PURE__ */ new Date(),
       seen: false
     }).returning();
+    await this.awardXP(insertBump.userId, 50, "Bumping another user");
     return result[0];
   }
   async getBump(id) {
@@ -518,6 +519,7 @@ var DatabaseStorage = class {
   }
   async createMessage(insertMessage) {
     const result = await db.insert(messages).values(insertMessage).returning();
+    await this.awardXP(insertMessage.senderId, 10, "Sending a message");
     return result[0];
   }
   async getMessagesBetweenUsers(userId1, userId2) {
@@ -716,6 +718,48 @@ var DatabaseStorage = class {
       email: `deleted_${userId}@deleted.com`,
       phoneNumber: null
     }).where(eq(users.id, userId));
+  }
+  // Gamification
+  async awardXP(userId, amount, reason) {
+    const user = await this.getUser(userId);
+    if (!user) return;
+    const newXP = (user.xp || 0) + amount;
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXP) * 0.5) + 1);
+    await db.update(users).set({ xp: newXP, level: newLevel }).where(eq(users.id, userId));
+    log2(`[Gamification] User ${userId} gained ${amount} XP for ${reason}. Now Level ${newLevel} with ${newXP} XP.`);
+  }
+  async checkIn(userId) {
+    const user = await this.getUser(userId);
+    if (!user) return { streak: 0, awarded: false };
+    const now = /* @__PURE__ */ new Date();
+    const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : null;
+    let newStreak = user.currentStreak || 0;
+    let awarded = false;
+    const nowStr = now.toISOString().split("T")[0];
+    const lastLoginStr = lastLogin ? lastLogin.toISOString().split("T")[0] : "";
+    if (lastLoginStr !== nowStr) {
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      if (lastLoginStr === yesterdayStr) {
+        newStreak += 1;
+      } else {
+        newStreak = 1;
+      }
+      awarded = true;
+    }
+    if (awarded) {
+      const longest = Math.max(user.longestStreak || 0, newStreak);
+      await db.update(users).set({
+        lastLoginDate: now,
+        currentStreak: newStreak,
+        longestStreak: longest
+      }).where(eq(users.id, userId));
+      await this.awardXP(userId, 20 + newStreak * 5, `Daily Check-In (Streak: ${newStreak})`);
+    } else {
+      await db.update(users).set({ lastLoginDate: now }).where(eq(users.id, userId));
+    }
+    return { streak: newStreak, awarded };
   }
 };
 var storage = new DatabaseStorage();
@@ -1332,6 +1376,18 @@ async function registerRoutes(app2) {
         return res.status(400).json({ message: "Invalid input", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update location" });
+    }
+  });
+  apiRouter.post("/users/check-in", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    try {
+      const result = await storage.checkIn(req.session.userId);
+      res.json(result);
+    } catch (err) {
+      log("Check-in error: " + err);
+      res.status(500).json({ message: "Check-in failed" });
     }
   });
   apiRouter.post("/waitlist", async (req, res) => {

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Settings, Gauge } from "lucide-react";
+import { Bell, Settings, Gauge, Flame } from "lucide-react";
 import { Logo } from "./Logo";
 import SettingsModal from "./SettingsModal";
 import NotificationsModal from "./NotificationsModal";
@@ -70,6 +70,13 @@ export default function Header() {
             )}
           </button>
         </div>
+
+        {user && user.currentStreak > 0 && (
+          <div className="flex items-center gap-1 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/30">
+            <Flame className="w-3.5 h-3.5 text-orange-500" />
+            <span className="text-xs font-black text-orange-400">{user.currentStreak}</span>
+          </div>
+        )}
 
         <div onClick={() => navigate('/profile')} className="cursor-pointer">
           <div className="avatar-ring">

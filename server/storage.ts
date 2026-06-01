@@ -102,6 +102,10 @@ export interface IStorage {
 
   // Account deletion
   deleteAccount(userId: number): Promise<void>;
+
+  // Gamification
+  awardXP(userId: number, amount: number, reason: string): Promise<void>;
+  checkIn(userId: number): Promise<{ streak: number; awarded: boolean }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -196,6 +200,9 @@ export class DatabaseStorage implements IStorage {
       seen: false,
     }).returning();
 
+    // Award XP for bumping someone
+    await this.awardXP(insertBump.userId, 50, "Bumping another user");
+
     return result[0];
   }
 
@@ -248,6 +255,8 @@ export class DatabaseStorage implements IStorage {
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const result = await db.insert(messages).values(insertMessage).returning();
+    // Award XP for sending a message
+    await this.awardXP(insertMessage.senderId, 10, "Sending a message");
     return result[0];
   }
 
@@ -513,7 +522,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateReportStatus(id: number, status: string): Promise<Report> {
-    const result = await db.update(reports).set({ status }).where(eq(reports.id, id)).returning();
+    const result = await db.update(reports)
+      .set({ status })
+      .where(eq(reports.id, id))
+      .returning();
     return result[0];
   }
 
@@ -529,6 +541,57 @@ export class DatabaseStorage implements IStorage {
         phoneNumber: null,
       })
       .where(eq(users.id, userId));
+  }
+
+  // Gamification
+  async awardXP(userId: number, amount: number, reason: string): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+    const newXP = (user.xp || 0) + amount;
+    // Level formula: Level = floor(sqrt(xp) * 0.5) + 1
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXP) * 0.5) + 1);
+    await db.update(users).set({ xp: newXP, level: newLevel }).where(eq(users.id, userId));
+    log(`[Gamification] User ${userId} gained ${amount} XP for ${reason}. Now Level ${newLevel} with ${newXP} XP.`);
+  }
+
+  async checkIn(userId: number): Promise<{ streak: number; awarded: boolean }> {
+    const user = await this.getUser(userId);
+    if (!user) return { streak: 0, awarded: false };
+    
+    const now = new Date();
+    const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : null;
+    let newStreak = user.currentStreak || 0;
+    let awarded = false;
+    
+    const nowStr = now.toISOString().split('T')[0];
+    const lastLoginStr = lastLogin ? lastLogin.toISOString().split('T')[0] : "";
+    
+    if (lastLoginStr !== nowStr) {
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      if (lastLoginStr === yesterdayStr) {
+         newStreak += 1;
+      } else {
+         newStreak = 1;
+      }
+      awarded = true;
+    }
+    
+    if (awarded) {
+      const longest = Math.max(user.longestStreak || 0, newStreak);
+      await db.update(users).set({ 
+        lastLoginDate: now, 
+        currentStreak: newStreak, 
+        longestStreak: longest 
+      }).where(eq(users.id, userId));
+      await this.awardXP(userId, 20 + (newStreak * 5), `Daily Check-In (Streak: ${newStreak})`);
+    } else {
+      await db.update(users).set({ lastLoginDate: now }).where(eq(users.id, userId));
+    }
+    
+    return { streak: newStreak, awarded };
   }
 }
 

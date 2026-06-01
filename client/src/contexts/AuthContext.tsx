@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -96,6 +96,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const hasCheckedIn = useRef(false);
 
   const { isLoading, refetch, data: user } = useQuery<User | null>({
     queryKey: ["/api/auth/me"],
@@ -123,6 +124,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
   });
+
+  useEffect(() => {
+    if (user && !hasCheckedIn.current) {
+      hasCheckedIn.current = true;
+      apiRequest("POST", "/api/users/check-in")
+        .then(res => res.json())
+        .then(data => {
+           if (data.awarded) {
+             toast({
+               title: "Daily Check-In!",
+               description: `You're on a ${data.streak} day streak! 🔥 (+XP)`,
+             });
+             refetch();
+           }
+        })
+        .catch(console.error);
+    }
+  }, [user, refetch, toast]);
 
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }: { username: string; password: string }) => {
