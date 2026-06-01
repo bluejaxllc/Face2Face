@@ -1,12 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useScrollSave } from "@/hooks/use-scroll-save";
 import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Search,
   Zap,
   ChevronRight,
+  ChevronLeft,
   Clock,
   Bell,
   Palette,
@@ -21,12 +25,38 @@ import {
   Settings,
   User,
   LogOut,
+  Send,
+  ArrowLeft,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type PrimaryMode = "bumps" | "messages";
 type BumpSubTab = "list" | "settings";
 type CategoryKey = "dating" | "friends" | "business";
+
+/* ═══════ API response types ═══════ */
+interface ConversationPartner {
+  id: number;
+  firstName: string;
+  lastName: string;
+  profilePhoto: string | null;
+  lastMessage: {
+    content: string;
+    timestamp: string;
+    senderId: number;
+  } | null;
+  unreadCount: number;
+  hasPendingReceivedBump: boolean;
+}
+
+interface ChatMessage {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  content: string;
+  timestamp: string;
+  read: boolean;
+}
 
 /* ═══════ Category-responsive accent config ═══════ */
 const accentConfig: Record<CategoryKey, {
@@ -99,6 +129,27 @@ const placeholderMessages = [
   { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "1h", unread: false, unreadCount: 0 },
   { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "3h", unread: false, unreadCount: 0 },
 ];
+
+/* ═══════ Helper: relative time ═══════ */
+function formatRelativeTime(timestamp: string | null | undefined): string {
+  if (!timestamp) return "";
+  const now = Date.now();
+  const then = new Date(timestamp).getTime();
+  const diffMs = now - then;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "now";
+  if (diffMin < 60) return `${diffMin}m`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d`;
+  return `${Math.floor(diffDays / 7)}w`;
+}
+
+/* ═══════ Helper: initials from name ═══════ */
+function getInitials(firstName: string, lastName: string): string {
+  return `${(firstName || "")[0] || ""}${(lastName || "")[0] || ""}`.toUpperCase();
+}
 
 /* ═══════ Floating Orb Component ═══════ */
 function FloatingOrb({ delay, size, x, y, accent }: { delay: number; size: number; x: string; y: string; accent: { orbFrom: string; orbTo: string } }) {
@@ -198,6 +249,8 @@ function ChatBubble({ primaryHex }: { primaryHex: string }) {
 
 /* ═══════ MAIN COMPONENT ═══════ */
 export default function Messages() {
+  const { user } = useAuth();
+
   /* ─── Category from localStorage ─── */
   const category = useMemo<CategoryKey>(() => {
     return (localStorage.getItem("f2f_activeCategory") as CategoryKey) || "dating";
@@ -242,17 +295,130 @@ export default function Messages() {
   const [showOnMap, setShowOnMap] = useState(true);
   const [soundEffects, setSoundEffects] = useState(false);
 
+  /* ═══════ API: Fetch conversation partners ═══════ */
+  const { data: apiConversations } = useQuery<ConversationPartner[]>({
+    queryKey: ["/api/bumps/users"],
+    enabled: !!user,
+    refetchInterval: 15000,
+    staleTime: 5000,
+  });
+
+  /* ─── Transform API data to message list format (with fallback) ─── */
+  const messageList = useMemo(() => {
+    if (apiConversations && apiConversations.length > 0) {
+      return apiConversations.map((c) => ({
+        id: c.id,
+        name: `${c.firstName} ${c.lastName.charAt(0)}.`,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        initials: getInitials(c.firstName, c.lastName),
+        lastMsg: c.lastMessage?.content || "No messages yet",
+        time: formatRelativeTime(c.lastMessage?.timestamp),
+        unread: c.unreadCount > 0,
+        unreadCount: c.unreadCount,
+        profilePhoto: c.profilePhoto,
+      }));
+    }
+    // Fallback to placeholders
+    return placeholderMessages;
+  }, [apiConversations]);
+
   /* ─── Unread counts ─── */
-  const unreadMessageCount = placeholderMessages.filter((m) => m.unread).length;
-  const totalUnreadBadge = placeholderMessages.reduce((sum, m) => sum + m.unreadCount, 0);
+  const unreadMessageCount = messageList.filter((m) => m.unread).length;
+  const totalUnreadBadge = messageList.reduce((sum, m) => sum + m.unreadCount, 0);
 
   /* ─── Search state ─── */
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredMessages = placeholderMessages.filter(
+  const filteredMessages = messageList.filter(
     (m) =>
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.lastMsg.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  /* ═══════ Conversation view state ═══════ */
+  const [activeConversation, setActiveConversation] = useState<{
+    userId: number;
+    name: string;
+    initials: string;
+    profilePhoto?: string | null;
+  } | null>(null);
+  const [messageInput, setMessageInput] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
+
+  /* ─── API: Fetch chat history ─── */
+  const { data: chatMessages, isLoading: isChatLoading } = useQuery<ChatMessage[]>({
+    queryKey: ["/api/messages", activeConversation?.userId],
+    queryFn: async () => {
+      if (!activeConversation) return [];
+      const res = await apiRequest("GET", `/api/messages/${activeConversation.userId}`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!activeConversation && !!user,
+    refetchInterval: 5000,
+    staleTime: 2000,
+  });
+
+  /* ─── API: Send message mutation ─── */
+  const sendMessageMutation = useMutation({
+    mutationFn: async ({ receiverId, content }: { receiverId: number; content: string }) => {
+      const res = await apiRequest("POST", "/api/messages", { receiverId, content });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to send message");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate chat history and conversation list
+      if (activeConversation) {
+        queryClient.invalidateQueries({ queryKey: ["/api/messages", activeConversation.userId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/bumps/users"] });
+    },
+  });
+
+  /* ─── Auto-scroll to bottom on new messages ─── */
+  useEffect(() => {
+    if (chatMessages && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages]);
+
+  /* ─── Handle send message ─── */
+  const handleSendMessage = () => {
+    const content = messageInput.trim();
+    if (!content || !activeConversation) return;
+    setMessageInput("");
+    sendMessageMutation.mutate({
+      receiverId: activeConversation.userId,
+      content,
+    });
+  };
+
+  /* ─── Handle opening a conversation ─── */
+  const openConversation = (contact: {
+    id: number;
+    name: string;
+    initials: string;
+    profilePhoto?: string | null;
+  }) => {
+    setActiveConversation({
+      userId: contact.id,
+      name: contact.name,
+      initials: contact.initials,
+      profilePhoto: contact.profilePhoto,
+    });
+  };
+
+  /* ─── Handle back to list ─── */
+  const closeConversation = () => {
+    setActiveConversation(null);
+    setMessageInput("");
+    // Refresh conversation list to update unread counts
+    queryClient.invalidateQueries({ queryKey: ["/api/bumps/users"] });
+  };
 
   /* ═══════ Render: Bumps List ═══════ */
   const renderBumpsList = () => (
@@ -481,6 +647,182 @@ export default function Messages() {
     );
   };
 
+  /* ═══════ Render: Conversation View (Chat) ═══════ */
+  const renderConversation = () => {
+    if (!activeConversation) return null;
+
+    const currentUserId = user?.id;
+
+    return (
+      <motion.div
+        initial={{ x: "100%", opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: "100%", opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="h-full flex flex-col"
+      >
+        {/* Chat Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 px-4 py-3 border-b border-slate-800/50 bg-slate-950/60 backdrop-blur-sm"
+        >
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={closeConversation}
+            className="p-1.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/60 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-300" />
+          </motion.button>
+
+          <div className="relative flex-shrink-0">
+            <Avatar className="h-10 w-10 border border-slate-700/50">
+              <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 text-xs font-bold">
+                {activeConversation.initials}
+              </AvatarFallback>
+            </Avatar>
+            {/* Online dot */}
+            <div className="absolute -bottom-0.5 -right-0.5">
+              <div className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950" />
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-white tracking-wide truncate">{activeConversation.name}</p>
+            <p className="text-[11px] text-emerald-400">Online</p>
+          </div>
+        </motion.div>
+
+        {/* Chat Messages Area */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5">
+          {isChatLoading ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className={`w-8 h-8 border-2 border-slate-700 border-t-current rounded-full ${accent.primary}`}
+              />
+              <p className="text-slate-500 text-xs mt-3">Loading messages...</p>
+            </div>
+          ) : chatMessages && chatMessages.length > 0 ? (
+            chatMessages.map((msg, index) => {
+              const isMine = msg.senderId === currentUserId;
+              const showTimestamp = index === 0 ||
+                (new Date(msg.timestamp).getTime() - new Date(chatMessages[index - 1].timestamp).getTime()) > 300000; // 5min gap
+
+              return (
+                <div key={msg.id}>
+                  {/* Timestamp divider */}
+                  {showTimestamp && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-center py-2"
+                    >
+                      <span className="text-[10px] text-slate-600 bg-slate-900/80 px-3 py-1 rounded-full">
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {/* Message bubble */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: index * 0.02, duration: 0.2 }}
+                    className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[78%] px-3.5 py-2.5 rounded-2xl ${
+                        isMine
+                          ? `${accent.badge} text-white rounded-br-md`
+                          : "bg-slate-800/80 text-slate-100 border border-slate-700/40 rounded-bl-md"
+                      }`}
+                      style={isMine ? { boxShadow: `0 2px 12px ${accent.primaryHex}25` } : undefined}
+                    >
+                      <p className="text-[13px] leading-relaxed break-words">{msg.content}</p>
+                      <div className={`flex items-center gap-1 mt-1 ${isMine ? "justify-end" : "justify-start"}`}>
+                        <span className={`text-[9px] ${isMine ? "text-white/50" : "text-slate-500"}`}>
+                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        {isMine && msg.read && (
+                          <span className="text-[9px] text-white/50">✓✓</span>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              );
+            })
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center h-full"
+            >
+              <ChatBubble primaryHex={accent.primaryHex} />
+              <p className="text-slate-500 text-sm text-center">
+                No messages yet. Say hi! 👋
+              </p>
+            </motion.div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
+
+        {/* Chat Input */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="px-4 py-3 border-t border-slate-800/50 bg-slate-950/80 backdrop-blur-sm"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900/70 border border-slate-800/50 focus-within:border-slate-600/60 transition-colors">
+              <input
+                ref={chatInputRef}
+                type="text"
+                placeholder="Type a message..."
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
+              />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSendMessage}
+              disabled={!messageInput.trim() || sendMessageMutation.isPending}
+              className={`p-3 rounded-2xl transition-all ${
+                messageInput.trim()
+                  ? `${accent.badge} text-white shadow-lg ${accent.glow}`
+                  : "bg-slate-800 text-slate-500"
+              }`}
+              style={messageInput.trim() ? { boxShadow: `0 0 20px ${accent.primaryHex}30` } : undefined}
+            >
+              {sendMessageMutation.isPending ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+            </motion.button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  };
+
   /* ═══════ Render: Messages List ═══════ */
   const renderMessages = () => (
     <div ref={messagesScroll.ref} onScroll={messagesScroll.onScroll} className="flex-1 overflow-y-auto w-full">
@@ -532,6 +874,14 @@ export default function Messages() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
               whileTap={{ scale: 0.98 }}
+              onClick={() =>
+                openConversation({
+                  id: contact.id,
+                  name: contact.name,
+                  initials: contact.initials,
+                  profilePhoto: "profilePhoto" in contact ? (contact as any).profilePhoto : null,
+                })
+              }
               className="flex items-center gap-3.5 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-800/30"
             >
               {/* Avatar + online indicator */}
@@ -615,129 +965,152 @@ export default function Messages() {
       </div>
 
       {/* ═══════ Primary Header: Bumps / Messages ═══════ */}
-      <div
-        className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60"
-        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
-      >
-        {/* Main tab bar */}
-        <div className="w-full flex items-center justify-center pt-4 pb-3 relative">
-          <div className="flex items-center bg-slate-900/60 rounded-2xl p-1 border border-slate-800/50 backdrop-blur-sm">
-            {(["bumps", "messages"] as PrimaryMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setPrimaryMode(mode)}
-                className="relative px-5 py-2 rounded-xl z-10"
-              >
-                {primaryMode === mode && (
-                  <motion.div
-                    layoutId="primary-tab-indicator"
-                    className={`absolute inset-0 rounded-xl ${accent.indicator} opacity-15`}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <div className="flex items-center gap-2 relative">
-                  <span
-                    className={`text-[15px] font-bold tracking-wide transition-colors ${
-                      primaryMode === mode ? "text-white" : "text-slate-500"
-                    }`}
+      <AnimatePresence>
+        {!activeConversation && (
+          <motion.div
+            initial={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60"
+            style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+          >
+            {/* Main tab bar */}
+            <div className="w-full flex items-center justify-center pt-4 pb-3 relative">
+              <div className="flex items-center bg-slate-900/60 rounded-2xl p-1 border border-slate-800/50 backdrop-blur-sm">
+                {(["bumps", "messages"] as PrimaryMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setPrimaryMode(mode)}
+                    className="relative px-5 py-2 rounded-xl z-10"
                   >
-                    {mode === "bumps" ? "Bumps" : "Messages"}
-                  </span>
-                  {/* Bump count badge */}
-                  {mode === "bumps" && placeholderBumps.length > 0 && (
-                    <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}
-                    >
-                      {placeholderBumps.length}
-                    </span>
-                  )}
-                  {/* Unread messages pulse dot */}
-                  {mode === "messages" && unreadMessageCount > 0 && (
-                    <div className="relative">
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white`}>
-                        {totalUnreadBadge}
-                      </span>
-                      <motion.div
-                        className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${accent.badge}`}
-                        animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ═══════ Sub-tabs (Only visible in Bumps Mode) ═══════ */}
-        <AnimatePresence>
-          {primaryMode === "bumps" && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 44, opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="w-full flex border-t border-slate-800/40 overflow-hidden"
-            >
-              {(["list", "settings"] as BumpSubTab[]).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setBumpTab(tab)}
-                  className="flex-1 flex items-center justify-center relative h-[44px]"
-                >
-                  <div className="flex items-center gap-1.5">
-                    {tab === "list" ? (
-                      <Zap className={`w-3.5 h-3.5 ${bumpTab === tab ? accent.primary : "text-slate-500"}`} />
-                    ) : (
-                      <Settings className={`w-3.5 h-3.5 ${bumpTab === tab ? accent.primary : "text-slate-500"}`} />
-                    )}
-                    <span
-                      className={`text-sm font-semibold tracking-wide transition-colors ${
-                        bumpTab === tab ? "text-white" : "text-slate-500"
-                      }`}
-                    >
-                      {tab === "list" ? "Bumps" : "Settings"}
-                    </span>
-                  </div>
-                  {bumpTab === tab && (
+                  {primaryMode === mode && (
                     <motion.div
-                      layoutId="bump-sub-indicator"
-                      className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`}
+                      layoutId="primary-tab-indicator"
+                      className={`absolute inset-0 rounded-xl ${accent.indicator} opacity-15`}
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
+                  <div className="flex items-center gap-2 relative">
+                    <span
+                      className={`text-[15px] font-bold tracking-wide transition-colors ${
+                        primaryMode === mode ? "text-white" : "text-slate-500"
+                      }`}
+                    >
+                      {mode === "bumps" ? "Bumps" : "Messages"}
+                    </span>
+                    {/* Bump count badge */}
+                    {mode === "bumps" && placeholderBumps.length > 0 && (
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}
+                      >
+                        {placeholderBumps.length}
+                      </span>
+                    )}
+                    {/* Unread messages pulse dot */}
+                    {mode === "messages" && unreadMessageCount > 0 && (
+                      <div className="relative">
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white`}>
+                          {totalUnreadBadge}
+                        </span>
+                        <motion.div
+                          className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${accent.badge}`}
+                          animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </button>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* ═══════ Sub-tabs (Only visible in Bumps Mode) ═══════ */}
+            <AnimatePresence>
+              {primaryMode === "bumps" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 44, opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  className="w-full flex border-t border-slate-800/40 overflow-hidden"
+                >
+                  {(["list", "settings"] as BumpSubTab[]).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setBumpTab(tab)}
+                      className="flex-1 flex items-center justify-center relative h-[44px]"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        {tab === "list" ? (
+                          <Zap className={`w-3.5 h-3.5 ${bumpTab === tab ? accent.primary : "text-slate-500"}`} />
+                        ) : (
+                          <Settings className={`w-3.5 h-3.5 ${bumpTab === tab ? accent.primary : "text-slate-500"}`} />
+                        )}
+                        <span
+                          className={`text-sm font-semibold tracking-wide transition-colors ${
+                            bumpTab === tab ? "text-white" : "text-slate-500"
+                          }`}
+                        >
+                          {tab === "list" ? "Bumps" : "Settings"}
+                        </span>
+                      </div>
+                      {bumpTab === tab && (
+                        <motion.div
+                          layoutId="bump-sub-indicator"
+                          className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════ Main Content Area ═══════ */}
+      <div
+        className="fixed left-0 right-0 overflow-hidden z-[2]"
+        style={{
+          top: activeConversation ? "0px" : (primaryMode === "bumps" ? "106px" : "62px"),
+          bottom: activeConversation ? "0px" : "60px",
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {activeConversation ? (
+            <motion.div
+              key="conversation"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="h-full flex flex-col"
+            >
+              {renderConversation()}
+            </motion.div>
+          ) : (
+            <motion.div
+              key={primaryMode === "bumps" ? `bumps-${bumpTab}` : "messages"}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="h-full flex flex-col"
+            >
+              {primaryMode === "bumps" ? (
+                bumpTab === "list" ? renderBumpsList() : renderSettings()
+              ) : (
+                renderMessages()
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ═══════ Main Content Area ═══════ */}
-      <div
-        className="fixed left-0 right-0 bottom-[60px] overflow-hidden z-[2]"
-        style={{ top: primaryMode === "bumps" ? "106px" : "62px" }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={primaryMode === "bumps" ? `bumps-${bumpTab}` : "messages"}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="h-full flex flex-col"
-          >
-            {primaryMode === "bumps" ? (
-              bumpTab === "list" ? renderBumpsList() : renderSettings()
-            ) : (
-              renderMessages()
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <BottomNavigation />
+      {/* Hide bottom nav when in conversation */}
+      {!activeConversation && <BottomNavigation />}
     </PageTransition>
   );
 }
