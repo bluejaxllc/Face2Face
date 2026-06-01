@@ -81,6 +81,15 @@ export const users = pgTable("users", {
   websiteUrl: text("website_url"),
   menuUrl: text("menu_url"),
   bookingUrl: text("booking_url"),
+  
+  // Gamification Fields
+  xp: integer("xp").default(0),
+  level: integer("level").default(1),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastLoginDate: timestamp("last_login_date"),
+  badges: text("badges"), // JSON string array of badges
+  
   deletedAt: timestamp("deleted_at"), // Soft delete timestamp
 }, (table) => {
   return {
@@ -307,6 +316,12 @@ export const updateUserSchema = createInsertSchema(users).pick({
   websiteUrl: true,
   menuUrl: true,
   bookingUrl: true,
+  xp: true,
+  level: true,
+  currentStreak: true,
+  longestStreak: true,
+  lastLoginDate: true,
+  badges: true,
 });
 
 

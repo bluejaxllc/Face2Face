@@ -97,6 +97,8 @@ export interface IStorage {
 
   // Report operations
   createReport(report: InsertReport): Promise<Report>;
+  getReports(): Promise<Report[]>;
+  updateReportStatus(id: number, status: string): Promise<Report>;
 
   // Account deletion
   deleteAccount(userId: number): Promise<void>;
@@ -503,6 +505,15 @@ export class DatabaseStorage implements IStorage {
 
   async createReport(report: InsertReport): Promise<Report> {
     const result = await db.insert(reports).values(report).returning();
+    return result[0];
+  }
+
+  async getReports(): Promise<Report[]> {
+    return await db.select().from(reports).orderBy(desc(reports.createdAt));
+  }
+
+  async updateReportStatus(id: number, status: string): Promise<Report> {
+    const result = await db.update(reports).set({ status }).where(eq(reports.id, id)).returning();
     return result[0];
   }
 

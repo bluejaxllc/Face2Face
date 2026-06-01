@@ -160,6 +160,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // --- Admin Command Center Routes ---
+  apiRouter.get("/waitlists", async (req: Request, res: Response) => {
+    try {
+      const type = req.query.type as 'individual' | 'business' | undefined;
+      const waitlists = await storage.getWaitlists(type);
+      res.json(waitlists);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch waitlists" });
+    }
+  });
+
+  apiRouter.get("/reports", async (req: Request, res: Response) => {
+    try {
+      const reports = await storage.getReports();
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  apiRouter.patch("/reports/:id/status", async (req: Request, res: Response) => {
+    try {
+      const { status } = req.body;
+      const report = await storage.updateReportStatus(parseInt(req.params.id), status);
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update report" });
+    }
+  });
+
+  apiRouter.post("/users/:id/ban", async (req: Request, res: Response) => {
+    try {
+      const user = await storage.updateUser(parseInt(req.params.id), { isActive: false });
+      res.json({ message: "User banned", user });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to ban user" });
+    }
+  });
+
+  apiRouter.get("/map/hotspots", async (req: Request, res: Response) => {
+    // Generate mock dense hotspots for investor pitch
+    const hotspots = [];
+    const basePoints = [
+      { lat: 40.7128, lng: -74.0060 }, // NYC
+      { lat: 34.0522, lng: -118.2437 }, // LA
+      { lat: 51.5074, lng: -0.1278 }, // London
+      { lat: 35.6762, lng: 139.6503 }, // Tokyo
+    ];
+    for (const point of basePoints) {
+      for (let i = 0; i < 50; i++) {
+        hotspots.push({
+          id: Math.random().toString(36).substr(2, 9),
+          latitude: point.lat + (Math.random() - 0.5) * 0.1,
+          longitude: point.lng + (Math.random() - 0.5) * 0.1,
+          intensity: Math.random() * 100
+        });
+      }
+    }
+    res.json(hotspots);
+  });
+
+
   // Get specific user by ID
   apiRouter.get("/users/:id", async (req: Request, res: Response, next) => {
     try {

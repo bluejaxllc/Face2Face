@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation as useLocationContext } from "@/contexts/LocationContext";
+import { useLocation } from "wouter";
 import { PageTransition } from "@/components/PageTransition";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
@@ -28,6 +29,8 @@ import {
   Zap,
   Gauge,
   Navigation,
+  ShieldAlert,
+  BarChart3,
 } from "lucide-react";
 
 interface MotionData {
@@ -47,6 +50,7 @@ interface OrientationData {
 export default function DevDiagnostics() {
   const { user } = useAuth();
   const { currentLocation } = useLocationContext();
+  const [, setLocation] = useLocation();
 
   // GPS state
   const [gpsStatus, setGpsStatus] = useState<"idle" | "requesting" | "success" | "error">("idle");
@@ -308,7 +312,25 @@ export default function DevDiagnostics() {
               <Gauge className="w-5 h-5 text-blue-400" />
               Device Diagnostics
             </h1>
-            <p className="text-xs text-slate-500 mt-1">Test sensors, vibration, and GPS on this device</p>
+            <p className="text-xs text-slate-500 mt-1 mb-4">Test sensors, vibration, and GPS on this device</p>
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <Button 
+                onClick={() => setLocation('/command-center')}
+                className="w-full sm:w-auto h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg shadow-lg shadow-blue-500/20 rounded-xl"
+              >
+                <ShieldAlert className="w-5 h-5 mr-2" />
+                Open Command Center
+              </Button>
+
+              <Button 
+                onClick={() => setLocation('/analytics')}
+                variant="outline"
+                className="w-full sm:w-auto h-12 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 font-bold text-lg rounded-xl"
+              >
+                <BarChart3 className="w-5 h-5 mr-2" />
+                Open Investor Analytics
+              </Button>
+            </div>
           </div>
 
           {/* Device Info Summary */}
