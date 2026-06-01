@@ -534,70 +534,23 @@
             }
         }
         
-        /* ===== CATEGORY NAV SYSTEM ===== */
-        .tab-nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(5,10,20,0.95);
-            backdrop-filter: blur(24px);
-            border-bottom: 1px solid var(--border);
-            padding: 0;
-        }
-        .cat-bar {
-            display: flex; gap: 0; justify-content: center;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto; scrollbar-width: none;
-            background: rgba(5,10,20,0.6);
-            padding: 0 1rem;
-        }
-        .cat-bar::-webkit-scrollbar { display: none; }
-        .cat-btn {
-            padding: 0.6rem 1rem;
-            font-family: inherit; font-size: 0.72rem; font-weight: 700;
-            color: var(--text-muted); background: none; border: none;
-            cursor: pointer; white-space: nowrap;
-            text-transform: uppercase; letter-spacing: 0.08em;
-            transition: all 0.2s; position: relative;
-        }
-        .cat-btn:hover { color: var(--text-secondary); }
-        .cat-btn.active { color: var(--accent); }
-        .cat-btn.active::after {
-            content: ''; position: absolute;
-            bottom: 0; left: 0.25rem; right: 0.25rem;
-            height: 2px; background: var(--accent);
-            border-radius: 2px 2px 0 0;
-        }
-        .tab-list {
-            max-width: 1600px; width: 100%; margin: 0 auto;
-            display: flex; gap: 0; list-style: none; 
-            overflow-x: auto; scrollbar-width: none;
-            padding: 0 1rem; justify-content: center;
-        }
-        .tab-list::-webkit-scrollbar { display: none; }
-        .tab-list li { display: none; }
-        .tab-list li.cat-visible { display: block; }
-        .tab-btn {
-            padding: 0.65rem 0.9rem;
-            font-family: inherit; font-size: 0.78rem; font-weight: 600;
-            color: var(--text-muted); background: none; border: none;
-            cursor: pointer; position: relative;
-            transition: color 0.3s; white-space: nowrap;
-            letter-spacing: 0.01em;
-        }
-        .tab-btn:hover { color: var(--text-secondary); }
-        .tab-btn.active { color: var(--accent); }
-        .tab-btn.active::after {
-            content: ''; position: absolute;
-            bottom: 0; left: 0.25rem; right: 0.25rem;
-            height: 2px; background: var(--accent);
-            border-radius: 2px 2px 0 0;
-            box-shadow: 0 0 12px var(--accent-glow);
-        }
-        @media (max-width: 768px) {
-            .cat-btn { padding: 0.5rem 0.6rem; font-size: 0.65rem; }
-            .tab-btn { padding: 0.5rem 0.6rem; font-size: 0.72rem; }
-        }
-
-        /* Sprint Board */
+        /* ===== CATEGORY NAV ===== */
+        .tab-nav{position:sticky;top:0;z-index:100;background:rgba(5,10,20,0.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:0}
+        .cat-bar{display:flex;gap:0;justify-content:center;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:rgba(5,10,20,0.6);padding:0 1rem}
+        .cat-bar::-webkit-scrollbar{display:none}
+        .cat-btn{padding:0.6rem 1rem;font-family:inherit;font-size:0.72rem;font-weight:700;color:var(--text-muted);background:none;border:none;cursor:pointer;white-space:nowrap;text-transform:uppercase;letter-spacing:0.08em;transition:all 0.2s;position:relative}
+        .cat-btn:hover{color:var(--text-secondary)}
+        .cat-btn.active{color:var(--accent)}
+        .cat-btn.active::after{content:'';position:absolute;bottom:0;left:0.25rem;right:0.25rem;height:2px;background:var(--accent);border-radius:2px 2px 0 0}
+        .tab-list{max-width:1600px;width:100%;margin:0 auto;display:flex;gap:0;list-style:none;overflow-x:auto;scrollbar-width:none;padding:0 1rem;justify-content:center}
+        .tab-list::-webkit-scrollbar{display:none}
+        .tab-list li{display:none}
+        .tab-list li.cat-visible{display:block}
+        .tab-btn{padding:0.65rem 0.9rem;font-family:inherit;font-size:0.78rem;font-weight:600;color:var(--text-muted);background:none;border:none;cursor:pointer;position:relative;transition:color 0.3s;white-space:nowrap;letter-spacing:0.01em}
+        .tab-btn:hover{color:var(--text-secondary)}
+        .tab-btn.active{color:var(--accent)}
+        .tab-btn.active::after{content:'';position:absolute;bottom:0;left:0.25rem;right:0.25rem;height:2px;background:var(--accent);border-radius:2px 2px 0 0;box-shadow:0 0 12px var(--accent-glow)}
+        @media(max-width:768px){.cat-btn{padding:0.5rem 0.6rem;font-size:0.65rem}.tab-btn{padding:0.5rem 0.6rem;font-size:0.72rem}}
         .sprint-col{min-height:200px}.sprint-item{padding:.75rem;margin:.5rem 0;background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;cursor:grab;font-size:.85rem;color:var(--text-secondary);transition:all .2s}.sprint-item:hover{border-color:var(--accent);transform:translateY(-1px)}
         .global-search{position:relative}.global-search input{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);padding:.5rem 1rem .5rem 2.2rem;border-radius:8px;font-size:.85rem;width:220px;outline:none;transition:all .3s}.global-search input:focus{border-color:var(--accent);width:320px;box-shadow:0 0 20px rgba(59,130,246,.15)}
         .header-controls{display:flex;align-items:center;gap:.75rem;margin-top:.75rem;flex-wrap:wrap}.header-controls button{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);padding:.4rem .75rem;border-radius:6px;cursor:pointer;font-size:.75rem;transition:all .2s}.header-controls button:hover{border-color:var(--accent);color:var(--text-primary)}
@@ -605,177 +558,8 @@
         html.light{--bg-deep:#f0f2f5;--bg-primary:#fff;--bg-card:#f8f9fa;--bg-elevated:#edf0f4;--border:rgba(0,0,0,.1);--border-bright:rgba(0,0,0,.2);--text-primary:#1a1a2e;--text-secondary:#4a5568;--text-muted:#718096}html.light .header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}html.light .tab-nav{background:rgba(255,255,255,0.95)}html.light .cat-bar{background:rgba(240,242,245,0.8)}html.light .footer{background:#1a1a2e}
 
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js">
-
-    // ======= CATEGORY NAV =======
-    document.querySelectorAll('.cat-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
-            btn.classList.add('active');
-            var cat = btn.dataset.cat;
-            document.querySelectorAll('.tab-list li').forEach(function(li) {
-                if (li.dataset.cat === cat) {
-                    li.classList.add('cat-visible');
-                } else {
-                    li.classList.remove('cat-visible');
-                }
-            });
-        });
-    });
-
-    // ======= FINANCIAL CALCULATOR =======
-    function updateCalc() {
-        var mau = +document.getElementById('calc-mau').value;
-        var conv = +document.getElementById('calc-conv').value / 100;
-        var price = +document.getElementById('calc-price').value;
-        var churn = +document.getElementById('calc-churn').value / 100;
-        var burn = +document.getElementById('calc-burn').value;
-        var paidUsers = Math.round(mau * conv);
-        var mrr = paidUsers * price;
-        var arr = mrr * 12;
-        var arpu = mrr / mau;
-        var ltv = price / churn;
-        var netMRR = mrr - burn;
-        document.getElementById('calc-mau-val').textContent = mau.toLocaleString();
-        document.getElementById('calc-conv-val').textContent = (conv*100).toFixed(1) + '%';
-        document.getElementById('calc-price-val').textContent = '$' + price.toFixed(2);
-        document.getElementById('calc-churn-val').textContent = (churn*100) + '%';
-        document.getElementById('calc-burn-val').textContent = '$' + burn.toLocaleString();
-        document.getElementById('calc-mrr').textContent = '$' + mrr.toLocaleString(undefined, {maximumFractionDigits:0});
-        document.getElementById('calc-arr').textContent = '$' + arr.toLocaleString(undefined, {maximumFractionDigits:0});
-        document.getElementById('calc-arpu').textContent = '$' + arpu.toFixed(2);
-        document.getElementById('calc-ltv').textContent = '$' + ltv.toFixed(2);
-        document.getElementById('calc-payback').textContent = (1/conv).toFixed(1) + ' mo';
-        document.getElementById('calc-runway').textContent = netMRR > 0 ? 'Infinite' : Math.ceil(10000/Math.abs(netMRR)) + ' mo';
-        document.getElementById('calc-val-3x').textContent = '$' + (arr*3/1000).toFixed(0) + 'K';
-        document.getElementById('calc-val-5x').textContent = '$' + (arr*5/1000).toFixed(0) + 'K';
-        document.getElementById('calc-val-8x').textContent = '$' + (arr*8/1000).toFixed(0) + 'K';
-        document.getElementById('calc-val-10x').textContent = '$' + (arr*10/1000).toFixed(0) + 'K';
-    }
-    // ======= SPRINT BOARD =======
-    function sprintDrag(ev) { ev.dataTransfer.setData('text', ev.target.id); }
-    function sprintDrop(ev) {
-        ev.preventDefault();
-        var id = ev.dataTransfer.getData('text');
-        var el = document.getElementById(id);
-        var col = ev.target.closest('.sprint-col');
-        if (col && el) { col.appendChild(el); saveSprintState(); }
-    }
-    function saveSprintState() {
-        var state = {};
-        document.querySelectorAll('.sprint-col').forEach(function(col) {
-            state[col.id] = Array.from(col.children).map(function(c) { return c.id; });
-        });
-        localStorage.setItem('f2f-sprint', JSON.stringify(state));
-    }
-    (function loadSprint() {
-        var saved = localStorage.getItem('f2f-sprint');
-        if (!saved) return;
-        try {
-            var state = JSON.parse(saved);
-            Object.keys(state).forEach(function(colId) {
-                var col = document.getElementById(colId);
-                if (!col) return;
-                state[colId].forEach(function(itemId) {
-                    var item = document.getElementById(itemId);
-                    if (item) col.appendChild(item);
-                });
-            });
-        } catch(e) {}
-    })();
-    // ======= GLOBAL SEARCH =======
-    function globalSearchHandler(query) {
-        if (!query || query.length < 2) return;
-        var panels = document.querySelectorAll('.tab-panel');
-        var found = [];
-        panels.forEach(function(panel) {
-            if (panel.textContent.toLowerCase().includes(query.toLowerCase())) {
-                found.push(panel.id.replace('tab-', ''));
-            }
-        });
-        if (found.length > 0) {
-            var btn = document.querySelector('[data-tab="' + found[0] + '"]');
-            if (btn) btn.click();
-            document.getElementById('globalSearch').title = 'Found in ' + found.length + ' tabs: ' + found.join(', ');
-        }
-    }
-    // ======= THEME TOGGLE =======
-    function toggleTheme() {
-        document.documentElement.classList.toggle('light');
-        var isLight = document.documentElement.classList.contains('light');
-        document.getElementById('themeToggle').textContent = isLight ? '\uD83C\uDF19 Dark Mode' : '\uD83C\uDF13 Light Mode';
-        localStorage.setItem('f2f-theme', isLight ? 'light' : 'dark');
-    }
-    if (localStorage.getItem('f2f-theme') === 'light') {
-        document.documentElement.classList.add('light');
-        var tb = document.getElementById('themeToggle');
-        if (tb) tb.textContent = '\uD83C\uDF19 Dark Mode';
-    }
-    // ======= EXPORT PNG =======
-    function exportToPDF() {
-        var activePanel = document.querySelector('.tab-panel.active');
-        if (!activePanel) return;
-        var tabName = activePanel.id.replace('tab-', '');
-        if (typeof html2canvas !== 'undefined') {
-            html2canvas(activePanel, {backgroundColor:'#050a14', scale:2, useCORS:true}).then(function(canvas) {
-                var link = document.createElement('a');
-                link.download = 'F2F_' + tabName + '_' + new Date().toISOString().slice(0,10) + '.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        } else { window.print(); }
-    }
-    // ======= COUNTDOWN =======
-    function updateCountdown() {
-        var saved = localStorage.getItem('f2f-launch-date');
-        var launch = saved ? new Date(saved) : new Date(Date.now() + 21*86400000);
-        if (!saved) localStorage.setItem('f2f-launch-date', launch.toISOString());
-        var diff = launch - new Date();
-        if (diff <= 0) { document.getElementById('cd-days').textContent = '0'; document.getElementById('cd-hours').textContent = '0'; document.getElementById('cd-mins').textContent = '0'; return; }
-        document.getElementById('cd-days').textContent = Math.floor(diff/86400000);
-        document.getElementById('cd-hours').textContent = Math.floor((diff%86400000)/3600000);
-        document.getElementById('cd-mins').textContent = Math.floor((diff%3600000)/60000);
-    }
-    updateCountdown(); setInterval(updateCountdown, 60000);
-    // ======= SECURITY PROGRESS =======
-    function updateSecurityProgress() {
-        var checks = document.querySelectorAll('.sec-check');
-        var done = Array.from(checks).filter(function(c){return c.checked;}).length;
-        var total = checks.length;
-        var pct = Math.round((done/total)*100);
-        var critLeft = Array.from(checks).slice(0,6).filter(function(c){return !c.checked;}).length;
-        var highLeft = Array.from(checks).slice(6).filter(function(c){return !c.checked;}).length;
-        document.getElementById('sec-critical').textContent = critLeft;
-        document.getElementById('sec-high').textContent = highLeft;
-        document.getElementById('sec-done').textContent = done;
-        document.getElementById('sec-pct').textContent = pct + '%';
-        localStorage.setItem('f2f-security', JSON.stringify(Array.from(checks).map(function(c){return c.checked;})));
-    }
-    (function(){var s=localStorage.getItem('f2f-security');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.sec-check').forEach(function(c,i){if(st[i])c.checked=true;});updateSecurityProgress();}catch(e){}}})();
-    // ======= LEGAL CHECKLIST =======
-    function saveLegalChecklist() {
-        var checks = [];
-        for (var i=1;i<=12;i++){var el=document.getElementById('lc-'+i);if(el)checks.push(el.checked);}
-        localStorage.setItem('f2f-legal', JSON.stringify(checks));
-    }
-    (function(){var s=localStorage.getItem('f2f-legal');if(s){try{var st=JSON.parse(s);st.forEach(function(v,i){var el=document.getElementById('lc-'+(i+1));if(el)el.checked=v;});}catch(e){}}})();
-    // ======= CITY LAUNCH CHECKLIST =======
-    function saveCityLaunch() {
-        var checks = Array.from(document.querySelectorAll('.cl-check')).map(function(c){return c.checked;});
-        localStorage.setItem('f2f-citylaunch', JSON.stringify(checks));
-    }
-    (function(){var s=localStorage.getItem('f2f-citylaunch');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.cl-check').forEach(function(c,i){if(st[i])c.checked=true;});}catch(e){}}})();
-
-
-    // ======= DUE DILIGENCE CHECKLIST =======
-    function saveDDChecklist() {
-        var checks = Array.from(document.querySelectorAll('.dd-check')).map(function(c){return c.checked;});
-        localStorage.setItem('f2f-dd', JSON.stringify(checks));
-    }
-    (function(){var s=localStorage.getItem('f2f-dd');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.dd-check').forEach(function(c,i){if(st[i])c.checked=true;});}catch(e){}}})();
-
-</script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -830,7 +614,6 @@
         <button class="cat-btn" data-cat="technical">🔧 Technical</button>
     </div>
     <ul class="tab-list">
-        <!-- CORE -->
         <li class="cat-visible" data-cat="core"><button class="tab-btn active" data-tab="overview">Overview</button></li>
         <li class="cat-visible" data-cat="core"><button class="tab-btn" data-tab="market">Market Intel</button></li>
         <li class="cat-visible" data-cat="core"><button class="tab-btn" data-tab="competitors">Competitors</button></li>
@@ -838,7 +621,6 @@
         <li class="cat-visible" data-cat="core"><button class="tab-btn" data-tab="safety">Safety</button></li>
         <li class="cat-visible" data-cat="core"><button class="tab-btn" data-tab="logos">Brand Assets</button></li>
         <li class="cat-visible" data-cat="core"><button class="tab-btn" data-tab="questionnaire">Questionnaire</button></li>
-        <!-- RESEARCH -->
         <li data-cat="research"><button class="tab-btn" data-tab="personas" style="color:var(--accent-secondary);">👤 Personas</button></li>
         <li data-cat="research"><button class="tab-btn" data-tab="kpis" style="color:var(--teal);">📊 KPIs</button></li>
         <li data-cat="research"><button class="tab-btn" data-tab="evidence" style="color:var(--accent);">📚 Evidence</button></li>
@@ -846,7 +628,6 @@
         <li data-cat="research"><button class="tab-btn" data-tab="localization" style="color:var(--warning);">🌎 Localization</button></li>
         <li data-cat="research"><button class="tab-btn" data-tab="risks" style="color:var(--danger);">⚠️ Risks</button></li>
         <li data-cat="research"><button class="tab-btn" data-tab="psychology">🧠 Psychology</button></li>
-        <!-- STRATEGY -->
         <li data-cat="strategy"><button class="tab-btn" data-tab="strategy">📈 Growth</button></li>
         <li data-cat="strategy"><button class="tab-btn" data-tab="revenue" style="color:var(--success);">💵 Revenue</button></li>
         <li data-cat="strategy"><button class="tab-btn" data-tab="coldstart" style="color:var(--accent-secondary);">🚀 Cold Start</button></li>
@@ -858,7 +639,6 @@
         <li data-cat="strategy"><button class="tab-btn" data-tab="uniteconomics" style="color:var(--accent);">📊 Unit Econ</button></li>
         <li data-cat="strategy"><button class="tab-btn" data-tab="growthloops">📈 Growth Loops</button></li>
         <li data-cat="strategy"><button class="tab-btn" data-tab="retention">🎯 Retention</button></li>
-        <!-- TOOLS -->
         <li data-cat="tools"><button class="tab-btn" data-tab="sprint" style="color:var(--success);">📋 Sprint</button></li>
         <li data-cat="tools"><button class="tab-btn" data-tab="calculator" style="color:var(--gold);">💹 Calculator</button></li>
         <li data-cat="tools"><button class="tab-btn" data-tab="okr" style="color:var(--success);">🎯 OKRs</button></li>
@@ -867,7 +647,6 @@
         <li data-cat="tools"><button class="tab-btn" data-tab="security" style="color:var(--teal);">🔐 Security</button></li>
         <li data-cat="tools"><button class="tab-btn" data-tab="analytics">📊 Analytics</button></li>
         <li data-cat="tools"><button class="tab-btn" data-tab="automations">🤖 Automations</button></li>
-        <!-- GROWTH -->
         <li data-cat="growth"><button class="tab-btn" data-tab="content">✍️ Content</button></li>
         <li data-cat="growth"><button class="tab-btn" data-tab="influencers">🎯 Influencers</button></li>
         <li data-cat="growth"><button class="tab-btn" data-tab="contentcal" style="color:var(--danger);">📅 Calendar</button></li>
@@ -875,7 +654,6 @@
         <li data-cat="growth"><button class="tab-btn" data-tab="gamification" style="color:var(--warning);">🎮 Gamification</button></li>
         <li data-cat="growth"><button class="tab-btn" data-tab="blogcontent">📝 Blog/SEO</button></li>
         <li data-cat="growth"><button class="tab-btn" data-tab="appstore" style="color:var(--accent);">📱 App Store</button></li>
-        <!-- OPS -->
         <li data-cat="ops"><button class="tab-btn" data-tab="citylaunch" style="color:var(--success);">🗺️ City Launch</button></li>
         <li data-cat="ops"><button class="tab-btn" data-tab="campus" style="color:var(--accent);">🏫 Campus</button></li>
         <li data-cat="ops"><button class="tab-btn" data-tab="pushnotif" style="color:var(--warning);">🔔 Push Notifs</button></li>
@@ -884,7 +662,6 @@
         <li data-cat="ops"><button class="tab-btn" data-tab="support" style="color:var(--accent-secondary);">📞 Support</button></li>
         <li data-cat="ops"><button class="tab-btn" data-tab="hiring" style="color:var(--teal);">🧑‍💼 Hiring</button></li>
         <li data-cat="ops"><button class="tab-btn" data-tab="outreach" style="color:var(--success);">📧 Outreach</button></li>
-        <!-- INVESTOR -->
         <li data-cat="investor"><button class="tab-btn" data-tab="pitch" style="color:var(--gold);">💰 Pitch</button></li>
         <li data-cat="investor"><button class="tab-btn" data-tab="pitchdeck">🎓 Deck Slides</button></li>
         <li data-cat="investor"><button class="tab-btn" data-tab="funding" style="color:var(--gold);">🏦 Funding</button></li>
@@ -892,10 +669,9 @@
         <li data-cat="investor"><button class="tab-btn" data-tab="meetingprep" style="color:var(--warning);">🎤 Meeting Prep</button></li>
         <li data-cat="investor"><button class="tab-btn" data-tab="duediligence" style="color:var(--teal);">💼 Due Diligence</button></li>
         <li data-cat="investor"><button class="tab-btn" data-tab="advisors" style="color:var(--accent);">👥 Advisors</button></li>
-        <li data-cat="investor"><button class="tab-btn" data-tab="ma" style="color:var(--danger);">🤝 M&A</button></li>
+        <li data-cat="investor"><button class="tab-btn" data-tab="ma" style="color:var(--danger);">🤝 M&amp;A</button></li>
         <li data-cat="investor"><button class="tab-btn" data-tab="demoscript" style="color:var(--accent-secondary);">🎬 Demo</button></li>
         <li data-cat="investor"><button class="tab-btn" data-tab="presskit" style="color:var(--accent);">📰 Press Kit</button></li>
-        <!-- TECHNICAL -->
         <li data-cat="technical"><button class="tab-btn" data-tab="techarch" style="color:var(--accent);">⚙️ Architecture</button></li>
         <li data-cat="technical"><button class="tab-btn" data-tab="economics" style="color:var(--teal);">🌩️ Server Econ</button></li>
         <li data-cat="technical"><button class="tab-btn" data-tab="teardown" style="color:var(--danger);">🔍 Teardown</button></li>
@@ -908,6 +684,7 @@
         <li data-cat="technical"><button class="tab-btn" data-tab="apiref" style="color:var(--teal);">🌐 API Ref</button></li>
     </ul>
 </nav>
+
 
 
 <!-- ═══════════ MAIN CONTENT ═══════════ -->
@@ -5012,6 +4789,170 @@ created_at  TIMESTAMP DEFAULT NOW()</pre>
             target.style.display = 'block';
         }
     }
+
+
+    // ======= CATEGORY NAV =======
+    document.querySelectorAll('.cat-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var cat = btn.dataset.cat;
+            document.querySelectorAll('.tab-list li').forEach(function(li) {
+                li.classList.toggle('cat-visible', li.dataset.cat === cat);
+            });
+        });
+    });
+
+    // ======= FINANCIAL CALCULATOR =======
+    function updateCalc() {
+        var mau = +document.getElementById('calc-mau').value;
+        var conv = +document.getElementById('calc-conv').value / 100;
+        var price = +document.getElementById('calc-price').value;
+        var churn = +document.getElementById('calc-churn').value / 100;
+        var burn = +document.getElementById('calc-burn').value;
+        var paidUsers = Math.round(mau * conv);
+        var mrr = paidUsers * price;
+        var arr = mrr * 12;
+        var arpu = mrr / mau;
+        var ltv = price / churn;
+        var netMRR = mrr - burn;
+        document.getElementById('calc-mau-val').textContent = mau.toLocaleString();
+        document.getElementById('calc-conv-val').textContent = (conv*100).toFixed(1) + '%';
+        document.getElementById('calc-price-val').textContent = '$' + price.toFixed(2);
+        document.getElementById('calc-churn-val').textContent = (churn*100) + '%';
+        document.getElementById('calc-burn-val').textContent = '$' + burn.toLocaleString();
+        document.getElementById('calc-mrr').textContent = '$' + mrr.toLocaleString(undefined, {maximumFractionDigits:0});
+        document.getElementById('calc-arr').textContent = '$' + arr.toLocaleString(undefined, {maximumFractionDigits:0});
+        document.getElementById('calc-arpu').textContent = '$' + arpu.toFixed(2);
+        document.getElementById('calc-ltv').textContent = '$' + ltv.toFixed(2);
+        document.getElementById('calc-payback').textContent = (1/conv).toFixed(1) + ' mo';
+        document.getElementById('calc-runway').textContent = netMRR > 0 ? 'Infinite' : Math.ceil(10000/Math.abs(netMRR)) + ' mo';
+        document.getElementById('calc-val-3x').textContent = '$' + (arr*3/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-5x').textContent = '$' + (arr*5/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-8x').textContent = '$' + (arr*8/1000).toFixed(0) + 'K';
+        document.getElementById('calc-val-10x').textContent = '$' + (arr*10/1000).toFixed(0) + 'K';
+    }
+    // ======= SPRINT BOARD =======
+    function sprintDrag(ev) { ev.dataTransfer.setData('text', ev.target.id); }
+    function sprintDrop(ev) {
+        ev.preventDefault();
+        var id = ev.dataTransfer.getData('text');
+        var el = document.getElementById(id);
+        var col = ev.target.closest('.sprint-col');
+        if (col && el) { col.appendChild(el); saveSprintState(); }
+    }
+    function saveSprintState() {
+        var state = {};
+        document.querySelectorAll('.sprint-col').forEach(function(col) {
+            state[col.id] = Array.from(col.children).map(function(c) { return c.id; });
+        });
+        localStorage.setItem('f2f-sprint', JSON.stringify(state));
+    }
+    (function loadSprint() {
+        var saved = localStorage.getItem('f2f-sprint');
+        if (!saved) return;
+        try {
+            var state = JSON.parse(saved);
+            Object.keys(state).forEach(function(colId) {
+                var col = document.getElementById(colId);
+                if (!col) return;
+                state[colId].forEach(function(itemId) {
+                    var item = document.getElementById(itemId);
+                    if (item) col.appendChild(item);
+                });
+            });
+        } catch(e) {}
+    })();
+    // ======= GLOBAL SEARCH =======
+    function globalSearchHandler(query) {
+        if (!query || query.length < 2) return;
+        var panels = document.querySelectorAll('.tab-panel');
+        var found = [];
+        panels.forEach(function(panel) {
+            if (panel.textContent.toLowerCase().includes(query.toLowerCase())) {
+                found.push(panel.id.replace('tab-', ''));
+            }
+        });
+        if (found.length > 0) {
+            var btn = document.querySelector('[data-tab="' + found[0] + '"]');
+            if (btn) btn.click();
+            document.getElementById('globalSearch').title = 'Found in ' + found.length + ' tabs: ' + found.join(', ');
+        }
+    }
+    // ======= THEME TOGGLE =======
+    function toggleTheme() {
+        document.documentElement.classList.toggle('light');
+        var isLight = document.documentElement.classList.contains('light');
+        document.getElementById('themeToggle').textContent = isLight ? '\uD83C\uDF19 Dark Mode' : '\uD83C\uDF13 Light Mode';
+        localStorage.setItem('f2f-theme', isLight ? 'light' : 'dark');
+    }
+    if (localStorage.getItem('f2f-theme') === 'light') {
+        document.documentElement.classList.add('light');
+        var tb = document.getElementById('themeToggle');
+        if (tb) tb.textContent = '\uD83C\uDF19 Dark Mode';
+    }
+    // ======= EXPORT PNG =======
+    function exportToPDF() {
+        var activePanel = document.querySelector('.tab-panel.active');
+        if (!activePanel) return;
+        var tabName = activePanel.id.replace('tab-', '');
+        if (typeof html2canvas !== 'undefined') {
+            html2canvas(activePanel, {backgroundColor:'#050a14', scale:2, useCORS:true}).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = 'F2F_' + tabName + '_' + new Date().toISOString().slice(0,10) + '.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        } else { window.print(); }
+    }
+    // ======= COUNTDOWN =======
+    function updateCountdown() {
+        var saved = localStorage.getItem('f2f-launch-date');
+        var launch = saved ? new Date(saved) : new Date(Date.now() + 21*86400000);
+        if (!saved) localStorage.setItem('f2f-launch-date', launch.toISOString());
+        var diff = launch - new Date();
+        if (diff <= 0) { document.getElementById('cd-days').textContent = '0'; document.getElementById('cd-hours').textContent = '0'; document.getElementById('cd-mins').textContent = '0'; return; }
+        document.getElementById('cd-days').textContent = Math.floor(diff/86400000);
+        document.getElementById('cd-hours').textContent = Math.floor((diff%86400000)/3600000);
+        document.getElementById('cd-mins').textContent = Math.floor((diff%3600000)/60000);
+    }
+    updateCountdown(); setInterval(updateCountdown, 60000);
+    // ======= SECURITY PROGRESS =======
+    function updateSecurityProgress() {
+        var checks = document.querySelectorAll('.sec-check');
+        var done = Array.from(checks).filter(function(c){return c.checked;}).length;
+        var total = checks.length;
+        var pct = Math.round((done/total)*100);
+        var critLeft = Array.from(checks).slice(0,6).filter(function(c){return !c.checked;}).length;
+        var highLeft = Array.from(checks).slice(6).filter(function(c){return !c.checked;}).length;
+        document.getElementById('sec-critical').textContent = critLeft;
+        document.getElementById('sec-high').textContent = highLeft;
+        document.getElementById('sec-done').textContent = done;
+        document.getElementById('sec-pct').textContent = pct + '%';
+        localStorage.setItem('f2f-security', JSON.stringify(Array.from(checks).map(function(c){return c.checked;})));
+    }
+    (function(){var s=localStorage.getItem('f2f-security');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.sec-check').forEach(function(c,i){if(st[i])c.checked=true;});updateSecurityProgress();}catch(e){}}})();
+    // ======= LEGAL CHECKLIST =======
+    function saveLegalChecklist() {
+        var checks = [];
+        for (var i=1;i<=12;i++){var el=document.getElementById('lc-'+i);if(el)checks.push(el.checked);}
+        localStorage.setItem('f2f-legal', JSON.stringify(checks));
+    }
+    (function(){var s=localStorage.getItem('f2f-legal');if(s){try{var st=JSON.parse(s);st.forEach(function(v,i){var el=document.getElementById('lc-'+(i+1));if(el)el.checked=v;});}catch(e){}}})();
+    // ======= CITY LAUNCH CHECKLIST =======
+    function saveCityLaunch() {
+        var checks = Array.from(document.querySelectorAll('.cl-check')).map(function(c){return c.checked;});
+        localStorage.setItem('f2f-citylaunch', JSON.stringify(checks));
+    }
+    (function(){var s=localStorage.getItem('f2f-citylaunch');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.cl-check').forEach(function(c,i){if(st[i])c.checked=true;});}catch(e){}}})();
+
+    // ======= DUE DILIGENCE CHECKLIST =======
+    function saveDDChecklist() {
+        var checks = Array.from(document.querySelectorAll('.dd-check')).map(function(c){return c.checked;});
+        localStorage.setItem('f2f-dd', JSON.stringify(checks));
+    }
+    (function(){var s=localStorage.getItem('f2f-dd');if(s){try{var st=JSON.parse(s);document.querySelectorAll('.dd-check').forEach(function(c,i){if(st[i])c.checked=true;});}catch(e){}}})();
+
 </script>
 
 </body>
