@@ -15,17 +15,21 @@ import { createServer } from "http";
 // shared/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
+  blocks: () => blocks,
   bumps: () => bumps,
   communityGroups: () => communityGroups,
   datingEvents: () => datingEvents,
+  insertBlockSchema: () => insertBlockSchema,
   insertBumpSchema: () => insertBumpSchema,
   insertDatingEventSchema: () => insertDatingEventSchema,
   insertMessageSchema: () => insertMessageSchema,
   insertNotificationSchema: () => insertNotificationSchema,
+  insertReportSchema: () => insertReportSchema,
   insertUserSchema: () => insertUserSchema,
   insertWaitlistSchema: () => insertWaitlistSchema,
   messages: () => messages,
   notifications: () => notifications,
+  reports: () => reports,
   tags: () => tags,
   updateUserSchema: () => updateUserSchema,
   users: () => users,
@@ -71,7 +75,7 @@ var users = pgTable("users", {
   lastLocation: timestamp("last_location"),
   profileCompleted: boolean("profile_completed").default(false),
   profilePhoto: text("profile_photo"),
-  // base64 encoded photo string
+  // URL path to photo on persistent volume or base64
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
   safetyAcknowledged: boolean("safety_acknowledged").default(false),
@@ -119,7 +123,7 @@ var users = pgTable("users", {
   lifestyleSchedule: text("lifestyle_schedule"),
   // "morning", "night", "flexible"
   bannerPhoto: text("banner_photo"),
-  // base64 encoded banner string
+  // URL path to banner on persistent volume or base64
   isPublic: boolean("is_public").default(true),
   // New Business Fields
   businessSlogan: text("business_slogan"),
@@ -135,7 +139,17 @@ var users = pgTable("users", {
   // JSON string of menu items: [{name, price, desc}]
   websiteUrl: text("website_url"),
   menuUrl: text("menu_url"),
-  bookingUrl: text("booking_url")
+  bookingUrl: text("booking_url"),
+  // Gamification Fields
+  xp: integer("xp").default(0),
+  level: integer("level").default(1),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastLoginDate: timestamp("last_login_date"),
+  badges: text("badges"),
+  // JSON string array of badges
+  deletedAt: timestamp("deleted_at")
+  // Soft delete timestamp
 }, (table) => {
   return {
     usernameIdx: index("username_idx").on(table.username),
@@ -254,6 +268,29 @@ var waitlists = pgTable("waitlists", {
   createdAt: timestamp("created_at").defaultNow()
 });
 var insertWaitlistSchema = createInsertSchema(waitlists);
+var blocks = pgTable("blocks", {
+  id: serial("id").primaryKey(),
+  blockerId: integer("blocker_id").notNull(),
+  blockedId: integer("blocked_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow()
+}, (table) => ({
+  blockerIdx: index("block_blocker_idx").on(table.blockerId),
+  blockedIdx: index("block_blocked_idx").on(table.blockedId)
+}));
+var reports = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  reporterId: integer("reporter_id").notNull(),
+  reportedId: integer("reported_id").notNull(),
+  reason: text("reason").notNull(),
+  // 'harassment', 'fake_profile', 'inappropriate', 'spam', 'underage', 'other'
+  details: text("details"),
+  status: text("status").default("pending"),
+  // 'pending', 'reviewed', 'action_taken', 'dismissed'
+  createdAt: timestamp("created_at").defaultNow()
+}, (table) => ({
+  reporterIdx: index("report_reporter_idx").on(table.reporterId),
+  reportedIdx: index("report_reported_idx").on(table.reportedId)
+}));
 var insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -328,7 +365,13 @@ var updateUserSchema = createInsertSchema(users).pick({
   menuData: true,
   websiteUrl: true,
   menuUrl: true,
-  bookingUrl: true
+  bookingUrl: true,
+  xp: true,
+  level: true,
+  currentStreak: true,
+  longestStreak: true,
+  lastLoginDate: true,
+  badges: true
 });
 var insertBumpSchema = createInsertSchema(bumps).pick({
   userId: true,
@@ -347,6 +390,8 @@ var insertNotificationSchema = createInsertSchema(notifications).pick({
   relatedId: true,
   content: true
 });
+var insertBlockSchema = createInsertSchema(blocks).pick({ blockerId: true, blockedId: true });
+var insertReportSchema = createInsertSchema(reports).pick({ reporterId: true, reportedId: true, reason: true, details: true });
 
 // server/storage.ts
 import { eq, or, and, desc, asc, sql } from "drizzle-orm";
@@ -423,9 +468,7 @@ var DatabaseStorage = class {
       eq(users.isActive, true),
       sql`${users.latitude} IS NOT NULL`,
       sql`${users.longitude} IS NOT NULL`,
-      // Exclude users who still have the default 0,0 coordinates (never set location)
       sql`NOT (CAST(${users.latitude} AS DOUBLE PRECISION) = 0 AND CAST(${users.longitude} AS DOUBLE PRECISION) = 0)`,
-      // Only show users who have been active/pinged location in the last 30 minutes OR are demo users
       or(
         sql`${users.lastLocation} > NOW() - INTERVAL '30 minutes'`,
         sql`${users.username} LIKE 'demo_%'`
@@ -473,7 +516,6 @@ var DatabaseStorage = class {
       eq(bumps.bumpedUserId, userId)
     )).orderBy(desc(bumps.timestamp)).limit(limit);
   }
-  // Message Operations
   async createMessage(insertMessage) {
     const result = await db.insert(messages).values(insertMessage).returning();
     return result[0];
@@ -523,8 +565,8 @@ var DatabaseStorage = class {
     if (connectedSet.size === 0) return [];
     const userIds = Array.from(connectedSet);
     const { inArray } = await import("drizzle-orm");
-    const connectedUsers = await db.select().from(users).where(inArray(users.id, userIds));
-    return connectedUsers;
+    const connectedUsers2 = await db.select().from(users).where(inArray(users.id, userIds));
+    return connectedUsers2;
   }
   async createNotification(insertNotification) {
     const result = await db.insert(notifications).values({
@@ -549,7 +591,6 @@ var DatabaseStorage = class {
   async markAllNotificationsAsRead(userId) {
     await db.update(notifications).set({ read: true }).where(eq(notifications.userId, userId));
   }
-  // Verification code operations
   async createVerificationCode(phoneNumber, code, expiresAt) {
     const result = await db.insert(verificationCodes).values({
       phoneNumber,
@@ -582,11 +623,6 @@ var DatabaseStorage = class {
     const result = await db.select().from(users).where(eq(users.phoneNumber, phone)).limit(1);
     return result[0];
   }
-  /**
-   * Deactivate users who have exceeded their personal inactiveTimeout.
-   * Compares lastLocation timestamp against inactiveTimeout (in minutes).
-   * Returns the number of users deactivated.
-   */
   async deactivateInactiveUsers() {
     const result = await db.update(users).set({ isActive: false }).where(and(
       eq(users.isActive, true),
@@ -620,6 +656,66 @@ var DatabaseStorage = class {
       return await db.select().from(datingEvents).where(and(...conditions)).orderBy(desc(datingEvents.timestamp));
     }
     return await db.select().from(datingEvents).where(eq(datingEvents.isActive, true)).orderBy(desc(datingEvents.timestamp));
+  }
+  async blockUser(blockerId, blockedId) {
+    const result = await db.insert(blocks).values({
+      blockerId,
+      blockedId
+    }).returning();
+    return result[0];
+  }
+  async unblockUser(blockerId, blockedId) {
+    await db.delete(blocks).where(
+      and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId))
+    );
+  }
+  async getBlockedUsers(userId) {
+    const result = await db.select({ blockedId: blocks.blockedId }).from(blocks).where(eq(blocks.blockerId, userId));
+    return result.map((r) => r.blockedId);
+  }
+  async isBlocked(blockerId, blockedId) {
+    const result = await db.select().from(blocks).where(
+      and(eq(blocks.blockerId, blockerId), eq(blocks.blockedId, blockedId))
+    ).limit(1);
+    return result.length > 0;
+  }
+  async deleteBumpsBetweenUsers(userId1, userId2) {
+    await db.delete(bumps).where(
+      or(
+        and(eq(bumps.userId, userId1), eq(bumps.bumpedUserId, userId2)),
+        and(eq(bumps.userId, userId2), eq(bumps.bumpedUserId, userId1))
+      )
+    );
+  }
+  async deleteMessagesBetweenUsers(userId1, userId2) {
+    await db.delete(messages).where(
+      or(
+        and(eq(messages.senderId, userId1), eq(messages.receiverId, userId2)),
+        and(eq(messages.senderId, userId2), eq(messages.receiverId, userId1))
+      )
+    );
+  }
+  async createReport(report) {
+    const result = await db.insert(reports).values(report).returning();
+    return result[0];
+  }
+  async getReports() {
+    return await db.select().from(reports).orderBy(desc(reports.createdAt));
+  }
+  async updateReportStatus(id, status) {
+    const result = await db.update(reports).set({ status }).where(eq(reports.id, id)).returning();
+    return result[0];
+  }
+  async deleteAccount(userId) {
+    await db.update(users).set({
+      deletedAt: /* @__PURE__ */ new Date(),
+      isActive: false,
+      profilePhoto: null,
+      bannerPhoto: null,
+      bio: null,
+      email: `deleted_${userId}@deleted.com`,
+      phoneNumber: null
+    }).where(eq(users.id, userId));
   }
 };
 var storage = new DatabaseStorage();
@@ -667,9 +763,23 @@ async function setupAuth(app2) {
       if (existingEmail) {
         return res.status(400).json({ message: "Email already exists" });
       }
+      let calculatedAge = userData.age;
+      if (userData.dateOfBirth) {
+        const birthDate = new Date(userData.dateOfBirth);
+        const today = /* @__PURE__ */ new Date();
+        calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || m === 0 && today.getDate() < birthDate.getDate()) {
+          calculatedAge--;
+        }
+      }
+      if (calculatedAge < 18) {
+        return res.status(400).json({ message: "You must be 18 or older to use Face 2 Face" });
+      }
       const hashedPassword = await hashPassword(userData.password);
       const user = await storage.createUser({
         ...userData,
+        age: calculatedAge,
         password: hashedPassword,
         dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth) : null
       });
@@ -1086,6 +1196,48 @@ function validateModeration(fields) {
   return { isValid: true };
 }
 
+// server/lib/storage-client.ts
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
+var UPLOADS_DIR = path.join(process.cwd(), "uploads");
+async function ensureUploadsDir() {
+  try {
+    await fs.access(UPLOADS_DIR);
+  } catch {
+    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+  }
+}
+async function uploadImageFromBase64(base64String, userId, prefix) {
+  await ensureUploadsDir();
+  const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+  if (!matches || matches.length !== 3) {
+    throw new Error("Invalid base64 string format");
+  }
+  const mimeType = matches[1];
+  const rawBase64 = matches[2];
+  let ext = "png";
+  if (mimeType === "image/jpeg") ext = "jpg";
+  else if (mimeType === "image/webp") ext = "webp";
+  else if (mimeType === "image/gif") ext = "gif";
+  const randomHex = crypto.randomBytes(4).toString("hex");
+  const filename = `${prefix}_${userId}_${randomHex}.${ext}`;
+  const filepath = path.join(UPLOADS_DIR, filename);
+  const buffer = Buffer.from(rawBase64, "base64");
+  await fs.writeFile(filepath, buffer);
+  return `/uploads/${filename}`;
+}
+
+// server/websocket.ts
+import { WebSocket, WebSocketServer } from "ws";
+var connectedUsers = /* @__PURE__ */ new Map();
+function notifyUser(userId, event, payload = {}) {
+  const ws = connectedUsers.get(userId);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: event, payload }));
+  }
+}
+
 // server/routes.ts
 function sanitizeInput(input, maxLength) {
   return input.replace(/<[^>]*>/g, "").trim().slice(0, maxLength);
@@ -1133,6 +1285,12 @@ async function registerRoutes(app2) {
         ...raw,
         ...raw.bio !== void 0 ? { bio: sanitizeInput(raw.bio ?? "", 500) } : {}
       };
+      if (raw.profilePhoto && raw.profilePhoto.startsWith("data:image")) {
+        updates.profilePhoto = await uploadImageFromBase64(raw.profilePhoto, req.session.userId, "profile");
+      }
+      if (raw.bannerPhoto && raw.bannerPhoto.startsWith("data:image")) {
+        updates.bannerPhoto = await uploadImageFromBase64(raw.bannerPhoto, req.session.userId, "banner");
+      }
       const updatedUser = await storage.updateUser(req.session.userId, updates);
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
@@ -1140,7 +1298,7 @@ async function registerRoutes(app2) {
       const { password, ...userWithoutPassword } = updatedUser;
       res.status(200).json({
         ...userWithoutPassword,
-        profilePhoto: updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null
+        profilePhoto: updatedUser.profilePhoto?.startsWith("/uploads/") ? updatedUser.profilePhoto : updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null
       });
     } catch (error) {
       const err = error;
@@ -1189,6 +1347,64 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to join waitlist" });
     }
   });
+  apiRouter.get("/waitlists", async (req, res) => {
+    try {
+      const type = req.query.type;
+      const waitlists2 = await storage.getWaitlists(type);
+      res.json(waitlists2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch waitlists" });
+    }
+  });
+  apiRouter.get("/reports", async (req, res) => {
+    try {
+      const reports2 = await storage.getReports();
+      res.json(reports2);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+  apiRouter.patch("/reports/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      const report = await storage.updateReportStatus(parseInt(req.params.id), status);
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update report" });
+    }
+  });
+  apiRouter.post("/users/:id/ban", async (req, res) => {
+    try {
+      const user = await storage.updateUser(parseInt(req.params.id), { isActive: false });
+      res.json({ message: "User banned", user });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to ban user" });
+    }
+  });
+  apiRouter.get("/map/hotspots", async (req, res) => {
+    const hotspots = [];
+    const basePoints = [
+      { lat: 40.7128, lng: -74.006 },
+      // NYC
+      { lat: 34.0522, lng: -118.2437 },
+      // LA
+      { lat: 51.5074, lng: -0.1278 },
+      // London
+      { lat: 35.6762, lng: 139.6503 }
+      // Tokyo
+    ];
+    for (const point of basePoints) {
+      for (let i = 0; i < 50; i++) {
+        hotspots.push({
+          id: Math.random().toString(36).substr(2, 9),
+          latitude: point.lat + (Math.random() - 0.5) * 0.1,
+          longitude: point.lng + (Math.random() - 0.5) * 0.1,
+          intensity: Math.random() * 100
+        });
+      }
+    }
+    res.json(hotspots);
+  });
   apiRouter.get("/users/:id", async (req, res, next) => {
     try {
       if (!req.session || !req.session.userId) {
@@ -1209,7 +1425,7 @@ async function registerRoutes(app2) {
       const { password, email, phoneNumber, ...safeUser } = user;
       res.status(200).json({
         ...safeUser,
-        profilePhoto: safeUser.profilePhoto ? `/api/users/${safeUser.id}/photo` : null
+        profilePhoto: safeUser.profilePhoto?.startsWith("/uploads/") ? safeUser.profilePhoto : safeUser.profilePhoto ? `/api/users/${safeUser.id}/photo` : null
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to get user details" });
@@ -1224,6 +1440,9 @@ async function registerRoutes(app2) {
       const user = await storage.getUser(userId);
       if (!user || !user.profilePhoto) {
         return res.status(404).send("Photo not found");
+      }
+      if (user.profilePhoto.startsWith("/uploads/")) {
+        return res.redirect(user.profilePhoto);
       }
       const matches = user.profilePhoto.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
       if (matches && matches.length === 3) {
@@ -1267,7 +1486,15 @@ async function registerRoutes(app2) {
           userSex
         }
       );
-      const sanitizedUsers = nearbyUsers.map(({ password, email, phoneNumber, ...rest }) => ({
+      const myBlockedIds = await storage.getBlockedUsers(req.session.userId);
+      const filteredUsers = [];
+      for (const u of nearbyUsers) {
+        if (myBlockedIds.includes(u.id)) continue;
+        const theyBlockedMe = await storage.isBlocked(u.id, req.session.userId);
+        if (theyBlockedMe) continue;
+        filteredUsers.push(u);
+      }
+      const sanitizedUsers = filteredUsers.map(({ password, email, phoneNumber, ...rest }) => ({
         ...rest,
         profilePhoto: rest.profilePhoto ? `/api/users/${rest.id}/photo` : null
       }));
@@ -1305,18 +1532,21 @@ async function registerRoutes(app2) {
         message: req.body.message || null
       });
       const bumpMessageContent = req.body.message || user.bumpMessage || "Hey! I just bumped you \u2728";
-      await storage.createMessage({
+      const initialMessage = await storage.createMessage({
         senderId: userId,
         receiverId: bumpedUserId,
         content: bumpMessageContent
       });
-      await storage.createNotification({
+      const notification = await storage.createNotification({
         userId: bumpedUserId,
         type: "bump",
         relatedId: userId,
         // Pass sender ID so receiver can easily bump back
         content: `${user.firstName} bumped you!`
       });
+      notifyUser(bumpedUserId, "NEW_BUMP", bump);
+      notifyUser(bumpedUserId, "NEW_MESSAGE", initialMessage);
+      notifyUser(bumpedUserId, "NEW_NOTIFICATION", notification);
       res.status(201).json(bump);
     } catch (error) {
       res.status(500).json({ message: "Failed to create bump" });
@@ -1440,8 +1670,8 @@ async function registerRoutes(app2) {
       if (!req.session || !req.session.userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }
-      const connectedUsers = await storage.getConnectedUsers(req.session.userId);
-      const usersWithDetails = await Promise.all(connectedUsers.map(async (u) => {
+      const connectedUsers2 = await storage.getConnectedUsers(req.session.userId);
+      const usersWithDetails = await Promise.all(connectedUsers2.map(async (u) => {
         const msgs = await storage.getMessagesBetweenUsers(req.session.userId, u.id);
         const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
         const unreadCount = await storage.getUnreadMessageCount(req.session.userId, u.id);
@@ -1491,6 +1721,11 @@ async function registerRoutes(app2) {
         return res.status(401).json({ message: "Not authenticated" });
       }
       const otherUserId = parseInt(req.params.userId);
+      const iBlockedThem = await storage.isBlocked(req.session.userId, otherUserId);
+      const theyBlockedMe = await storage.isBlocked(otherUserId, req.session.userId);
+      if (iBlockedThem || theyBlockedMe) {
+        return res.status(403).json({ message: "Cannot view messages with this user" });
+      }
       const messages2 = await storage.getMessagesBetweenUsers(req.session.userId, otherUserId);
       await storage.markMessagesAsRead(req.session.userId, otherUserId);
       res.status(200).json(messages2);
@@ -1508,18 +1743,26 @@ async function registerRoutes(app2) {
       if (!receiverId || !content) {
         return res.status(400).json({ message: "Missing receiverId or content" });
       }
+      const targetId = parseInt(receiverId);
+      const iBlockedThem = await storage.isBlocked(req.session.userId, targetId);
+      const theyBlockedMe = await storage.isBlocked(targetId, req.session.userId);
+      if (iBlockedThem || theyBlockedMe) {
+        return res.status(403).json({ message: "Cannot send messages to this user" });
+      }
       const message = await storage.createMessage({
         senderId: req.session.userId,
-        receiverId: parseInt(receiverId),
+        receiverId: targetId,
         content
       });
       const sender = await storage.getUser(req.session.userId);
-      await storage.createNotification({
-        userId: receiverId,
+      const notification = await storage.createNotification({
+        userId: targetId,
         type: "message",
         relatedId: req.session.userId,
         content: `${sender?.firstName} sent you a message`
       });
+      notifyUser(targetId, "NEW_MESSAGE", message);
+      notifyUser(targetId, "NEW_NOTIFICATION", notification);
       res.status(201).json(message);
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -1635,6 +1878,114 @@ async function registerRoutes(app2) {
     } catch (error) {
       console.error("Get dating events error:", error);
       res.status(500).json({ message: "Failed to fetch dating events" });
+    }
+  });
+  apiRouter.delete("/users/account", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const { confirm } = req.body;
+      if (confirm !== true) {
+        return res.status(400).json({ message: "You must confirm account deletion by sending { confirm: true }" });
+      }
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      await storage.deleteAccount(userId);
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destroy error during account deletion:", err);
+        }
+      });
+      res.status(200).json({ message: "Account deleted successfully" });
+    } catch (error) {
+      console.error("Account deletion error:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
+  apiRouter.post("/users/:id/block", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const blockedId = parseInt(req.params.id);
+      if (isNaN(blockedId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      if (blockedId === req.session.userId) {
+        return res.status(400).json({ message: "Cannot block yourself" });
+      }
+      const alreadyBlocked = await storage.isBlocked(req.session.userId, blockedId);
+      if (alreadyBlocked) {
+        return res.status(400).json({ message: "User is already blocked" });
+      }
+      const block = await storage.blockUser(req.session.userId, blockedId);
+      await storage.deleteBumpsBetweenUsers(req.session.userId, blockedId);
+      await storage.deleteMessagesBetweenUsers(req.session.userId, blockedId);
+      res.status(201).json({ message: "User blocked successfully", block });
+    } catch (error) {
+      console.error("Block user error:", error);
+      res.status(500).json({ message: "Failed to block user" });
+    }
+  });
+  apiRouter.delete("/users/:id/block", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const blockedId = parseInt(req.params.id);
+      if (isNaN(blockedId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      await storage.unblockUser(req.session.userId, blockedId);
+      res.status(200).json({ message: "User unblocked successfully" });
+    } catch (error) {
+      console.error("Unblock user error:", error);
+      res.status(500).json({ message: "Failed to unblock user" });
+    }
+  });
+  apiRouter.get("/users/blocked", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const blockedIds = await storage.getBlockedUsers(req.session.userId);
+      res.status(200).json(blockedIds);
+    } catch (error) {
+      console.error("Get blocked users error:", error);
+      res.status(500).json({ message: "Failed to get blocked users" });
+    }
+  });
+  apiRouter.post("/users/:id/report", async (req, res) => {
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      const reportedId = parseInt(req.params.id);
+      if (isNaN(reportedId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      if (reportedId === req.session.userId) {
+        return res.status(400).json({ message: "Cannot report yourself" });
+      }
+      const { reason, details } = req.body;
+      const validReasons = ["harassment", "fake_profile", "inappropriate", "spam", "underage", "other"];
+      if (!reason || !validReasons.includes(reason)) {
+        return res.status(400).json({ message: "Invalid or missing reason. Must be one of: " + validReasons.join(", ") });
+      }
+      const report = await storage.createReport({
+        reporterId: req.session.userId,
+        reportedId,
+        reason,
+        details: details ? sanitizeInput(details, 1e3) : void 0
+      });
+      res.status(201).json({ message: "Report submitted successfully", report });
+    } catch (error) {
+      console.error("Report user error:", error);
+      res.status(500).json({ message: "Failed to submit report" });
     }
   });
   app2.use("/api", apiRouter);
