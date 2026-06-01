@@ -240,7 +240,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await updateProfileMutation.mutateAsync(profileData);
   };
 
-  // Auto-refetch on focus is fine for auth state
+  // WebSocket real-time connection
+  useEffect(() => {
+    if (!user) return;
+
+    // Use current host for websocket
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    // For local dev, Vite runs on 5173 but API is on 5000. For production, it's the same host.
+    const host = window.location.port === '5173' ? 'localhost:5000' : window.location.host;
+    const wsUrl = `${protocol}//${host}/ws`;
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'AUTH', userId: user.id }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_MESSAGE') {
+          queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+        } else if (data.type === 'NEW_BUMP') {
+          queryClient.invalidateQueries({ queryKey: ["/api/bumps"] });
+        } else if (data.type === 'NEW_NOTIFICATION') {
+          queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+        }
+      } catch (err) {
+        console.error("WS parse error", err);
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [user]);
 
   return (
     <AuthContext.Provider

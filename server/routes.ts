@@ -12,6 +12,8 @@ import { z } from "zod";
 import { setupAuth } from "./auth";
 import { sendVerificationSMS } from "./ghl";
 import { validateTags, validateModeration } from "@shared/moderation";
+import { uploadImageFromBase64 } from "./lib/storage-client";
+import { notifyUser } from "./websocket";
 
 /** Strip HTML tags and trim to maxLength */
 function sanitizeInput(input: string, maxLength: number): string {
@@ -73,10 +75,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const updates = {
+      const updates: Record<string, any> = {
         ...raw,
         ...(raw.bio !== undefined ? { bio: sanitizeInput(raw.bio ?? "", 500) } : {}),
       };
+
+      // Handle image uploads to persistent volume
+      if (raw.profilePhoto && raw.profilePhoto.startsWith('data:image')) {
+        updates.profilePhoto = await uploadImageFromBase64(raw.profilePhoto, req.session.userId, 'profile');
+      }
+      if (raw.bannerPhoto && raw.bannerPhoto.startsWith('data:image')) {
+        updates.bannerPhoto = await uploadImageFromBase64(raw.bannerPhoto, req.session.userId, 'banner');
+      }
 
       const updatedUser = await storage.updateUser(req.session.userId, updates);
 
@@ -89,7 +99,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(200).json({
         ...userWithoutPassword,
-        profilePhoto: updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null
+        profilePhoto: updatedUser.profilePhoto?.startsWith('/uploads/') 
+          ? updatedUser.profilePhoto 
+          : (updatedUser.profilePhoto ? `/api/users/${updatedUser.id}/photo` : null)
       });
     } catch (error) {
       const err = error as any;
@@ -176,7 +188,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, email, phoneNumber, ...safeUser } = user;
       res.status(200).json({
         ...safeUser,
-        profilePhoto: safeUser.profilePhoto ? `/api/users/${safeUser.id}/photo` : null
+        profilePhoto: safeUser.profilePhoto?.startsWith('/uploads/') 
+          ? safeUser.profilePhoto 
+          : (safeUser.profilePhoto ? `/api/users/${safeUser.id}/photo` : null)
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to get user details" });
@@ -195,6 +209,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!user || !user.profilePhoto) {
         return res.status(404).send("Photo not found");
+      }
+
+      if (user.profilePhoto.startsWith('/uploads/')) {
+        return res.redirect(user.profilePhoto);
       }
 
       const matches = user.profilePhoto.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -315,19 +333,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Automatically send the "bumpMessage" as the first chat message to bridge the gap
       // This is crucial so that when they go to the Messages tab, a conversation is already initiated
       const bumpMessageContent = req.body.message || user.bumpMessage || "Hey! I just bumped you \u2728";
-      await storage.createMessage({
+      const initialMessage = await storage.createMessage({
         senderId: userId,
         receiverId: bumpedUserId,
         content: bumpMessageContent
       });
 
       // Create a notification for the bumped user
-      await storage.createNotification({
+      const notification = await storage.createNotification({
         userId: bumpedUserId,
         type: "bump",
         relatedId: userId, // Pass sender ID so receiver can easily bump back
-        content: `${user.firstName} bumped you!`,
+        content: `${user.firstName} bumped you!`
       });
+
+      // Notify the receiver about the bump and initial message
+      notifyUser(bumpedUserId, 'NEW_BUMP', bump);
+      notifyUser(bumpedUserId, 'NEW_MESSAGE', initialMessage);
+      notifyUser(bumpedUserId, 'NEW_NOTIFICATION', notification);
 
       res.status(201).json(bump);
     } catch (error) {
@@ -588,12 +611,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const sender = await storage.getUser(req.session.userId);
-      await storage.createNotification({
+      const notification = await storage.createNotification({
         userId: targetId,
         type: "message",
         relatedId: req.session.userId,
         content: `${sender?.firstName} sent you a message`
       });
+
+      // Notify receiver immediately
+      notifyUser(targetId, 'NEW_MESSAGE', message);
+      notifyUser(targetId, 'NEW_NOTIFICATION', notification);
 
       res.status(201).json(message);
     } catch (error) {

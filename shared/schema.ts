@@ -31,7 +31,7 @@ export const users = pgTable("users", {
   longitude: numeric("longitude").notNull().default("0"),
   lastLocation: timestamp("last_location"),
   profileCompleted: boolean("profile_completed").default(false),
-  profilePhoto: text("profile_photo"), // base64 encoded photo string
+  profilePhoto: text("profile_photo"), // URL path to photo on persistent volume or base64
   phoneNumber: text("phone_number").unique(),
   isPhoneVerified: boolean("is_phone_verified").default(false),
   safetyAcknowledged: boolean("safety_acknowledged").default(false),
@@ -65,7 +65,7 @@ export const users = pgTable("users", {
   lifestyleCoffee: text("lifestyle_coffee"), // "addict", "decal", "none"
   lifestyleAlcohol: text("lifestyle_alcohol"), // "social", "frequent", "never"
   lifestyleSchedule: text("lifestyle_schedule"), // "morning", "night", "flexible"
-  bannerPhoto: text("banner_photo"), // base64 encoded banner string
+  bannerPhoto: text("banner_photo"), // URL path to banner on persistent volume or base64
   isPublic: boolean("is_public").default(true),
   // New Business Fields
   businessSlogan: text("business_slogan"),

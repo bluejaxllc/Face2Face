@@ -7,12 +7,14 @@ import { storage } from "./storage";
 import cors from "cors";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
+import path from "path";
 
 if (!process.env.SESSION_SECRET) {
   process.env.SESSION_SECRET = "face2face-dev-secret";
 }
 
 const app = express();
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // Trust Railway's reverse proxy (Fastly CDN) so secure cookies work
 app.set('trust proxy', 1);
 
@@ -133,8 +135,13 @@ app.use((req, res, next) => {
   next();
 });
 
+import { setupWebSocket } from "./websocket";
+
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Attach WebSocket server
+  setupWebSocket(server);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
