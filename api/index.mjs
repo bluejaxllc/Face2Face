@@ -31,6 +31,7 @@ __export(schema_exports, {
   notifications: () => notifications,
   reports: () => reports,
   tags: () => tags,
+  transactions: () => transactions,
   updateUserSchema: () => updateUserSchema,
   users: () => users,
   verificationCodes: () => verificationCodes,
@@ -148,6 +149,10 @@ var users = pgTable("users", {
   lastLoginDate: timestamp("last_login_date"),
   badges: text("badges"),
   // JSON string array of badges
+  // Monetization Fields
+  isPremium: boolean("is_premium").default(false),
+  availableBumps: integer("available_bumps").default(3),
+  stripeCustomerId: text("stripe_customer_id"),
   deletedAt: timestamp("deleted_at")
   // Soft delete timestamp
 }, (table) => {
@@ -384,6 +389,18 @@ var insertMessageSchema = createInsertSchema(messages).pick({
   receiverId: true,
   content: true
 });
+var transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  stripeSessionId: text("stripe_session_id").notNull().unique(),
+  amount: integer("amount").notNull(),
+  // in cents
+  status: text("status").notNull(),
+  // 'pending', 'completed', 'failed'
+  type: text("type").notNull(),
+  // 'bump_pack', 'subscription'
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
 var insertNotificationSchema = createInsertSchema(notifications).pick({
   userId: true,
   type: true,
@@ -412,7 +429,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 
 // server/log.ts
-function log2(message, source = "express") {
+function log(message, source = "express") {
   const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -434,7 +451,7 @@ var DatabaseStorage = class {
       conString: process.env.DATABASE_URL,
       createTableIfMissing: true
     });
-    log2("Database connection established", "storage");
+    log("Database connection established", "storage");
   }
   async getUser(id) {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
@@ -726,7 +743,7 @@ var DatabaseStorage = class {
     const newXP = (user.xp || 0) + amount;
     const newLevel = Math.max(1, Math.floor(Math.sqrt(newXP) * 0.5) + 1);
     await db.update(users).set({ xp: newXP, level: newLevel }).where(eq(users.id, userId));
-    log2(`[Gamification] User ${userId} gained ${amount} XP for ${reason}. Now Level ${newLevel} with ${newXP} XP.`);
+    log(`[Gamification] User ${userId} gained ${amount} XP for ${reason}. Now Level ${newLevel} with ${newXP} XP.`);
   }
   async checkIn(userId) {
     const user = await this.getUser(userId);
@@ -1282,6 +1299,65 @@ function notifyUser(userId, event, payload = {}) {
   }
 }
 
+// server/stripe.ts
+import Stripe from "stripe";
+import { eq as eq2 } from "drizzle-orm";
+var isStripeConfigured = () => !!process.env.STRIPE_SECRET_KEY;
+var stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
+  apiVersion: "2024-10-28.acacia"
+});
+var STRIPE_PRICES = {
+  BUMP_PACK_5: process.env.STRIPE_PRICE_BUMP_PACK_5 || "price_bump_pack_5_placeholder",
+  PREMIUM_SUBSCRIPTION: process.env.STRIPE_PRICE_PREMIUM || "price_premium_placeholder"
+};
+async function handleStripeWebhook(event) {
+  if (event.type === "checkout.session.completed") {
+    const session3 = event.data.object;
+    const userId = session3.client_reference_id ? parseInt(session3.client_reference_id) : null;
+    if (!userId) {
+      console.error("Stripe webhook error: No client_reference_id found in session", session3.id);
+      return;
+    }
+    const sessionWithLineItems = await stripe.checkout.sessions.retrieve(session3.id, {
+      expand: ["line_items"]
+    });
+    const lineItems = sessionWithLineItems.line_items?.data || [];
+    let isSubscription = false;
+    let bumpsToAdd = 0;
+    for (const item of lineItems) {
+      const priceId = item.price?.id;
+      if (priceId === STRIPE_PRICES.PREMIUM_SUBSCRIPTION) {
+        isSubscription = true;
+      } else if (priceId === STRIPE_PRICES.BUMP_PACK_5) {
+        bumpsToAdd += 5;
+      } else {
+        const name = item.description?.toLowerCase() || "";
+        if (name.includes("premium") || name.includes("f2f+")) {
+          isSubscription = true;
+        } else if (name.includes("bump")) {
+          bumpsToAdd += 5;
+        }
+      }
+    }
+    await db.insert(transactions).values({
+      userId,
+      stripeSessionId: session3.id,
+      amount: session3.amount_total || 0,
+      status: session3.payment_status,
+      type: isSubscription ? "subscription" : "bump_pack"
+    });
+    const [user] = await db.select().from(users).where(eq2(users.id, userId));
+    if (user) {
+      await db.update(users).set({
+        isPremium: isSubscription ? true : user.isPremium,
+        availableBumps: (user.availableBumps || 0) + bumpsToAdd,
+        stripeCustomerId: session3.customer
+      }).where(eq2(users.id, userId));
+      console.log(`Successfully processed payment for user ${userId}. Added ${bumpsToAdd} bumps. Premium: ${isSubscription}`);
+    }
+  }
+}
+
 // server/routes.ts
 function sanitizeInput(input, maxLength) {
   return input.replace(/<[^>]*>/g, "").trim().slice(0, maxLength);
@@ -1386,7 +1462,7 @@ async function registerRoutes(app2) {
       const result = await storage.checkIn(req.session.userId);
       res.json(result);
     } catch (err) {
-      log("Check-in error: " + err);
+      console.error("Check-in error: " + err);
       res.status(500).json({ message: "Check-in failed" });
     }
   });
@@ -2045,6 +2121,62 @@ async function registerRoutes(app2) {
     }
   });
   app2.use("/api", apiRouter);
+  app2.post("/api/stripe/create-checkout", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!isStripeConfigured()) {
+      return res.status(503).json({ message: "Stripe is not configured on this server." });
+    }
+    const { type } = req.body;
+    const user = req.user;
+    try {
+      let priceId;
+      let mode = "payment";
+      let successUrl = `${process.env.PUBLIC_URL || req.headers.origin}/store?success=true`;
+      let cancelUrl = `${process.env.PUBLIC_URL || req.headers.origin}/store?canceled=true`;
+      if (type === "subscription") {
+        priceId = process.env.STRIPE_PRICE_PREMIUM || "price_premium_placeholder";
+        mode = "subscription";
+      } else {
+        priceId = process.env.STRIPE_PRICE_BUMP_PACK_5 || "price_bump_pack_5_placeholder";
+        mode = "payment";
+      }
+      const session3 = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1
+          }
+        ],
+        mode,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        client_reference_id: user.id.toString(),
+        customer_email: user.email
+      });
+      res.json({ url: session3.url });
+    } catch (error) {
+      console.error("Stripe Checkout error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    let event;
+    try {
+      if (endpointSecret && sig) {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+      } else {
+        event = JSON.parse(req.body.toString());
+      }
+      await handleStripeWebhook(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error(`Webhook Error: ${err.message}`);
+      res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+  });
   const httpServer = createServer(app2);
   return httpServer;
 }
@@ -2119,8 +2251,19 @@ async function ensureInitialized() {
   }
 }
 async function handler(req, res) {
-  await ensureInitialized();
-  return app(req, res);
+  try {
+    await ensureInitialized();
+    return new Promise((resolve, reject) => {
+      res.on("finish", resolve);
+      res.on("error", reject);
+      app(req, res);
+    });
+  } catch (error) {
+    console.error("Handler error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Internal server error", detail: error.message });
+    }
+  }
 }
 export {
   handler as default
