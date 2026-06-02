@@ -1,0 +1,49 @@
+// Restart Railway Postgres by redeploying
+const https = require('https');
+
+const configPath = require('os').homedir() + '/.railway/config.json';
+const config = JSON.parse(require('fs').readFileSync(configPath, 'utf8'));
+const token = config.user?.token;
+
+if (!token) {
+  console.error('No Railway token found');
+  process.exit(1);
+}
+
+const environmentId = '638ea985-1d88-475a-b6f6-d7984a0563a1';
+const postgresServiceId = '8f280f05-9561-4fd7-87d2-faafe92295e1';
+
+// Use serviceInstanceRedeploy mutation
+const query = JSON.stringify({
+  query: `mutation {
+    serviceInstanceRedeploy(
+      environmentId: "${environmentId}"
+      serviceId: "${postgresServiceId}"
+    )
+  }`
+});
+
+const options = {
+  hostname: 'backboard.railway.app',
+  port: 443,
+  path: '/graphql/v2',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'Content-Length': Buffer.byteLength(query)
+  }
+};
+
+const req = https.request(options, (res) => {
+  let data = '';
+  res.on('data', (chunk) => data += chunk);
+  res.on('end', () => {
+    console.log('Status:', res.statusCode);
+    console.log('Response:', data);
+  });
+});
+
+req.on('error', (e) => console.error('Error:', e.message));
+req.write(query);
+req.end();
