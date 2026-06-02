@@ -884,7 +884,7 @@ async function setupAuth(app2) {
       });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed", detail: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ message: "Login failed" });
     }
   });
   app2.post("/api/auth/logout", (req, res) => {

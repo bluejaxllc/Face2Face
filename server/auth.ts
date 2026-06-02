@@ -138,7 +138,7 @@ export async function setupAuth(app: Express) {
       });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed", detail: error instanceof Error ? error.message : String(error) });
+      res.status(500).json({ message: "Login failed" });
     }
   });
 
