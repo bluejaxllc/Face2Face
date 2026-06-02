@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Eye, Map, Satellite, Bell, Vibrate, Moon, Clock, Shield, ChevronRight, Wrench, Trash2, AlertTriangle } from "lucide-react";
+import { Settings, Eye, Map, MapPin, Satellite, Bell, Vibrate, Moon, Clock, Shield, ChevronRight, Wrench, Trash2, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Category = "dating" | "friends" | "business";
@@ -84,10 +84,28 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
   const [showOnMap, setShowOnMap] = useState(user?.isActive !== false);
   const [inactiveTimeout, setInactiveTimeout] = useState(user?.inactiveTimeout || 30);
 
-  // App preferences
-  const [pushNotifs, setPushNotifs] = useState(true);
-  const [haptic, setHaptic] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  // App preferences — persisted in localStorage
+  const [pushNotifs, setPushNotifs] = useState(() => {
+    const saved = localStorage.getItem('f2f_pushNotifs');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [haptic, setHaptic] = useState(() => {
+    const saved = localStorage.getItem('f2f_haptic');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('f2f_darkMode');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  // Persist app preferences to localStorage on change
+  useEffect(() => { localStorage.setItem('f2f_pushNotifs', String(pushNotifs)); }, [pushNotifs]);
+  useEffect(() => { localStorage.setItem('f2f_haptic', String(haptic)); }, [haptic]);
+  useEffect(() => {
+    localStorage.setItem('f2f_darkMode', String(darkMode));
+    // Dispatch event so other components can react to dark mode changes
+    window.dispatchEvent(new CustomEvent('f2f:darkModeChange', { detail: darkMode }));
+  }, [darkMode]);
 
   // Account deletion state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -239,6 +257,28 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
             <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.15em] flex items-center gap-1.5">
               <Eye className="w-3 h-3" /> Visibility & Map
             </Label>
+
+            {/* Show on Map toggle */}
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.22 }}
+              className="flex items-center justify-between rounded-xl px-4 py-3 transition-colors"
+              style={{
+                background: showOnMap ? `${c.accent}10` : "rgba(15,23,42,0.5)",
+                backdropFilter: "blur(8px)",
+                border: showOnMap ? `1px solid ${c.accent}30` : "1px solid rgba(148,163,184,0.08)",
+              }}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <MapPin className={`w-4 h-4 ${showOnMap ? c.text : 'text-slate-400'} flex-shrink-0`} />
+                <div>
+                  <p className="text-sm font-semibold text-slate-200">Show on Map</p>
+                  <p className="text-[10px] text-slate-500">{showOnMap ? 'Others can see you nearby' : 'You are hidden from the map'}</p>
+                </div>
+              </div>
+              <AnimatedToggle checked={showOnMap} onToggle={() => setShowOnMap(!showOnMap)} accent={c.accent} />
+            </motion.div>
 
             {/* Map Style Picker */}
             <div
