@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageTransition } from "@/components/PageTransition";
 import Header from "@/components/Header";
@@ -18,7 +18,14 @@ import WaitlistCRM from "@/components/admin/WaitlistCRM";
 // or build a unified master layout.
 
 export default function CommandCenter() {
-  const [activeTab, setActiveTab] = useState<"map" | "safety" | "crm">("map");
+  const [activeTab, setActiveTab] = useState<"map" | "safety" | "crm">(() => {
+    const saved = localStorage.getItem("f2f-command-center-tab");
+    return (saved as "map" | "safety" | "crm") || "map";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("f2f-command-center-tab", activeTab);
+  }, [activeTab]);
 
   return (
     <PageTransition className="h-screen w-full page-dark flex flex-col bg-slate-950 text-slate-50">
