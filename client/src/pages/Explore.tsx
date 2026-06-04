@@ -346,9 +346,9 @@ export default function Explore() {
             />
             <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
             <div className="flex items-center space-x-2 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-              <button onClick={() => setGroupDistanceUnit("mi")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
+              <button onClick={() => { if (groupDistanceUnit === 'km') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 0.621371) || 25)); } setGroupDistanceUnit("mi"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
               <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => setGroupDistanceUnit("km")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
+              <button onClick={() => { if (groupDistanceUnit === 'mi') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 1.60934) || 40)); } setGroupDistanceUnit("km"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
             </div>
           </div>
         </div>
@@ -449,12 +449,12 @@ export default function Explore() {
               />
               <div className="flex items-center bg-slate-800/60 rounded-md border border-slate-700/40 overflow-hidden">
                 <button 
-                  onClick={() => setDistanceUnit("mi")} 
+                  onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} 
                   className={`px-1.5 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${distanceUnit === 'mi' ? `${theme.text} bg-slate-700/50` : 'text-slate-500'}`}
                 >MI</button>
                 <div className="w-px h-3 bg-slate-700/50" />
                 <button 
-                  onClick={() => setDistanceUnit("km")} 
+                  onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} 
                   className={`px-1.5 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${distanceUnit === 'km' ? `${theme.text} bg-slate-700/50` : 'text-slate-500'}`}
                 >KM</button>
               </div>
@@ -524,9 +524,9 @@ export default function Explore() {
             />
             <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
             <div className="flex items-center space-x-2 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-              <button onClick={() => setDistanceUnit("mi")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
+              <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
               <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => setDistanceUnit("km")} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
+              <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
             </div>
           </div>
         </div>
