@@ -5,7 +5,7 @@ import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileCard from "@/components/ProfileCard";
 import Map from "@/components/Map";
-import { ChevronDown, Search, Heart, ArrowLeft, CalendarDays, MapPin, Plus, ImagePlus, Camera, X } from "lucide-react";
+import { ChevronDown, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 
 type PrimaryMode = "groups" | "list";
 type GroupSubTab = "feed" | "settings";
-type ListSubTab = "feed" | "dates" | "settings";
+type ListSubTab = "feed" | "settings";
 
 import { useScrollSave } from "@/hooks/use-scroll-save";
 import { CategoryKey, categoryConfig } from "@/components/BottomNavigation";
@@ -66,7 +66,7 @@ const CATEGORY_COLORS = {
 export default function Explore() {
   const groupsScroll = useScrollSave("f2f_explore_scroll_groups");
   const listScroll = useScrollSave("f2f_explore_scroll_list");
-  const datesScroll = useScrollSave("f2f_explore_scroll_dates");
+
   const listSettingsScroll = useScrollSave("f2f_explore_scroll_list_settings");
   const groupSettingsScroll = useScrollSave("f2f_explore_scroll_group_settings");
   
@@ -480,41 +480,7 @@ export default function Explore() {
     );
   };
 
-  const mockDatesList = [
-    { name: "Aly", date: "Friday, 8:00 PM", location: "Downtown Wine Bar", status: "Confirmed", seed: "p2" },
-    { name: "kyniah", date: "Saturday, 12:30 PM", location: "Coffee Roasters", status: "Pending", seed: "p3" },
-    { name: "kia", date: "Next Tuesday, 7:00 PM", location: "Sushi Roku", status: "Confirmed", seed: "p4" }
-  ];
 
-  const renderDatesList = () => (
-    <div {...datesScroll} onScroll={datesScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-20">
-      <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
-        {mockDatesList.map((d, i) => (
-          <div key={i} className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group">
-            <div className="w-[60px] h-[60px] rounded-full overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative group-hover:scale-105 transition-transform">
-              <img src={`https://picsum.photos/seed/${d.seed}/150/150`} alt={d.name} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-slate-900/10 pointer-events-none" />
-            </div>
-            
-            <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
-              <div className="flex justify-between items-center">
-                 <h3 className="text-white text-[17px] font-semibold tracking-tight">{d.name}</h3>
-                 <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${d.status === "Confirmed" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>{d.status}</span>
-              </div>
-              <p className={`font-semibold text-[14px] leading-snug mt-1 truncate flex items-center ${theme.text}`}>
-                <CalendarDays className="w-4 h-4 mr-1.5" />
-                {d.date}
-              </p>
-              <p className="text-slate-400 text-[13px] mt-1 truncate flex items-center">
-                <MapPin className="w-4 h-4 mr-1.5" />
-                {d.location}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
   const renderListSettings = () => (
     <div {...listSettingsScroll} onScroll={listSettingsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-20">
@@ -669,16 +635,6 @@ export default function Explore() {
             </button>
             <div className="w-px bg-slate-800 self-center h-5" />
             <button 
-              onClick={() => setListTab("dates")}
-              className="flex-1 flex items-center justify-center relative transition-colors"
-            >
-              <span className={`text-sm font-semibold tracking-wide ${listTab === "dates" ? theme.text : "text-slate-500"}`}>
-                {modeCategory === 'business' ? 'Meetings' : 'Matches'}
-              </span>
-              {listTab === "dates" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
-            </button>
-            <div className="w-px bg-slate-800 self-center h-5" />
-            <button 
               onClick={() => setListTab("settings")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
@@ -697,8 +653,7 @@ export default function Explore() {
         {primaryMode === "groups" ? (
           groupTab === "feed" ? renderGroupFeed() : renderGroupSettings()
         ) : (
-          listTab === "feed" ? renderListView() : 
-          listTab === "dates" ? renderDatesList() : renderListSettings()
+          listTab === "feed" ? renderListView() : renderListSettings()
         )}
       </div>
 
