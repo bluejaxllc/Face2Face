@@ -5,7 +5,7 @@ import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileCard from "@/components/ProfileCard";
 import Map from "@/components/Map";
-import { ChevronDown, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X } from "lucide-react";
+import { ChevronDown, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X, MapPin } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -435,6 +435,33 @@ export default function Explore() {
   const renderListView = () => {
     return (
       <div {...listScroll} onScroll={listScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-20">
+        {/* ── Distance Radius Indicator ── */}
+        <div className="sticky top-0 z-10 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60 px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MapPin className={`w-3.5 h-3.5 ${theme.text} shrink-0`} />
+            <span className="text-[12px] text-slate-400 font-medium">Within</span>
+            <div className="flex items-center gap-1">
+              <input 
+                type="text" 
+                value={listDistance}
+                onChange={(e) => setListDistance(e.target.value)}
+                className={`bg-slate-800/80 border border-slate-700/50 rounded-md w-10 text-center text-[13px] font-bold text-white py-0.5 outline-none focus:ring-1 ring-${theme.primary} transition-shadow`}
+              />
+              <div className="flex items-center bg-slate-800/60 rounded-md border border-slate-700/40 overflow-hidden">
+                <button 
+                  onClick={() => setDistanceUnit("mi")} 
+                  className={`px-1.5 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${distanceUnit === 'mi' ? `${theme.text} bg-slate-700/50` : 'text-slate-500'}`}
+                >MI</button>
+                <div className="w-px h-3 bg-slate-700/50" />
+                <button 
+                  onClick={() => setDistanceUnit("km")} 
+                  className={`px-1.5 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${distanceUnit === 'km' ? `${theme.text} bg-slate-700/50` : 'text-slate-500'}`}
+                >KM</button>
+              </div>
+            </div>
+          </div>
+          <span className="text-[10px] text-slate-500 font-medium">of your location</span>
+        </div>
         <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
           {mockListProfiles.map((p, i) => (
             <div 
@@ -629,7 +656,7 @@ export default function Explore() {
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
               <span className={`text-sm font-semibold tracking-wide ${listTab === "feed" ? theme.text : "text-slate-500"}`}>
-                {modeCategory === 'business' ? 'Professionals' : modeCategory === 'friends' ? 'Local people' : 'Explore List'}
+                {modeCategory === 'business' ? 'Professionals' : modeCategory === 'friends' ? 'Local people' : 'View List'}
               </span>
               {listTab === "feed" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
