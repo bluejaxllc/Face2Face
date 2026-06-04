@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Eye, Map, MapPin, Satellite, Bell, Vibrate, Moon, Clock, Shield, ChevronRight, Wrench, Trash2, AlertTriangle } from "lucide-react";
+import { Settings, Eye, Map, MapPin, Satellite, Bell, Vibrate, Moon, Clock, Shield, ChevronRight, Wrench, Trash2, AlertTriangle, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Category = "dating" | "friends" | "business";

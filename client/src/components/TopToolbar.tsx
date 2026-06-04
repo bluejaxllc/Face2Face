@@ -107,33 +107,34 @@ export default function TopToolbar({
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-[9999]" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
-        <div className="bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 w-full" style={{ height: "48px", padding: "4px 12px" }}>
-          <div className="flex justify-around items-center h-full relative">
+        <div className="bg-slate-900/95 backdrop-blur-md border-b border-slate-700/50 w-full" style={{ height: "48px", padding: "4px 6px" }}>
+          <div className="flex items-center justify-evenly h-full relative" style={{ gap: "2px" }}>
             {toolbarItems.map(({ id, icon: Icon, label, active, hasDropdown, onClick, activeColor }) => (
               <button
                 key={id}
                 onClick={onClick}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-full transition-all duration-300 relative ${
+                className={`flex items-center justify-center gap-0.5 py-1.5 rounded-full transition-all duration-300 relative min-w-0 ${
                   active ? "bg-white/5 opacity-100" : "opacity-70 hover:opacity-100 hover:bg-white/5"
                 }`}
+                style={{ padding: "6px 6px" }}
               >
                 <Icon
-                  className={`transition-colors duration-300 ${active ? activeColor : "text-slate-400"}`}
-                  style={{ width: "16px", height: "16px" }}
+                  className={`flex-shrink-0 transition-colors duration-300 ${active ? activeColor : "text-slate-400"}`}
+                  style={{ width: "14px", height: "14px" }}
                   strokeWidth={active ? 2.5 : 1.5}
                 />
                 <span
-                  className={`font-semibold tracking-wider uppercase transition-colors duration-300 ${
+                  className={`font-semibold tracking-wider uppercase transition-colors duration-300 truncate ${
                     active ? activeColor : "text-slate-400"
                   }`}
-                  style={{ fontSize: "9px" }}
+                  style={{ fontSize: "8px", lineHeight: "1" }}
                 >
                   {label}
                 </span>
                 {hasDropdown && (
                   <ChevronDown
-                    className="text-slate-500"
-                    style={{ width: "10px", height: "10px", marginLeft: "-2px" }}
+                    className="text-slate-500 flex-shrink-0"
+                    style={{ width: "8px", height: "8px", marginLeft: "-1px" }}
                   />
                 )}
               </button>

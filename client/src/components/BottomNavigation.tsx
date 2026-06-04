@@ -147,7 +147,7 @@ export default function BottomNavigation() {
       )}
 
       {/* Bottom navigation bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-[9999]" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div className="fixed left-0 right-0 z-[9999]" style={{ bottom: 0, paddingBottom: "env(safe-area-inset-bottom, 0px)", transform: "translateZ(0)" }}>
         <nav className="bg-slate-900/95 backdrop-blur-md border-t border-slate-700/50 w-full" style={{ height: "60px" }}>
           <div className="flex justify-around items-center h-full">
             {/* Category button (Dating/Friends/Business) */}
