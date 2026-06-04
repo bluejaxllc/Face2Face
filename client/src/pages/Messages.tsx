@@ -970,102 +970,73 @@ export default function Messages() {
           <motion.div
             initial={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60"
+            className="fixed top-0 left-0 right-0 z-[9999] bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80"
             style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
           >
-            {/* Main tab bar */}
-            <div className="w-full flex items-center justify-center pt-4 pb-3 relative">
-              <div className="flex items-center bg-slate-900/60 rounded-2xl p-1 border border-slate-800/50 backdrop-blur-sm">
-                {(["bumps", "messages"] as PrimaryMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setPrimaryMode(mode)}
-                    className="relative px-5 py-2 rounded-xl z-10"
-                  >
-                  {primaryMode === mode && (
-                    <motion.div
-                      layoutId="primary-tab-indicator"
-                      className={`absolute inset-0 rounded-xl ${accent.indicator} opacity-15`}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <div className="flex items-center gap-2 relative">
-                    <span
-                      className={`text-[15px] font-bold tracking-wide transition-colors ${
-                        primaryMode === mode ? "text-white" : "text-slate-500"
-                      }`}
-                    >
-                      {mode === "bumps" ? "Bumps" : "Messages"}
+            {/* Main tab bar — matches Explore layout */}
+            <div className="w-full h-[64px] flex items-center justify-center">
+              <button 
+                onClick={() => setPrimaryMode("bumps")}
+                className="px-2 relative group pb-1 mr-3"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "bumps" ? "text-white" : "text-slate-500"}`}>Bumps</span>
+                  {placeholderBumps.length > 0 && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}>
+                      {placeholderBumps.length}
                     </span>
-                    {/* Bump count badge */}
-                    {mode === "bumps" && placeholderBumps.length > 0 && (
-                      <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}
-                      >
-                        {placeholderBumps.length}
+                  )}
+                </div>
+                {primaryMode === "bumps" && (
+                  <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${accent.indicator} rounded-full translate-y-1 mx-2`} />
+                )}
+              </button>
+              <span className="text-slate-600 font-light text-[22px]">/</span>
+              <button 
+                onClick={() => setPrimaryMode("messages")}
+                className="px-2 relative group pb-1 ml-3"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "messages" ? "text-white" : "text-slate-500"}`}>Messages</span>
+                  {unreadMessageCount > 0 && (
+                    <div className="relative">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}>
+                        {totalUnreadBadge}
                       </span>
-                    )}
-                    {/* Unread messages pulse dot */}
-                    {mode === "messages" && unreadMessageCount > 0 && (
-                      <div className="relative">
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white`}>
-                          {totalUnreadBadge}
-                        </span>
-                        <motion.div
-                          className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${accent.badge}`}
-                          animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </button>
-                ))}
-              </div>
+                      <motion.div
+                        className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${accent.badge}`}
+                        animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                    </div>
+                  )}
+                </div>
+                {primaryMode === "messages" && (
+                  <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${accent.indicator} rounded-full translate-y-1 mx-2`} />
+                )}
+              </button>
             </div>
 
             {/* ═══════ Sub-tabs (Only visible in Bumps Mode) ═══════ */}
-            <AnimatePresence>
-              {primaryMode === "bumps" && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 44, opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                  className="w-full flex border-t border-slate-800/40 overflow-hidden"
+            {primaryMode === "bumps" && (
+              <div className="w-full flex border-t border-slate-800/50 h-[44px]">
+                <button
+                  onClick={() => setBumpTab("list")}
+                  className="flex-1 flex items-center justify-center relative transition-colors"
                 >
-                  {(["list", "settings"] as BumpSubTab[]).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setBumpTab(tab)}
-                      className="flex-1 flex items-center justify-center relative h-[44px]"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        {tab === "list" ? (
-                          <Zap className={`w-3.5 h-3.5 ${bumpTab === tab ? accent.primary : "text-slate-500"}`} />
-                        ) : (
-                          <Settings className={`w-3.5 h-3.5 ${bumpTab === tab ? accent.primary : "text-slate-500"}`} />
-                        )}
-                        <span
-                          className={`text-sm font-semibold tracking-wide transition-colors ${
-                            bumpTab === tab ? "text-white" : "text-slate-500"
-                          }`}
-                        >
-                          {tab === "list" ? "Bumps" : "Settings"}
-                        </span>
-                      </div>
-                      {bumpTab === tab && (
-                        <motion.div
-                          layoutId="bump-sub-indicator"
-                          className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`}
-                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <span className={`text-sm font-semibold tracking-wide ${bumpTab === "list" ? "text-white" : "text-slate-500"}`}>Bumps</span>
+                  {bumpTab === "list" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                </button>
+                <div className="w-px bg-slate-800 self-center h-5" />
+                <button
+                  onClick={() => setBumpTab("settings")}
+                  className="flex-1 flex items-center justify-center relative transition-colors"
+                >
+                  <span className={`text-sm font-semibold tracking-wide ${bumpTab === "settings" ? "text-white" : "text-slate-500"}`}>Settings</span>
+                  {bumpTab === "settings" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -1074,7 +1045,7 @@ export default function Messages() {
       <div
         className="fixed left-0 right-0 overflow-hidden z-[2]"
         style={{
-          top: activeConversation ? "0px" : (primaryMode === "bumps" ? "106px" : "62px"),
+          top: activeConversation ? "0px" : (primaryMode === "bumps" ? "108px" : "64px"),
           bottom: activeConversation ? "0px" : "60px",
         }}
       >
