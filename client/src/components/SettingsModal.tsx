@@ -149,9 +149,9 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
         inactiveTimeout,
       });
       toast({ title: "Settings saved", description: "Your preferences have been updated." });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update settings:", error);
-      toast({ title: "Update failed", description: "There was a problem saving your settings.", variant: "destructive" });
+      toast({ title: "Update failed", description: error?.message || "There was a problem saving your settings.", variant: "destructive" });
     } finally {
       onClose();
     }
