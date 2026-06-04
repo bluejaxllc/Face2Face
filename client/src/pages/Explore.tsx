@@ -5,7 +5,7 @@ import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileCard from "@/components/ProfileCard";
 import Map from "@/components/Map";
-import { ChevronDown, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X, MapPin } from "lucide-react";
+import { ChevronDown, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X, MapPin, Tag, Hash } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -207,6 +207,83 @@ export default function Explore() {
   const [listAgeMin, setListAgeMin] = useState("18");
   const [listAgeMax, setListAgeMax] = useState("35");
   const [listDate, setListDate] = useState(false);
+  const [tagCloudOpen, setTagCloudOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [customTags, setCustomTags] = useState<string[]>([]);
+
+  const MASTER_TAGS = [
+    // Popular (will also appear at top)
+    'hiking', 'fitness', 'coffee', 'music', 'tech', 'art', 'reading', 'travel',
+    'foodie', 'gaming', 'photography', 'yoga', 'running', 'dancing', 'cooking',
+    // A
+    'adventure', 'anime', 'archery', 'astrology',
+    // B
+    'basketball', 'biking', 'board games', 'book club', 'bowling', 'brunch',
+    // C
+    'camping', 'cars', 'chess', 'climbing', 'comedy', 'concerts', 'crafts', 'cycling',
+    // D
+    'denver', 'diy', 'dogs', 'drawing',
+    // E
+    'entrepreneur', 'esports', 'exploring',
+    // F
+    'fashion', 'film', 'fishing', 'football',
+    // G
+    'gardening', 'golf', 'guitar',
+    // H
+    'happy hour', 'hunting',
+    // I-J
+    'investing', 'jazz',
+    // K
+    'karaoke', 'kayaking', 'kickboxing',
+    // L
+    'languages', 'lgbtq+', 'live music',
+    // M
+    'martial arts', 'meditation', 'movies', 'motorcycles',
+    // N
+    'nature', 'networking', 'nightlife',
+    // O
+    'outdoors', 'off-road',
+    // P
+    'painting', 'pets', 'pickleball', 'poetry', 'potluck', 'puzzles',
+    // R
+    'real estate', 'rock climbing', 'roller skating',
+    // S
+    'sailing', 'salsa', 'singing', 'skateboarding', 'skiing', 'snowboarding', 'soccer', 'spirituality', 'surfing', 'swimming',
+    // T
+    'tennis', 'theater', 'thrifting', 'trivia',
+    // V-W
+    'veganism', 'vinyl', 'volleyball', 'volunteering', 'wine', 'writing', 'woodworking',
+    // X-Z
+    'xbox', 'zumba'
+  ];
+
+  const POPULAR_TAGS = MASTER_TAGS.slice(0, 15);
+  const allTags = [...new Set([...MASTER_TAGS, ...customTags])].sort();
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleCreateTag = () => {
+    const tag = newTagInput.trim().toLowerCase();
+    if (tag && !allTags.includes(tag)) {
+      setCustomTags(prev => [...prev, tag]);
+      setSelectedTags(prev => [...prev, tag]);
+      toast({ title: "Tag created! 🏷️", description: `#${tag} added and selected.` });
+    } else if (allTags.includes(tag)) {
+      if (!selectedTags.includes(tag)) toggleTag(tag);
+      toast({ title: "Tag selected", description: `#${tag} is now active.` });
+    }
+    setNewTagInput("");
+  };
+
+  // Sync selected tags to listTags search
+  useEffect(() => {
+    setListTags(selectedTags.join(', '));
+  }, [selectedTags]);
 
   const [groupDistance, setGroupDistance] = useState("25");
   const [groupDistanceUnit, setGroupDistanceUnit] = useState<"mi" | "km">("mi");
@@ -385,8 +462,15 @@ export default function Explore() {
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
           <span className="lowercase font-bold tracking-wide">tags</span>
-          <div className="flex items-center">
-             <span className="text-slate-500 mr-2 text-sm">[</span>
+          <div className="flex items-center gap-2">
+             <button 
+               onClick={() => setTagCloudOpen(true)}
+               className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
+             >
+               <Tag className="w-3 h-3" />
+               <span className="text-[10px] font-bold tracking-wider uppercase">Cloud</span>
+             </button>
+             <span className="text-slate-500 text-sm">[</span>
              <input 
                type="text" 
                placeholder="Search"
@@ -394,7 +478,7 @@ export default function Explore() {
                onChange={(e) => setGroupTags(e.target.value)}
                className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
              />
-             <span className="text-slate-500 ml-2 text-sm">]</span>
+             <span className="text-slate-500 text-sm">]</span>
           </div>
         </div>
       </div>
@@ -542,8 +626,15 @@ export default function Explore() {
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
           <span className="lowercase font-bold tracking-wide">tags</span>
-          <div className="flex items-center">
-             <span className="text-slate-500 mr-2 text-sm">[</span>
+          <div className="flex items-center gap-2">
+             <button 
+               onClick={() => setTagCloudOpen(true)}
+               className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
+             >
+               <Tag className="w-3 h-3" />
+               <span className="text-[10px] font-bold tracking-wider uppercase">Cloud</span>
+             </button>
+             <span className="text-slate-500 text-sm">[</span>
              <input 
                type="text" 
                placeholder="Search"
@@ -551,9 +642,27 @@ export default function Explore() {
                onChange={(e) => setListTags(e.target.value)}
                className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
              />
-             <span className="text-slate-500 ml-2 text-sm">]</span>
+             <span className="text-slate-500 text-sm">]</span>
           </div>
         </div>
+
+        {/* Selected Tags Display */}
+        {selectedTags.length > 0 && (
+          <div className="px-5 py-3 border-b border-slate-700/50">
+            <div className="flex flex-wrap gap-1.5">
+              {selectedTags.map(tag => (
+                <button 
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${theme.bg} text-white hover:opacity-80 transition-opacity active:scale-95`}
+                >
+                  #{tag}
+                  <X className="w-3 h-3" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
           <span className="font-bold tracking-wide">Age</span>
@@ -697,6 +806,118 @@ export default function Explore() {
             }}
             distance={1.5}
           />
+        </div>
+      )}
+
+      {/* ═══════ Tag Cloud Modal ═══════ */}
+      {tagCloudOpen && (
+        <div className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-200">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/60" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
+            <div className="flex items-center gap-2">
+              <Tag className={`w-5 h-5 ${theme.text}`} />
+              <h2 className="text-white text-xl font-extrabold tracking-tight">Tag Cloud</h2>
+            </div>
+            <button 
+              onClick={() => setTagCloudOpen(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+            >
+              <X className="w-4 h-4 text-slate-400" />
+            </button>
+          </div>
+
+          {/* Selected Tags Bar */}
+          {selectedTags.length > 0 && (
+            <div className="px-5 py-3 border-b border-slate-800/40 bg-slate-900/50">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Active Filters ({selectedTags.length})</p>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedTags.map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${theme.bg} text-white hover:opacity-80 transition-all active:scale-95`}
+                  >
+                    #{tag}
+                    <X className="w-3 h-3" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Scrollable Tag Content */}
+          <div className="flex-1 overflow-y-auto pb-24">
+            {/* Popular Section */}
+            <div className="px-5 pt-5 pb-4">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <span className="text-amber-400">★</span> Popular
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {POPULAR_TAGS.map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all active:scale-95 ${
+                      selectedTags.includes(tag) 
+                        ? `${theme.bg} text-white border-transparent shadow-lg` 
+                        : 'bg-slate-800/60 text-slate-300 border-slate-700/50 hover:border-slate-600'
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* A-Z Sections */}
+            {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
+              const letterTags = allTags.filter(t => t[0].toUpperCase() === letter);
+              if (letterTags.length === 0) return null;
+              return (
+                <div key={letter} className="px-5 pb-3">
+                  <p className={`text-[11px] font-extrabold uppercase tracking-widest mb-2 ${theme.text} opacity-70`}>{letter}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {letterTags.map(tag => (
+                      <button 
+                        key={tag}
+                        onClick={() => toggleTag(tag)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all active:scale-95 ${
+                          selectedTags.includes(tag) 
+                            ? `${theme.bg} text-white border-transparent` 
+                            : 'bg-slate-800/40 text-slate-400 border-slate-700/40 hover:text-white hover:border-slate-600'
+                        }`}
+                      >
+                        #{tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Create Tag Bar — Fixed Bottom */}
+          <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/60 px-5 py-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}>
+            <div className="flex items-center gap-2">
+              <Hash className={`w-4 h-4 ${theme.text} shrink-0`} />
+              <input
+                type="text"
+                placeholder="Create a new tag..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
+                className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50"
+                style={{ focusRing: theme.primary } as any}
+              />
+              <button 
+                onClick={handleCreateTag}
+                disabled={!newTagInput.trim()}
+                className={`px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white disabled:opacity-30 hover:opacity-90 transition-all active:scale-95`}
+              >
+                Add
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
