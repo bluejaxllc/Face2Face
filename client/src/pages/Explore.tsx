@@ -419,12 +419,16 @@ export default function Explore() {
             </button>
           </div>
           
-          <TagsMenu 
-            tags={['hiking', 'denver', 'tech', 'coffee', 'music', 'art', 'fitness', 'reading']} 
-            activeTag={null} 
-            onTagSelect={(t) => console.log(t)} 
-            theme={theme}
-          />
+          <div className={`mx-4 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] flex items-center overflow-hidden focus-within:ring-1 ring-${theme.primary} transition-shadow h-[44px]`}>
+            <div className="pl-3.5 pr-2 flex items-center justify-center h-full">
+              <Search className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
+            </div>
+            <input 
+              type="text" 
+              placeholder="Search groups... e.g. Dance, Hiking, Yoga, Fishing" 
+              className="bg-transparent text-[13px] text-white placeholder:text-slate-500 h-full w-full outline-none truncate pr-3" 
+            />
+          </div>
           
           <SuggestedGroups title="Public" groups={publicGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
           <SuggestedGroups title="Private" groups={privateGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
