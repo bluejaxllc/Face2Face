@@ -800,13 +800,20 @@ export default function Explore() {
         {primaryMode === "list" && (
           <div className="w-full flex border-t border-slate-800/50 h-[44px]">
             <button 
+              onClick={() => setLocation("/")}
+              className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/30 cursor-pointer"
+            >
+              <span className="text-sm font-semibold tracking-wide text-slate-500 group-hover:text-white transition-colors">View map</span>
+            </button>
+            <div className="w-px bg-slate-800 self-center h-5" />
+            <button 
               onClick={() => setListTab("feed")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
               <span className={`text-sm font-semibold tracking-wide ${listTab === "feed" ? theme.text : "text-slate-500"}`}>
                 {modeCategory === 'business' ? 'Professionals' : modeCategory === 'friends' ? 'Local people' : 'View List'}
               </span>
-              {listTab === "feed" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
+              {listTab === "feed" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
             <div className="w-px bg-slate-800 self-center h-5" />
             <button 
@@ -814,7 +821,7 @@ export default function Explore() {
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
               <span className={`text-sm font-semibold tracking-wide ${listTab === "settings" ? theme.text : "text-slate-500"}`}>Settings</span>
-              {listTab === "settings" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full`} />}
+              {listTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
           </div>
         )}
