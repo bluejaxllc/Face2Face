@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flame, MapPin, Eye, Layers, Settings, ChevronDown, Heart, Handshake, Briefcase, Gauge } from "lucide-react";
+import { Flame, MapPin, Eye, Layers, Settings, ChevronDown, Heart, Handshake, Briefcase, Gauge, Tag } from "lucide-react";
 import { useLocation } from "wouter";
 import SettingsModal from "./SettingsModal";
 import { FilterOptions } from "./FilterDrawer";
@@ -245,11 +245,24 @@ export default function TopToolbar({
           >
             <div className="flex flex-col gap-1.5 mb-2">
               {items.map(({ key, label }) => {
-                const isOn = (filterOptions as any)[key] !== false;
+                const isOn = key === "showAll"
+                  ? items.filter(i => i.key !== "showAll").every(i => (filterOptions as any)[i.key] !== false)
+                  : (filterOptions as any)[key] !== false;
                 return (
                   <button
                     key={key}
-                    onClick={() => onFilterChange({ ...filterOptions, [key]: !isOn })}
+                    onClick={() => {
+                      if (key === "showAll") {
+                        // Toggle all items on
+                        const allOn = items.filter(i => i.key !== "showAll").every(i => (filterOptions as any)[i.key] !== false);
+                        const updates: any = { ...filterOptions };
+                        items.forEach(i => { if (i.key !== "showAll") updates[i.key] = !allOn; });
+                        updates.showAll = !allOn;
+                        onFilterChange(updates);
+                      } else {
+                        onFilterChange({ ...filterOptions, [key]: !isOn });
+                      }
+                    }}
                     className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg hover:bg-white/5 transition-all duration-200"
                   >
                     <span className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
@@ -274,21 +287,54 @@ export default function TopToolbar({
                 );
               })}
             </div>
+            {/* Age Range */}
+            <div className="border-t border-slate-700/50 pt-2 mt-1">
+              <span className="text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1.5 block text-center">Age Range</span>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  value={filterOptions.ageRange[0]}
+                  min={18}
+                  max={80}
+                  aria-label="Minimum age"
+                  onChange={(e) => {
+                    const val = Math.min(80, Math.max(18, parseInt(e.target.value) || 18));
+                    onFilterChange({ ...filterOptions, ageRange: [val, Math.max(val, filterOptions.ageRange[1])] });
+                  }}
+                  className="bg-slate-950/80 border border-white/10 rounded-md px-2 py-1.5 text-white font-bold text-center outline-none focus:border-slate-500 transition-colors flex-1"
+                  style={{ fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+                />
+                <span className="text-slate-500 text-xs font-bold">—</span>
+                <input
+                  type="number"
+                  value={filterOptions.ageRange[1]}
+                  min={18}
+                  max={80}
+                  aria-label="Maximum age"
+                  onChange={(e) => {
+                    const val = Math.min(80, Math.max(18, parseInt(e.target.value) || 80));
+                    onFilterChange({ ...filterOptions, ageRange: [Math.min(val, filterOptions.ageRange[0]), val] });
+                  }}
+                  className="bg-slate-950/80 border border-white/10 rounded-md px-2 py-1.5 text-white font-bold text-center outline-none focus:border-slate-500 transition-colors flex-1"
+                  style={{ fontSize: "13px", MozAppearance: "textfield", WebkitAppearance: "none" } as any}
+                />
+              </div>
+            </div>
             <button
               onClick={() => setShowFilters(false)}
               className={`w-full py-1.5 rounded-lg ${accentBg} text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 mb-2`}
             >
               Set
             </button>
-            {/* Tag search */}
+            {/* Browse Tags button */}
             <div className="border-t border-slate-700/50 pt-2">
-              <input
-                type="text"
-                placeholder="Tag search"
-                value={(filterOptions as any).tagSearch || ''}
-                onChange={(e) => onFilterChange({ ...filterOptions, tagSearch: e.target.value } as any)}
-                className="w-full bg-slate-950/80 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 outline-none focus:border-slate-500 transition-colors duration-200"
-              />
+              <button
+                onClick={() => { setShowFilters(false); navigate('/explore'); }}
+                className={`w-full flex items-center justify-center gap-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/40 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200`}
+              >
+                <Tag className="h-3.5 w-3.5" />
+                Browse Tags
+              </button>
             </div>
           </div>
         );
