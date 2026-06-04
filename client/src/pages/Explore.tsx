@@ -274,9 +274,11 @@ export default function Explore() {
     if (tag && !allTags.includes(tag)) {
       setCustomTags(prev => [...prev, tag]);
       setSelectedTags(prev => [...prev, tag]);
-      toast({ title: "Tag created! 🏷️", description: `#${tag} added and selected.` });
+      setActiveLetter(tag[0].toUpperCase());
+      toast({ title: "Tag created! 🏷️", description: `#${tag} added — showing under "${tag[0].toUpperCase()}".` });
     } else if (allTags.includes(tag)) {
       if (!selectedTags.includes(tag)) toggleTag(tag);
+      setActiveLetter(tag[0].toUpperCase());
       toast({ title: "Tag selected", description: `#${tag} is now active.` });
     }
     setNewTagInput("");
