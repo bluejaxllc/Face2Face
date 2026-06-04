@@ -5,7 +5,7 @@ import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
 import ProfileCard from "@/components/ProfileCard";
 import Map from "@/components/Map";
-import { ChevronDown, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X, MapPin, Tag, Hash } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Search, Heart, ArrowLeft, Plus, ImagePlus, Camera, X, MapPin, Tag, Hash } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -211,6 +211,8 @@ export default function Explore() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagInput, setNewTagInput] = useState("");
   const [customTags, setCustomTags] = useState<string[]>([]);
+  const [activeLetter, setActiveLetter] = useState("A");
+  const alphabetRef = useRef<HTMLDivElement>(null);
 
   const MASTER_TAGS = [
     // Popular (will also appear at top)
@@ -468,7 +470,7 @@ export default function Explore() {
                className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
              >
                <Tag className="w-3 h-3" />
-               <span className="text-[10px] font-bold tracking-wider uppercase">Cloud</span>
+               <span className="text-[10px] font-bold tracking-wider uppercase">Tags</span>
              </button>
              <span className="text-slate-500 text-sm">[</span>
              <input 
@@ -632,7 +634,7 @@ export default function Explore() {
                className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
              >
                <Tag className="w-3 h-3" />
-               <span className="text-[10px] font-bold tracking-wider uppercase">Cloud</span>
+               <span className="text-[10px] font-bold tracking-wider uppercase">Tags</span>
              </button>
              <span className="text-slate-500 text-sm">[</span>
              <input 
@@ -809,14 +811,14 @@ export default function Explore() {
         </div>
       )}
 
-      {/* ═══════ Tag Cloud Modal ═══════ */}
+      {/* ═══════ Tags Modal ═══════ */}
       {tagCloudOpen && (
         <div className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-200">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/60" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
             <div className="flex items-center gap-2">
               <Tag className={`w-5 h-5 ${theme.text}`} />
-              <h2 className="text-white text-xl font-extrabold tracking-tight">Tag Cloud</h2>
+              <h2 className="text-white text-xl font-extrabold tracking-tight">Tags</h2>
             </div>
             <button 
               onClick={() => setTagCloudOpen(false)}
@@ -835,7 +837,7 @@ export default function Explore() {
                   <button 
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${theme.bg} text-white hover:opacity-80 transition-all active:scale-95`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-bold ${theme.bg} text-white hover:opacity-80 transition-all active:scale-95`}
                   >
                     #{tag}
                     <X className="w-3 h-3" />
@@ -845,11 +847,11 @@ export default function Explore() {
             </div>
           )}
 
-          {/* Scrollable Tag Content */}
+          {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto pb-24">
             {/* Popular Section */}
             <div className="px-5 pt-5 pb-4">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
                 <span className="text-amber-400">★</span> Popular
               </p>
               <div className="flex flex-wrap gap-2">
@@ -857,7 +859,7 @@ export default function Explore() {
                   <button 
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all active:scale-95 ${
+                    className={`px-3.5 py-2 rounded-full text-[14px] font-semibold border transition-all active:scale-95 ${
                       selectedTags.includes(tag) 
                         ? `${theme.bg} text-white border-transparent shadow-lg` 
                         : 'bg-slate-800/60 text-slate-300 border-slate-700/50 hover:border-slate-600'
@@ -869,31 +871,68 @@ export default function Explore() {
               </div>
             </div>
 
-            {/* A-Z Sections */}
-            {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
-              const letterTags = allTags.filter(t => t[0].toUpperCase() === letter);
-              if (letterTags.length === 0) return null;
-              return (
-                <div key={letter} className="px-5 pb-3">
-                  <p className={`text-[11px] font-extrabold uppercase tracking-widest mb-2 ${theme.text} opacity-70`}>{letter}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {letterTags.map(tag => (
-                      <button 
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all active:scale-95 ${
-                          selectedTags.includes(tag) 
-                            ? `${theme.bg} text-white border-transparent` 
-                            : 'bg-slate-800/40 text-slate-400 border-slate-700/40 hover:text-white hover:border-slate-600'
+            {/* ── Alphabet Bar ── */}
+            <div className="px-3 pt-3 pb-2 border-t border-slate-800/40">
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 px-2">Browse A — Z</p>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => { if (alphabetRef.current) alphabetRef.current.scrollBy({ left: -120, behavior: 'smooth' }); }}
+                  className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-800/60 hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-400" />
+                </button>
+                <div ref={alphabetRef} className="flex-1 overflow-x-auto scrollbar-hide flex gap-0.5 scroll-smooth">
+                  {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
+                    const hasItems = allTags.some(t => t[0].toUpperCase() === letter);
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => hasItems && setActiveLetter(letter)}
+                        className={`shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-[15px] font-bold transition-all ${
+                          activeLetter === letter
+                            ? `${theme.bg} text-white shadow-lg`
+                            : hasItems 
+                              ? 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                              : 'text-slate-700 cursor-default'
                         }`}
                       >
-                        #{tag}
+                        {letter}
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+                <button 
+                  onClick={() => { if (alphabetRef.current) alphabetRef.current.scrollBy({ left: 120, behavior: 'smooth' }); }}
+                  className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-800/60 hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* ── Tags for Active Letter ── */}
+            <div className="px-5 pt-4 pb-6">
+              <p className={`text-[18px] font-extrabold uppercase tracking-wider mb-4 ${theme.text}`}>{activeLetter}</p>
+              <div className="flex flex-wrap gap-2">
+                {allTags.filter(t => t[0].toUpperCase() === activeLetter).length > 0 ? (
+                  allTags.filter(t => t[0].toUpperCase() === activeLetter).map(tag => (
+                    <button 
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3.5 py-2 rounded-full text-[14px] font-medium border transition-all active:scale-95 ${
+                        selectedTags.includes(tag) 
+                          ? `${theme.bg} text-white border-transparent shadow-lg` 
+                          : 'bg-slate-800/40 text-slate-300 border-slate-700/40 hover:text-white hover:border-slate-600'
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-slate-600 text-sm italic">No tags starting with {activeLetter}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Create Tag Bar — Fixed Bottom */}
@@ -907,7 +946,6 @@ export default function Explore() {
                 onChange={(e) => setNewTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
                 className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50"
-                style={{ focusRing: theme.primary } as any}
               />
               <button 
                 onClick={handleCreateTag}
