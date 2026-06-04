@@ -114,9 +114,10 @@ export default function Explore() {
   const [newGroup, setNewGroup] = useState({
     name: "",
     description: "",
-    type: "public" as "public" | "private",
+    type: "public" as "public" | "private" | "21+",
     maxMembers: "50",
     tags: "",
+    groupLeader: "",
     coverImage: "",
     overlayText: "",
     overlayColor: "#ffffff",
@@ -190,12 +191,14 @@ export default function Explore() {
     };
     if (newGroup.type === "public") {
       publicGroups.unshift(newGroupEntry);
+    } else if (newGroup.type === "21+") {
+      adultGroups.unshift(newGroupEntry);
     } else {
       privateGroups.unshift(newGroupEntry);
     }
     toast({ title: "Group Created! 🎉", description: `"${newGroup.name}" is now live. Share it with friends!` });
     setCreateGroupOpen(false);
-    setNewGroup({ name: "", description: "", type: "public", maxMembers: "50", tags: "", coverImage: "", overlayText: "", overlayColor: "#ffffff", overlayPosition: "center", overlaySize: "24" });
+    setNewGroup({ name: "", description: "", type: "public", maxMembers: "50", tags: "", groupLeader: "", coverImage: "", overlayText: "", overlayColor: "#ffffff", overlayPosition: "center", overlaySize: "24" });
     setGroupPhotos([]);
   };
 
@@ -1177,6 +1180,19 @@ export default function Explore() {
                     maxLength={200}
                   />
                 </div>
+                <div className="space-y-1">
+                  <span className={`text-xs font-black uppercase tracking-widest ${
+                    modeCategory === 'dating' ? 'text-pink-400' : modeCategory === 'business' ? 'text-blue-400' : 'text-emerald-400'
+                  }`}>Group Leader / Contact</span>
+                  <Input 
+                    value={newGroup.groupLeader}
+                    onChange={(e) => setNewGroup({...newGroup, groupLeader: e.target.value})}
+                    placeholder="e.g. Your name or username"
+                    className={`bg-slate-950/50 text-white text-sm font-bold h-10 rounded-lg placeholder:text-slate-600 ${
+                      modeCategory === 'dating' ? 'border-pink-500/20' : modeCategory === 'business' ? 'border-blue-500/20' : 'border-emerald-500/20'
+                    }`}
+                  />
+                </div>
               </div>
             </div>
 
@@ -1237,6 +1253,15 @@ export default function Explore() {
                         : 'bg-transparent text-slate-500 border-slate-700 hover:bg-slate-800'
                     }`}>
                     [ Private ]
+                  </button>
+                  <button
+                    onClick={() => setNewGroup({...newGroup, type: "21+"})}
+                    className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest border-2 transition-all cursor-pointer rounded-md ${
+                      newGroup.type === "21+" 
+                        ? `${modeCategory === 'dating' ? 'bg-pink-500/20 text-pink-400 border-pink-500' : modeCategory === 'business' ? 'bg-blue-500/20 text-blue-400 border-blue-500' : 'bg-emerald-500/20 text-emerald-400 border-emerald-500'} hover:opacity-80` 
+                        : 'bg-transparent text-slate-500 border-slate-700 hover:bg-slate-800'
+                    }`}>
+                    [ 21+ ]
                   </button>
                 </div>
               </div>
