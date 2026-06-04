@@ -660,6 +660,27 @@ export default function Explore() {
         </div>
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
+          <span className="font-bold tracking-wide">Age</span>
+          <div className="flex items-center">
+            <span className="text-slate-500 mr-2 text-sm">[</span>
+            <input 
+              type="text" 
+              value={listAgeMin}
+              onChange={(e) => setListAgeMin(e.target.value)}
+              className="bg-transparent w-6 text-center outline-none text-white font-medium"
+            />
+            <span className="text-slate-500 mx-1">-</span>
+            <input 
+              type="text" 
+              value={listAgeMax}
+              onChange={(e) => setListAgeMax(e.target.value)}
+              className="bg-transparent w-6 text-center outline-none text-white font-medium"
+            />
+            <span className="text-slate-500 ml-2 text-sm">]</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
           <span className="lowercase font-bold tracking-wide">tags</span>
           <div className="flex items-center gap-2">
              <button 
@@ -698,27 +719,6 @@ export default function Explore() {
             </div>
           </div>
         )}
-
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="font-bold tracking-wide">Age</span>
-          <div className="flex items-center">
-            <span className="text-slate-500 mr-2 text-sm">[</span>
-            <input 
-              type="text" 
-              value={listAgeMin}
-              onChange={(e) => setListAgeMin(e.target.value)}
-              className="bg-transparent w-6 text-center outline-none text-white font-medium"
-            />
-            <span className="text-slate-500 mx-1">-</span>
-            <input 
-              type="text" 
-              value={listAgeMax}
-              onChange={(e) => setListAgeMax(e.target.value)}
-              className="bg-transparent w-6 text-center outline-none text-white font-medium"
-            />
-            <span className="text-slate-500 ml-2 text-sm">]</span>
-          </div>
-        </div>
 
 
       </div>
