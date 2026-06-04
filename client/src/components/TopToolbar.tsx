@@ -332,7 +332,7 @@ export default function TopToolbar({
             </div>
             {/* Browse Tags button */}
             <button
-              onClick={() => { setShowFilters(false); navigate('/explore?tags=open'); }}
+              onClick={() => { setShowFilters(false); navigate('/explore?tags=open&from=map'); }}
               className="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/40 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 mt-2"
             >
               <Tag className="h-3.5 w-3.5" />

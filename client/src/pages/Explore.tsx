@@ -222,10 +222,14 @@ export default function Explore() {
   const alphabetRef = useRef<HTMLDivElement>(null);
 
   // Auto-open tags modal when navigated with ?tags=open
+  const cameFromMap = useRef(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('tags') === 'open') {
       setTagCloudOpen(true);
+      if (params.get('from') === 'map') {
+        cameFromMap.current = true;
+      }
       // Clean up the URL without reloading
       window.history.replaceState({}, '', window.location.pathname);
     }
@@ -935,6 +939,10 @@ export default function Explore() {
                 <button 
                   onClick={() => {
                     setTagCloudOpen(false);
+                    if (cameFromMap.current) {
+                      cameFromMap.current = false;
+                      setLocation('/map');
+                    }
                     toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
                   }}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 shadow-lg`}
@@ -943,7 +951,13 @@ export default function Explore() {
                 </button>
               )}
               <button 
-                onClick={() => setTagCloudOpen(false)}
+                onClick={() => {
+                  setTagCloudOpen(false);
+                  if (cameFromMap.current) {
+                    cameFromMap.current = false;
+                    setLocation('/map');
+                  }
+                }}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
               >
                 <X className="w-4 h-4 text-slate-400" />
@@ -1081,6 +1095,10 @@ export default function Explore() {
             <button 
               onClick={() => {
                 setTagCloudOpen(false);
+                if (cameFromMap.current) {
+                  cameFromMap.current = false;
+                  setLocation('/map');
+                }
                 if (selectedTags.length > 0) {
                   toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
                 }
