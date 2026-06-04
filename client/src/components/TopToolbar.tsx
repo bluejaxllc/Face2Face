@@ -320,22 +320,31 @@ export default function TopToolbar({
                 />
               </div>
             </div>
+            {/* Tag search */}
+            <div className="border-t border-slate-700/50 pt-2 mt-1">
+              <input
+                type="text"
+                placeholder="Search tags..."
+                value={(filterOptions as any).tagSearch || ''}
+                onChange={(e) => onFilterChange({ ...filterOptions, tagSearch: e.target.value } as any)}
+                className="w-full bg-slate-950/80 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 outline-none focus:border-slate-500 transition-colors duration-200"
+              />
+            </div>
+            {/* Browse Tags button */}
+            <button
+              onClick={() => { setShowFilters(false); navigate('/explore?tags=open'); }}
+              className="w-full flex items-center justify-center gap-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/40 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 mt-2"
+            >
+              <Tag className="h-3.5 w-3.5" />
+              Browse Tags
+            </button>
+            {/* Set button at the bottom */}
             <button
               onClick={() => setShowFilters(false)}
-              className={`w-full py-1.5 rounded-lg ${accentBg} text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 mb-2`}
+              className={`w-full py-1.5 rounded-lg ${accentBg} text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 mt-2`}
             >
               Set
             </button>
-            {/* Browse Tags button */}
-            <div className="border-t border-slate-700/50 pt-2">
-              <button
-                onClick={() => { setShowFilters(false); navigate('/explore?tags=open'); }}
-                className={`w-full flex items-center justify-center gap-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/40 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200`}
-              >
-                <Tag className="h-3.5 w-3.5" />
-                Browse Tags
-              </button>
-            </div>
           </div>
         );
       })()}
