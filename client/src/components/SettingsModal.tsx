@@ -467,20 +467,30 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
           </motion.div>
         </div>
 
-        {/* ── Save Button ── */}
+        {/* ── Cancel / Save Buttons ── */}
         <div className="relative z-10 px-6 pb-6 pt-2 border-t border-slate-800/40">
-          <motion.div whileTap={{ scale: 0.97 }}>
-            <Button
-              type="button" onClick={handleSave}
-              className="w-full h-12 rounded-xl font-bold text-sm tracking-wide text-white transition-all"
-              style={{
-                background: `linear-gradient(135deg, ${c.accent}, ${c.accent}cc)`,
-                boxShadow: `0 4px 20px ${c.glow}`,
-              }}
-            >
-              Save Settings
-            </Button>
-          </motion.div>
+          <div className="flex gap-3">
+            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+              <Button
+                type="button" onClick={onClose}
+                className="w-full h-12 rounded-xl font-bold text-sm tracking-wide text-slate-300 transition-all bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/40"
+              >
+                Cancel
+              </Button>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.97 }} className="flex-1">
+              <Button
+                type="button" onClick={handleSave}
+                className="w-full h-12 rounded-xl font-bold text-sm tracking-wide text-white transition-all"
+                style={{
+                  background: `linear-gradient(135deg, ${c.accent}, ${c.accent}cc)`,
+                  boxShadow: `0 4px 20px ${c.glow}`,
+                }}
+              >
+                Save Settings
+              </Button>
+            </motion.div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
