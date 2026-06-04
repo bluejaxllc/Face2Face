@@ -541,21 +541,48 @@ export default function Explore() {
           <span className="lowercase font-bold tracking-wide">tags</span>
           <div className="flex items-center gap-2">
              <button 
-               onClick={() => setTagCloudOpen(true)}
-               className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
-             >
-               <Tag className="w-3 h-3" />
-               <span className="text-[10px] font-bold tracking-wider uppercase">Tags</span>
-             </button>
-             <span className="text-slate-500 text-sm">[</span>
-             <input 
-               type="text" 
-               placeholder="Search"
-               value={groupTags}
-               onChange={(e) => setGroupTags(e.target.value)}
-               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-             />
-             <span className="text-slate-500 text-sm">]</span>
+                onClick={() => setTagCloudOpen(true)}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
+              >
+                <Tag className="w-3 h-3" />
+                <span className="text-[10px] font-bold tracking-wider uppercase">Tags</span>
+              </button>
+              <span className="text-slate-500 text-sm">[</span>
+              <input 
+                type="text" 
+                placeholder="Search"
+                value={groupTags}
+                onChange={(e) => setGroupTags(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && groupTags.trim()) {
+                    const tag = groupTags.trim().toLowerCase();
+                    if (!selectedTags.includes(tag)) {
+                      if (!allTags.includes(tag)) setCustomTags(prev => [...prev, tag]);
+                      setSelectedTags(prev => [...prev, tag]);
+                    }
+                    setGroupTags('');
+                    toast({ title: 'Tag added', description: `#${tag}` });
+                  }
+                }}
+                className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
+              />
+              <span className="text-slate-500 text-sm">]</span>
+              {groupTags.trim() && (
+                <button
+                  onClick={() => {
+                    const tag = groupTags.trim().toLowerCase();
+                    if (!selectedTags.includes(tag)) {
+                      if (!allTags.includes(tag)) setCustomTags(prev => [...prev, tag]);
+                      setSelectedTags(prev => [...prev, tag]);
+                    }
+                    setGroupTags('');
+                    toast({ title: 'Tag added', description: `#${tag}` });
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+                >
+                  Add
+                </button>
+              )}
           </div>
         </div>
       </div>
