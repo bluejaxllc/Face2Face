@@ -221,6 +221,16 @@ export default function Explore() {
   const [activeLetter, setActiveLetter] = useState("A");
   const alphabetRef = useRef<HTMLDivElement>(null);
 
+  // Auto-open tags modal when navigated with ?tags=open
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tags') === 'open') {
+      setTagCloudOpen(true);
+      // Clean up the URL without reloading
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   // Persist custom tags and selected tags
   useEffect(() => { localStorage.setItem('f2f_customTags', JSON.stringify(customTags)); }, [customTags]);
   useEffect(() => { localStorage.setItem('f2f_selectedTags', JSON.stringify(selectedTags)); }, [selectedTags]);

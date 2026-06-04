@@ -329,7 +329,7 @@ export default function TopToolbar({
             {/* Browse Tags button */}
             <div className="border-t border-slate-700/50 pt-2">
               <button
-                onClick={() => { setShowFilters(false); navigate('/explore'); }}
+                onClick={() => { setShowFilters(false); navigate('/explore?tags=open'); }}
                 className={`w-full flex items-center justify-center gap-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-600/40 text-slate-300 hover:text-white text-xs font-bold uppercase tracking-wider transition-all duration-200`}
               >
                 <Tag className="h-3.5 w-3.5" />
