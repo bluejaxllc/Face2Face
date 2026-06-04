@@ -874,12 +874,25 @@ export default function Explore() {
               <Tag className={`w-5 h-5 ${theme.text}`} />
               <h2 className="text-white text-xl font-extrabold tracking-tight">Tags</h2>
             </div>
-            <button 
-              onClick={() => setTagCloudOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
-            >
-              <X className="w-4 h-4 text-slate-400" />
-            </button>
+            <div className="flex items-center gap-2">
+              {selectedTags.length > 0 && (
+                <button 
+                  onClick={() => {
+                    setTagCloudOpen(false);
+                    toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
+                  }}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 shadow-lg`}
+                >
+                  Search ({selectedTags.length})
+                </button>
+              )}
+              <button 
+                onClick={() => setTagCloudOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+              >
+                <X className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
           </div>
 
           {/* Selected Tags Bar */}
@@ -990,8 +1003,8 @@ export default function Explore() {
           </div>
 
           {/* Create Tag Bar — Fixed Bottom */}
-          <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/60 px-5 py-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}>
-            <div className="flex items-center gap-2">
+          <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/60 px-5 py-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
+            <div className="flex items-center gap-2 mb-2">
               <Hash className={`w-4 h-4 ${theme.text} shrink-0`} />
               <input
                 type="text"
@@ -1009,6 +1022,17 @@ export default function Explore() {
                 Add
               </button>
             </div>
+            <button 
+              onClick={() => {
+                setTagCloudOpen(false);
+                if (selectedTags.length > 0) {
+                  toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
+                }
+              }}
+              className={`w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 shadow-lg`}
+            >
+              {selectedTags.length > 0 ? `Search ${selectedTags.length} Tag${selectedTags.length > 1 ? 's' : ''}` : 'Search'}
+            </button>
           </div>
         </div>
       )}
