@@ -522,32 +522,32 @@ export default function Explore() {
 
   const mockListProfiles = [
     { 
-      id: 801, username: "shay", firstName: "shay", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 27, city: "Denver (Jefferson co.)", quote: '"lover girl and caring"', seed: "p1", bio: "lover girl and caring", interests: "Concerts, Food", profilePhoto: "https://picsum.photos/seed/p1/200/200"
-    },
-    { 
-      id: 802, username: "aly", firstName: "Aly", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 30, city: "Byers", quote: '"Hello 😊"', seed: "p2", bio: "Hello 😊", interests: "Travel", profilePhoto: "https://picsum.photos/seed/p2/200/200"
-    },
-    { 
       id: 803, username: "kyniah", firstName: "kyniah", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 29, city: "Denver", quote: '"iykYK it\'s Simple 😌"', seed: "p3", bio: "iykYK it's Simple 😌", interests: "Hiking", profilePhoto: "https://picsum.photos/seed/p3/200/200"
-    },
-    { 
-      id: 804, username: "kia", firstName: "kia", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 22, city: "Colorado Springs", quote: '"Here for vibes, laughs, and snack..."', seed: "p4", bio: "Here for vibes, laughs, and snacks", interests: "Movies", profilePhoto: "https://picsum.photos/seed/p4/200/200"
+      age: 29, city: "Denver", distance: 0.3, quote: '"iykYK it\'s Simple 😌"', seed: "p3", bio: "iykYK it's Simple 😌", interests: "Hiking", profilePhoto: "https://picsum.photos/seed/p3/200/200"
     },
     { 
       id: 805, username: "aaliyah", firstName: "aaliyah", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 24, city: "Denver", quote: '"i\'m wood smoker and i like to ba..."', seed: "p5", bio: "i'm wood smoker and i like to bake", interests: "Cooking", profilePhoto: "https://picsum.photos/seed/p5/200/200"
+      age: 24, city: "Denver", distance: 0.7, quote: '"i\'m wood smoker and i like to ba..."', seed: "p5", bio: "i'm wood smoker and i like to bake", interests: "Cooking", profilePhoto: "https://picsum.photos/seed/p5/200/200"
     },
     { 
-      id: 806, username: "kaylin", firstName: "Kaylin", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 29, city: "Castle Rock", quote: '"Sarcasm, kindness, good vibes"', seed: "p6", bio: "Sarcasm, kindness, good vibes", interests: "Comedy", profilePhoto: "https://picsum.photos/seed/p6/200/200"
+      id: 801, username: "shay", firstName: "shay", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 27, city: "Denver (Jefferson co.)", distance: 1.2, quote: '"lover girl and caring"', seed: "p1", bio: "lover girl and caring", interests: "Concerts, Food", profilePhoto: "https://picsum.photos/seed/p1/200/200"
     },
     { 
       id: 807, username: "ladii", firstName: "ladii", lastName: "", category: "dating", sex: "female", isActive: true,
-      age: 28, city: "Aurora", quote: '"All about money it\'s all about me"', seed: "p7", bio: "All about money it's all about me", interests: "Business", profilePhoto: "https://picsum.photos/seed/p7/200/200"
+      age: 28, city: "Aurora", distance: 3.4, quote: '"All about money it\'s all about me"', seed: "p7", bio: "All about money it's all about me", interests: "Business", profilePhoto: "https://picsum.photos/seed/p7/200/200"
+    },
+    { 
+      id: 806, username: "kaylin", firstName: "Kaylin", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 29, city: "Castle Rock", distance: 8.5, quote: '"Sarcasm, kindness, good vibes"', seed: "p6", bio: "Sarcasm, kindness, good vibes", interests: "Comedy", profilePhoto: "https://picsum.photos/seed/p6/200/200"
+    },
+    { 
+      id: 802, username: "aly", firstName: "Aly", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 30, city: "Byers", distance: 14.2, quote: '"Hello 😊"', seed: "p2", bio: "Hello 😊", interests: "Travel", profilePhoto: "https://picsum.photos/seed/p2/200/200"
+    },
+    { 
+      id: 804, username: "kia", firstName: "kia", lastName: "", category: "dating", sex: "female", isActive: true,
+      age: 22, city: "Colorado Springs", distance: 22.1, quote: '"Here for vibes, laughs, and snack..."', seed: "p4", bio: "Here for vibes, laughs, and snacks", interests: "Movies", profilePhoto: "https://picsum.photos/seed/p4/200/200"
     },
   ];
 
@@ -598,7 +598,7 @@ export default function Explore() {
                   {p.category === 'business' ? (p.company || p.firstName) : p.firstName}
                 </h3>
                 <p className="text-slate-400 text-[14px] leading-snug mt-0.5 truncate">
-                  {p.age}, {p.city}
+                  {p.age}, {p.city} • <span className={theme.text}>{distanceUnit === 'km' ? (p.distance * 1.60934).toFixed(1) : p.distance} {distanceUnit}</span> away
                 </p>
                 <p className="text-slate-300/80 text-[14px] italic mt-1 leading-snug truncate">
                   {p.quote}
