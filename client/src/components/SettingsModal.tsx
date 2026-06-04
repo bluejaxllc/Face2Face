@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Eye, Map, MapPin, Satellite, Bell, Vibrate, Moon, Clock, Shield, ChevronRight, Wrench, Trash2, AlertTriangle, Flame } from "lucide-react";
+import { Settings, Eye, Map, MapPin, Satellite, Bell, Vibrate, Moon, Clock, Shield, ChevronRight, Wrench, Trash2, AlertTriangle, Flame, UserPen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Category = "dating" | "friends" | "business";
@@ -59,6 +59,7 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
 
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   const [category, setCategory] = useState<Category>(() =>
     (localStorage.getItem("f2f_activeCategory") as Category) || "dating"
@@ -245,6 +246,43 @@ export default function SettingsModal({ onClose, mapStyle = 'street', onToggleMa
                 </div>
                 <AnimatedToggle checked={item.state} onToggle={item.toggle} accent={c.accent} />
               </motion.div>
+            ))}
+          </motion.div>
+
+          {/* ═══ Quick Navigation ═══ */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="space-y-2 border-t border-slate-800/60 pt-5"
+          >
+            {[
+              { icon: UserPen, label: "Edit Profile", sub: "Update your photos, bio & details", route: "/profile" },
+              { icon: Shield, label: "Privacy & Safety", sub: "Block list, visibility & data controls", route: "/messages?tab=privacy" },
+            ].map((item, i) => (
+              <motion.button
+                key={item.label}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.14 + i * 0.05 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onClose(); navigate(item.route); }}
+                className="flex items-center justify-between w-full rounded-xl px-4 py-3 transition-colors group"
+                style={{
+                  background: "rgba(15,23,42,0.5)",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(148,163,184,0.08)",
+                }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <item.icon className={`w-4 h-4 ${c.text} flex-shrink-0`} />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-slate-200">{item.label}</p>
+                    <p className="text-[10px] text-slate-500">{item.sub}</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors" />
+              </motion.button>
             ))}
           </motion.div>
 
