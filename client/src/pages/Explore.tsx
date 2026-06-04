@@ -423,6 +423,34 @@ export default function Explore() {
             <span className="text-[10px] text-slate-500 font-medium">of your location</span>
           </div>
 
+          {/* ── Active Tags Bar ── */}
+          {selectedTags.length > 0 && (
+            <div className="px-4 py-2.5 bg-slate-900/60 border-b border-slate-800/40">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Tag className={`w-3 h-3 ${theme.text}`} />
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Active Tags ({selectedTags.length})</span>
+                <button
+                  onClick={() => setTagCloudOpen(true)}
+                  className={`ml-auto text-[10px] font-bold uppercase tracking-wider ${theme.text} hover:opacity-80 transition-opacity`}
+                >
+                  + Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${theme.bg} text-white hover:opacity-80 transition-all active:scale-95`}
+                  >
+                    #{tag}
+                    <X className="w-3 h-3" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="px-4 mt-4 mb-4 h-[52px]">
             <button 
               onClick={() => setCreateGroupOpen(true)}
@@ -591,6 +619,34 @@ export default function Explore() {
           </div>
           <span className="text-[10px] text-slate-500 font-medium">of your location</span>
         </div>
+
+        {/* ── Active Tags Bar ── */}
+        {selectedTags.length > 0 && (
+          <div className="px-4 py-2.5 bg-slate-900/60 border-b border-slate-800/40">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Tag className={`w-3 h-3 ${theme.text}`} />
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Active Tags ({selectedTags.length})</span>
+              <button
+                onClick={() => setTagCloudOpen(true)}
+                className={`ml-auto text-[10px] font-bold uppercase tracking-wider ${theme.text} hover:opacity-80 transition-opacity`}
+              >
+                + Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {selectedTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${theme.bg} text-white hover:opacity-80 transition-all active:scale-95`}
+                >
+                  #{tag}
+                  <X className="w-3 h-3" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
           {mockListProfiles.map((p, i) => (
             <div 
