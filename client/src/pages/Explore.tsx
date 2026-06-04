@@ -761,7 +761,7 @@ export default function Explore() {
               onClick={() => setGroupTab("list")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
-              <span className={`text-sm font-semibold tracking-wide ${groupTab === "list" ? theme.text : "text-slate-500"}`}>Groups List</span>
+              <span className={`text-sm font-semibold tracking-wide ${groupTab === "list" ? theme.text : "text-slate-500"}`}>Groups view</span>
               {groupTab === "list" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
             <div className="w-px bg-slate-800 self-center h-5" />
