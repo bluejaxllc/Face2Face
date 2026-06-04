@@ -208,11 +208,19 @@ export default function Explore() {
   const [listAgeMax, setListAgeMax] = useState("35");
   const [listDate, setListDate] = useState(false);
   const [tagCloudOpen, setTagCloudOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('f2f_selectedTags') || '[]'); } catch { return []; }
+  });
   const [newTagInput, setNewTagInput] = useState("");
-  const [customTags, setCustomTags] = useState<string[]>([]);
+  const [customTags, setCustomTags] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('f2f_customTags') || '[]'); } catch { return []; }
+  });
   const [activeLetter, setActiveLetter] = useState("A");
   const alphabetRef = useRef<HTMLDivElement>(null);
+
+  // Persist custom tags and selected tags
+  useEffect(() => { localStorage.setItem('f2f_customTags', JSON.stringify(customTags)); }, [customTags]);
+  useEffect(() => { localStorage.setItem('f2f_selectedTags', JSON.stringify(selectedTags)); }, [selectedTags]);
 
   const MASTER_TAGS = [
     // Popular (will also appear at top)
