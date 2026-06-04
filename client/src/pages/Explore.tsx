@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 
 
 type PrimaryMode = "groups" | "list";
-type GroupSubTab = "feed" | "settings";
+type GroupSubTab = "feed" | "list" | "settings";
 type ListSubTab = "feed" | "settings";
 
 import { useScrollSave } from "@/hooks/use-scroll-save";
@@ -420,6 +420,88 @@ export default function Explore() {
     );
   };
 
+  const renderGroupList = () => (
+    <div className="flex-1 overflow-y-auto w-full h-full text-slate-300 relative pb-20">
+      {/* Section: Public */}
+      <div className="px-5 pt-5 pb-2">
+        <p className={`text-[11px] font-bold uppercase tracking-[0.15em] ${theme.text} mb-3`}>Public Groups</p>
+      </div>
+      <div className="flex flex-col w-full divide-y divide-slate-800/60">
+        {publicGroups.map((g, i) => (
+          <div key={`pub-${i}`} className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group">
+            <div className="w-[56px] h-[56px] rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative group-hover:scale-105 transition-transform">
+              <img src={`https://picsum.photos/seed/${g.seed}/400/600`} alt={g.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
+              <h3 className="text-white text-[15px] font-semibold tracking-tight leading-snug">{g.name}</h3>
+              <p className="text-slate-400 text-[12px] leading-snug mt-0.5 truncate">
+                {g.members} members • {g.distance} away
+              </p>
+            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); toast({ title: "Joined!", description: `You joined ${g.name}.` }); }}
+              className={`px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm transition-transform active:scale-95 shrink-0 ${theme.bg} text-white hover:opacity-90`}
+            >
+              Join
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Section: Private */}
+      <div className="px-5 pt-6 pb-2">
+        <p className={`text-[11px] font-bold uppercase tracking-[0.15em] ${theme.text} mb-3`}>Private Groups</p>
+      </div>
+      <div className="flex flex-col w-full divide-y divide-slate-800/60">
+        {privateGroups.map((g, i) => (
+          <div key={`prv-${i}`} className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group">
+            <div className="w-[56px] h-[56px] rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative group-hover:scale-105 transition-transform">
+              <img src={`https://picsum.photos/seed/${g.seed}/400/600`} alt={g.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
+              <h3 className="text-white text-[15px] font-semibold tracking-tight leading-snug">{g.name}</h3>
+              <p className="text-slate-400 text-[12px] leading-snug mt-0.5 truncate">
+                {g.members} members • {g.distance} away
+              </p>
+            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); toast({ title: "Request Sent", description: "Waiting for admin approval." }); }}
+              className={`px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm transition-transform active:scale-95 shrink-0 bg-slate-800 ${theme.text} border border-slate-700/50 hover:bg-slate-700`}
+            >
+              Request
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Section: 21+ */}
+      <div className="px-5 pt-6 pb-2">
+        <p className={`text-[11px] font-bold uppercase tracking-[0.15em] ${theme.text} mb-3`}>21+ Groups</p>
+      </div>
+      <div className="flex flex-col w-full divide-y divide-slate-800/60">
+        {adultGroups.map((g, i) => (
+          <div key={`adult-${i}`} className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group">
+            <div className="w-[56px] h-[56px] rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative group-hover:scale-105 transition-transform">
+              <img src={`https://picsum.photos/seed/${g.seed}/400/600`} alt={g.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
+              <h3 className="text-white text-[15px] font-semibold tracking-tight leading-snug">{g.name}</h3>
+              <p className="text-slate-400 text-[12px] leading-snug mt-0.5 truncate">
+                {g.members} members • {g.distance} away
+              </p>
+            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); toast({ title: "Joined!", description: `You joined ${g.name}.` }); }}
+              className={`px-4 py-1.5 rounded-full text-[12px] font-bold shadow-sm transition-transform active:scale-95 shrink-0 ${theme.bg} text-white hover:opacity-90`}
+            >
+              Join
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderGroupSettings = () => (
     <div {...groupSettingsScroll} onScroll={groupSettingsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-24">
       <div className="flex flex-col w-full">
@@ -739,18 +821,14 @@ export default function Explore() {
                   try {
                     const parsed = JSON.parse(saved);
                     options = { ...parsed };
-                    // Reset ALL filters that begin with "show"
                     Object.keys(options).forEach(key => {
                       if (key.startsWith('show')) options[key] = false;
                     });
                   } catch (e) {}
                 }
-                
-                // Explicitly set all known top-toolbar show toggles to false
                 const explicitlyFalseKeys = ['showAll', 'showMen', 'showWomen', 'showDates', 'showHotspots', 'showNearby', 'showProfessionals', 'showRecruiters', 'showStartups', 'showFriendships', 'showBusiness', 'showDating'];
                 explicitlyFalseKeys.forEach(k => options[k] = false);
                 options.showGroups = true;
-                
                 localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
                 setLocation("/");
               }}
@@ -760,11 +838,19 @@ export default function Explore() {
             </button>
             <div className="w-px bg-slate-800 self-center h-5" />
             <button 
+              onClick={() => setGroupTab("list")}
+              className="flex-1 flex items-center justify-center relative transition-colors"
+            >
+              <span className={`text-sm font-semibold tracking-wide ${groupTab === "list" ? theme.text : "text-slate-500"}`}>Groups List</span>
+              {groupTab === "list" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${theme.bg} rounded-t-full`} />}
+            </button>
+            <div className="w-px bg-slate-800 self-center h-5" />
+            <button 
               onClick={() => setGroupTab("settings")}
               className="flex-1 flex items-center justify-center relative transition-colors"
             >
               <span className={`text-sm font-semibold tracking-wide ${groupTab === "settings" ? theme.text : "text-slate-500"}`}>Settings</span>
-              {groupTab === "settings" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${theme.bg} rounded-t-full shadow-[0_0_8px_rgba(0,0,0,0.6)]`} />}
+              {groupTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${theme.bg} rounded-t-full`} />}
             </button>
           </div>
         )}
@@ -799,7 +885,7 @@ export default function Explore() {
         style={{ top: ((primaryMode === "groups" && !activeCategory) || primaryMode === "list") ? "108px" : "64px", bottom: "60px" }}
       >
         {primaryMode === "groups" ? (
-          groupTab === "feed" ? renderGroupFeed() : renderGroupSettings()
+          groupTab === "feed" ? renderGroupFeed() : groupTab === "list" ? renderGroupList() : renderGroupSettings()
         ) : (
           listTab === "feed" ? renderListView() : renderListSettings()
         )}
