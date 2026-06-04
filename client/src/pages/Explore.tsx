@@ -381,28 +381,42 @@ export default function Explore() {
 
     return (
       <div {...groupsScroll} onScroll={groupsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 relative pb-20">
-        <div className="pt-8 pb-8">
-          <div className="px-4 mb-4 flex gap-3 z-10 h-[52px]">
-            <div className="w-[55%]">
-              <button 
-                onClick={() => setCreateGroupOpen(true)}
-                className={`w-full h-full bg-gradient-to-b ${theme.gradient} text-white font-extrabold px-4 rounded-2xl text-[16px] shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex items-center justify-center border ${theme.border} hover:scale-[1.02] active:scale-95 transition-transform`}
-              >
-                {modeCategory === 'business' ? 'Post opening' : modeCategory === 'friends' ? 'Start group' : 'Create dating group'}
-              </button>
-            </div>
-            
-            <div className={`flex-1 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] flex items-center overflow-hidden focus-within:ring-1 ring-${theme.primary} transition-shadow`}>
-              <div className="pl-3 pr-2 flex items-center justify-center h-full">
-                <Search className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
+        <div className="pt-2 pb-4">
+          {/* ── Distance Radius Indicator ── */}
+          <div className="sticky top-0 z-10 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60 px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className={`w-3.5 h-3.5 ${theme.text} shrink-0`} />
+              <span className="text-[12px] text-slate-400 font-medium">Groups within</span>
+              <div className="flex items-center gap-1">
+                <input 
+                  type="text" 
+                  value={groupDistance}
+                  onChange={(e) => setGroupDistance(e.target.value)}
+                  className={`bg-slate-800/80 border border-slate-700/50 rounded-md w-10 text-center text-[13px] font-bold text-white py-0.5 outline-none focus:ring-1 ring-${theme.primary} transition-shadow`}
+                />
+                <div className="flex items-center bg-slate-800/60 rounded-md border border-slate-700/40 overflow-hidden">
+                  <button 
+                    onClick={() => { if (groupDistanceUnit === 'km') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 0.621371) || 25)); } setGroupDistanceUnit("mi"); }} 
+                    className={`px-1.5 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${groupDistanceUnit === 'mi' ? `${theme.text} bg-slate-700/50` : 'text-slate-500'}`}
+                  >MI</button>
+                  <div className="w-px h-3 bg-slate-700/50" />
+                  <button 
+                    onClick={() => { if (groupDistanceUnit === 'mi') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 1.60934) || 40)); } setGroupDistanceUnit("km"); }} 
+                    className={`px-1.5 py-0.5 text-[10px] font-bold tracking-wider transition-colors ${groupDistanceUnit === 'km' ? `${theme.text} bg-slate-700/50` : 'text-slate-500'}`}
+                  >KM</button>
+                </div>
               </div>
-              
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="bg-transparent text-[13px] text-white placeholder:text-slate-500 h-full w-full outline-none truncate pr-3" 
-              />
             </div>
+            <span className="text-[10px] text-slate-500 font-medium">of your location</span>
+          </div>
+
+          <div className="px-4 mt-4 mb-4 h-[52px]">
+            <button 
+              onClick={() => setCreateGroupOpen(true)}
+              className={`w-full h-full bg-gradient-to-b ${theme.gradient} text-white font-extrabold px-4 rounded-2xl text-[16px] shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex items-center justify-center border ${theme.border} hover:scale-[1.02] active:scale-95 transition-transform`}
+            >
+              {modeCategory === 'business' ? 'Post opening' : modeCategory === 'friends' ? 'Start group' : 'Create dating group'}
+            </button>
           </div>
           
           <TagsMenu 
