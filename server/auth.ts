@@ -86,14 +86,23 @@ export async function setupAuth(app: Express) {
       // Don't return the password in the response
       const { password, ...userWithoutPassword } = user;
 
-      // Set session
-      if (req.session) {
+      // Regenerate session to prevent session fixation, then persist
+      req.session.regenerate((regenErr) => {
+        if (regenErr) {
+          console.error("Session regeneration error:", regenErr);
+          return res.status(500).json({ message: "Session error during registration" });
+        }
         req.session.userId = user.id;
-      }
-
-      res.status(201).json({
-        ...userWithoutPassword,
-        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Failed to persist session" });
+          }
+          res.status(201).json({
+            ...userWithoutPassword,
+            profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+          });
+        });
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -124,17 +133,29 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
 
-      // Set session
-      if (req.session) {
-        req.session.userId = user.id;
-      }
-
       // Don't return the password in the response
       const { password: _, ...userWithoutPassword } = user;
 
-      res.status(200).json({
-        ...userWithoutPassword,
-        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+      // Regenerate session (prevent session fixation) then explicitly save
+      // to ensure the session is flushed to the Postgres store before responding.
+      // Without save(), Railway's async environment can respond before the session
+      // write completes, causing every subsequent request to return 401.
+      req.session.regenerate((regenErr) => {
+        if (regenErr) {
+          console.error("Session regeneration error:", regenErr);
+          return res.status(500).json({ message: "Session error during login" });
+        }
+        req.session.userId = user.id;
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Failed to persist session" });
+          }
+          res.status(200).json({
+            ...userWithoutPassword,
+            profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+          });
+        });
       });
     } catch (error) {
       console.error("Login error:", error);

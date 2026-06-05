@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Star, Zap, EyeOff, Map, Loader2 } from 'lucide-react';
+import BottomNavigation from '@/components/BottomNavigation';
 
 export default function Store() {
   const { user } = useAuth();
@@ -37,13 +38,14 @@ export default function Store() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl pb-24">
-      <div className="text-center mb-10 mt-6">
-        <h1 className="text-4xl font-bold tracking-tight mb-2 text-primary">Face 2 Face Store</h1>
-        <p className="text-muted-foreground text-lg">Enhance your experience with premium features</p>
-      </div>
+    <>
+      <div className="container mx-auto p-4 max-w-4xl pb-24">
+        <div className="text-center mb-10 mt-6">
+          <h1 className="text-4xl font-bold tracking-tight mb-2 text-primary">Face 2 Face Store</h1>
+          <p className="text-muted-foreground text-lg">Enhance your experience with premium features</p>
+        </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
         {/* F2F+ Subscription */}
         <Card className={`relative overflow-hidden border-primary/50 shadow-lg ${user?.isPremium ? 'opacity-80' : ''}`}>
           {user?.isPremium && (
@@ -154,7 +156,9 @@ export default function Store() {
             </Button>
           </CardFooter>
         </Card>
+        </div>
       </div>
-    </div>
+      <BottomNavigation />
+    </>
   );
 }
