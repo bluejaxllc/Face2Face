@@ -89,7 +89,9 @@ export default function Explore() {
   // Sync with global category change
   useEffect(() => {
     const handleCatChange = (e: any) => {
-      if (e.detail?.category) {
+      if (typeof e.detail === 'string') {
+        setModeCategory(e.detail as CategoryKey);
+      } else if (e.detail?.category) {
         setModeCategory(e.detail.category);
       }
     };
@@ -97,7 +99,8 @@ export default function Explore() {
     return () => window.removeEventListener('f2f:categoryChange', handleCatChange as any);
   }, []);
 
-  const theme = CATEGORY_COLORS[modeCategory === 'friends' ? 'friendships' : (modeCategory as keyof typeof CATEGORY_COLORS) || 'other'];
+  const themeKey = modeCategory === 'friends' ? 'friendships' : (modeCategory as keyof typeof CATEGORY_COLORS);
+  const theme = CATEGORY_COLORS[themeKey] || CATEGORY_COLORS.other;
 
   // Sync sub-menu position to localStorage
   useEffect(() => {
