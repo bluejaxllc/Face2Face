@@ -845,12 +845,22 @@ async function setupAuth(app2) {
         dateOfBirth: userData.dateOfBirth ? new Date(userData.dateOfBirth) : null
       });
       const { password, ...userWithoutPassword } = user;
-      if (req.session) {
+      req.session.regenerate((regenErr) => {
+        if (regenErr) {
+          console.error("Session regeneration error:", regenErr);
+          return res.status(500).json({ message: "Session error during registration" });
+        }
         req.session.userId = user.id;
-      }
-      res.status(201).json({
-        ...userWithoutPassword,
-        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Failed to persist session" });
+          }
+          res.status(201).json({
+            ...userWithoutPassword,
+            profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+          });
+        });
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -874,13 +884,23 @@ async function setupAuth(app2) {
       if (!passwordMatch) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
-      if (req.session) {
-        req.session.userId = user.id;
-      }
       const { password: _, ...userWithoutPassword } = user;
-      res.status(200).json({
-        ...userWithoutPassword,
-        profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+      req.session.regenerate((regenErr) => {
+        if (regenErr) {
+          console.error("Session regeneration error:", regenErr);
+          return res.status(500).json({ message: "Session error during login" });
+        }
+        req.session.userId = user.id;
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Failed to persist session" });
+          }
+          res.status(200).json({
+            ...userWithoutPassword,
+            profilePhoto: user.profilePhoto ? `/api/users/${user.id}/photo` : null
+          });
+        });
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -2188,6 +2208,7 @@ if (!process.env.SESSION_SECRET) {
   process.env.SESSION_SECRET = "face2face-dev-secret";
 }
 var app = express2();
+app.set("trust proxy", 1);
 app.use(express2.json());
 app.use(express2.urlencoded({ extended: false }));
 var allowedOrigins = [

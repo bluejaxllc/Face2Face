@@ -38,13 +38,20 @@ export default function BottomNavigation() {
   });
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
-  // Fetch unread notifications
-  const { data: notifications = [] } = useQuery<any[]>({
-    queryKey: ["/api/notifications"],
+  // Fetch users with messages/bumps to get accurate unread counts for the Messages tab
+  const { data: connectedUsers = [] } = useQuery<any[]>({
+    queryKey: ["/api/bumps/users"],
     enabled: !!user,
     refetchInterval: 15000,
   });
-  const notifCount = notifications.filter((n: any) => !n.isRead).length;
+
+  // Calculate total unread messages + pending bumps
+  const notifCount = connectedUsers.reduce((total: number, u: any) => {
+    let add = 0;
+    if (u.unreadCount) add += u.unreadCount;
+    if (u.hasPendingReceivedBump) add += 1;
+    return total + add;
+  }, 0);
 
   const previousNotifCount = useRef(notifCount);
 

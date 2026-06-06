@@ -81,7 +81,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
           </Button>
 
           <p className="text-xs text-slate-400 text-center">
-            By continuing, you agree to our Terms of Service and Privacy Policy
+            By continuing, you agree to our <a href="/tos" className="underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Terms of Service</a> and <a href="/privacy" className="underline hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
           </p>
         </div>
       </DialogContent>
