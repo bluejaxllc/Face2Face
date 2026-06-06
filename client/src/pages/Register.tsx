@@ -207,14 +207,16 @@ export default function Register() {
   if (showVerification) {
     return (
       <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
-        {/* Dev Diagnostics Bypass Button */}
-        <button
-          onClick={() => navigate("/dev")}
-          className="absolute top-4 right-4 z-50 p-3 rounded-full bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 transition-colors shadow-lg"
-          aria-label="Developer Diagnostics"
-        >
-          <Gauge className="w-5 h-5 text-amber-400 animate-pulse" />
-        </button>
+        {/* Dev Diagnostics Bypass Button - Only in development */}
+        {import.meta.env.DEV && (
+          <button
+            onClick={() => navigate("/dev")}
+            className="absolute top-4 right-4 z-50 p-3 rounded-full bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 transition-colors shadow-lg"
+            aria-label="Developer Diagnostics"
+          >
+            <Gauge className="w-5 h-5 text-amber-400 animate-pulse" />
+          </button>
+        )}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -291,14 +293,16 @@ export default function Register() {
 
   return (
     <div className="auth-page min-h-screen flex flex-col relative overflow-hidden">
-      {/* Dev Diagnostics Bypass Button */}
-      <button
-        onClick={() => navigate("/dev")}
-        className="absolute top-4 right-4 z-50 p-3 rounded-full bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 transition-colors shadow-lg"
-        aria-label="Developer Diagnostics"
-      >
-        <Gauge className="w-5 h-5 text-amber-400 animate-pulse" />
-      </button>
+      {/* Dev Diagnostics Bypass Button - Only in development */}
+      {import.meta.env.DEV && (
+        <button
+          onClick={() => navigate("/dev")}
+          className="absolute top-4 right-4 z-50 p-3 rounded-full bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/80 transition-colors shadow-lg"
+          aria-label="Developer Diagnostics"
+        >
+          <Gauge className="w-5 h-5 text-amber-400 animate-pulse" />
+        </button>
+      )}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-4 md:py-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

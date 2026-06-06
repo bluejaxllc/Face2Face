@@ -263,11 +263,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) return;
 
-    // Use current host for websocket
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // For local dev, Vite runs on 5173 but API is on 5000. For production, it's the same host.
-    const host = window.location.port === '5173' ? 'localhost:5000' : window.location.host;
-    const wsUrl = `${protocol}//${host}/ws`;
+    // For local dev, Vite runs on 5173 but API is on 5000. 
+    // For production (both Vercel Web and Capacitor Native), WebSockets MUST hit the Railway backend.
+    const wsUrl = window.location.port === '5173' 
+      ? 'ws://localhost:5000/ws' 
+      : 'wss://face2face.icu/ws';
 
     const ws = new WebSocket(wsUrl);
 

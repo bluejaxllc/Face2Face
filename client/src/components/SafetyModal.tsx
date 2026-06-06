@@ -33,7 +33,7 @@ export default function SafetyModal({ isOpen, onAccept, isUpdating }: SafetyModa
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent
-                className="sm:max-w-md p-0 bg-slate-900 border border-slate-700/50 max-h-[90vh] overflow-y-auto"
+                className="sm:max-w-md p-0 bg-slate-900 border border-slate-700/50 max-h-[90vh] overflow-y-auto [&>button]:hidden"
                 onInteractOutside={(e) => { e.preventDefault(); }}
                 onEscapeKeyDown={(e) => { e.preventDefault(); }}
             >
