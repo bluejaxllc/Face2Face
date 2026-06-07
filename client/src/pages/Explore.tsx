@@ -560,6 +560,21 @@ export default function Explore() {
             </div>
           </div>
         </div>
+
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
+          <span className="lowercase font-bold tracking-wide">
+            {modeCategory === 'dating' ? 'dating groups' : modeCategory === 'friends' ? 'friends groups' : 'business groups'}
+          </span>
+          <div className="flex items-center">
+             <span className="text-slate-500 mr-2 text-sm">[</span>
+             <input 
+               type="text" 
+               placeholder="Search"
+               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
+             />
+             <span className="text-slate-500 ml-2 text-sm">]</span>
+          </div>
+        </div>
         
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
           <span className="lowercase font-bold tracking-wide">public</span>
