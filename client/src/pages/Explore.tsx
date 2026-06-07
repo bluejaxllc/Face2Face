@@ -974,6 +974,12 @@ export default function Explore() {
                     handleCreateTag();
                   }
                 }}
+                onFocus={(e) => {
+                  // On mobile, scroll input into view when keyboard opens
+                  setTimeout(() => {
+                    e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 300);
+                }}
                 className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50 min-w-0"
               />
               <button 
