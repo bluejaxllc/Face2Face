@@ -485,29 +485,49 @@ export default function Explore() {
             </div>
           </div>
           
-          {/* ── Category Subcategories ── */}
-          <div className="px-4 mt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className={`text-[11px] font-bold uppercase tracking-[0.15em] ${theme.text}`}>
-                {modeCategory === 'dating' ? '💕 Dating Groups' : modeCategory === 'friends' ? '👋 Friends Groups' : '💼 Business Groups'}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {(modeCategory === 'dating' 
-                ? ['Double Dates', 'Group Dates', 'Speed Dating', 'Blind Dates', 'Chaperoned Dates', 'Singles Mixers', 'Coffee Dates', 'Outdoor Dates', 'Fitness Dates', 'Dance Dates']
-                : modeCategory === 'friends'
-                ? ['Activity Groups', 'Hobby Groups', 'Sports Groups', 'Social Events', 'Adventure Groups', 'Gaming Groups', 'Book Clubs', 'Fitness Groups', 'Foodies', 'New In Town']
-                : ['Networking', 'Coworking', 'Mastermind Groups', 'Startup Founders', 'Mentorship', 'Industry Meetups', 'Side Hustle', 'Content Creators', 'Freelancers', 'Workshops']
-              ).map(sub => (
-                <button
-                  key={sub}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all active:scale-95 bg-slate-800/40 text-slate-300 border-slate-700/40 hover:text-white hover:border-slate-600`}
-                >
-                  {sub}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* ── Category Subcategories (same tile format as Public/Private/21+) ── */}
+          {(() => {
+            const subcategoryGroups = modeCategory === 'dating' 
+              ? [
+                  { name: 'Double Dates', seed: 'double-dates-f2f' },
+                  { name: 'Group Dates', seed: 'group-dates-f2f' },
+                  { name: 'Speed Dating', seed: 'speed-dating-f2f' },
+                  { name: 'Blind Dates', seed: 'blind-dates-f2f' },
+                  { name: 'Chaperoned Dates', seed: 'chaperoned-f2f' },
+                  { name: 'Singles Mixers', seed: 'singles-mixer-f2f' },
+                  { name: 'Coffee Dates', seed: 'coffee-dates-f2f' },
+                  { name: 'Outdoor Dates', seed: 'outdoor-dates-f2f' },
+                  { name: 'Fitness Dates', seed: 'fitness-dates-f2f' },
+                  { name: 'Dance Dates', seed: 'dance-dates-f2f' },
+                ]
+              : modeCategory === 'friends'
+              ? [
+                  { name: 'Activity Groups', seed: 'activity-groups-f2f' },
+                  { name: 'Hobby Groups', seed: 'hobby-groups-f2f' },
+                  { name: 'Sports Groups', seed: 'sports-groups-f2f' },
+                  { name: 'Social Events', seed: 'social-events-f2f' },
+                  { name: 'Adventure Groups', seed: 'adventure-f2f' },
+                  { name: 'Gaming Groups', seed: 'gaming-groups-f2f' },
+                  { name: 'Book Clubs', seed: 'book-clubs-f2f' },
+                  { name: 'Fitness Groups', seed: 'fitness-groups-f2f' },
+                  { name: 'Foodies', seed: 'foodies-f2f' },
+                  { name: 'New In Town', seed: 'new-in-town-f2f' },
+                ]
+              : [
+                  { name: 'Networking', seed: 'networking-f2f' },
+                  { name: 'Coworking', seed: 'coworking-f2f' },
+                  { name: 'Mastermind Groups', seed: 'mastermind-f2f' },
+                  { name: 'Startup Founders', seed: 'startups-f2f' },
+                  { name: 'Mentorship', seed: 'mentorship-f2f' },
+                  { name: 'Industry Meetups', seed: 'industry-f2f' },
+                  { name: 'Side Hustle', seed: 'sidehustle-f2f' },
+                  { name: 'Content Creators', seed: 'creators-f2f' },
+                  { name: 'Freelancers', seed: 'freelancers-f2f' },
+                  { name: 'Workshops', seed: 'workshops-f2f' },
+                ];
+            const sectionTitle = modeCategory === 'dating' ? 'Dating Groups' : modeCategory === 'friends' ? 'Friends Groups' : 'Business Groups';
+            return <SuggestedGroups title={sectionTitle} groups={subcategoryGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />;
+          })()}
 
           <SuggestedGroups title="Public" groups={publicGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
           <SuggestedGroups title="Private" groups={privateGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
