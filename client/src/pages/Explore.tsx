@@ -1083,7 +1083,7 @@ export default function Explore() {
 
             {/* ── Alphabet Bar ── */}
             <div className="px-3 pt-3 pb-2 border-t border-slate-800/40">
-              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 px-2">Browse A — Z</p>
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 px-2">Browse 0–9 · A — Z</p>
               <div className="flex items-center gap-1">
                 <button 
                   onClick={() => { if (alphabetRef.current) alphabetRef.current.scrollBy({ left: -120, behavior: 'smooth' }); }}
@@ -1092,6 +1092,25 @@ export default function Explore() {
                   <ChevronLeft className="w-4 h-4 text-slate-400" />
                 </button>
                 <div ref={alphabetRef} className="flex-1 overflow-x-auto scrollbar-hide flex gap-0.5 scroll-smooth">
+                  {/* 0-9 button */}
+                  {(() => {
+                    const hasNumeric = allTags.some(t => /^[0-9]/.test(t));
+                    return (
+                      <button
+                        key="0-9"
+                        onClick={() => hasNumeric && setActiveLetter('0-9')}
+                        className={`shrink-0 w-12 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold transition-all ${
+                          activeLetter === '0-9'
+                            ? `${theme.bg} text-white shadow-lg`
+                            : hasNumeric 
+                              ? 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                              : 'text-slate-700 cursor-default'
+                        }`}
+                      >
+                        0-9
+                      </button>
+                    );
+                  })()}
                   {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
                     const hasItems = allTags.some(t => t[0].toUpperCase() === letter);
                     return (
@@ -1125,7 +1144,9 @@ export default function Explore() {
               <p className={`text-[18px] font-extrabold uppercase tracking-wider mb-4 ${theme.text}`}>{activeLetter}</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {(() => {
-                  const letterTags = allTags.filter(t => t[0].toUpperCase() === activeLetter);
+                  const letterTags = activeLetter === '0-9' 
+                    ? allTags.filter(t => /^[0-9]/.test(t))
+                    : allTags.filter(t => t[0].toUpperCase() === activeLetter);
                   const filterText = newTagInput.trim().toLowerCase();
                   const filtered = filterText ? letterTags.filter(t => t.includes(filterText)) : letterTags;
                   return filtered.length > 0 ? filtered.map(tag => (
