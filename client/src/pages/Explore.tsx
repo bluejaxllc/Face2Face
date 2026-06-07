@@ -1080,21 +1080,25 @@ export default function Explore() {
                 onClick={() => {
                   if (newTagInput.trim()) {
                     const tag = newTagInput.trim().toLowerCase();
-                    if (allTags.includes(tag) && !selectedTags.includes(tag)) {
-                      toggleTag(tag);
+                    if (allTags.includes(tag)) {
+                      // Tag exists — add to filter
+                      if (!selectedTags.includes(tag)) {
+                        toggleTag(tag);
+                      }
                       setNewTagInput('');
-                    } else if (!allTags.includes(tag)) {
-                      handleCreateTag();
+                      toast({ title: `Filter added`, description: `#${tag} added to your filters` });
                     } else {
-                      setNewTagInput('');
+                      // Tag doesn't exist — tell user
+                      toast({ title: `No tag found`, description: `"${tag}" doesn't exist yet. Use + Create to make it.` });
                     }
                   } else if (selectedTags.length > 0) {
+                    // No text, but has selected tags — apply filters and close
                     setTagCloudOpen(false);
                     if (cameFromMap.current) {
                       cameFromMap.current = false;
                       setLocation('/map');
                     }
-                    toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
+                    toast({ title: `Filtering by ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
                   }
                 }}
                 className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
