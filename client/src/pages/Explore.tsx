@@ -1022,7 +1022,7 @@ export default function Explore() {
                     handleCreateTag();
                   }
                 }}
-                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 ${!newTagInput.trim() ? 'opacity-40' : ''}`}
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
               >
                 + Create
               </button>
