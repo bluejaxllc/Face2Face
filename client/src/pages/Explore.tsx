@@ -478,6 +478,30 @@ export default function Explore() {
             />
           </div>
           
+          {/* ── Category Subcategories ── */}
+          <div className="px-4 mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`text-[11px] font-bold uppercase tracking-[0.15em] ${theme.text}`}>
+                {modeCategory === 'dating' ? '💕 Dating Groups' : modeCategory === 'friends' ? '👋 Friends Groups' : '💼 Business Groups'}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(modeCategory === 'dating' 
+                ? ['Double Dates', 'Group Dates', 'Speed Dating', 'Blind Dates', 'Chaperoned Dates', 'Singles Mixers', 'Coffee Dates', 'Outdoor Dates', 'Fitness Dates', 'Dance Dates']
+                : modeCategory === 'friends'
+                ? ['Activity Groups', 'Hobby Groups', 'Sports Groups', 'Social Events', 'Adventure Groups', 'Gaming Groups', 'Book Clubs', 'Fitness Groups', 'Foodies', 'New In Town']
+                : ['Networking', 'Coworking', 'Mastermind Groups', 'Startup Founders', 'Mentorship', 'Industry Meetups', 'Side Hustle', 'Content Creators', 'Freelancers', 'Workshops']
+              ).map(sub => (
+                <button
+                  key={sub}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all active:scale-95 bg-slate-800/40 text-slate-300 border-slate-700/40 hover:text-white hover:border-slate-600`}
+                >
+                  {sub}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <SuggestedGroups title="Public" groups={publicGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
           <SuggestedGroups title="Private" groups={privateGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
           <SuggestedGroups title="21+" groups={adultGroups} theme={theme} onSeeAll={(title, groups) => setActiveCategory({ title, groups })} />
