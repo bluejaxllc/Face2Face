@@ -287,9 +287,11 @@ export default function Messages() {
   const [primaryMode, setPrimaryMode] = useState<PrimaryMode>(() =>
     (localStorage.getItem("f2f_messages_primaryMode") as PrimaryMode) || "bumps"
   );
-  const [bumpTab, setBumpTab] = useState<BumpSubTab>(() =>
-    (localStorage.getItem("f2f_messages_bumpTab") as BumpSubTab) || "sent"
-  );
+  const [bumpTab, setBumpTab] = useState<BumpSubTab>(() => {
+    const stored = localStorage.getItem("f2f_messages_bumpTab") as string;
+    const validTabs: BumpSubTab[] = ["sent", "received", "auto", "settings"];
+    return validTabs.includes(stored as BumpSubTab) ? (stored as BumpSubTab) : "sent";
+  });
 
   useEffect(() => {
     localStorage.setItem("f2f_messages_primaryMode", primaryMode);
