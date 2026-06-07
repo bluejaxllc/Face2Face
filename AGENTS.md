@@ -1,8 +1,3 @@
-QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
-/* QA FEEDBACK:
-Issues FoundLogic & Content FlawsContradictory Mobile Stack/Build Info: Under Known Issues, it states that the APK expires every 14 days from an "EAS build date". EAS (Expo Application Services) is exclusive to React Native/Expo. However, the Architecture, Deployment, and Known Issues sections all explicitly state that the mobile app is built using Capacitor (npx cap sync android && ./gradlew assembleDebug). A Capacitor Android project uses standard Gradle/Android Studio tools, not EAS. This will break an automated agent's understanding of the mobile deployment pipeline.Formatting & Syntax FlawsMalformed Markdown Checklist: In the Store Release Blockers section, the Privacy Policy line has a broken format due to an extra leading space:Markdown-  [ ] Privacy Policy at a live URL
-    It must be consistently formatted as `- [ ]` to render and parse correctly.
-Fix this, then delete this warning. */
 
 # Face 2 Face — Agent Working Agreement (AGENTS.md)
 
@@ -66,7 +61,6 @@ agent supervision. Each loop iteration:
 ## Known Issues (Pre-Audit)
 - Auth redirect disabled (intentional for now)
 - `face2face-mobile/` directory is empty (mobile is Capacitor-based, in `/android`)
-- APK expires every 14 days from EAS build date
 - Demo accounts prefixed `demo_` bypass 30-min location timeout
 
 ## Store Release Blockers
