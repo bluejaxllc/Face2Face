@@ -15,6 +15,10 @@ interface SuggestedGroupsProps {
 
 export default function SuggestedGroups({ title, groups, theme, onSeeAll }: SuggestedGroupsProps) {
   const textColor = theme?.text || "text-slate-300";
+
+  if (!groups || groups.length === 0) {
+    return null;
+  }
   
   return (
     <div className="mb-6">
@@ -30,9 +34,9 @@ export default function SuggestedGroups({ title, groups, theme, onSeeAll }: Sugg
           </button>
         )}
       </div>
-      <div className="flex gap-4 overflow-x-auto px-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden">
-        {groups.map((g, i) => (
-          <div key={i} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+      <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+        {groups.map((g) => (
+          <div key={g.seed || g.name} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
             <img 
               src={`https://picsum.photos/seed/${g.seed}/400/600`} 
               alt={g.name} 
@@ -40,12 +44,11 @@ export default function SuggestedGroups({ title, groups, theme, onSeeAll }: Sugg
               loading="lazy"
             />
             <div className="absolute inset-0 bg-slate-950/40 pointer-events-none transition-colors hover:bg-slate-950/50" />
-            <div className="absolute inset-0 flex items-center justify-center px-2 pointer-events-none text-center">
-              <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] break-words">{g.name}</h3>
+            <div className="absolute inset-0 flex items-center justify-center px-3 pointer-events-none text-center">
+              <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-4 overflow-hidden">{g.name}</h3>
             </div>
           </div>
         ))}
-        <div className="w-1 shrink-0 snap-end" />
       </div>
     </div>
   );
