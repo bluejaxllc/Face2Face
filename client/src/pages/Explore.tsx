@@ -1024,7 +1024,7 @@ export default function Explore() {
               {newTagInput.trim() && (
                 <button 
                   onClick={handleCreateTag}
-                  className="flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider bg-emerald-600 text-white hover:opacity-90 transition-all active:scale-95"
+                  className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
                 >
                   + Create "{newTagInput.trim()}"
                 </button>
