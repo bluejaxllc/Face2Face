@@ -998,9 +998,9 @@ export default function Messages() {
               >
                 <div className="flex items-center gap-2">
                   <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "bumps" ? "text-white" : "text-slate-500"}`}>Bumps</span>
-                  {placeholderBumps.length > 0 && (
+                  {placeholderBumpsReceived.length > 0 && (
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}>
-                      {placeholderBumps.length}
+                      {placeholderBumpsReceived.length}
                     </span>
                   )}
                 </div>
