@@ -458,24 +458,31 @@ export default function Explore() {
             </div>
           )}
 
-          <div className="px-4 mt-4 mb-4 h-[52px]">
-            <button 
-              onClick={() => setCreateGroupOpen(true)}
-              className={`w-full h-full bg-gradient-to-b ${theme.gradient} text-white font-extrabold px-4 rounded-2xl text-[16px] shadow-[0_8px_30px_rgba(0,0,0,0.3)] flex items-center justify-center border ${theme.border} hover:scale-[1.02] active:scale-95 transition-transform`}
-            >
-              {modeCategory === 'business' ? 'Post opening' : modeCategory === 'friends' ? 'Start group' : 'Create dating group'}
-            </button>
-          </div>
-          
-          <div className={`mx-4 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.6)] flex items-center overflow-hidden focus-within:ring-1 ring-${theme.primary} transition-shadow h-[44px]`}>
-            <div className="pl-3.5 pr-2 flex items-center justify-center h-full">
-              <Search className="w-4 h-4 text-slate-400" strokeWidth={2.5} />
-            </div>
+          {/* ── Search Input + Search/Create Buttons (matches Tags modal pattern) ── */}
+          <div className="px-4 mt-4 mb-2">
             <input 
               type="text" 
-              placeholder="Search groups... e.g. Dance, Hiking, Yoga, Fishing" 
-              className="bg-transparent text-[13px] text-white placeholder:text-slate-500 h-full w-full outline-none truncate pr-3" 
+              placeholder="Search or create a group..." 
+              className="w-full bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50 mb-2"
+              onFocus={(e) => {
+                setTimeout(() => {
+                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+              }}
             />
+            <div className="flex items-center gap-2">
+              <button 
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >
+                Search
+              </button>
+              <button 
+                onClick={() => setCreateGroupOpen(true)}
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >
+                + Create
+              </button>
+            </div>
           </div>
           
           {/* ── Category Subcategories ── */}
