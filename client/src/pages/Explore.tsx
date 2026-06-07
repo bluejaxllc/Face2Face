@@ -995,6 +995,44 @@ export default function Explore() {
             </div>
           </div>
 
+          {/* Search / Create Tag Bar — at top */}
+          <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-900/60">
+            <div className="flex items-center gap-2">
+              <Search className={`w-4 h-4 ${theme.text} shrink-0`} />
+              <input
+                type="text"
+                placeholder="Search or create a tag..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newTagInput.trim()) {
+                    handleCreateTag();
+                  }
+                }}
+                className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50"
+              />
+              {newTagInput.trim() && !allTags.includes(newTagInput.trim().toLowerCase()) && (
+                <button 
+                  onClick={handleCreateTag}
+                  className={`px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+                >
+                  + Create
+                </button>
+              )}
+              {newTagInput.trim() && allTags.includes(newTagInput.trim().toLowerCase()) && !selectedTags.includes(newTagInput.trim().toLowerCase()) && (
+                <button 
+                  onClick={() => {
+                    toggleTag(newTagInput.trim().toLowerCase());
+                    setNewTagInput('');
+                  }}
+                  className={`px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+                >
+                  + Add
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Selected Tags Bar */}
           {selectedTags.length > 0 && (
             <div className="px-5 py-3 border-b border-slate-800/40 bg-slate-900/50">
@@ -1015,26 +1053,32 @@ export default function Explore() {
           )}
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto pb-24">
+          <div className="flex-1 overflow-y-auto">
             {/* Popular Section */}
             <div className="px-5 pt-5 pb-4">
               <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
                 <span className="text-amber-400">★</span> Popular
               </p>
               <div className="flex flex-wrap gap-2">
-                {POPULAR_TAGS.map(tag => (
-                  <button 
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={`px-3.5 py-2 rounded-full text-[14px] font-semibold border transition-all active:scale-95 ${
-                      selectedTags.includes(tag) 
-                        ? `${theme.bg} text-white border-transparent shadow-lg` 
-                        : 'bg-slate-800/60 text-slate-300 border-slate-700/50 hover:border-slate-600'
-                    }`}
-                  >
-                    #{tag}
-                  </button>
-                ))}
+                {(() => {
+                  const filterText = newTagInput.trim().toLowerCase();
+                  const filtered = filterText ? POPULAR_TAGS.filter(t => t.includes(filterText)) : POPULAR_TAGS;
+                  return filtered.length > 0 ? filtered.map(tag => (
+                    <button 
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3.5 py-2 rounded-full text-[14px] font-semibold border transition-all active:scale-95 ${
+                        selectedTags.includes(tag) 
+                          ? `${theme.bg} text-white border-transparent shadow-lg` 
+                          : 'bg-slate-800/60 text-slate-300 border-slate-700/50 hover:border-slate-600'
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  )) : (
+                    <p className="text-slate-600 text-sm italic">No popular tags match "{filterText}"</p>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1080,13 +1124,16 @@ export default function Explore() {
             {/* ── Tags for Active Letter ── */}
             <div className="px-5 pt-4 pb-6">
               <p className={`text-[18px] font-extrabold uppercase tracking-wider mb-4 ${theme.text}`}>{activeLetter}</p>
-              <div className="flex flex-wrap gap-2">
-                {allTags.filter(t => t[0].toUpperCase() === activeLetter).length > 0 ? (
-                  allTags.filter(t => t[0].toUpperCase() === activeLetter).map(tag => (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {(() => {
+                  const letterTags = allTags.filter(t => t[0].toUpperCase() === activeLetter);
+                  const filterText = newTagInput.trim().toLowerCase();
+                  const filtered = filterText ? letterTags.filter(t => t.includes(filterText)) : letterTags;
+                  return filtered.length > 0 ? filtered.map(tag => (
                     <button 
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`px-3.5 py-2 rounded-full text-[14px] font-medium border transition-all active:scale-95 ${
+                      className={`px-3 py-1.5 rounded-full text-[13px] font-semibold border transition-all active:scale-95 ${
                         selectedTags.includes(tag) 
                           ? `${theme.bg} text-white border-transparent shadow-lg` 
                           : 'bg-slate-800/40 text-slate-300 border-slate-700/40 hover:text-white hover:border-slate-600'
@@ -1094,49 +1141,12 @@ export default function Explore() {
                     >
                       #{tag}
                     </button>
-                  ))
-                ) : (
-                  <p className="text-slate-600 text-sm italic">No tags starting with {activeLetter}</p>
-                )}
+                  )) : (
+                    <p className="text-slate-600 text-sm italic">{filterText ? `No tags matching "${filterText}"` : `No tags starting with ${activeLetter}`}</p>
+                  );
+                })()}
               </div>
             </div>
-          </div>
-
-          {/* Create Tag Bar — Fixed Bottom */}
-          <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/60 px-5 py-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Hash className={`w-4 h-4 ${theme.text} shrink-0`} />
-              <input
-                type="text"
-                placeholder="Create a new tag..."
-                value={newTagInput}
-                onChange={(e) => setNewTagInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
-                className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50"
-              />
-              <button 
-                onClick={handleCreateTag}
-                disabled={!newTagInput.trim()}
-                className={`px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white disabled:opacity-30 hover:opacity-90 transition-all active:scale-95`}
-              >
-                Add
-              </button>
-            </div>
-            <button 
-              onClick={() => {
-                setTagCloudOpen(false);
-                if (cameFromMap.current) {
-                  cameFromMap.current = false;
-                  setLocation('/map');
-                }
-                if (selectedTags.length > 0) {
-                  toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
-                }
-              }}
-              className={`w-full py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 shadow-lg`}
-            >
-              {selectedTags.length > 0 ? `Search ${selectedTags.length} Tag${selectedTags.length > 1 ? 's' : ''}` : 'Search'}
-            </button>
           </div>
         </div>
       )}
