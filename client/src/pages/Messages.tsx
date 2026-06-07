@@ -31,7 +31,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type PrimaryMode = "bumps" | "messages";
-type BumpSubTab = "list" | "settings";
+type BumpSubTab = "sent" | "received" | "passed" | "rejected" | "settings";
 type CategoryKey = "dating" | "friends" | "business";
 
 /* ═══════ API response types ═══════ */
@@ -114,12 +114,30 @@ const accentConfig: Record<CategoryKey, {
 };
 
 /* ═══════ Placeholder bumps ═══════ */
-const placeholderBumps = [
+const placeholderBumpsReceived = [
   { id: 1, name: "Sarah M.", initials: "SM", message: "Bumped you from 0.3 mi away!", time: "2m", sex: "female" },
   { id: 2, name: "Jake R.", initials: "JR", message: "Hey! Bumped you 👋", time: "15m", sex: "male" },
   { id: 3, name: "Mia L.", initials: "ML", message: "Wants to meet up!", time: "1h", sex: "female" },
   { id: 4, name: "Carlos D.", initials: "CD", message: "Bumped you twice!", time: "3h", sex: "male" },
   { id: 5, name: "Priya K.", initials: "PK", message: "Nearby bump!", time: "5h", sex: "female" },
+];
+
+const placeholderBumpsSent = [
+  { id: 6, name: "Olivia T.", initials: "OT", message: "You bumped from 0.2 mi", time: "5m", sex: "female" },
+  { id: 7, name: "Marcus W.", initials: "MW", message: "You bumped from 0.5 mi", time: "30m", sex: "male" },
+  { id: 8, name: "Emma S.", initials: "ES", message: "You bumped from 1.0 mi", time: "2h", sex: "female" },
+];
+
+const placeholderPassedBy = [
+  { id: 9, name: "Lily C.", initials: "LC", message: "Passed by 0.1 mi away", time: "10m", sex: "female" },
+  { id: 10, name: "Noah B.", initials: "NB", message: "Passed by 0.4 mi away", time: "25m", sex: "male" },
+  { id: 11, name: "Ava R.", initials: "AR", message: "Passed by 0.2 mi away", time: "1h", sex: "female" },
+  { id: 12, name: "Ethan P.", initials: "EP", message: "Passed by 0.3 mi away", time: "2h", sex: "male" },
+];
+
+const placeholderRejected = [
+  { id: 13, name: "Jordan F.", initials: "JF", message: "You passed on this bump", time: "1h", sex: "male" },
+  { id: 14, name: "Taylor H.", initials: "TH", message: "You passed on this bump", time: "4h", sex: "female" },
 ];
 
 /* ═══════ Placeholder messages ═══════ */
@@ -275,7 +293,7 @@ export default function Messages() {
     (localStorage.getItem("f2f_messages_primaryMode") as PrimaryMode) || "bumps"
   );
   const [bumpTab, setBumpTab] = useState<BumpSubTab>(() =>
-    (localStorage.getItem("f2f_messages_bumpTab") as BumpSubTab) || "list"
+    (localStorage.getItem("f2f_messages_bumpTab") as BumpSubTab) || "received"
   );
 
   useEffect(() => {
@@ -420,8 +438,8 @@ export default function Messages() {
     queryClient.invalidateQueries({ queryKey: ["/api/bumps/users"] });
   };
 
-  /* ═══════ Render: Bumps List ═══════ */
-  const renderBumpsList = () => (
+  /* ═══════ Render: Generic Bumps List ═══════ */
+  const renderBumpCards = (bumps: typeof placeholderBumpsReceived, sectionLabel: string, emptyText: string, actionLabel?: string) => (
     <div ref={bumpsScroll.ref} onScroll={bumpsScroll.onScroll} className="flex-1 overflow-y-auto w-full">
       {/* Section header */}
       <motion.div
@@ -433,11 +451,11 @@ export default function Messages() {
           <Zap className={accent.primary} style={{ width: 14, height: 14 }} />
         </div>
         <span className="text-slate-400 text-xs font-bold uppercase tracking-[0.15em]">
-          {placeholderBumps.length} Bumps Received
+          {bumps.length} {sectionLabel}
         </span>
       </motion.div>
 
-      {placeholderBumps.length === 0 ? (
+      {bumps.length === 0 ? (
         /* ─── Empty State ─── */
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -445,7 +463,7 @@ export default function Messages() {
           className="flex flex-col items-center justify-center pt-20 px-8"
         >
           <RadarPing accent={accentName} />
-          <h3 className="text-white font-bold text-lg mb-1">No bumps yet</h3>
+          <h3 className="text-white font-bold text-lg mb-1">{emptyText}</h3>
           <p className="text-slate-500 text-sm text-center mb-6">
             Head to the map and get close to people to start bumping!
           </p>
@@ -463,7 +481,7 @@ export default function Messages() {
       ) : (
         /* ─── Bump Cards ─── */
         <div className="flex flex-col gap-2 px-4 pb-4">
-          {placeholderBumps.map((bump, index) => (
+          {bumps.map((bump, index) => (
             <motion.div
               key={bump.id}
               initial={{ opacity: 0, y: 20 }}
@@ -504,15 +522,17 @@ export default function Messages() {
               </div>
 
               {/* Action button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.9 }}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl ${accent.bg} border border-current/10 transition-all ${accent.badgeText}`}
-                style={{ boxShadow: `0 0 16px ${accent.primaryHex}15` }}
-              >
-                <Zap style={{ width: 12, height: 12 }} />
-                <span className="font-bold" style={{ fontSize: 10, letterSpacing: "0.05em" }}>BUMP</span>
-              </motion.button>
+              {actionLabel && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl ${accent.bg} border border-current/10 transition-all ${accent.badgeText}`}
+                  style={{ boxShadow: `0 0 16px ${accent.primaryHex}15` }}
+                >
+                  <Zap style={{ width: 12, height: 12 }} />
+                  <span className="font-bold" style={{ fontSize: 10, letterSpacing: "0.05em" }}>{actionLabel}</span>
+                </motion.button>
+              )}
 
               {/* Swipe hint */}
               <ChevronRight className="w-4 h-4 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
@@ -1019,22 +1039,23 @@ export default function Messages() {
 
             {/* ═══════ Sub-tabs (Only visible in Bumps Mode) ═══════ */}
             {primaryMode === "bumps" && (
-              <div className="w-full flex border-t border-slate-800/50 h-[44px]">
-                <button
-                  onClick={() => setBumpTab("list")}
-                  className="flex-1 flex items-center justify-center relative transition-colors"
-                >
-                  <span className={`text-sm font-semibold tracking-wide ${bumpTab === "list" ? "text-white" : "text-slate-500"}`}>Bumps</span>
-                  {bumpTab === "list" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`} />}
-                </button>
-                <div className="w-px bg-slate-800 self-center h-5" />
-                <button
-                  onClick={() => setBumpTab("settings")}
-                  className="flex-1 flex items-center justify-center relative transition-colors"
-                >
-                  <span className={`text-sm font-semibold tracking-wide ${bumpTab === "settings" ? "text-white" : "text-slate-500"}`}>Settings</span>
-                  {bumpTab === "settings" && <div className={`absolute bottom-0 left-6 right-6 h-[2px] ${accent.indicator} rounded-t-full`} />}
-                </button>
+              <div className="w-full flex border-t border-slate-800/50 h-[44px] overflow-x-auto scrollbar-hide">
+                {(["sent", "received", "passed", "rejected", "settings"] as BumpSubTab[]).map((tab, i) => (
+                  <div key={tab} className="flex items-center">
+                    {i > 0 && <div className="w-px bg-slate-800 self-center h-5" />}
+                    <button
+                      onClick={() => setBumpTab(tab)}
+                      className="flex-1 flex items-center justify-center relative transition-colors px-3 min-w-fit"
+                    >
+                      <span className={`text-[13px] font-semibold tracking-wide whitespace-nowrap ${
+                        bumpTab === tab ? "text-white" : "text-slate-500"
+                      }`}>
+                        {tab === "sent" ? "Sent" : tab === "received" ? "Received" : tab === "passed" ? "Passed By" : tab === "rejected" ? "Rejected" : "Settings"}
+                      </span>
+                      {bumpTab === tab && <div className={`absolute bottom-0 left-3 right-3 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </motion.div>
@@ -1071,7 +1092,11 @@ export default function Messages() {
               className="h-full flex flex-col"
             >
               {primaryMode === "bumps" ? (
-                bumpTab === "list" ? renderBumpsList() : renderSettings()
+                bumpTab === "sent" ? renderBumpCards(placeholderBumpsSent, "Bumps Sent", "No bumps sent yet", "VIEW") :
+                bumpTab === "received" ? renderBumpCards(placeholderBumpsReceived, "Bumps Received", "No bumps yet", "BUMP") :
+                bumpTab === "passed" ? renderBumpCards(placeholderPassedBy, "Passed By", "No one passed by yet", "BUMP") :
+                bumpTab === "rejected" ? renderBumpCards(placeholderRejected, "Rejected", "No rejected bumps") :
+                renderSettings()
               ) : (
                 renderMessages()
               )}
