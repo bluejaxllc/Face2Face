@@ -994,17 +994,16 @@ export default function Explore() {
               <button 
                 onClick={() => {
                   if (newTagInput.trim()) {
-                    // If typed tag exists, add it to selected
                     const tag = newTagInput.trim().toLowerCase();
                     if (allTags.includes(tag) && !selectedTags.includes(tag)) {
                       toggleTag(tag);
                       setNewTagInput('');
                     } else if (!allTags.includes(tag)) {
-                      // Create it then add
                       handleCreateTag();
+                    } else {
+                      setNewTagInput('');
                     }
                   } else if (selectedTags.length > 0) {
-                    // No text typed, apply selected tags and close
                     setTagCloudOpen(false);
                     if (cameFromMap.current) {
                       cameFromMap.current = false;
@@ -1015,20 +1014,18 @@ export default function Explore() {
                 }}
                 className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
               >
-                {newTagInput.trim() 
-                  ? `Search "${newTagInput.trim()}"` 
-                  : selectedTags.length > 0 
-                    ? `Search ${selectedTags.length} Tag${selectedTags.length > 1 ? 's' : ''}` 
-                    : 'Search'}
+                Search
               </button>
-              {newTagInput.trim() && (
-                <button 
-                  onClick={handleCreateTag}
-                  className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
-                >
-                  + Create "{newTagInput.trim()}"
-                </button>
-              )}
+              <button 
+                onClick={() => {
+                  if (newTagInput.trim()) {
+                    handleCreateTag();
+                  }
+                }}
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 ${!newTagInput.trim() ? 'opacity-40' : ''}`}
+              >
+                + Create
+              </button>
             </div>
           </div>
 
