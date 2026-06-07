@@ -958,28 +958,24 @@ export default function Explore() {
       {/* ═══════ Tags Modal ═══════ */}
       {tagCloudOpen && (
         <div className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-200">
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/60" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
+          {/* Header with inline search */}
+          <div className="px-5 pt-4 pb-3 border-b border-slate-800/60" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
+            {/* Row 1: Tags label + search input + X close */}
             <div className="flex items-center gap-2">
-              <Tag className={`w-5 h-5 ${theme.text}`} />
-              <h2 className="text-white text-xl font-extrabold tracking-tight">Tags</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              {selectedTags.length > 0 && (
-                <button 
-                  onClick={() => {
-                    setTagCloudOpen(false);
-                    if (cameFromMap.current) {
-                      cameFromMap.current = false;
-                      setLocation('/map');
-                    }
-                    toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
-                  }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95 shadow-lg`}
-                >
-                  Search ({selectedTags.length})
-                </button>
-              )}
+              <Tag className={`w-5 h-5 ${theme.text} shrink-0`} />
+              <h2 className="text-white text-lg font-extrabold tracking-tight shrink-0">Tags</h2>
+              <input
+                type="text"
+                placeholder="Search or create..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newTagInput.trim()) {
+                    handleCreateTag();
+                  }
+                }}
+                className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50 min-w-0"
+              />
               <button 
                 onClick={() => {
                   setTagCloudOpen(false);
@@ -988,46 +984,49 @@ export default function Explore() {
                     setLocation('/map');
                   }
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors shrink-0"
               >
                 <X className="w-4 h-4 text-slate-400" />
               </button>
             </div>
-          </div>
-
-          {/* Search / Create Tag Bar — at top */}
-          <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-900/60">
-            <div className="flex items-center gap-2">
-              <Search className={`w-4 h-4 ${theme.text} shrink-0`} />
-              <input
-                type="text"
-                placeholder="Search or create a tag..."
-                value={newTagInput}
-                onChange={(e) => setNewTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newTagInput.trim()) {
-                    handleCreateTag();
+            {/* Row 2: Search + Create buttons */}
+            <div className="flex items-center gap-2 mt-2">
+              <button 
+                onClick={() => {
+                  if (newTagInput.trim()) {
+                    // If typed tag exists, add it to selected
+                    const tag = newTagInput.trim().toLowerCase();
+                    if (allTags.includes(tag) && !selectedTags.includes(tag)) {
+                      toggleTag(tag);
+                      setNewTagInput('');
+                    } else if (!allTags.includes(tag)) {
+                      // Create it then add
+                      handleCreateTag();
+                    }
+                  } else if (selectedTags.length > 0) {
+                    // No text typed, apply selected tags and close
+                    setTagCloudOpen(false);
+                    if (cameFromMap.current) {
+                      cameFromMap.current = false;
+                      setLocation('/map');
+                    }
+                    toast({ title: `Searching ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
                   }
                 }}
-                className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50"
-              />
-              {newTagInput.trim() && !allTags.includes(newTagInput.trim().toLowerCase()) && (
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >
+                {newTagInput.trim() 
+                  ? `Search "${newTagInput.trim()}"` 
+                  : selectedTags.length > 0 
+                    ? `Search ${selectedTags.length} Tag${selectedTags.length > 1 ? 's' : ''}` 
+                    : 'Search'}
+              </button>
+              {newTagInput.trim() && (
                 <button 
                   onClick={handleCreateTag}
-                  className={`px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+                  className="flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider bg-emerald-600 text-white hover:opacity-90 transition-all active:scale-95"
                 >
-                  + Create
-                </button>
-              )}
-              {newTagInput.trim() && allTags.includes(newTagInput.trim().toLowerCase()) && !selectedTags.includes(newTagInput.trim().toLowerCase()) && (
-                <button 
-                  onClick={() => {
-                    toggleTag(newTagInput.trim().toLowerCase());
-                    setNewTagInput('');
-                  }}
-                  className={`px-3 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
-                >
-                  + Add
+                  + Create "{newTagInput.trim()}"
                 </button>
               )}
             </div>
