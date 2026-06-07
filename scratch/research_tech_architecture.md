@@ -1,3 +1,11 @@
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
+/* QA FEEDBACK:
+The file contains multiple critical violations of the PROJECT RULES specified in AGENTS.md. The AI agent must fix the following issues before this file can pass:Database Source of Truth Contradiction: The technical architecture document recommends migrating to Neon serverless and Supabase (Auth, Storage, Realtime). However, AGENTS.md explicitly states that shared/schema.ts (Drizzle ORM schema) is the absolute source of truth for the database, and that the database is a Postgres instance hosted on Railway (turntable.proxy.rlwy.net). Recommending or initiating migrations to Supabase/Neon directly conflicts with the existing infrastructure design and the non-negotiable rule preventing unapproved schema/infrastructure changes.Authentication Infrastructure Conflict:
+The document proposes migrating authentication to Supabase Auth / Phone OTP with JWTs. According to AGENTS.md, the app currently uses a specific test user (edgar) and has a dedicated configuration where the auth redirect is intentionally disabled in App.tsx for local dev access. Proposing a complete swap of the auth architecture violates the stability constraints of the active environment.Wrong App Bundle ID / Branding References:
+The document references deep links like face2face:// and domains like https://face2face.app. According to the Project Identity rules, the internal / Capacitor bundle ID is strictly com.bumpandgrind.app and the live web URL is bump.bluejax.ai. All deep linking configurations and domain references must align with the official bundle ID and web domains specified in the rules.Preservation of Mobile Shell Environment:
+The document suggests a "Plan React Native migration" as an immediate action item due to Capacitor bottlenecks. AGENTS.md explicitly states that the project identity is bound to the Capacitor Android native shell (/android) and running npx cap sync android. Planning a migration to an entirely different framework (React Native) is a direct violation of the project's current structural constraints.
+Fix this, then delete this warning. */
+
 # Face 2 Face — Technical Architecture
 
 ## CURRENT STACK

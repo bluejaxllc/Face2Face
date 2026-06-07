@@ -19,6 +19,7 @@ server/              ← Express.js API
 shared/schema.ts     ← Drizzle ORM schema (source of truth for DB)
 android/             ← Capacitor Android native shell
 capacitor.config.ts  ← Mobile configuration
+face2face-mobile/    ← Deprecated (empty, use /android instead)
 ```
 
 ## Non-Negotiable Rules for All Agents

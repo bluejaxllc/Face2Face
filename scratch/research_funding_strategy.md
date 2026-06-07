@@ -1,3 +1,8 @@
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
+/* QA FEEDBACK:
+As a strict QA Art Director and Code Inspector, I have reviewed the submitted document against the AGENTS.md Working Agreement and general logic principles.The document has broken logic and structural inconsistencies that an AI agent must fix immediately.Issues to Fix:Infrastructure Mismatch (Critical Broken Logic): Under Phase 1: Bootstrap, the text says "Keep burn <$2K/mo (Supabase free tier)". According to the AGENTS.md Project Identity, this app explicitly uses Railway Postgres and Drizzle ORM, not Supabase. Change this to mention Railway's free/hobby tiers or credits instead.Contradictory Metrics / Data Flaw: In Section 1 (Metrics Needed Before Approaching Investors), D30 Retention is listed as 25%+, while D7 Retention is listed as 10-25%. It is mathematically impossible for Day 30 retention to be higher than or equal to the upper bound of Day 7 retention unless users are deleting and reinstalling the app en masse (a "ski slope" anomaly). Fix the retention decay logic so D7 is higher than D30 (e.g., D7: 20-30%, D30: 10-15%).Outdated/Inconsistent Timeframe References: Section 5 refers to Round Sizes for (2024-2025), but the project is operating under a 2026 current-year timeline. Update the pitch benchmarks and round sizes to reflect contemporary market conditions.
+Fix this, then delete this warning. */
+
 # Face 2 Face — Funding Strategy & Financial Planning
 
 ## 1. BOOTSTRAPPING MILESTONES

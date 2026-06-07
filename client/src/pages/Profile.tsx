@@ -13,7 +13,7 @@ import {
   Smile, Coffee, Zap, Shield, MessageSquare, 
   Navigation, Linkedin, ExternalLink, BookOpen, Play, 
   Users, CheckCircle, Flame, Music, Beer, Sun, Moon,
-  Activity, UserPlus, Palette, LogOut, Plus
+  Activity, UserPlus, Palette, LogOut, Plus, Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";

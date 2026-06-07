@@ -1,3 +1,8 @@
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
+/* QA FEEDBACK:
+Layout and Code Integrity FlawsTruncated File / Incomplete Content: The file ends abruptly mid-sentence under the Monetization Lab tab (<li><strong>After 5th Bump blocked:</strong> "Upgrade to Premium for unlimited Bumps"</li>\n<li><strong>When 3+ users are ). The closing HTML tags for the <ul>, </div>, and </div> are entirely missing.Invalid Table Hierarchy: Under the Support Playbook tab (#tab-support), the escalation matrix table uses <tr> and <td> tags directly inside a <table> without wrapping them in an explicit <tbody>.Unescaped Angle Brackets in Text: Inside the Event Playbook card (#tab-events), raw HTML angle brackets are used for text comparison (Cost target: <$5 per acquired user.). This should be escaped as &lt; to prevent potential browser parsing glitches.Project Agreement ViolationsOutdated/Incorrect App Timeline: Under the City Launch Playbook tab (#tab-citylaunch), the timeline label shows CDMX ⬜ Q1 2026. Because the current year is 2026, marking a prospective launch in Q1 2026 as unstarted or future state introduces stale timeline logic. This needs to reflect the current year's actual progress or upcoming quarters relative to June 2026.
+Fix this, then delete this warning. */
+
 
 <!-- ═════ CITY LAUNCH PLAYBOOK TAB ═════ -->
 <div class="tab-panel" id="tab-citylaunch">

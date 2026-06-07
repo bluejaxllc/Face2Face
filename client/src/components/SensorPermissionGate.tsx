@@ -230,16 +230,13 @@ export default function SensorPermissionGate({ children }: SensorPermissionGateP
         setPermissionGranted(true);
     };
 
-    if (permissionGranted) {
-        return <>{children}</>;
-    }
-
     const gradientCSS = `linear-gradient(135deg, ${accent.from}, ${accent.via}, ${accent.to})`;
 
     return (
         <>
             {children}
             <AnimatePresence>
+                {!permissionGranted && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -502,6 +499,7 @@ export default function SensorPermissionGate({ children }: SensorPermissionGateP
                         </motion.div>
                     )}
                 </motion.div>
+                )}
             </AnimatePresence>
         </>
     );

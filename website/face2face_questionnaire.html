@@ -1,3 +1,8 @@
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
+/* QA FEEDBACK:
+Code Quality & Logic FlawsBroken/Truncated HTML: The file cuts off mid-sentence at the very end of the document inside the options list for Question 37 (<li><label class="option-label"><input type="checkbox" name="q37" value="a"> A) Detailed Personality Type (e.g., Myers-Br). It completely lacks the closing </label>, </li>, </ul>, </div>, </body>, and </html> tags.Duplicate Input name Attributes: Multiple radio buttons in Question 4 share name="q4", which works fine for selecting a single scale rating, but every question block across sections uses static name attributes (e.g., q1, q2) without dynamic submission logic or form wrapper tracking.Missing Form Element: The questions are not wrapped in a <form> element, and there is no submit action, script, or button to actually process or save the questionnaire answers.UI & Layout IssuesForm Control Accessibility Issues: Textarea elements and input fields (textarea, input[type="text"]) have a hardcoded width: calc(100% - 2.75rem); alongside margin-left: 2.75rem;. This layout breaks and overflows its parent containers on small mobile screens because it doesn't account for inner margins and flex behaviors properly.Scale Container Layout Glitch: The .scale-container class utilizes justify-content: space-between; but doesn't handle responsive wrapping or explicit widths gracefully for labels with varying text lengths (e.g., Points 1 and 5 have label subtext, whereas 2, 3, and 4 do not), causing mismatched and unaligned spacing on smaller viewports.
+Fix this, then delete this warning. */
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

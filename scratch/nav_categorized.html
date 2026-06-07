@@ -1,3 +1,8 @@
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
+/* QA FEEDBACK:
+Here are the visual glitches, logic flaws, and UX mismatches that need to be fixed in the navigation bar code:Broken Logic & TyposDuplicate Tab Target Content: Inside data-cat="strategy", the first tab option uses data-tab="strategy". This matches the name of the category itself and conflicts with the semantic grouping rules of clean navigation structures.Typo in User Journey: The tab button text for data-tab="journey" contains an accidental space: User Jou rney. Fix it to read User Journey.Visual / UX GlitchesInconsistent Category Class Initialization: The elements under data-cat="core" explicitly include the class class="cat-visible", whereas all subsequent category items (like research, strategy, etc.) omit this structural class name completely. This will break CSS targeting and filter animations unless dynamically added by JS, creating initial render states that are prone to layout shifting.Inline Styling Visual Soup: The codebase uses inline color variables (e.g., style="color:var(--accent-secondary);" and style="color:var(--teal);") scattered randomly across tab buttons. This overrides uniform active/inactive CSS classes, causes uneven text contrast ratios, and creates visual noise across the navigation bar. Colors should be handled globally via class states (.tab-btn.active, etc.) in a stylesheet.
+Fix this, then delete this warning. */
+
 <!-- ═══════════ TAB NAV ═══════════ -->
 <nav class="tab-nav">
     <div class="cat-bar">

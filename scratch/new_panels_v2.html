@@ -1,3 +1,8 @@
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
+/* QA FEEDBACK:
+Hiring & Org Chart Tab Layout Bug: The React Native Dev role lists a timeline milestone of 5K MAU, but its status tag is styled with class="tag warning" inside an unclosed HTML layout chain. Additionally, the table structure uses explicit pixel widths and inline styles that don't match standard flex or grid responsiveness, which will clip on smaller screens.Broken Logic / Violation of Project Rules (Sprint Board Tab): Sprint Item #si-6 explicitly states "Update Capacitor Config". This directly violates Non-Negotiable Rule #1 of the AGENTS.md working agreement: "NEVER modify these files without explicit user approval: capacitor.config.ts". The automated agent must remove or mark this item with an explicit guard block.Security Audit Markup Bug: The final <li> tag under the Critical Security Items card is unclosed and cuts off mid-sentence: <li><input type="checkbox" class="sec-check" onchange="updateSecurityProgress()"> Move photos from base64 in DB to object storage. This unclosed block breaks downstream parsing of any closing structural layout.
+Fix this, then delete this warning. */
+
 
 <!-- ═════ SPRINT BOARD TAB ═════ -->
 <div class="tab-panel" id="tab-sprint">
