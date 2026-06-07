@@ -31,7 +31,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type PrimaryMode = "bumps" | "messages";
-type BumpSubTab = "sent" | "received" | "passed" | "rejected" | "settings";
+type BumpSubTab = "sent" | "received" | "auto" | "settings";
 type CategoryKey = "dating" | "friends" | "business";
 
 /* ═══════ API response types ═══════ */
@@ -128,16 +128,11 @@ const placeholderBumpsSent = [
   { id: 8, name: "Emma S.", initials: "ES", message: "You bumped from 1.0 mi", time: "2h", sex: "female" },
 ];
 
-const placeholderPassedBy = [
-  { id: 9, name: "Lily C.", initials: "LC", message: "Passed by 0.1 mi away", time: "10m", sex: "female" },
-  { id: 10, name: "Noah B.", initials: "NB", message: "Passed by 0.4 mi away", time: "25m", sex: "male" },
-  { id: 11, name: "Ava R.", initials: "AR", message: "Passed by 0.2 mi away", time: "1h", sex: "female" },
-  { id: 12, name: "Ethan P.", initials: "EP", message: "Passed by 0.3 mi away", time: "2h", sex: "male" },
-];
-
-const placeholderRejected = [
-  { id: 13, name: "Jordan F.", initials: "JF", message: "You passed on this bump", time: "1h", sex: "male" },
-  { id: 14, name: "Taylor H.", initials: "TH", message: "You passed on this bump", time: "4h", sex: "female" },
+const placeholderAutoBumps = [
+  { id: 9, name: "Lily C.", initials: "LC", message: "Auto-bumped 0.1 mi away", time: "10m", sex: "female" },
+  { id: 10, name: "Noah B.", initials: "NB", message: "Auto-bumped 0.4 mi away", time: "25m", sex: "male" },
+  { id: 11, name: "Ava R.", initials: "AR", message: "Auto-bumped 0.2 mi away", time: "1h", sex: "female" },
+  { id: 12, name: "Ethan P.", initials: "EP", message: "Auto-bumped 0.3 mi away", time: "2h", sex: "male" },
 ];
 
 /* ═══════ Placeholder messages ═══════ */
@@ -293,7 +288,7 @@ export default function Messages() {
     (localStorage.getItem("f2f_messages_primaryMode") as PrimaryMode) || "bumps"
   );
   const [bumpTab, setBumpTab] = useState<BumpSubTab>(() =>
-    (localStorage.getItem("f2f_messages_bumpTab") as BumpSubTab) || "received"
+    (localStorage.getItem("f2f_messages_bumpTab") as BumpSubTab) || "sent"
   );
 
   useEffect(() => {
@@ -1040,7 +1035,7 @@ export default function Messages() {
             {/* ═══════ Sub-tabs (Only visible in Bumps Mode) ═══════ */}
             {primaryMode === "bumps" && (
               <div className="w-full flex border-t border-slate-800/50 h-[44px] overflow-x-auto scrollbar-hide">
-                {(["sent", "received", "passed", "rejected", "settings"] as BumpSubTab[]).map((tab, i) => (
+                {(["sent", "received", "auto", "settings"] as BumpSubTab[]).map((tab, i) => (
                   <div key={tab} className="flex items-center">
                     {i > 0 && <div className="w-px bg-slate-800 self-center h-5" />}
                     <button
@@ -1050,7 +1045,7 @@ export default function Messages() {
                       <span className={`text-[13px] font-semibold tracking-wide whitespace-nowrap ${
                         bumpTab === tab ? "text-white" : "text-slate-500"
                       }`}>
-                        {tab === "sent" ? "Sent" : tab === "received" ? "Received" : tab === "passed" ? "Passed By" : tab === "rejected" ? "Rejected" : "Settings"}
+                        {tab === "sent" ? "Sent" : tab === "received" ? "Received" : tab === "auto" ? "Auto Bumps" : "Settings"}
                       </span>
                       {bumpTab === tab && <div className={`absolute bottom-0 left-3 right-3 h-[2px] ${accent.indicator} rounded-t-full`} />}
                     </button>
@@ -1094,8 +1089,7 @@ export default function Messages() {
               {primaryMode === "bumps" ? (
                 bumpTab === "sent" ? renderBumpCards(placeholderBumpsSent, "Bumps Sent", "No bumps sent yet", "VIEW") :
                 bumpTab === "received" ? renderBumpCards(placeholderBumpsReceived, "Bumps Received", "No bumps yet", "BUMP") :
-                bumpTab === "passed" ? renderBumpCards(placeholderPassedBy, "Passed By", "No one passed by yet", "BUMP") :
-                bumpTab === "rejected" ? renderBumpCards(placeholderRejected, "Rejected", "No rejected bumps") :
+                bumpTab === "auto" ? renderBumpCards(placeholderAutoBumps, "Auto Bumps", "No auto bumps yet", "VIEW") :
                 renderSettings()
               ) : (
                 renderMessages()
