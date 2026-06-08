@@ -53,6 +53,8 @@ interface ConversationPartner {
   } | null;
   unreadCount: number;
   hasPendingReceivedBump: boolean;
+  isRevealed?: boolean;
+  category?: string;
 }
 
 interface ChatMessage {
@@ -155,10 +157,10 @@ const placeholderBumpsPassed = [
 
 /* ═══════ Placeholder messages ═══════ */
 const placeholderMessages = [
-  { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "Today • 6:30 PM", unread: true, unreadCount: 3 },
-  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1 },
-  { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "Today • 5:30 PM", unread: false, unreadCount: 0 },
-  { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "Today • 3:30 PM", unread: false, unreadCount: 0 },
+  { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "Today • 6:30 PM", unread: true, unreadCount: 3, isRevealed: false, category: "friends" as string },
+  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string },
+  { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "Today • 5:30 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
+  { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "Today • 3:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
 ];
 
 /* ═══════ Helper: relative time ═══════ */
@@ -528,10 +530,15 @@ export default function Messages() {
         unread: c.unreadCount > 0,
         unreadCount: c.unreadCount,
         profilePhoto: c.profilePhoto,
+        isRevealed: c.isRevealed ?? false,
+        category: c.category || "friends",
       }));
     }
-    // Fallback to placeholders
-    return placeholderMessages;
+    // Fallback to placeholders (already typed with isRevealed and category)
+    return placeholderMessages.map((m) => ({
+      ...m,
+      profilePhoto: null as string | null,
+    }));
   }, [apiConversations]);
 
   /* ─── Unread counts ─── */
@@ -1280,134 +1287,233 @@ export default function Messages() {
   };
 
   /* ═══════ Render: Messages List ═══════ */
-  const renderMessages = () => (
-    <div ref={messagesScroll.ref} onScroll={messagesScroll.onScroll} className="flex-1 overflow-y-auto w-full">
-      {/* Search bar */}
+  /* ═══════ Contact section drill-down state ═══════ */
+  const [activeContactSection, setActiveContactSection] = useState<{
+    title: string;
+    key: "new" | "revealed" | "dates";
+  } | null>(null);
+
+  /* ═══════ Render: Contact Carousel Section ═══════ */
+  const renderContactCarousel = (
+    contacts: typeof messageList,
+    sectionLabel: string,
+    sectionKey: "new" | "revealed" | "dates",
+    actionLabel?: string
+  ) => (
+    <div>
+      {/* Section header with count + all button */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-4 pt-4 pb-3"
+        className="px-5 pt-5 pb-3 flex items-center justify-between"
       >
-        <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-800/50 backdrop-blur-sm">
-          <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
-          />
+        <div className="flex items-center gap-2.5">
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-[0.15em]">
+            {contacts.length} {sectionLabel}
+          </span>
         </div>
+        {contacts.length > 0 && (
+          <button
+            onClick={() => setActiveContactSection({ title: sectionLabel, key: sectionKey })}
+            className="flex flex-col items-center cursor-pointer group"
+          >
+            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+          </button>
+        )}
       </motion.div>
 
-      {filteredMessages.length === 0 ? (
-        /* ─── Empty State ─── */
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center pt-16 px-8"
-        >
-          <ChatBubble primaryHex={accent.primaryHex} />
-          <h3 className="text-white font-bold text-lg mb-1">No conversations yet</h3>
-          <p className="text-slate-500 text-sm text-center mb-6">
-            Bump someone nearby to start chatting!
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-6 py-2.5 rounded-xl ${accent.badge} text-white font-semibold text-sm shadow-lg ${accent.glow}`}
-          >
-            Start a Conversation
-          </motion.button>
-        </motion.div>
+      {contacts.length === 0 ? (
+        <p className="px-5 text-slate-600 text-sm italic pb-2">No {sectionLabel.toLowerCase()} yet</p>
       ) : (
-        /* ─── Message Cards ─── */
-        <div className="flex flex-col">
-          {filteredMessages.map((contact, index) => (
-            <motion.div
-              key={contact.id}
-              initial={{ opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() =>
-                openConversation({
-                  id: contact.id,
-                  name: contact.name,
-                  initials: contact.initials,
-                  profilePhoto: "profilePhoto" in contact ? (contact as any).profilePhoto : null,
-                })
-              }
-              className="flex items-center gap-3.5 px-5 py-3.5 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-800/30"
-            >
-              {/* Avatar + online indicator */}
-              <div className="relative flex-shrink-0">
-                <Avatar className="h-12 w-12 border border-slate-700/50 overflow-hidden">
-                  <img 
-                    src={contact.profilePhoto || `https://picsum.photos/seed/bump-${contact.id}/200/200`} 
-                    alt={contact.name} 
+        <div className="mb-2">
+          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+            {contacts.map((contact, index) => (
+              <motion.button
+                key={contact.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.06, duration: 0.3 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() =>
+                  openConversation({
+                    id: contact.id,
+                    name: contact.name,
+                    initials: contact.initials,
+                    profilePhoto: contact.profilePhoto,
+                  })
+                }
+                className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer"
+              >
+                <div className="w-full h-full flex items-center justify-center">
+                  <img
+                    src={contact.profilePhoto || `https://picsum.photos/seed/contact-${contact.id}/300/400`}
+                    alt={contact.name}
                     className="w-full h-full object-cover"
                   />
-                </Avatar>
-                {/* Online dot with pulse */}
-                <div className="absolute -bottom-0.5 -right-0.5">
-                  <div className="relative">
-                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-950" />
-                    <motion.div
-                      className="absolute inset-0 rounded-full bg-emerald-400"
-                      animate={{ scale: [1, 1.8], opacity: [0.5, 0] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                    />
+                </div>
+                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] text-white/80 font-bold">{contact.time}</span>
+                </div>
+                {contact.unread && contact.unreadCount > 0 && (
+                  <div className="absolute top-3 left-3">
+                    <div className={`min-w-[20px] h-[20px] rounded-full ${accent.badge} flex items-center justify-center`}>
+                      <span className="text-white text-[9px] font-bold px-1">{contact.unreadCount}</span>
+                    </div>
                   </div>
+                )}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{contact.name}</h3>
+                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] line-clamp-2">{contact.lastMsg}</p>
                 </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-0.5">
-                  <p
-                    className={`text-sm tracking-wide ${
-                      contact.unread ? "font-bold text-white" : "font-medium text-slate-300"
-                    }`}
-                  >
-                    {contact.name}
-                  </p>
-                  <span
-                    className={`flex-shrink-0 text-[11px] ${
-                      contact.unread ? `font-semibold ${accent.badgeText}` : "text-slate-500"
-                    }`}
-                  >
-                    {contact.time}
-                  </span>
-                </div>
-                <p
-                  className={`text-xs truncate ${
-                    contact.unread ? "text-slate-200 font-medium" : "text-slate-500"
-                  }`}
-                >
-                  {contact.lastMsg}
-                </p>
-              </div>
-
-              {/* Unread count badge */}
-              {contact.unread && contact.unreadCount > 0 && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 25, delay: index * 0.05 + 0.2 }}
-                  className={`min-w-[22px] h-[22px] rounded-full ${accent.badge} flex items-center justify-center flex-shrink-0`}
-                >
-                  <span className="text-white text-[10px] font-bold px-1.5">
-                    {contact.unreadCount}
-                  </span>
-                </motion.div>
-              )}
-            </motion.div>
-          ))}
+                {actionLabel && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                    <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>
+                      {actionLabel}
+                    </div>
+                  </div>
+                )}
+              </motion.button>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
+
+  /* ═══════ Render: Contact Section "All" List View ═══════ */
+  const renderContactCategoryList = () => {
+    if (!activeContactSection) return null;
+
+    const sectionContacts = activeContactSection.key === "new"
+      ? filteredMessages.filter(m => !m.isRevealed)
+      : activeContactSection.key === "dates"
+        ? filteredMessages.filter(m => m.isRevealed && m.category === "dating")
+        : filteredMessages.filter(m => m.isRevealed && m.category !== "dating");
+
+    return (
+      <div className="flex-1 overflow-y-auto w-full h-full text-slate-300 relative bg-slate-950 pb-20">
+        <div className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl">
+          <button onClick={() => setActiveContactSection(null)} className="mr-3 p-1 rounded-full hover:bg-slate-800/50 transition-colors">
+            <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
+          </button>
+          <h2 className="text-[20px] font-bold text-white tracking-tight capitalize">{activeContactSection.title}</h2>
+        </div>
+
+        <div className="px-4 pt-4 pb-2 bg-slate-950/80 backdrop-blur-sm sticky top-[64px] z-10">
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-800/50">
+            <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder={`Search ${activeContactSection.title.toLowerCase()}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
+          {sectionContacts.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 text-sm italic">No matching contacts found</div>
+          ) : (
+            sectionContacts.map((contact) => (
+              <div
+                key={contact.id}
+                onClick={() =>
+                  openConversation({
+                    id: contact.id,
+                    name: contact.name,
+                    initials: contact.initials,
+                    profilePhoto: contact.profilePhoto,
+                  })
+                }
+                className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group"
+              >
+                <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm">
+                  <img src={contact.profilePhoto || `https://picsum.photos/seed/contact-${contact.id}/200/200`} alt={contact.name} className="w-full h-full object-cover" />
+                </div>
+                <div className="ml-4 flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className={`text-sm tracking-wide ${contact.unread ? "font-bold text-white" : "font-medium text-slate-300"}`}>{contact.name}</p>
+                    <span className={`flex-shrink-0 text-[11px] ${contact.unread ? `font-semibold ${accent.badgeText}` : "text-slate-500"}`}>{contact.time}</span>
+                  </div>
+                  <p className={`text-xs truncate mt-0.5 ${contact.unread ? "text-slate-200 font-medium" : "text-slate-500"}`}>{contact.lastMsg}</p>
+                </div>
+                {contact.unread && contact.unreadCount > 0 && (
+                  <div className={`ml-3 min-w-[22px] h-[22px] rounded-full ${accent.badge} flex items-center justify-center flex-shrink-0`}>
+                    <span className="text-white text-[10px] font-bold px-1.5">{contact.unreadCount}</span>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  /* ═══════ Render: Messages (Carousel Layout) ═══════ */
+  const renderMessages = () => {
+    const newContacts = filteredMessages.filter(m => !m.isRevealed);
+    const revealedContacts = filteredMessages.filter(m => m.isRevealed && m.category !== "dating");
+    const dates = filteredMessages.filter(m => m.isRevealed && m.category === "dating");
+
+    if (activeContactSection) {
+      return renderContactCategoryList();
+    }
+
+    return (
+      <div ref={messagesScroll.ref} onScroll={messagesScroll.onScroll} className="flex-1 overflow-y-auto w-full pb-8">
+        {/* Search bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-4 pt-4 pb-2"
+        >
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-800/50 backdrop-blur-sm">
+            <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
+            />
+          </div>
+        </motion.div>
+
+        {filteredMessages.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center pt-16 px-8"
+          >
+            <ChatBubble primaryHex={accent.primaryHex} />
+            <h3 className="text-white font-bold text-lg mb-1">No conversations yet</h3>
+            <p className="text-slate-500 text-sm text-center mb-6">Bump someone nearby to start chatting!</p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2.5 rounded-xl ${accent.badge} text-white font-semibold text-sm shadow-lg ${accent.glow}`}
+            >
+              Start a Conversation
+            </motion.button>
+          </motion.div>
+        ) : (
+          <>
+            {newContacts.length > 0 && renderContactCarousel(newContacts, "new contacts", "new", "CHAT")}
+            {revealedContacts.length > 0 && renderContactCarousel(revealedContacts, "revealed contacts", "revealed")}
+            {dates.length > 0 && renderContactCarousel(dates, "dates", "dates")}
+            {newContacts.length === 0 && revealedContacts.length === 0 && dates.length === 0 && (
+              <div className="text-center py-16 text-slate-500 text-sm italic">No conversations match your search.</div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <PageTransition className="h-screen w-full page-dark relative overflow-hidden bg-slate-950">
@@ -1516,7 +1622,7 @@ export default function Messages() {
         style={{
           top: activeConversation 
             ? "0px" 
-            : (primaryMode === "bumps" && !activeBumpCategory) 
+            : ((primaryMode === "bumps" && !activeBumpCategory) || (primaryMode === "messages" && !activeContactSection))
               ? "108px" 
               : "64px",
           bottom: activeConversation ? "0px" : "60px",

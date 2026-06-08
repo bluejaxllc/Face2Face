@@ -1939,6 +1939,9 @@ async function registerRoutes(app2) {
         const unreadCount = await storage.getUnreadMessageCount(req.session.userId, u.id);
         const bumps2 = await storage.getBumpsBetweenUsers(req.session.userId, u.id);
         const hasPendingReceivedBump = bumps2.some((b) => b.bumpedUserId === req.session.userId && b.status === "pending");
+        const isRevealed = bumps2.some((b) => b.status === "revealed");
+        const rawCategory = u.category || "friendships";
+        const category = rawCategory === "friendships" ? "friends" : rawCategory;
         return {
           id: u.id,
           firstName: u.firstName,
@@ -1950,7 +1953,9 @@ async function registerRoutes(app2) {
             senderId: lastMsg.senderId
           } : null,
           unreadCount,
-          hasPendingReceivedBump
+          hasPendingReceivedBump,
+          isRevealed,
+          category
         };
       }));
       usersWithDetails.sort((a, b) => {

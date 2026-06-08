@@ -589,6 +589,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const bumps = await storage.getBumpsBetweenUsers(req.session!.userId!, u.id);
         const hasPendingReceivedBump = bumps.some(b => b.bumpedUserId === req.session!.userId! && b.status === "pending");
+        const isRevealed = bumps.some(b => b.status === "revealed");
+
+        // Map DB category ("friendships") to front-end CategoryKey ("friends")
+        const rawCategory = u.category || "friendships";
+        const category = rawCategory === "friendships" ? "friends" : rawCategory;
 
         return {
           id: u.id,
@@ -601,7 +606,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             senderId: lastMsg.senderId
           } : null,
           unreadCount,
-          hasPendingReceivedBump
+          hasPendingReceivedBump,
+          isRevealed,
+          category,
         };
       }));
 
