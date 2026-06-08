@@ -1508,7 +1508,7 @@ export default function Messages() {
             <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
@@ -1579,7 +1579,7 @@ export default function Messages() {
             <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search all contacts..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
@@ -1832,7 +1832,7 @@ export default function Messages() {
                           <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
                           <input
                             type="text"
-                            placeholder="Search by keyword..."
+                            placeholder="Search..."
                             value={bumpsSearchQuery}
                             onChange={(e) => setBumpsSearchQuery(e.target.value)}
                             className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
