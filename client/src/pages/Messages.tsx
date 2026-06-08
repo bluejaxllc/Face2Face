@@ -775,6 +775,115 @@ export default function Messages() {
 
   /* ═══════ Render: Auto Bumps Settings & Upgrade Menu ═══════ */
   const renderAutoBumpsMenu = () => {
+    const sections = [
+      {
+        title: "Status",
+        icon: <Shield className="w-4 h-4" />,
+        content: (
+          <div className="flex items-center justify-between px-4 py-3.5">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Radar className="w-4 h-4 text-slate-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-200 tracking-wide">Enable Auto Bumps</p>
+                <p className="text-xs text-slate-500">Automatically bump matched users in proximity</p>
+              </div>
+            </div>
+            <ToggleSwitch 
+              on={autoBumpsEnabled} 
+              onToggle={() => setAutoBumpsEnabled(!autoBumpsEnabled)} 
+              accentClass={accent.toggleOn} 
+            />
+          </div>
+        )
+      },
+      {
+        title: "Parameters",
+        icon: <Settings className="w-4 h-4" />,
+        content: (
+          <div className="divide-y divide-slate-800/40">
+            {/* Scan Frequency */}
+            <div className="px-4 py-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <Clock className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                <p className="text-sm font-semibold text-slate-200 tracking-wide">Scan Frequency</p>
+              </div>
+              <p className="text-xs text-slate-500 pl-7">Choose how often the app scans for nearby users</p>
+              <div className="grid grid-cols-4 gap-2 pl-7">
+                {[
+                  { label: "1 min", value: "1" },
+                  { label: "5 mins", value: "5" },
+                  { label: "15 mins", value: "15" },
+                  { label: "30 mins", value: "30" }
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setScanFrequency(opt.value)}
+                    className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                      scanFrequency === opt.value
+                        ? `${accent.badge} text-white border-transparent shadow-md`
+                        : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Distance Radius */}
+            <div className="px-4 py-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <MapPin className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                <p className="text-sm font-semibold text-slate-200 tracking-wide">Proximity Radius</p>
+              </div>
+              <p className="text-xs text-slate-500 pl-7">Distance range to trigger auto-bumps</p>
+              <div className="grid grid-cols-4 gap-2 pl-7">
+                {[
+                  { label: "0.1 mi", value: "0.1" },
+                  { label: "0.25 mi", value: "0.25" },
+                  { label: "0.5 mi", value: "0.5" },
+                  { label: "1.0 mi", value: "1.0" }
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSelectedRadius(opt.value)}
+                    className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                      selectedRadius === opt.value
+                        ? `${accent.badge} text-white border-transparent shadow-md`
+                        : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      },
+      {
+        title: "Greeting",
+        icon: <MessageCircle className="w-4 h-4" />,
+        content: (
+          <div className="px-4 py-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <MessageCircle className="w-4 h-4 text-slate-500 flex-shrink-0" />
+              <p className="text-sm font-semibold text-slate-200 tracking-wide">Auto-Bump Message</p>
+            </div>
+            <p className="text-xs text-slate-500 pl-7">The message sent automatically when a bump occurs</p>
+            <div className="pl-7">
+              <textarea
+                value={autoBumpMessage}
+                onChange={(e) => setAutoBumpMessage(e.target.value)}
+                placeholder="Hey! Bumped you..."
+                className="w-full h-24 rounded-xl bg-slate-950 border border-slate-805 p-3 text-slate-200 placeholder:text-slate-600 text-sm outline-none focus:border-slate-700 transition-colors resize-none"
+              />
+            </div>
+          </div>
+        )
+      }
+    ];
+
     return (
       <AnimatePresence>
         {showAutoBumpsMenu && (
@@ -787,104 +896,44 @@ export default function Messages() {
           >
             {/* Header */}
             <div 
-              className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl"
+              className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl shrink-0"
               style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
             >
               <button 
                 onClick={() => setShowAutoBumpsMenu(false)} 
-                className="mr-3 p-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-805 transition-colors"
+                className="mr-3 p-1 rounded-full hover:bg-slate-800/50 transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-slate-300" />
+                <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
               </button>
-              <h2 className="text-[20px] font-bold text-white tracking-tight">Auto Bump Settings</h2>
+              <div className="flex items-center gap-2">
+                <Radar className={`w-5 h-5 ${accent.primary}`} />
+                <h2 className="text-[20px] font-bold text-white tracking-tight">Auto Bump Settings</h2>
+              </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-              {/* Section 1: Enable Auto Bumps */}
-              <div className="rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden px-4 py-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-200 tracking-wide">Enable Auto Bumps</h3>
-                  <p className="text-xs text-slate-500">Automatically bump matched users in your proximity</p>
-                </div>
-                <ToggleSwitch 
-                  on={autoBumpsEnabled} 
-                  onToggle={() => setAutoBumpsEnabled(!autoBumpsEnabled)} 
-                  accentClass={accent.toggleOn} 
-                />
-              </div>
+            <div className="flex-1 overflow-y-auto pb-8">
+              {sections.map((section) => (
+                <div key={section.title} className="flex flex-col">
+                  {/* Section header */}
+                  <div className="flex items-center gap-2.5 px-5 pt-5 pb-2">
+                    <div className={`p-1.5 rounded-lg ${accent.bg} ${accent.primary}`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs font-bold uppercase tracking-[0.15em] ${accent.primary}`}>
+                      {section.title}
+                    </span>
+                  </div>
 
-              {/* Section 2: Parameters */}
-              <div className="rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden divide-y divide-slate-800/40">
-                {/* Scan Frequency */}
-                <div className="px-4 py-4 space-y-2">
-                  <label className="text-sm font-semibold text-slate-200 tracking-wide block">Scan Frequency</label>
-                  <p className="text-xs text-slate-500 mb-2">Choose how often the app scans for nearby users</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { label: "1 min", value: "1" },
-                      { label: "5 mins", value: "5" },
-                      { label: "15 mins", value: "15" },
-                      { label: "30 mins", value: "30" }
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setScanFrequency(opt.value)}
-                        className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                          scanFrequency === opt.value
-                            ? `${accent.badge} text-white border-transparent shadow-md`
-                            : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                  {/* Section content card */}
+                  <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
+                    {section.content}
                   </div>
                 </div>
+              ))}
 
-                {/* Custom Distance Radius */}
-                <div className="px-4 py-4 space-y-2">
-                  <label className="text-sm font-semibold text-slate-200 tracking-wide block">Proximity Radius</label>
-                  <p className="text-xs text-slate-500 mb-2">Distance range to trigger auto-bumps</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { label: "0.1 mi", value: "0.1" },
-                      { label: "0.25 mi", value: "0.25" },
-                      { label: "0.5 mi", value: "0.5" },
-                      { label: "1.0 mi", value: "1.0" }
-                    ].map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setSelectedRadius(opt.value)}
-                        className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                          selectedRadius === opt.value
-                            ? `${accent.badge} text-white border-transparent shadow-md`
-                            : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 3: Custom Greeting Message */}
-              <div className="rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden px-4 py-4 space-y-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-200 tracking-wide">Auto-Bump Message</h3>
-                  <p className="text-xs text-slate-500">The message sent automatically when a bump occurs</p>
-                </div>
-                <textarea
-                  value={autoBumpMessage}
-                  onChange={(e) => setAutoBumpMessage(e.target.value)}
-                  placeholder="Hey! Bumped you..."
-                  className="w-full h-24 rounded-xl bg-slate-950 border border-slate-805 p-3 text-slate-200 placeholder:text-slate-600 text-sm outline-none focus:border-slate-700 transition-colors resize-none"
-                />
-              </div>
-
-              {/* Section 4: Premium Upgrade Callout Banner */}
-              <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4">
+              {/* Premium Upgrade Callout Banner */}
+              <div className="mx-4 mt-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
