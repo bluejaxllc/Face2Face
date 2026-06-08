@@ -115,6 +115,11 @@ const accentConfig: Record<CategoryKey, {
 };
 
 /* ═══════ Placeholder bumps ═══════ */
+const placeholderBumpsMutual = [
+  { id: 17, name: "Daniel K.", initials: "DK", message: "Mutual bump! Add to contacts", time: "1m", sex: "male" },
+  { id: 18, name: "Chloe L.", initials: "CL", message: "Mutual bump! Add to contacts", time: "12m", sex: "female" },
+];
+
 const placeholderBumpsReceived = [
   { id: 1, name: "Sarah M.", initials: "SM", message: "Bumped you from 0.3 mi away!", time: "2m", sex: "female" },
   { id: 2, name: "Jake R.", initials: "JR", message: "Hey! Bumped you 👋", time: "15m", sex: "male" },
