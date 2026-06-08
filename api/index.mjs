@@ -1129,8 +1129,10 @@ This code expires in 5 minutes. Do not share it with anyone.`;
 }
 
 // shared/moderation.ts
-QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED;
-var DATING_ONLY_TAGS = /* @__PURE__ */ new Set([
+function normalizeTag(tag) {
+  return tag.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+var DATING_ONLY_TAGS = new Set([
   "romance",
   "hookup",
   "soulmate",
@@ -1151,8 +1153,8 @@ var DATING_ONLY_TAGS = /* @__PURE__ */ new Set([
   "wife",
   "flirt",
   "nsfw"
-]);
-var BUSINESS_ONLY_TAGS = /* @__PURE__ */ new Set([
+].map(normalizeTag));
+var BUSINESS_ONLY_TAGS = new Set([
   "react",
   "node",
   "ai",
@@ -1183,8 +1185,8 @@ var BUSINESS_ONLY_TAGS = /* @__PURE__ */ new Set([
   "skills",
   "job",
   "career"
-]);
-var FRIENDSHIP_ONLY_TAGS = /* @__PURE__ */ new Set([
+].map(normalizeTag));
+var FRIENDSHIP_ONLY_TAGS = new Set([
   "gym buddy",
   "running partner",
   "study group",
@@ -1197,10 +1199,9 @@ var FRIENDSHIP_ONLY_TAGS = /* @__PURE__ */ new Set([
   "buddies",
   "hangout",
   "activity partner"
-]);
+].map(normalizeTag));
 var BLOCKED_WORDS = [
   // English
-  "nsfw",
   "porn",
   "naked",
   "sex",
@@ -1289,9 +1290,6 @@ var BLOCKED_WORDS = [
   "cachondo",
   "cachonda"
 ];
-function normalizeTag(tag) {
-  return tag.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
 function validateTags(category, interests, seeking, skills) {
   const getTagsList = (str) => {
     if (!str) return [];
@@ -1374,7 +1372,7 @@ function validateModeration(fields) {
     const normalizedText = val.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     for (const blocked of BLOCKED_WORDS) {
       const normalizedBlocked = blocked.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      if (normalizedBlocked.length <= 3) {
+      if (normalizedBlocked.length <= 4) {
         const regex = new RegExp(`\\b${normalizedBlocked}\\b`, "i");
         if (regex.test(normalizedText)) {
           return { isValid: false, blockedWord: blocked, field: fieldName };

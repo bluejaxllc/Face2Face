@@ -1,7 +1,10 @@
-QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED
-/* QA FEEDBACK:
-The provided file has logic flaws in its content validation and tag validation systems that will cause bugs in production. Here is exactly what must be fixed:Tag Selection Collision (Content vs. Moderation Blocklist): * The tag "nsfw" is explicitly included in DATING_ONLY_TAGS. However, "nsfw" is also explicitly defined in the BLOCKED_WORDS blocklist. If a user tries to select the valid dating tag "nsfw", the profile will fail moderation verification and be rejected entirely.Regex Substring Matching Fault (Short vs. Long Blocked Words):In validateModeration(), the conditional check if (normalizedBlocked.length <= 3) targets short words, but many critical explicit words in the BLOCKED_WORDS list are 4 characters long (e.g., "shit", "dick", "cock", "porn", "sexo", "puto", "puta").Because these words are >3 characters, they fall into the else block which uses standard .includes() substring matching. This will cause heavy false-positive flags on completely benign, normal words (e.g., blocking "sesexonal", "putoff", "classhity", or "cacocktail").Incomplete Normalization Flow in Tag Sets:The utility normalizeTag() strips accents and diacritics via .normalize("NFD"). However, the constant Set objects (DATING_ONLY_TAGS, BUSINESS_ONLY_TAGS, FRIENDSHIP_ONLY_TAGS) contain string values initialized with accents or non-alphanumeric characters (e.g., "venture capital" contains a space, and potential future additions might contain accents). To ensure .has(tag) never fails due to formatting discrepancies, the static text in those Sets must match the strict regex output format of normalizeTag.
-Fix this, then delete this warning. */
+function normalizeTag(tag: string): string {
+  return tag
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
 
 export const DATING_ONLY_TAGS = new Set([
   "romance",
@@ -24,7 +27,7 @@ export const DATING_ONLY_TAGS = new Set([
   "wife",
   "flirt",
   "nsfw"
-]);
+].map(normalizeTag));
 
 export const BUSINESS_ONLY_TAGS = new Set([
   "react",
@@ -57,7 +60,7 @@ export const BUSINESS_ONLY_TAGS = new Set([
   "skills",
   "job",
   "career"
-]);
+].map(normalizeTag));
 
 export const FRIENDSHIP_ONLY_TAGS = new Set([
   "gym buddy",
@@ -72,11 +75,10 @@ export const FRIENDSHIP_ONLY_TAGS = new Set([
   "buddies",
   "hangout",
   "activity partner"
-]);
+].map(normalizeTag));
 
 export const BLOCKED_WORDS = [
   // English
-  "nsfw",
   "porn",
   "naked",
   "sex",
@@ -165,14 +167,6 @@ export const BLOCKED_WORDS = [
   "cachondo",
   "cachonda"
 ];
-
-function normalizeTag(tag: string): string {
-  return tag
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
 
 /**
  * Validates category tag separation
@@ -294,7 +288,7 @@ export function validateModeration(
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 
-      if (normalizedBlocked.length <= 3) {
+      if (normalizedBlocked.length <= 4) {
         // Use word boundaries for short words to avoid false positives (e.g. "ass" in "classic")
         const regex = new RegExp(`\\b${normalizedBlocked}\\b`, 'i');
         if (regex.test(normalizedText)) {
