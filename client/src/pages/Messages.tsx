@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useLocation } from "wouter";
 import { useScrollSave } from "@/hooks/use-scroll-save";
 import { PageTransition } from "@/components/PageTransition";
 import BottomNavigation from "@/components/BottomNavigation";
@@ -283,6 +284,7 @@ function ChatBubble({ primaryHex }: { primaryHex: string }) {
 /* ═══════ MAIN COMPONENT ═══════ */
 export default function Messages() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   /* ─── Category from localStorage ─── */
   const category = useMemo<CategoryKey>(() => {
@@ -292,9 +294,83 @@ export default function Messages() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>(category);
   const [activeBumpCategory, setActiveBumpCategory] = useState<{
     title: string;
-    bumps: typeof placeholderBumpsReceived;
+    categoryKey: "mutual" | "received" | "sent" | "auto" | "passed";
     actionLabel: string;
   } | null>(null);
+
+  const [bumpsSearchQuery, setBumpsSearchQuery] = useState("");
+  const [showAutoBumpsMenu, setShowAutoBumpsMenu] = useState(false);
+  const [autoBumpsEnabled, setAutoBumpsEnabled] = useState(() => {
+    const stored = localStorage.getItem("f2f_settings_autoBumpsEnabled");
+    return stored === null ? true : stored === "true";
+  });
+  const [scanFrequency, setScanFrequency] = useState(() => {
+    return localStorage.getItem("f2f_settings_scanFrequency") || "5";
+  });
+  const [selectedRadius, setSelectedRadius] = useState(() => {
+    return localStorage.getItem("f2f_settings_selectedRadius") || "0.25";
+  });
+  const [autoBumpMessage, setAutoBumpMessage] = useState(() => {
+    return localStorage.getItem("f2f_settings_autoBumpMessage") || "Hey! Bumped you from auto-bump!";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("f2f_settings_autoBumpsEnabled", String(autoBumpsEnabled));
+  }, [autoBumpsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("f2f_settings_scanFrequency", scanFrequency);
+  }, [scanFrequency]);
+
+  useEffect(() => {
+    localStorage.setItem("f2f_settings_selectedRadius", selectedRadius);
+  }, [selectedRadius]);
+
+  useEffect(() => {
+    localStorage.setItem("f2f_settings_autoBumpMessage", autoBumpMessage);
+  }, [autoBumpMessage]);
+
+  const filteredMutualBumps = useMemo(() => {
+    if (!bumpsSearchQuery.trim()) return placeholderBumpsMutual;
+    const q = bumpsSearchQuery.toLowerCase();
+    return placeholderBumpsMutual.filter(b => b.name.toLowerCase().includes(q) || b.message.toLowerCase().includes(q));
+  }, [bumpsSearchQuery]);
+
+  const filteredReceivedBumps = useMemo(() => {
+    if (!bumpsSearchQuery.trim()) return placeholderBumpsReceived;
+    const q = bumpsSearchQuery.toLowerCase();
+    return placeholderBumpsReceived.filter(b => b.name.toLowerCase().includes(q) || b.message.toLowerCase().includes(q));
+  }, [bumpsSearchQuery]);
+
+  const filteredSentBumps = useMemo(() => {
+    if (!bumpsSearchQuery.trim()) return placeholderBumpsSent;
+    const q = bumpsSearchQuery.toLowerCase();
+    return placeholderBumpsSent.filter(b => b.name.toLowerCase().includes(q) || b.message.toLowerCase().includes(q));
+  }, [bumpsSearchQuery]);
+
+  const filteredAutoBumps = useMemo(() => {
+    if (!bumpsSearchQuery.trim()) return placeholderAutoBumps;
+    const q = bumpsSearchQuery.toLowerCase();
+    return placeholderAutoBumps.filter(b => b.name.toLowerCase().includes(q) || b.message.toLowerCase().includes(q));
+  }, [bumpsSearchQuery]);
+
+  const filteredPassedBumps = useMemo(() => {
+    if (!bumpsSearchQuery.trim()) return placeholderBumpsPassed;
+    const q = bumpsSearchQuery.toLowerCase();
+    return placeholderBumpsPassed.filter(b => b.name.toLowerCase().includes(q) || b.message.toLowerCase().includes(q));
+  }, [bumpsSearchQuery]);
+
+  const currentCategoryBumps = useMemo(() => {
+    if (!activeBumpCategory) return [];
+    switch (activeBumpCategory.categoryKey) {
+      case "mutual": return filteredMutualBumps;
+      case "received": return filteredReceivedBumps;
+      case "sent": return filteredSentBumps;
+      case "auto": return filteredAutoBumps;
+      case "passed": return filteredPassedBumps;
+      default: return [];
+    }
+  }, [activeBumpCategory, filteredMutualBumps, filteredReceivedBumps, filteredSentBumps, filteredAutoBumps, filteredPassedBumps]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -334,14 +410,6 @@ export default function Messages() {
   const [darkMode, setDarkMode] = useState(true);
   const [showOnMap, setShowOnMap] = useState(true);
   const [soundEffects, setSoundEffects] = useState(false);
-  const [autoBumpsEnabled, setAutoBumpsEnabled] = useState(() => {
-    const stored = localStorage.getItem("f2f_settings_autoBumpsEnabled");
-    return stored === null ? true : stored === "true";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("f2f_settings_autoBumpsEnabled", String(autoBumpsEnabled));
-  }, [autoBumpsEnabled]);
 
   /* ═══════ API: Fetch conversation partners ═══════ */
   const { data: apiConversations } = useQuery<ConversationPartner[]>({
@@ -594,12 +662,11 @@ export default function Messages() {
         items: [
           { label: "Show on Map", subtitle: "Let others see your location", icon: <Eye className="w-4 h-4" />, state: showOnMap, setter: setShowOnMap },
           { 
-            label: "Auto Bumps", 
-            subtitle: "Automatically bump matches nearby", 
-            icon: <Power className="w-4 h-4" />, 
-            state: autoBumpsEnabled, 
-            setter: setAutoBumpsEnabled,
-            isAutoBump: true
+            label: "Auto Bump Settings", 
+            subtitle: "Configure frequency, radius & message", 
+            icon: <Radar className="w-4 h-4" />, 
+            isLink: true,
+            onClick: () => setShowAutoBumpsMenu(true)
           },
         ],
       },
@@ -630,7 +697,8 @@ export default function Messages() {
                 {section.items.map((item: any, iIdx) => (
                   <div
                     key={item.label}
-                    className={`flex items-center justify-between px-4 py-3.5 ${iIdx < section.items.length - 1 ? "border-b border-slate-800/40" : ""}`}
+                    onClick={item.isLink ? item.onClick : undefined}
+                    className={`flex items-center justify-between px-4 py-3.5 ${iIdx < section.items.length - 1 ? "border-b border-slate-800/40" : ""} ${item.isLink ? "cursor-pointer hover:bg-slate-850/50 transition-colors" : ""}`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="text-slate-500 flex-shrink-0">{item.icon}</div>
@@ -639,18 +707,8 @@ export default function Messages() {
                         <p className="text-xs text-slate-500 truncate">{item.subtitle}</p>
                       </div>
                     </div>
-                    {item.isAutoBump ? (
-                      <button
-                        onClick={() => item.setter(!item.state)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md ${
-                          item.state
-                            ? `${accent.badge} text-white`
-                            : "bg-slate-800 text-slate-400 border border-slate-700/50"
-                        }`}
-                      >
-                        <Power style={{ width: 10, height: 10 }} />
-                        {item.state ? "ACTIVE" : "ACTIVATE"}
-                      </button>
+                    {item.isLink ? (
+                      <ChevronRight className="w-4 h-4 text-slate-600" />
                     ) : (
                       <ToggleSwitch on={item.state} onToggle={() => item.setter(!item.state)} accentClass={accent.toggleOn} />
                     )}
@@ -715,6 +773,145 @@ export default function Messages() {
     );
   };
 
+  /* ═══════ Render: Auto Bumps Settings & Upgrade Menu ═══════ */
+  const renderAutoBumpsMenu = () => {
+    return (
+      <AnimatePresence>
+        {showAutoBumpsMenu && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-0 z-[10000] bg-slate-950 flex flex-col pb-[env(safe-area-inset-bottom,20px)]"
+          >
+            {/* Header */}
+            <div 
+              className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl"
+              style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+            >
+              <button 
+                onClick={() => setShowAutoBumpsMenu(false)} 
+                className="mr-3 p-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-805 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-slate-300" />
+              </button>
+              <h2 className="text-[20px] font-bold text-white tracking-tight">Auto Bump Settings</h2>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+              {/* Section 1: Enable Auto Bumps */}
+              <div className="rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden px-4 py-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-200 tracking-wide">Enable Auto Bumps</h3>
+                  <p className="text-xs text-slate-500">Automatically bump matched users in your proximity</p>
+                </div>
+                <ToggleSwitch 
+                  on={autoBumpsEnabled} 
+                  onToggle={() => setAutoBumpsEnabled(!autoBumpsEnabled)} 
+                  accentClass={accent.toggleOn} 
+                />
+              </div>
+
+              {/* Section 2: Parameters */}
+              <div className="rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden divide-y divide-slate-800/40">
+                {/* Scan Frequency */}
+                <div className="px-4 py-4 space-y-2">
+                  <label className="text-sm font-semibold text-slate-200 tracking-wide block">Scan Frequency</label>
+                  <p className="text-xs text-slate-500 mb-2">Choose how often the app scans for nearby users</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: "1 min", value: "1" },
+                      { label: "5 mins", value: "5" },
+                      { label: "15 mins", value: "15" },
+                      { label: "30 mins", value: "30" }
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setScanFrequency(opt.value)}
+                        className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                          scanFrequency === opt.value
+                            ? `${accent.badge} text-white border-transparent shadow-md`
+                            : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Distance Radius */}
+                <div className="px-4 py-4 space-y-2">
+                  <label className="text-sm font-semibold text-slate-200 tracking-wide block">Proximity Radius</label>
+                  <p className="text-xs text-slate-500 mb-2">Distance range to trigger auto-bumps</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: "0.1 mi", value: "0.1" },
+                      { label: "0.25 mi", value: "0.25" },
+                      { label: "0.5 mi", value: "0.5" },
+                      { label: "1.0 mi", value: "1.0" }
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setSelectedRadius(opt.value)}
+                        className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                          selectedRadius === opt.value
+                            ? `${accent.badge} text-white border-transparent shadow-md`
+                            : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Custom Greeting Message */}
+              <div className="rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden px-4 py-4 space-y-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-200 tracking-wide">Auto-Bump Message</h3>
+                  <p className="text-xs text-slate-500">The message sent automatically when a bump occurs</p>
+                </div>
+                <textarea
+                  value={autoBumpMessage}
+                  onChange={(e) => setAutoBumpMessage(e.target.value)}
+                  placeholder="Hey! Bumped you..."
+                  className="w-full h-24 rounded-xl bg-slate-950 border border-slate-805 p-3 text-slate-200 placeholder:text-slate-600 text-sm outline-none focus:border-slate-700 transition-colors resize-none"
+                />
+              </div>
+
+              {/* Section 4: Premium Upgrade Callout Banner */}
+              <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">Premium Feature</span>
+                  </div>
+                  <h4 className="text-[17px] font-extrabold text-white tracking-tight leading-snug">Unlock Unlimited Auto Bumps</h4>
+                  <p className="text-slate-400 text-xs leading-relaxed">
+                    Set up automatic proximity nets, custom Greetings, and scan without limits. Never miss a connection.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowAutoBumpsMenu(false);
+                    setLocation("/store");
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all cursor-pointer"
+                >
+                  Upgrade to Premium
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
+
   /* ═══════ Render: Bump Category List (See All) ═══════ */
   const renderBumpCategoryList = () => {
     if (!activeBumpCategory) return null;
@@ -726,40 +923,60 @@ export default function Messages() {
             <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
           </button>
           <div className="flex items-center gap-2">
-            {activeBumpCategory.title === "Auto Bumps" && <Power className={`w-5 h-5 ${accent.primary}`} />}
+            <Zap className={`w-5 h-5 ${accent.primary}`} />
             <h2 className={`text-[20px] font-bold text-white tracking-tight`}>{activeBumpCategory.title}</h2>
           </div>
         </div>
+
+        {/* List View Search input */}
+        <div className="px-4 pt-4 pb-2 bg-slate-950/80 backdrop-blur-sm sticky top-[64px] z-10">
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-800/50">
+            <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder={`Search ${activeBumpCategory.title.toLowerCase()}...`}
+              value={bumpsSearchQuery}
+              onChange={(e) => setBumpsSearchQuery(e.target.value)}
+              className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
+            />
+          </div>
+        </div>
+
         <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
-          {activeBumpCategory.bumps.map((bump, i) => (
-            <div key={i} className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group">
-              <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative flex items-center justify-center">
-                <img 
-                  src={`https://picsum.photos/seed/bump-${bump.id}/200/200`} 
-                  alt={bump.name} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
-                <h3 className="text-white text-[16px] font-semibold tracking-tight leading-snug">{bump.name}</h3>
-                <p className="text-slate-400 text-[12px] leading-snug mt-1 truncate">
-                  {bump.message} • {bump.time}
-                </p>
-              </div>
-
-              <button 
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                  activeBumpCategory.actionLabel === "BUMP" || activeBumpCategory.actionLabel === "ADD" || activeBumpCategory.actionLabel === "ACTIVATE"
-                    ? `${accent.badge} text-white`
-                    : "bg-slate-800 text-slate-300"
-                } shadow-md`}
-              >
-                {activeBumpCategory.actionLabel === "ACTIVATE" && <Power style={{ width: 12, height: 12 }} />}
-                {activeBumpCategory.actionLabel}
-              </button>
+          {currentCategoryBumps.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 text-sm italic">
+              No matching bumps found
             </div>
-          ))}
+          ) : (
+            currentCategoryBumps.map((bump, i) => (
+              <div key={i} className="flex items-center px-5 py-4 hover:bg-slate-800/20 cursor-pointer transition-colors group">
+                <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 bg-slate-800 border border-slate-700/50 shadow-sm relative flex items-center justify-center">
+                  <img 
+                    src={`https://picsum.photos/seed/bump-${bump.id}/200/200`} 
+                    alt={bump.name} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="flex flex-col flex-1 pl-4 pr-3 overflow-hidden">
+                  <h3 className="text-white text-[16px] font-semibold tracking-tight leading-snug">{bump.name}</h3>
+                  <p className="text-slate-400 text-[12px] leading-snug mt-1 truncate">
+                    {bump.message} • {bump.time}
+                  </p>
+                </div>
+
+                <button 
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                    activeBumpCategory.actionLabel === "BUMP" || activeBumpCategory.actionLabel === "ADD"
+                      ? `${accent.badge} text-white`
+                      : "bg-slate-800 text-slate-300"
+                  } shadow-md`}
+                >
+                  {activeBumpCategory.actionLabel}
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     );
@@ -1201,256 +1418,302 @@ export default function Messages() {
                 activeBumpCategory ? renderBumpCategoryList() : (
                   bumpTab === "settings" ? renderSettings() : (
                     <div ref={bumpsScroll.ref} onScroll={bumpsScroll.onScroll} className="flex-1 overflow-y-auto w-full pb-8">
-                      {/* ── Mutual Bumps Section ── */}
-                      <div className="mb-6 pt-2">
-                        <div className="flex justify-between items-end mb-3 px-4">
-                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Mutual Bumps</h2>
-                          <button 
-                            onClick={() => setActiveBumpCategory({
-                              title: "Mutual Bumps",
-                              bumps: placeholderBumpsMutual,
-                              actionLabel: "ADD"
-                            })}
-                            className="flex flex-col items-center cursor-pointer group"
-                          >
-                            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
-                            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
-                          </button>
+                      {/* Search bar for Bumps */}
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-4 pt-4 pb-2"
+                      >
+                        <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-800/50 backdrop-blur-sm">
+                          <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
+                          <input
+                            type="text"
+                            placeholder="Search bumps..."
+                            value={bumpsSearchQuery}
+                            onChange={(e) => setBumpsSearchQuery(e.target.value)}
+                            className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
+                          />
                         </div>
-                        {placeholderBumpsMutual.length > 0 ? (
-                          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
-                            {placeholderBumpsMutual.map((bump) => (
-                              <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
-                                <div className="w-full h-full relative bg-slate-800">
-                                  <img 
-                                    src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
-                                    alt={bump.name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
-                                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                                  <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                </div>
-                                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
-                                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
-                                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
-                                </div>
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                                  <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>ADD</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="px-4 text-slate-600 text-sm italic">No mutual bumps yet</p>
-                        )}
-                      </div>
+                      </motion.div>
 
-                      {/* ── Received Bumps Section ── */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-end mb-3 px-4">
-                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Received</h2>
-                          <button 
-                            onClick={() => setActiveBumpCategory({
-                              title: "Received Bumps",
-                              bumps: placeholderBumpsReceived,
-                              actionLabel: "BUMP"
-                            })}
-                            className="flex flex-col items-center cursor-pointer group"
-                          >
-                            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
-                            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
-                          </button>
+                      {bumpsSearchQuery.trim() && 
+                       filteredMutualBumps.length === 0 && 
+                       filteredReceivedBumps.length === 0 && 
+                       filteredSentBumps.length === 0 && 
+                       filteredAutoBumps.length === 0 && 
+                       filteredPassedBumps.length === 0 ? (
+                        <div className="text-center py-16 text-slate-500 text-sm italic">
+                          No bumps found matching &ldquo;{bumpsSearchQuery}&rdquo;
                         </div>
-                        {placeholderBumpsReceived.length > 0 ? (
-                          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
-                            {placeholderBumpsReceived.map((bump) => (
-                              <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
-                                <div className="w-full h-full relative bg-slate-800">
-                                  <img 
-                                    src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
-                                    alt={bump.name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
-                                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                                  <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                </div>
-                                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
-                                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
-                                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
-                                </div>
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                                  <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>BUMP</div>
-                                </div>
+                      ) : (
+                        <>
+                          {/* ── Mutual Bumps Section ── */}
+                          {(!bumpsSearchQuery.trim() || filteredMutualBumps.length > 0) && (
+                            <div className="mb-6 pt-2">
+                              <div className="flex justify-between items-end mb-3 px-4">
+                                <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Mutual Bumps</h2>
+                                <button 
+                                  onClick={() => setActiveBumpCategory({
+                                    title: "Mutual Bumps",
+                                    categoryKey: "mutual",
+                                    actionLabel: "ADD"
+                                  })}
+                                  className="flex flex-col items-center cursor-pointer group"
+                                >
+                                  <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+                                  <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+                                </button>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="px-4 text-slate-600 text-sm italic">No bumps received yet</p>
-                        )}
-                      </div>
+                              {filteredMutualBumps.length > 0 ? (
+                                <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+                                  {filteredMutualBumps.map((bump) => (
+                                    <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+                                      <div className="w-full h-full relative bg-slate-800">
+                                        <img 
+                                          src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
+                                          alt={bump.name} 
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                                      <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                        <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
+                                      </div>
+                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                      </div>
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                                        <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
+                                        <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
+                                      </div>
+                                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>ADD</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="px-4 text-slate-600 text-sm italic">No mutual bumps yet</p>
+                              )}
+                            </div>
+                          )}
 
-                      {/* ── Sent Bumps Section ── */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-end mb-3 px-4">
-                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Sent</h2>
-                          <button 
-                            onClick={() => setActiveBumpCategory({
-                              title: "Sent Bumps",
-                              bumps: placeholderBumpsSent,
-                              actionLabel: "VIEW"
-                            })}
-                            className="flex flex-col items-center cursor-pointer group"
-                          >
-                            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
-                            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
-                          </button>
-                        </div>
-                        {placeholderBumpsSent.length > 0 ? (
-                          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
-                            {placeholderBumpsSent.map((bump) => (
-                              <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
-                                <div className="w-full h-full relative bg-slate-800">
-                                  <img 
-                                    src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
-                                    alt={bump.name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
-                                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                                  <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                </div>
-                                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
-                                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
-                                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
-                                </div>
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                                  <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800/80 text-white shadow-lg`}>VIEW</div>
-                                </div>
+                          {/* ── Received Bumps Section ── */}
+                          {(!bumpsSearchQuery.trim() || filteredReceivedBumps.length > 0) && (
+                            <div className="mb-6">
+                              <div className="flex justify-between items-end mb-3 px-4">
+                                <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Received</h2>
+                                <button 
+                                  onClick={() => setActiveBumpCategory({
+                                    title: "Received Bumps",
+                                    categoryKey: "received",
+                                    actionLabel: "BUMP"
+                                  })}
+                                  className="flex flex-col items-center cursor-pointer group"
+                                >
+                                  <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+                                  <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+                                </button>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="px-4 text-slate-600 text-sm italic">No bumps sent yet</p>
-                        )}
-                      </div>
+                              {filteredReceivedBumps.length > 0 ? (
+                                <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+                                  {filteredReceivedBumps.map((bump) => (
+                                    <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+                                      <div className="w-full h-full relative bg-slate-800">
+                                        <img 
+                                          src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
+                                          alt={bump.name} 
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                                      <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                        <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
+                                      </div>
+                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                      </div>
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                                        <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
+                                        <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
+                                      </div>
+                                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>BUMP</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="px-4 text-slate-600 text-sm italic">No bumps received yet</p>
+                              )}
+                            </div>
+                          )}
 
-                      {/* ── Auto Bumps Section ── */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-end mb-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <Power className={`${accent.primary} w-6 h-6`} />
-                            <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Auto Bumps</h2>
-                          </div>
-                          <button 
-                            onClick={() => setActiveBumpCategory({
-                              title: "Auto Bumps",
-                              bumps: placeholderAutoBumps,
-                              actionLabel: "ACTIVATE"
-                            })}
-                            className="flex flex-col items-center cursor-pointer group"
-                          >
-                            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
-                            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
-                          </button>
-                        </div>
-                        {placeholderAutoBumps.length > 0 ? (
-                          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
-                            {placeholderAutoBumps.map((bump) => (
-                              <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
-                                <div className="w-full h-full relative bg-slate-800">
-                                  <img 
-                                    src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
-                                    alt={bump.name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
-                                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                                  <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                </div>
-                                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                  <Power style={{ width: 12, height: 12 }} className="text-white" />
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
-                                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
-                                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
-                                </div>
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                                  <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>
-                                    <Power style={{ width: 10, height: 10 }} />
-                                    ACTIVATE
-                                  </div>
-                                </div>
+                          {/* ── Sent Bumps Section ── */}
+                          {(!bumpsSearchQuery.trim() || filteredSentBumps.length > 0) && (
+                            <div className="mb-6">
+                              <div className="flex justify-between items-end mb-3 px-4">
+                                <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Sent</h2>
+                                <button 
+                                  onClick={() => setActiveBumpCategory({
+                                    title: "Sent Bumps",
+                                    categoryKey: "sent",
+                                    actionLabel: "VIEW"
+                                  })}
+                                  className="flex flex-col items-center cursor-pointer group"
+                                >
+                                  <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+                                  <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+                                </button>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="px-4 text-slate-600 text-sm italic">No auto bumps yet</p>
-                        )}
-                      </div>
+                              {filteredSentBumps.length > 0 ? (
+                                <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+                                  {filteredSentBumps.map((bump) => (
+                                    <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+                                      <div className="w-full h-full relative bg-slate-800">
+                                        <img 
+                                          src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
+                                          alt={bump.name} 
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                                      <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                        <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
+                                      </div>
+                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                      </div>
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                                        <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
+                                        <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
+                                      </div>
+                                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800/80 text-white shadow-lg`}>VIEW</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="px-4 text-slate-600 text-sm italic">No bumps sent yet</p>
+                              )}
+                            </div>
+                          )}
 
-                      {/* ── Passed Bumps Section ── */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-end mb-3 px-4">
-                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Passed by</h2>
-                          <button 
-                            onClick={() => setActiveBumpCategory({
-                              title: "Passed by Bumps",
-                              bumps: placeholderBumpsPassed,
-                              actionLabel: "VIEW"
-                            })}
-                            className="flex flex-col items-center cursor-pointer group"
-                          >
-                            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
-                            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
-                          </button>
-                        </div>
-                        {placeholderBumpsPassed.length > 0 ? (
-                          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
-                            {placeholderBumpsPassed.map((bump) => (
-                              <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
-                                <div className="w-full h-full relative bg-slate-800">
-                                  <img 
-                                    src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
-                                    alt={bump.name} 
-                                    className="w-full h-full object-cover"
-                                  />
+                          {/* ── Auto Bumps Section ── */}
+                          {(!bumpsSearchQuery.trim() || filteredAutoBumps.length > 0) && (
+                            <div className="mb-6">
+                              <div className="flex justify-between items-end mb-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <Zap className={`${accent.primary} w-6 h-6`} />
+                                  <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Auto Bumps</h2>
+                                  <button
+                                    onClick={() => setShowAutoBumpsMenu(true)}
+                                    className="px-3 py-1 rounded-full text-xs font-semibold lowercase transition-all cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 ml-2"
+                                  >
+                                    activate
+                                  </button>
                                 </div>
-                                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
-                                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                                  <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                </div>
-                                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
-                                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
-                                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
-                                </div>
-                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                                  <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800/80 text-white shadow-lg`}>VIEW</div>
-                                </div>
+                                <button 
+                                  onClick={() => setActiveBumpCategory({
+                                    title: "Auto Bumps",
+                                    categoryKey: "auto",
+                                    actionLabel: "VIEW"
+                                  })}
+                                  className="flex flex-col items-center cursor-pointer group"
+                                >
+                                  <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+                                  <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+                                </button>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="px-4 text-slate-600 text-sm italic">No passed by bumps yet</p>
-                        )}
-                      </div>
+                              {filteredAutoBumps.length > 0 ? (
+                                <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+                                  {filteredAutoBumps.map((bump) => (
+                                    <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+                                      <div className="w-full h-full relative bg-slate-800">
+                                        <img 
+                                          src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
+                                          alt={bump.name} 
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                                      <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                        <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
+                                      </div>
+                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                      </div>
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                                        <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
+                                        <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
+                                      </div>
+                                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800/80 text-white shadow-lg`}>
+                                          VIEW
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="px-4 text-slate-600 text-sm italic">No auto bumps yet</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ── Passed Bumps Section ── */}
+                          {(!bumpsSearchQuery.trim() || filteredPassedBumps.length > 0) && (
+                            <div className="mb-6">
+                              <div className="flex justify-between items-end mb-3 px-4">
+                                <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Passed by</h2>
+                                <button 
+                                  onClick={() => setActiveBumpCategory({
+                                    title: "Passed by Bumps",
+                                    categoryKey: "passed",
+                                    actionLabel: "VIEW"
+                                  })}
+                                  className="flex flex-col items-center cursor-pointer group"
+                                >
+                                  <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+                                  <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+                                </button>
+                              </div>
+                              {filteredPassedBumps.length > 0 ? (
+                                <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+                                  {filteredPassedBumps.map((bump) => (
+                                    <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+                                      <div className="w-full h-full relative bg-slate-800">
+                                        <img 
+                                          src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
+                                          alt={bump.name} 
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                                      <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                        <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
+                                      </div>
+                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                      </div>
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                                        <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
+                                        <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
+                                      </div>
+                                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                                        <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800/80 text-white shadow-lg`}>VIEW</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="px-4 text-slate-600 text-sm italic">No passed by bumps yet</p>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
                   )
                 )
@@ -1464,6 +1727,7 @@ export default function Messages() {
 
       {/* Hide bottom nav when in conversation */}
       {!activeConversation && <BottomNavigation />}
+      {renderAutoBumpsMenu()}
     </PageTransition>
   );
 }
