@@ -95,6 +95,7 @@ export default function DatingMenu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchDayFilter, setSearchDayFilter] = useState("");
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [reviewExpanded, setReviewExpanded] = useState<number | null>(null);
 
   // Schedule form state
   const [schedDate, setSchedDate] = useState("");
@@ -111,9 +112,7 @@ export default function DatingMenu() {
 
   const dates = useMemo(() => getPlaceholderDates(), []);
 
-  const quote = useMemo(() => {
-    return romanticQuotes[(month + year) % romanticQuotes.length];
-  }, [month, year]);
+  const [quote] = useState(() => romanticQuotes[Math.floor(Math.random() * romanticQuotes.length)]);
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
@@ -342,7 +341,7 @@ export default function DatingMenu() {
                               <button className="flex-1 py-2 rounded-lg bg-sky-500/15 text-sky-400 text-[10px] font-bold uppercase tracking-wider hover:bg-sky-500/25 transition-colors">
                                 Directions
                               </button>
-                              <button className="flex-1 py-2 rounded-lg bg-slate-700/40 text-slate-400 text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700/60 transition-colors">
+                              <button className="flex-1 py-2 rounded-lg bg-slate-800/30 text-slate-500 text-[10px] font-medium tracking-wider hover:text-red-400 hover:bg-red-500/10 transition-colors">
                                 Cancel
                               </button>
                             </div>
@@ -574,20 +573,61 @@ export default function DatingMenu() {
                 >
                   <div className="px-4 pt-3 pb-1 space-y-2">
                     {allDatesFlat.length > 0 ? allDatesFlat.map((d, idx) => (
-                      <div key={idx} className="rounded-xl p-3 flex items-center gap-3" style={{
-                        background: "rgba(30, 41, 59, 0.6)",
-                        border: "1px solid rgba(51, 65, 85, 0.4)",
-                      }}>
-                        <div className={`w-2.5 h-2.5 rounded-full ${d.color} flex-shrink-0`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-white">{d.label} — {d.person}</span>
+                      <div key={idx}>
+                        <button
+                          onClick={() => setReviewExpanded(reviewExpanded === idx ? null : idx)}
+                          className="w-full rounded-xl p-3 flex items-center gap-3 hover:bg-slate-800/50 transition-colors"
+                          style={{
+                            background: reviewExpanded === idx ? "rgba(244, 63, 94, 0.06)" : "rgba(30, 41, 59, 0.6)",
+                            border: `1px solid ${reviewExpanded === idx ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.4)"}`,
+                          }}
+                        >
+                          <img src={d.personAvatar} alt={d.person} className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-600 flex-shrink-0" />
+                          <div className="flex-1 min-w-0 text-left">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-white">{d.label} — {d.person}</span>
+                              <ChevronRight className={`w-3.5 h-3.5 text-slate-500 transition-transform ${reviewExpanded === idx ? "rotate-90" : ""}`} />
+                            </div>
+                            <p className="text-[10px] text-slate-400">{d.dayOfWeek} • {d.time} • {d.location}</p>
                           </div>
-                          <p className="text-[10px] text-slate-400">{d.dayOfWeek} • {d.time} • {d.location}</p>
-                        </div>
-                        <button className="px-2 py-1 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold uppercase tracking-wider hover:bg-red-500/30 transition-colors flex-shrink-0">
-                          Cancel
                         </button>
+                        {/* Expanded detail card */}
+                        <AnimatePresence>
+                          {reviewExpanded === idx && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-2 rounded-xl overflow-hidden" style={{ background: "rgba(30, 41, 59, 0.6)", border: "1px solid rgba(51, 65, 85, 0.4)" }}>
+                                <div className="relative h-[90px] overflow-hidden">
+                                  <img src={d.venueImage} alt={d.location} className="w-full h-full object-cover" />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent" />
+                                  <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
+                                    <div>
+                                      <span className="text-sm font-bold text-white drop-shadow-lg">{d.label}</span>
+                                      <p className="text-[10px] text-slate-300/90 drop-shadow">{d.location}</p>
+                                    </div>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${d.color}`}>{d.time}</span>
+                                  </div>
+                                </div>
+                                <div className="p-3 space-y-2">
+                                  <button onClick={() => d.profileId && navigate(`/profile/${d.profileId}`)} className="w-full flex items-center gap-3 p-2 rounded-lg bg-slate-800/40 hover:bg-slate-800/70 transition-colors">
+                                    <img src={d.personAvatar} alt={d.person} className="w-8 h-8 rounded-full object-cover ring-2 ring-rose-500/30" />
+                                    <div className="flex-1 text-left"><p className="text-xs font-bold text-white">{d.person}</p><p className="text-[9px] text-rose-400/80">View Profile →</p></div>
+                                  </button>
+                                  {d.notes && <p className="text-[10px] text-slate-500 italic px-1">{d.notes}</p>}
+                                  <div className="flex gap-2 pt-1">
+                                    <button className="flex-1 py-2 rounded-lg bg-rose-500/15 text-rose-400 text-[10px] font-bold uppercase tracking-wider">Message</button>
+                                    <button className="flex-1 py-2 rounded-lg bg-sky-500/15 text-sky-400 text-[10px] font-bold uppercase tracking-wider">Directions</button>
+                                    <button className="flex-1 py-2 rounded-lg bg-slate-800/30 text-slate-500 text-[10px] font-medium hover:text-red-400 hover:bg-red-500/10 transition-colors">Cancel</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )) : (
                       <p className="text-xs text-slate-500 text-center py-3">No upcoming dates</p>
