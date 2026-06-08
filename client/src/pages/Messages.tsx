@@ -159,26 +159,26 @@ const placeholderBumpsPassed = [
 /* ═══════ Placeholder messages ═══════ */
 const placeholderMessages = [
   // New contacts (unrevealed)
-  { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "Today • 6:30 PM", unread: true, unreadCount: 3, isRevealed: false, category: "friends" as string },
-  { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "Today • 5:30 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
-  { id: 5, name: "Jordan T.", initials: "JT", lastMsg: "What's good?", time: "Today • 4:00 PM", unread: true, unreadCount: 2, isRevealed: false, category: "friends" as string },
-  { id: 7, name: "Priya K.", initials: "PK", lastMsg: "Nice to meet you!", time: "Today • 2:15 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
-  { id: 9, name: "Alex W.", initials: "AW", lastMsg: "Just bumped into you 👋", time: "Yesterday • 8:00 PM", unread: true, unreadCount: 1, isRevealed: false, category: "friends" as string },
-  { id: 11, name: "Nina F.", initials: "NF", lastMsg: "Hey there!", time: "Yesterday • 6:45 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
+  { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "Today • 6:30 PM", unread: true, unreadCount: 3, isRevealed: false, category: "friends" as string, age: 24, sex: "female" as string, distance: 2, tags: ["coffee", "hiking"] },
+  { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "Today • 5:30 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string, age: 22, sex: "female" as string, distance: 5, tags: ["music", "coffee"] },
+  { id: 5, name: "Jordan T.", initials: "JT", lastMsg: "What's good?", time: "Today • 4:00 PM", unread: true, unreadCount: 2, isRevealed: false, category: "friends" as string, age: 28, sex: "male" as string, distance: 8, tags: ["sports", "gaming"] },
+  { id: 7, name: "Priya K.", initials: "PK", lastMsg: "Nice to meet you!", time: "Today • 2:15 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string, age: 26, sex: "female" as string, distance: 12, tags: ["yoga", "travel"] },
+  { id: 9, name: "Alex W.", initials: "AW", lastMsg: "Just bumped into you 👋", time: "Yesterday • 8:00 PM", unread: true, unreadCount: 1, isRevealed: false, category: "friends" as string, age: 31, sex: "male" as string, distance: 18, tags: ["tech", "coffee"] },
+  { id: 11, name: "Nina F.", initials: "NF", lastMsg: "Hey there!", time: "Yesterday • 6:45 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string, age: 20, sex: "female" as string, distance: 30, tags: ["art", "photography"] },
   // Revealed contacts (non-dating)
-  { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "Today • 3:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
-  { id: 6, name: "Kenji H.", initials: "KH", lastMsg: "Let's grab coffee ☕", time: "Today • 1:00 PM", unread: true, unreadCount: 1, isRevealed: true, category: "friends" as string },
-  { id: 8, name: "Olivia R.", initials: "OR", lastMsg: "That was fun!", time: "Today • 11:30 AM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
-  { id: 10, name: "Marcus B.", initials: "MB", lastMsg: "See you next week", time: "Yesterday • 9:15 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
-  { id: 13, name: "Tanya S.", initials: "TS", lastMsg: "Great meeting you!", time: "Yesterday • 4:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
-  { id: 15, name: "Leo G.", initials: "LG", lastMsg: "Down for Saturday?", time: "2 days ago", unread: true, unreadCount: 2, isRevealed: true, category: "friends" as string },
+  { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "Today • 3:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string, age: 29, sex: "male" as string, distance: 3, tags: ["sports", "music"] },
+  { id: 6, name: "Kenji H.", initials: "KH", lastMsg: "Let's grab coffee ☕", time: "Today • 1:00 PM", unread: true, unreadCount: 1, isRevealed: true, category: "friends" as string, age: 27, sex: "male" as string, distance: 7, tags: ["coffee", "tech"] },
+  { id: 8, name: "Olivia R.", initials: "OR", lastMsg: "That was fun!", time: "Today • 11:30 AM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string, age: 25, sex: "female" as string, distance: 15, tags: ["hiking", "yoga"] },
+  { id: 10, name: "Marcus B.", initials: "MB", lastMsg: "See you next week", time: "Yesterday • 9:15 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string, age: 34, sex: "male" as string, distance: 22, tags: ["business", "golf"] },
+  { id: 13, name: "Tanya S.", initials: "TS", lastMsg: "Great meeting you!", time: "Yesterday • 4:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string, age: 23, sex: "female" as string, distance: 10, tags: ["travel", "food"] },
+  { id: 15, name: "Leo G.", initials: "LG", lastMsg: "Down for Saturday?", time: "2 days ago", unread: true, unreadCount: 2, isRevealed: true, category: "friends" as string, age: 30, sex: "male" as string, distance: 4, tags: ["sports", "gaming"] },
   // Dates (revealed + dating)
-  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string },
-  { id: 12, name: "Emma C.", initials: "EC", lastMsg: "Can't wait for tonight 💃", time: "Today • 10:00 AM", unread: true, unreadCount: 4, isRevealed: true, category: "dating" as string },
-  { id: 14, name: "Dante V.", initials: "DV", lastMsg: "That restaurant was amazing", time: "Yesterday • 7:00 PM", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string },
-  { id: 16, name: "Sofia P.", initials: "SP", lastMsg: "You're sweet 😊", time: "Yesterday • 3:00 PM", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string },
-  { id: 17, name: "Ryan M.", initials: "RM", lastMsg: "Loved our walk in the park", time: "2 days ago", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string },
-  { id: 18, name: "Zoe A.", initials: "ZA", lastMsg: "When can I see you again?", time: "3 days ago", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string },
+  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string, age: 27, sex: "male" as string, distance: 1, tags: ["food", "movies"] },
+  { id: 12, name: "Emma C.", initials: "EC", lastMsg: "Can't wait for tonight 💃", time: "Today • 10:00 AM", unread: true, unreadCount: 4, isRevealed: true, category: "dating" as string, age: 24, sex: "female" as string, distance: 6, tags: ["dancing", "music"] },
+  { id: 14, name: "Dante V.", initials: "DV", lastMsg: "That restaurant was amazing", time: "Yesterday • 7:00 PM", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string, age: 32, sex: "male" as string, distance: 9, tags: ["food", "wine"] },
+  { id: 16, name: "Sofia P.", initials: "SP", lastMsg: "You're sweet 😊", time: "Yesterday • 3:00 PM", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string, age: 21, sex: "female" as string, distance: 14, tags: ["art", "coffee"] },
+  { id: 17, name: "Ryan M.", initials: "RM", lastMsg: "Loved our walk in the park", time: "2 days ago", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string, age: 29, sex: "male" as string, distance: 20, tags: ["hiking", "photography"] },
+  { id: 18, name: "Zoe A.", initials: "ZA", lastMsg: "When can I see you again?", time: "3 days ago", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string, age: 26, sex: "female" as string, distance: 35, tags: ["travel", "movies"] },
 ];
 
 /* ═══════ Helper: relative time ═══════ */
@@ -469,10 +469,46 @@ export default function Messages() {
   // Local list-matching filter settings (matching Explore.tsx)
   const [listDistance, setListDistance] = useState("25");
   const [distanceUnit, setDistanceUnit] = useState<"mi" | "km">("mi");
-  const [listSex, setListSex] = useState<"male" | "female" | "custom">("male");
+  const [listSex, setListSex] = useState<"male" | "female" | "custom" | "">(""  );
   const [listTags, setListTags] = useState("");
   const [listAgeMin, setListAgeMin] = useState("18");
-  const [listAgeMax, setListAgeMax] = useState("35");
+  const [listAgeMax, setListAgeMax] = useState("50");
+
+  // Toggle switches — filters only apply when toggled ON
+  const [distanceFilterOn, setDistanceFilterOn] = useState(false);
+  const [sexFilterOn, setSexFilterOn] = useState(false);
+  const [ageFilterOn, setAgeFilterOn] = useState(false);
+  const [tagsFilterOn, setTagsFilterOn] = useState(false);
+
+  // Filter function for contacts/bumps — only applies toggled-on filters
+  const applySettingsFilter = (contacts: typeof placeholderMessages) => {
+    return contacts.filter(c => {
+      // Distance filter
+      if (distanceFilterOn) {
+        const maxDist = parseFloat(listDistance) || 999;
+        const contactDist = (c as any).distance ?? 0;
+        if (contactDist > maxDist) return false;
+      }
+      // Sex filter
+      if (sexFilterOn && listSex) {
+        if ((c as any).sex && (c as any).sex !== listSex) return false;
+      }
+      // Age filter
+      if (ageFilterOn) {
+        const minAge = parseInt(listAgeMin) || 0;
+        const maxAge = parseInt(listAgeMax) || 100;
+        const contactAge = (c as any).age ?? 25;
+        if (contactAge < minAge || contactAge > maxAge) return false;
+      }
+      // Tag filter
+      if (tagsFilterOn && selectedTags.length > 0) {
+        const contactTags: string[] = (c as any).tags ?? [];
+        const hasMatchingTag = selectedTags.some(t => contactTags.includes(t.toLowerCase()));
+        if (!hasMatchingTag) return false;
+      }
+      return true;
+    });
+  };
   const [selectedTags, setSelectedTags] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem('f2f_selectedTags') || '[]'); } catch { return []; }
   });
@@ -799,82 +835,161 @@ export default function Messages() {
     const themeText = activeCategory === "dating" ? "text-rose-500" : activeCategory === "friends" ? "text-emerald-500" : "text-blue-500";
     const themeBg = activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500";
     const themeBorder = activeCategory === "dating" ? "border-rose-500" : activeCategory === "friends" ? "border-emerald-500" : "border-blue-500";
+    const themeRing = activeCategory === "dating" ? "focus:ring-rose-500/30" : activeCategory === "friends" ? "focus:ring-emerald-500/30" : "focus:ring-blue-500/30";
+    const activeCount = [distanceFilterOn, sexFilterOn, ageFilterOn, tagsFilterOn].filter(Boolean).length;
 
     return (
       <div ref={settingsScroll.ref} onScroll={settingsScroll.onScroll} className="flex-1 overflow-y-auto w-full text-slate-300 pb-20 bg-slate-950">
         <div className="flex flex-col w-full pb-24">
-          {/* distance */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
-            <span className="lowercase font-bold tracking-wide">distance</span>
-            <div className="flex items-center">
-              <span className="text-slate-500 mr-2 text-sm">[</span>
-              <input 
-                type="text" 
-                value={listDistance}
-                onChange={(e) => setListDistance(e.target.value)}
-                className={`bg-transparent w-8 text-center outline-none text-white font-medium focus:ring-1 ${themeBorder} rounded px-1`}
-              />
-              <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
-              <div className="flex items-center space-x-2 bg-slate-900/80 px-2 py-1 rounded-md border border-slate-800/50">
-                <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}>MI</button>
+          {/* Active filter count banner */}
+          {activeCount > 0 && (
+            <div className="px-5 py-3 border-b border-slate-800/80">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${themeBg} animate-pulse`} />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{activeCount} filter{activeCount > 1 ? 's' : ''} active</span>
+                <button
+                  onClick={() => { setDistanceFilterOn(false); setSexFilterOn(false); setAgeFilterOn(false); setTagsFilterOn(false); setListDistance("25"); setListSex(""); setListAgeMin("18"); setListAgeMax("50"); setSelectedTags([]); }}
+                  className="ml-auto text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors"
+                >Reset All</button>
+              </div>
+            </div>
+          )}
+
+          {/* Distance */}
+          <div className={`px-5 py-4 border-b transition-colors ${
+            distanceFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`font-bold tracking-wide ${distanceFilterOn ? themeText : "text-slate-500"}`}>Distance</span>
+              <button
+                onClick={() => setDistanceFilterOn(!distanceFilterOn)}
+                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  distanceFilterOn 
+                    ? themeBg + " text-white shadow-lg" 
+                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                }`}
+              >{distanceFilterOn ? "Active" : "Set"}</button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+                distanceFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
+              }`}>
+                <input 
+                  type="text" 
+                  value={listDistance}
+                  onChange={(e) => setListDistance(e.target.value)}
+                  className={`bg-transparent flex-1 outline-none font-medium text-sm ${distanceFilterOn ? "text-white" : "text-slate-500"}`}
+                  placeholder="25"
+                />
+                <span className="text-slate-500 text-xs">mi</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-slate-900/80 px-2 py-1.5 rounded-md border border-slate-800/50">
+                <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}>MI</button>
                 <span className="text-slate-700 text-[10px]">|</span>
-                <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}>KM</button>
+                <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}>KM</button>
               </div>
             </div>
           </div>
 
-          {/* sex */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
-            <span className="lowercase font-bold tracking-wide">sex</span>
-            <div className="flex items-center space-x-4">
-               <button onClick={() => setListSex("male")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'male' ? themeText : 'text-slate-600'}`}>male</button>
-               <button onClick={() => setListSex("female")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'female' ? themeText : 'text-slate-600'}`}>female</button>
-               <button onClick={() => setListSex("custom")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'custom' ? themeText : 'text-slate-600'}`}>custom</button>
+          {/* Sex */}
+          <div className={`px-5 py-4 border-b transition-colors ${
+            sexFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`font-bold tracking-wide ${sexFilterOn ? themeText : "text-slate-500"}`}>Sex</span>
+              <button
+                onClick={() => setSexFilterOn(!sexFilterOn)}
+                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  sexFilterOn 
+                    ? themeBg + " text-white shadow-lg" 
+                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                }`}
+              >{sexFilterOn ? "Active" : "Set"}</button>
+            </div>
+            <div className="flex items-center gap-2">
+               <button onClick={() => setListSex(listSex === "male" ? "" : "male")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'male' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Male</button>
+               <button onClick={() => setListSex(listSex === "female" ? "" : "female")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'female' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Female</button>
+               <button onClick={() => setListSex(listSex === "custom" ? "" : "custom")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'custom' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Custom</button>
             </div>
           </div>
 
           {/* Age */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
-            <span className="font-bold tracking-wide text-slate-300">Age</span>
-            <div className="flex items-center">
-              <span className="text-slate-500 mr-2 text-sm">[</span>
-              <input 
-                type="text" 
-                value={listAgeMin}
-                onChange={(e) => setListAgeMin(e.target.value)}
-                className="bg-transparent w-6 text-center outline-none text-white font-medium"
-              />
-              <span className="text-slate-500 mx-1">-</span>
-              <input 
-                type="text" 
-                value={listAgeMax}
-                onChange={(e) => setListAgeMax(e.target.value)}
-                className="bg-transparent w-6 text-center outline-none text-white font-medium"
-              />
-              <span className="text-slate-500 ml-2 text-sm">]</span>
+          <div className={`px-5 py-4 border-b transition-colors ${
+            ageFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`font-bold tracking-wide ${ageFilterOn ? themeText : "text-slate-500"}`}>Age</span>
+              <button
+                onClick={() => setAgeFilterOn(!ageFilterOn)}
+                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  ageFilterOn 
+                    ? themeBg + " text-white shadow-lg" 
+                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                }`}
+              >{ageFilterOn ? "Active" : "Set"}</button>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+                ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
+              }`}>
+                <span className="text-slate-500 text-xs">Min</span>
+                <input 
+                  type="text" 
+                  value={listAgeMin}
+                  onChange={(e) => setListAgeMin(e.target.value)}
+                  className={`bg-transparent w-8 text-center outline-none font-medium text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
+                />
+              </div>
+              <span className="text-slate-600 font-bold">—</span>
+              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+                ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
+              }`}>
+                <span className="text-slate-500 text-xs">Max</span>
+                <input 
+                  type="text" 
+                  value={listAgeMax}
+                  onChange={(e) => setListAgeMax(e.target.value)}
+                  className={`bg-transparent w-8 text-center outline-none font-medium text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
+                />
+              </div>
             </div>
           </div>
 
-          {/* tags */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
-            <span className="lowercase font-bold tracking-wide">tags</span>
-            <div className="flex items-center gap-2">
-               <button 
-                 onClick={() => setTagCloudOpen(true)}
-                 className={`flex items-center gap-1 px-3 py-1.5 rounded-md ${themeBg} hover:opacity-85 transition-colors text-white`}
-               >
-                 <Tag className="w-3 h-3" />
-                 <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
-               </button>
-               <span className="text-slate-500 text-sm">[</span>
-               <input 
-                 type="text" 
-                 placeholder="Search"
-                 value={listTags}
-                 onChange={(e) => setListTags(e.target.value)}
-                 className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-               />
-               <span className="text-slate-500 text-sm">]</span>
+          {/* Tags */}
+          <div className={`px-5 py-4 border-b transition-colors ${
+            tagsFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <span className={`font-bold tracking-wide ${tagsFilterOn ? themeText : "text-slate-500"}`}>Tags</span>
+              <button
+                onClick={() => setTagsFilterOn(!tagsFilterOn)}
+                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  tagsFilterOn 
+                    ? themeBg + " text-white shadow-lg" 
+                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                }`}
+              >{tagsFilterOn ? "Active" : "Set"}</button>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+                tagsFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
+              }`}>
+                <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                <input 
+                  type="text" 
+                  placeholder="Search tags..."
+                  value={listTags}
+                  onChange={(e) => setListTags(e.target.value)}
+                  className={`bg-transparent flex-1 outline-none text-sm font-medium placeholder:text-slate-600 ${tagsFilterOn ? "text-white" : "text-slate-500"}`}
+                />
+              </div>
+              <button 
+                onClick={() => setTagCloudOpen(true)}
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg ${themeBg} hover:opacity-85 transition-colors text-white`}
+              >
+                <Tag className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold tracking-wider uppercase">Browse</span>
+              </button>
             </div>
           </div>
 
@@ -898,7 +1013,7 @@ export default function Messages() {
 
           {/* Auto Bump Settings Row */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
-            <span className="lowercase font-bold tracking-wide">auto bump</span>
+            <span className="font-bold tracking-wide capitalize text-slate-300">Auto Bump</span>
             <button
               onClick={() => setShowAutoBumpsMenu(true)}
               className={`px-4 py-1.5 rounded-md ${themeBg} hover:opacity-85 transition-colors text-white text-xs font-bold uppercase tracking-wider`}
