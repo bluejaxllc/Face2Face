@@ -158,10 +158,27 @@ const placeholderBumpsPassed = [
 
 /* ═══════ Placeholder messages ═══════ */
 const placeholderMessages = [
+  // New contacts (unrevealed)
   { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "Today • 6:30 PM", unread: true, unreadCount: 3, isRevealed: false, category: "friends" as string },
-  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string },
   { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "Today • 5:30 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
+  { id: 5, name: "Jordan T.", initials: "JT", lastMsg: "What's good?", time: "Today • 4:00 PM", unread: true, unreadCount: 2, isRevealed: false, category: "friends" as string },
+  { id: 7, name: "Priya K.", initials: "PK", lastMsg: "Nice to meet you!", time: "Today • 2:15 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
+  { id: 9, name: "Alex W.", initials: "AW", lastMsg: "Just bumped into you 👋", time: "Yesterday • 8:00 PM", unread: true, unreadCount: 1, isRevealed: false, category: "friends" as string },
+  { id: 11, name: "Nina F.", initials: "NF", lastMsg: "Hey there!", time: "Yesterday • 6:45 PM", unread: false, unreadCount: 0, isRevealed: false, category: "friends" as string },
+  // Revealed contacts (non-dating)
   { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "Today • 3:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
+  { id: 6, name: "Kenji H.", initials: "KH", lastMsg: "Let's grab coffee ☕", time: "Today • 1:00 PM", unread: true, unreadCount: 1, isRevealed: true, category: "friends" as string },
+  { id: 8, name: "Olivia R.", initials: "OR", lastMsg: "That was fun!", time: "Today • 11:30 AM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
+  { id: 10, name: "Marcus B.", initials: "MB", lastMsg: "See you next week", time: "Yesterday • 9:15 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
+  { id: 13, name: "Tanya S.", initials: "TS", lastMsg: "Great meeting you!", time: "Yesterday • 4:30 PM", unread: false, unreadCount: 0, isRevealed: true, category: "friends" as string },
+  { id: 15, name: "Leo G.", initials: "LG", lastMsg: "Down for Saturday?", time: "2 days ago", unread: true, unreadCount: 2, isRevealed: true, category: "friends" as string },
+  // Dates (revealed + dating)
+  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string },
+  { id: 12, name: "Emma C.", initials: "EC", lastMsg: "Can't wait for tonight 💃", time: "Today • 10:00 AM", unread: true, unreadCount: 4, isRevealed: true, category: "dating" as string },
+  { id: 14, name: "Dante V.", initials: "DV", lastMsg: "That restaurant was amazing", time: "Yesterday • 7:00 PM", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string },
+  { id: 16, name: "Sofia P.", initials: "SP", lastMsg: "You're sweet 😊", time: "Yesterday • 3:00 PM", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string },
+  { id: 17, name: "Ryan M.", initials: "RM", lastMsg: "Loved our walk in the park", time: "2 days ago", unread: false, unreadCount: 0, isRevealed: true, category: "dating" as string },
+  { id: 18, name: "Zoe A.", initials: "ZA", lastMsg: "When can I see you again?", time: "3 days ago", unread: true, unreadCount: 1, isRevealed: true, category: "dating" as string },
 ];
 
 /* ═══════ Helper: relative time ═══════ */
@@ -1423,7 +1440,7 @@ export default function Messages() {
     );
 
     const renderSectionHeader = (title: string, count: number) => (
-      <div className="px-5 pt-5 pb-2 bg-slate-950/40">
+      <div className="px-5 pt-5 pb-2 border-b border-slate-800/30 bg-slate-950/40">
         <h3 className={`text-xs font-bold uppercase tracking-wider ${accent.primary} flex items-center justify-between`}>
           <span>{title}</span>
           <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-extrabold">{count}</span>
@@ -1431,73 +1448,16 @@ export default function Messages() {
       </div>
     );
 
-    const renderHorizontalSection = (
+    const renderSection = (
       title: string,
       contacts: typeof messageList,
     ) => {
       if (contacts.length === 0) return null;
-
       return (
-        <div className="mb-3">
+        <div className="mb-4">
           {renderSectionHeader(title, contacts.length)}
-          {/* Horizontal swipeable carousel */}
-          <div 
-            className="flex gap-3 overflow-x-auto px-4 pt-3 pb-2 snap-x snap-mandatory scrollbar-hide"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
-          >
-            {contacts.map((contact, idx) => (
-              <motion.div
-                key={contact.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.05, duration: 0.3, ease: "easeOut" }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() =>
-                  openConversation({
-                    id: contact.id,
-                    name: contact.name,
-                    initials: contact.initials,
-                    profilePhoto: "profilePhoto" in contact ? (contact as any).profilePhoto : null,
-                  })
-                }
-                className="flex-shrink-0 w-[160px] snap-start bg-slate-900/60 border border-slate-800/50 rounded-2xl p-3.5 cursor-pointer hover:bg-slate-800/50 transition-all hover:border-slate-700/60 group"
-              >
-                {/* Avatar */}
-                <div className="relative mb-3 flex justify-center">
-                  <Avatar className="h-14 w-14 border border-slate-700/50 overflow-hidden">
-                    <img 
-                      src={contact.profilePhoto || `https://picsum.photos/seed/bump-${contact.id}/200/200`} 
-                      alt={contact.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </Avatar>
-                  {/* Online dot */}
-                  <div className="absolute bottom-0 right-[calc(50%-28px)]">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
-                  </div>
-                </div>
-                {/* Name */}
-                <p className={`text-sm font-semibold text-center truncate mb-1 ${contact.unread ? "text-white" : "text-slate-300"}`}>
-                  {contact.name}
-                </p>
-                {/* Last message preview */}
-                <p className="text-[11px] text-slate-500 text-center truncate leading-tight">
-                  {contact.lastMsg}
-                </p>
-                {/* Time */}
-                <p className={`text-[10px] text-center mt-1.5 ${contact.unread ? accent.primary : "text-slate-600"}`}>
-                  {contact.time}
-                </p>
-                {/* Unread badge */}
-                {contact.unread && contact.unreadCount > 0 && (
-                  <div className="flex justify-center mt-2">
-                    <span className={`min-w-[20px] h-[20px] rounded-full ${accent.badge} flex items-center justify-center text-white text-[10px] font-bold px-1.5`}>
-                      {contact.unreadCount}
-                    </span>
-                  </div>
-                )}
-              </motion.div>
-            ))}
+          <div className="flex flex-col">
+            {contacts.map((contact, idx) => renderContactCard(contact, idx))}
           </div>
         </div>
       );
@@ -1545,9 +1505,9 @@ export default function Messages() {
           </motion.div>
         ) : (
           <div className="flex flex-col pb-12">
-            {renderHorizontalSection("new contacts", newContacts)}
-            {renderHorizontalSection("revealed contacts", revealedContacts)}
-            {renderHorizontalSection("dates", dates)}
+            {renderSection("new contacts", newContacts)}
+            {renderSection("revealed contacts", revealedContacts)}
+            {renderSection("dates", dates)}
             
             {newContacts.length === 0 && revealedContacts.length === 0 && dates.length === 0 && (
               <div className="text-center py-16 text-slate-500 text-sm italic">
@@ -1631,13 +1591,30 @@ export default function Messages() {
                       />
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm tracking-wide ${contact.unread ? "font-bold text-white" : "font-medium text-slate-300"}`}>
-                        {contact.name}
-                      </p>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className={`text-sm tracking-wide truncate ${contact.unread ? "font-bold text-white" : "font-medium text-slate-300"}`}>
+                            {contact.name}
+                          </p>
+                          {/* Category badge */}
+                          <span className={`flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                            !contact.isRevealed
+                              ? "bg-blue-500/20 text-blue-400"
+                              : contact.category === "dating"
+                                ? "bg-pink-500/20 text-pink-400"
+                                : "bg-emerald-500/20 text-emerald-400"
+                          }`}>
+                            {!contact.isRevealed ? "new" : contact.category === "dating" ? "date" : "revealed"}
+                          </span>
+                        </div>
+                        <span className={`flex-shrink-0 text-[10px] ml-2 ${contact.unread ? accent.primary + " font-semibold" : "text-slate-600"}`}>
+                          {contact.time}
+                        </span>
+                      </div>
                       <p className="text-[11px] text-slate-500 truncate">{contact.lastMsg}</p>
                     </div>
                     {contact.unread && contact.unreadCount > 0 && (
-                      <span className={`min-w-[20px] h-[20px] rounded-full ${accent.badge} flex items-center justify-center text-white text-[10px] font-bold px-1.5`}>
+                      <span className={`min-w-[20px] h-[20px] rounded-full ${accent.badge} flex items-center justify-center text-white text-[10px] font-bold px-1.5 flex-shrink-0`}>
                         {contact.unreadCount}
                       </span>
                     )}
