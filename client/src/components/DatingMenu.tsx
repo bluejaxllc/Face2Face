@@ -1,15 +1,20 @@
 import { useState, useMemo } from "react";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin,
   CalendarPlus,
   Search,
   XCircle,
-  Sparkles,
+  HeartHandshake,
   HelpCircle,
   ChevronLeft,
   ChevronRight,
   Heart,
+  Clock,
+  User,
+  MapPinned,
+  Calendar,
 } from "lucide-react";
 
 /* ═══════ Romantic quotes ═══════ */
@@ -28,37 +33,38 @@ const romanticQuotes = [
   "Where there is love there is life.",
 ];
 
-/* ═══════ Placeholder date appointments ═══════ */
-const placeholderDates: Record<string, { time: string; label: string; color: string }[]> = {
-  // keyed by "YYYY-MM-DD"
-};
+/* ═══════ Richer placeholder date appointments ═══════ */
+interface DateAppointment {
+  time: string;
+  label: string;
+  color: string;
+  person: string;
+  location: string;
+  notes?: string;
+}
 
-// Generate some placeholder dates for the current month
 function getPlaceholderDates() {
   const now = new Date();
   const y = now.getFullYear();
   const m = now.getMonth();
-  const dates: Record<string, { time: string; label: string; color: string }[]> = {};
-  
-  // Add a few sample dates
-  const day1 = new Date(y, m, Math.min(12, 28));
-  const day2 = new Date(y, m, Math.min(18, 28));
-  const day3 = new Date(y, m, Math.min(24, 28));
-  const day4 = new Date(y, m, Math.min(8, 28));
-  
-  const key1 = day1.toISOString().split("T")[0];
-  const key2 = day2.toISOString().split("T")[0];
-  const key3 = day3.toISOString().split("T")[0];
-  const key4 = day4.toISOString().split("T")[0];
-  
-  dates[key1] = [{ time: "2:30 PM", label: "Park Walk", color: "bg-rose-500" }];
-  dates[key2] = [
-    { time: "2:00 PM", label: "Coffee", color: "bg-amber-500" },
-    { time: "9:30 PM", label: "Dinner", color: "bg-violet-500" },
+  const dates: Record<string, DateAppointment[]> = {};
+
+  const key = (d: number) => new Date(y, m, Math.min(d, 28)).toISOString().split("T")[0];
+
+  dates[key(8)] = [
+    { time: "11:00 AM", label: "Brunch", color: "bg-emerald-500", person: "Sophia M.", location: "The Garden Café", notes: "Outdoor patio reserved" },
   ];
-  dates[key3] = [{ time: "7:00 PM", label: "Movie Night", color: "bg-sky-500" }];
-  dates[key4] = [{ time: "11:00 AM", label: "Brunch", color: "bg-emerald-500" }];
-  
+  dates[key(12)] = [
+    { time: "2:30 PM", label: "Park Walk", color: "bg-rose-500", person: "Jessica L.", location: "Riverside Park", notes: "Meet at the fountain" },
+  ];
+  dates[key(18)] = [
+    { time: "2:00 PM", label: "Coffee", color: "bg-amber-500", person: "Mia R.", location: "Blue Bottle Coffee" },
+    { time: "9:30 PM", label: "Dinner", color: "bg-violet-500", person: "Olivia K.", location: "Nobu Downtown", notes: "Reservation confirmed" },
+  ];
+  dates[key(24)] = [
+    { time: "7:00 PM", label: "Movie Night", color: "bg-sky-500", person: "Emma C.", location: "AMC Theater", notes: "Action film — she picks" },
+  ];
+
   return dates;
 }
 
@@ -68,6 +74,7 @@ const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
@@ -77,22 +84,21 @@ function getFirstDayOfMonth(year: number, month: number) {
   return new Date(year, month, 1).getDay();
 }
 
-/* ═══════ Menu Items ═══════ */
-const menuItems = [
-  { id: "datemap", label: "Date Map", icon: MapPin, description: "View dates on the map" },
-  { id: "schedule", label: "Schedule Dates", icon: CalendarPlus, description: "Plan a new date" },
-  { id: "search", label: "Search Dates", icon: Search, description: "Find available dates", hasSearch: true },
-  { id: "review", label: "Review / Cancel Dates", icon: XCircle, description: "Manage your upcoming dates" },
-  { id: "suggestions", label: "Dating Suggestions / Matchmaking", icon: Sparkles, description: "AI-powered recommendations" },
-  { id: "tips", label: "Dating Tips / Support", icon: HelpCircle, description: "Advice and help" },
-];
-
 /* ═══════ COMPONENT ═══════ */
 export default function DatingMenu() {
+  const [, navigate] = useLocation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchDayFilter, setSearchDayFilter] = useState("");
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  // Schedule form state
+  const [schedDate, setSchedDate] = useState("");
+  const [schedTime, setSchedTime] = useState("");
+  const [schedPerson, setSchedPerson] = useState("");
+  const [schedLocation, setSchedLocation] = useState("");
+  const [schedNotes, setSchedNotes] = useState("");
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -123,6 +129,38 @@ export default function DatingMenu() {
   };
 
   const getDayDates = (day: number) => dates[getDateKey(day)] || [];
+
+  // Get all dates for review/search
+  const allDatesFlat = useMemo(() => {
+    const result: (DateAppointment & { dateKey: string; dayOfWeek: string })[] = [];
+    Object.entries(dates).forEach(([key, appts]) => {
+      const d = new Date(key + "T12:00:00");
+      const dow = DAY_NAMES[d.getDay()];
+      appts.forEach(a => result.push({ ...a, dateKey: key, dayOfWeek: dow }));
+    });
+    return result.sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+  }, [dates]);
+
+  // Filtered search results
+  const searchResults = useMemo(() => {
+    return allDatesFlat.filter(d => {
+      if (searchDayFilter && !d.dayOfWeek.toLowerCase().includes(searchDayFilter.toLowerCase())) return false;
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        return d.label.toLowerCase().includes(q) || d.person.toLowerCase().includes(q) || d.location.toLowerCase().includes(q) || (d.notes?.toLowerCase().includes(q) ?? false);
+      }
+      return true;
+    });
+  }, [allDatesFlat, searchDayFilter, searchQuery]);
+
+  const handleMenuClick = (id: string) => {
+    if (id === "datemap") {
+      // Navigate to map with date filter
+      navigate("/map");
+      return;
+    }
+    setExpandedItem(expandedItem === id ? null : id);
+  };
 
   return (
     <div className="absolute inset-0 z-40 overflow-y-auto bg-slate-950/95 backdrop-blur-xl">
@@ -181,12 +219,12 @@ export default function DatingMenu() {
           <div className="grid grid-cols-7 px-3 pb-3 gap-y-0.5">
             {calendarCells.map((day, i) => {
               if (day === null) return <div key={`empty-${i}`} />;
-              
+
               const dayDates = getDayDates(day);
               const hasDates = dayDates.length > 0;
               const isTodayDay = isToday(day);
               const isSelected = selectedDay === day;
-              
+
               return (
                 <motion.button
                   key={day}
@@ -218,9 +256,9 @@ export default function DatingMenu() {
             })}
           </div>
 
-          {/* Selected day details */}
+          {/* ═══════ Selected day detail panel ═══════ */}
           <AnimatePresence>
-            {selectedDay && getDayDates(selectedDay).length > 0 && (
+            {selectedDay && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
@@ -228,17 +266,51 @@ export default function DatingMenu() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden border-t border-slate-800/50"
               >
-                <div className="px-4 py-3 space-y-2">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    {MONTHS[month]} {selectedDay} — Dates
+                <div className="px-4 py-3">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    {DAY_NAMES[new Date(year, month, selectedDay).getDay()]}, {MONTHS[month]} {selectedDay}
                   </p>
-                  {getDayDates(selectedDay).map((d, idx) => (
-                    <div key={idx} className="flex items-center gap-3 py-1.5">
-                      <div className={`w-2 h-2 rounded-full ${d.color} flex-shrink-0`} />
-                      <span className="text-xs font-bold text-white">{d.time}</span>
-                      <span className="text-xs text-slate-400">{d.label}</span>
+                  {getDayDates(selectedDay).length > 0 ? (
+                    <div className="space-y-2.5">
+                      {getDayDates(selectedDay).map((d, idx) => (
+                        <div key={idx} className="rounded-xl p-3" style={{
+                          background: "rgba(30, 41, 59, 0.6)",
+                          border: "1px solid rgba(51, 65, 85, 0.4)",
+                        }}>
+                          <div className="flex items-start gap-3">
+                            <div className={`w-3 h-3 rounded-full ${d.color} flex-shrink-0 mt-0.5`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-bold text-white">{d.label}</span>
+                                <span className="text-[10px] font-semibold text-rose-400">{d.time}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <User className="w-3 h-3 text-slate-500" />
+                                <span className="text-xs text-slate-300">{d.person}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <MapPinned className="w-3 h-3 text-slate-500" />
+                                <span className="text-xs text-slate-400">{d.location}</span>
+                              </div>
+                              {d.notes && (
+                                <p className="text-[10px] text-slate-500 italic mt-1">{d.notes}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-xs text-slate-500">No dates scheduled</p>
+                      <button
+                        onClick={() => { setExpandedItem("schedule"); setSelectedDay(null); }}
+                        className="mt-2 text-[10px] font-bold text-rose-400 uppercase tracking-wider hover:text-rose-300 transition-colors"
+                      >
+                        + Schedule a Date
+                      </button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -247,68 +319,281 @@ export default function DatingMenu() {
 
         {/* ═══════ Menu Items ═══════ */}
         <div className="flex flex-col gap-2 px-4">
-          {menuItems.map((item, idx) => {
-            const Icon = item.icon;
-            const isExpanded = expandedItem === item.id;
-            
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05, duration: 0.3 }}
-              >
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setExpandedItem(isExpanded ? null : item.id)}
-                  className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
-                  style={{
-                    background: isExpanded ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
-                    border: `1px solid ${isExpanded ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
-                  }}
-                >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    isExpanded ? "bg-rose-500/20" : "bg-slate-800/60"
-                  }`}>
-                    <Icon className={`w-4.5 h-4.5 ${isExpanded ? "text-rose-400" : "text-slate-400"}`} />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className={`text-sm font-semibold tracking-wide ${isExpanded ? "text-rose-300" : "text-slate-200"}`}>
-                      {item.label}
-                    </p>
-                    <p className="text-[10px] text-slate-500">{item.description}</p>
-                  </div>
-                  <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-                </motion.button>
 
-                {/* Search input for Search Dates */}
-                <AnimatePresence>
-                  {isExpanded && item.hasSearch && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-4 pt-2 pb-1">
-                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800/50">
-                          <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-                          <input
-                            type="text"
-                            placeholder="Search dates by keyword..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-xs font-medium"
-                            autoFocus
-                          />
-                        </div>
+          {/* Date Map */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0, duration: 0.3 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate("/map")}
+            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+            style={{
+              background: "rgba(15, 23, 42, 0.5)",
+              border: "1px solid rgba(51, 65, 85, 0.3)",
+            }}
+          >
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-800/60">
+              <MapPin className="w-4.5 h-4.5 text-slate-400" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-semibold tracking-wide text-slate-200">Date Map</p>
+              <p className="text-[10px] text-slate-500">View dates on the map</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-600" />
+          </motion.button>
+
+          {/* Schedule Dates */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05, duration: 0.3 }}
+          >
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleMenuClick("schedule")}
+              className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+              style={{
+                background: expandedItem === "schedule" ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
+                border: `1px solid ${expandedItem === "schedule" ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
+              }}
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${expandedItem === "schedule" ? "bg-rose-500/20" : "bg-slate-800/60"}`}>
+                <CalendarPlus className={`w-4.5 h-4.5 ${expandedItem === "schedule" ? "text-rose-400" : "text-slate-400"}`} />
+              </div>
+              <div className="flex-1 text-left">
+                <p className={`text-sm font-semibold tracking-wide ${expandedItem === "schedule" ? "text-rose-300" : "text-slate-200"}`}>Schedule Dates</p>
+                <p className="text-[10px] text-slate-500">Plan a new date</p>
+              </div>
+              <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${expandedItem === "schedule" ? "rotate-90" : ""}`} />
+            </motion.button>
+
+            <AnimatePresence>
+              {expandedItem === "schedule" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pt-3 pb-1 space-y-3">
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5">
+                      <Calendar className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <input type="date" value={schedDate} onChange={e => setSchedDate(e.target.value)} className="bg-transparent w-full outline-none text-white text-xs font-medium" />
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5">
+                      <Clock className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <input type="time" value={schedTime} onChange={e => setSchedTime(e.target.value)} className="bg-transparent w-full outline-none text-white text-xs font-medium" />
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5">
+                      <User className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <input type="text" placeholder="Who's the date with?" value={schedPerson} onChange={e => setSchedPerson(e.target.value)} className="bg-transparent w-full outline-none text-white placeholder:text-slate-600 text-xs font-medium" />
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5">
+                      <MapPinned className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <input type="text" placeholder="Location (e.g. Blue Bottle Coffee)" value={schedLocation} onChange={e => setSchedLocation(e.target.value)} className="bg-transparent w-full outline-none text-white placeholder:text-slate-600 text-xs font-medium" />
+                    </div>
+                    <input type="text" placeholder="Notes (optional)" value={schedNotes} onChange={e => setSchedNotes(e.target.value)} className="w-full rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5 outline-none text-white placeholder:text-slate-600 text-xs font-medium" />
+                    <button className="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold uppercase tracking-wider transition-colors">
+                      Schedule Date
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Search Dates */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleMenuClick("search")}
+              className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+              style={{
+                background: expandedItem === "search" ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
+                border: `1px solid ${expandedItem === "search" ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
+              }}
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${expandedItem === "search" ? "bg-rose-500/20" : "bg-slate-800/60"}`}>
+                <Search className={`w-4.5 h-4.5 ${expandedItem === "search" ? "text-rose-400" : "text-slate-400"}`} />
+              </div>
+              <div className="flex-1 text-left">
+                <p className={`text-sm font-semibold tracking-wide ${expandedItem === "search" ? "text-rose-300" : "text-slate-200"}`}>Search Dates</p>
+                <p className="text-[10px] text-slate-500">By day of week or keyword</p>
+              </div>
+              <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${expandedItem === "search" ? "rotate-90" : ""}`} />
+            </motion.button>
+
+            <AnimatePresence>
+              {expandedItem === "search" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pt-3 pb-1 space-y-2">
+                    {/* Day of week filter */}
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5">
+                      <Calendar className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <input
+                        type="text"
+                        placeholder="Date (e.g. June 12, Friday)"
+                        value={searchDayFilter}
+                        onChange={(e) => setSearchDayFilter(e.target.value)}
+                        className="bg-transparent w-full outline-none text-white placeholder:text-slate-600 text-xs font-medium"
+                      />
+                    </div>
+                    {/* Keyword search */}
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-900/60 border border-slate-800/50 px-3 py-2.5">
+                      <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                      <input
+                        type="text"
+                        placeholder="Keyword (e.g. Coffee, Dinner)"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-transparent w-full outline-none text-white placeholder:text-slate-600 text-xs font-medium"
+                      />
+                    </div>
+                    {/* Search results */}
+                    {searchResults.length > 0 ? (
+                      <div className="space-y-2 pt-1">
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{searchResults.length} result{searchResults.length > 1 ? "s" : ""}</p>
+                        {searchResults.map((d, idx) => (
+                          <div key={idx} className="rounded-xl p-3" style={{
+                            background: "rgba(30, 41, 59, 0.6)",
+                            border: "1px solid rgba(51, 65, 85, 0.4)",
+                          }}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-bold text-white">{d.label}</span>
+                              <span className="text-[10px] text-rose-400 font-semibold">{d.dayOfWeek}</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                              <span>{d.time}</span>
+                              <span>• {d.person}</span>
+                              <span>• {d.location}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
+                    ) : (searchDayFilter || searchQuery) ? (
+                      <p className="text-xs text-slate-500 text-center py-3">No dates found</p>
+                    ) : null}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Review / Cancel Dates */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.3 }}
+          >
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleMenuClick("review")}
+              className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+              style={{
+                background: expandedItem === "review" ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
+                border: `1px solid ${expandedItem === "review" ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
+              }}
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${expandedItem === "review" ? "bg-rose-500/20" : "bg-slate-800/60"}`}>
+                <XCircle className={`w-4.5 h-4.5 ${expandedItem === "review" ? "text-rose-400" : "text-slate-400"}`} />
+              </div>
+              <div className="flex-1 text-left">
+                <p className={`text-sm font-semibold tracking-wide ${expandedItem === "review" ? "text-rose-300" : "text-slate-200"}`}>Review / Cancel Dates</p>
+                <p className="text-[10px] text-slate-500">Manage your upcoming dates</p>
+              </div>
+              <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${expandedItem === "review" ? "rotate-90" : ""}`} />
+            </motion.button>
+
+            <AnimatePresence>
+              {expandedItem === "review" && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pt-3 pb-1 space-y-2">
+                    {allDatesFlat.length > 0 ? allDatesFlat.map((d, idx) => (
+                      <div key={idx} className="rounded-xl p-3 flex items-center gap-3" style={{
+                        background: "rgba(30, 41, 59, 0.6)",
+                        border: "1px solid rgba(51, 65, 85, 0.4)",
+                      }}>
+                        <div className={`w-2.5 h-2.5 rounded-full ${d.color} flex-shrink-0`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-white">{d.label} — {d.person}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-400">{d.dayOfWeek} • {d.time} • {d.location}</p>
+                        </div>
+                        <button className="px-2 py-1 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold uppercase tracking-wider hover:bg-red-500/30 transition-colors flex-shrink-0">
+                          Cancel
+                        </button>
+                      </div>
+                    )) : (
+                      <p className="text-xs text-slate-500 text-center py-3">No upcoming dates</p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Dating Suggestions / Matchmaking */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => handleMenuClick("suggestions")}
+            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+            style={{
+              background: expandedItem === "suggestions" ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
+              border: `1px solid ${expandedItem === "suggestions" ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
+            }}
+          >
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${expandedItem === "suggestions" ? "bg-rose-500/20" : "bg-slate-800/60"}`}>
+              <HeartHandshake className={`w-4.5 h-4.5 ${expandedItem === "suggestions" ? "text-rose-400" : "text-slate-400"}`} />
+            </div>
+            <div className="flex-1 text-left">
+              <p className={`text-sm font-semibold tracking-wide ${expandedItem === "suggestions" ? "text-rose-300" : "text-slate-200"}`}>Dating Suggestions / Matchmaking</p>
+              <p className="text-[10px] text-slate-500">Set up friends & get matched</p>
+            </div>
+            <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${expandedItem === "suggestions" ? "rotate-90" : ""}`} />
+          </motion.button>
+
+          {/* Dating Tips / Support */}
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.3 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => handleMenuClick("tips")}
+            className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+            style={{
+              background: expandedItem === "tips" ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
+              border: `1px solid ${expandedItem === "tips" ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
+            }}
+          >
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${expandedItem === "tips" ? "bg-rose-500/20" : "bg-slate-800/60"}`}>
+              <HelpCircle className={`w-4.5 h-4.5 ${expandedItem === "tips" ? "text-rose-400" : "text-slate-400"}`} />
+            </div>
+            <div className="flex-1 text-left">
+              <p className={`text-sm font-semibold tracking-wide ${expandedItem === "tips" ? "text-rose-300" : "text-slate-200"}`}>Dating Tips / Support</p>
+              <p className="text-[10px] text-slate-500">Advice and help</p>
+            </div>
+            <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${expandedItem === "tips" ? "rotate-90" : ""}`} />
+          </motion.button>
+
         </div>
       </div>
     </div>
