@@ -1,333 +1,316 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coffee, Heart, Search, Calendar, ChevronUp, ChevronDown, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import {
+  MapPin,
+  CalendarPlus,
+  Search,
+  XCircle,
+  Sparkles,
+  HelpCircle,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+} from "lucide-react";
 
-type Category = "dating" | "friends" | "business";
+/* ═══════ Romantic quotes ═══════ */
+const romanticQuotes = [
+  "Love is composed of a single soul inhabiting two bodies.",
+  "The best thing to hold onto in life is each other.",
+  "You know you're in love when you can't fall asleep.",
+  "Every love story is beautiful, but ours is my favorite.",
+  "In all the world, there is no heart for me like yours.",
+  "Love recognizes no barriers.",
+  "Two souls with but a single thought.",
+  "Wherever you go, go with all your heart.",
+  "Love is the whole thing. We are only pieces.",
+  "The heart wants what it wants.",
+  "To love is to be vulnerable.",
+  "Where there is love there is life.",
+];
 
-const catAccents: Record<Category, { accent: string; glow: string; text: string; gradient: string }> = {
-  dating:   { accent: "#f43f5e", glow: "rgba(244,63,94,0.3)", text: "text-rose-400", gradient: "from-pink-500 to-rose-600" },
-  friends:  { accent: "#10b981", glow: "rgba(16,185,129,0.3)", text: "text-emerald-400", gradient: "from-emerald-500 to-teal-600" },
-  business: { accent: "#6366f1", glow: "rgba(99,102,241,0.3)", text: "text-indigo-400", gradient: "from-indigo-500 to-blue-600" },
+/* ═══════ Placeholder date appointments ═══════ */
+const placeholderDates: Record<string, { time: string; label: string; color: string }[]> = {
+  // keyed by "YYYY-MM-DD"
 };
 
-export default function DatingMenu() {
-  const { user, updateProfile } = useAuth();
-  const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<"viewing" | "seeking" | "offering" | "events" | null>((user?.datingMode as any) || null);
+// Generate some placeholder dates for the current month
+function getPlaceholderDates() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const dates: Record<string, { time: string; label: string; color: string }[]> = {};
   
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<"seeking" | "offering" | "events" | null>(null);
-
-  const [category, setCategory] = useState<Category>(() =>
-    (localStorage.getItem("f2f_activeCategory") as Category) || "dating"
-  );
-  const c = catAccents[category];
-
-  useEffect(() => {
-    const sync = () => {
-      const cat = localStorage.getItem("f2f_activeCategory") as Category;
-      if (cat) setCategory(cat);
-    };
-    window.addEventListener("f2f:categoryChange", sync);
-    return () => window.removeEventListener("f2f:categoryChange", sync);
-  }, []);
+  // Add a few sample dates
+  const day1 = new Date(y, m, Math.min(12, 28));
+  const day2 = new Date(y, m, Math.min(18, 28));
+  const day3 = new Date(y, m, Math.min(24, 28));
+  const day4 = new Date(y, m, Math.min(8, 28));
   
-  // Form State
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    location: ""
-  });
-
-  const datingModes = [
-    { id: "viewing", label: "Just Viewing", icon: Search, color: "text-slate-400", activeColor: "text-white" },
-    { id: "seeking", label: "Seek a Date", icon: Heart, color: "text-rose-400", activeColor: "text-white" },
-    { id: "offering", label: "Offer a Date", icon: Coffee, color: "text-amber-400", activeColor: "text-white" },
-    { id: "events", label: "Find Events", icon: Calendar, color: "text-indigo-400", activeColor: "text-white" },
+  const key1 = day1.toISOString().split("T")[0];
+  const key2 = day2.toISOString().split("T")[0];
+  const key3 = day3.toISOString().split("T")[0];
+  const key4 = day4.toISOString().split("T")[0];
+  
+  dates[key1] = [{ time: "2:30 PM", label: "Park Walk", color: "bg-rose-500" }];
+  dates[key2] = [
+    { time: "2:00 PM", label: "Coffee", color: "bg-amber-500" },
+    { time: "9:30 PM", label: "Dinner", color: "bg-violet-500" },
   ];
+  dates[key3] = [{ time: "7:00 PM", label: "Movie Night", color: "bg-sky-500" }];
+  dates[key4] = [{ time: "11:00 AM", label: "Brunch", color: "bg-emerald-500" }];
+  
+  return dates;
+}
 
-  const handleModeSelect = async (newMode: typeof mode) => {
-    setMode(newMode);
-    setIsOpen(false);
-    
-    if (newMode !== "viewing" && newMode !== null) {
-      setModalType(newMode);
-      setModalOpen(true);
-    }
-    
-    if (updateProfile) {
-      try {
-        await updateProfile({ datingMode: newMode } as any);
-      } catch (err) {
-        console.error("Failed to update dating mode", err);
-      }
-    }
+/* ═══════ Calendar helpers ═══════ */
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 1).getDay();
+}
+
+/* ═══════ Menu Items ═══════ */
+const menuItems = [
+  { id: "datemap", label: "Date Map", icon: MapPin, description: "View dates on the map" },
+  { id: "schedule", label: "Schedule Dates", icon: CalendarPlus, description: "Plan a new date" },
+  { id: "search", label: "Search Dates", icon: Search, description: "Find available dates", hasSearch: true },
+  { id: "review", label: "Review / Cancel Dates", icon: XCircle, description: "Manage your upcoming dates" },
+  { id: "suggestions", label: "Dating Suggestions / Matchmaking", icon: Sparkles, description: "AI-powered recommendations" },
+  { id: "tips", label: "Dating Tips / Support", icon: HelpCircle, description: "Advice and help" },
+];
+
+/* ═══════ COMPONENT ═══════ */
+export default function DatingMenu() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = getDaysInMonth(year, month);
+  const firstDay = getFirstDayOfMonth(year, month);
+  const today = new Date();
+
+  const dates = useMemo(() => getPlaceholderDates(), []);
+
+  const quote = useMemo(() => {
+    return romanticQuotes[(month + year) % romanticQuotes.length];
+  }, [month, year]);
+
+  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+
+  // Build calendar grid
+  const calendarCells: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) calendarCells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) calendarCells.push(d);
+
+  const isToday = (day: number) =>
+    day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+  const getDateKey = (day: number) => {
+    const d = new Date(year, month, day);
+    return d.toISOString().split("T")[0];
   };
 
-  const handleModalSubmit = async () => {
-    try {
-      const payload = {
-        type: modalType,
-        title: formData.title,
-        description: formData.description,
-        date: formData.date ? `${formData.date}T${formData.time || '00:00'}` : null,
-        location: formData.location
-      };
-      
-      const res = await fetch("/api/dating-events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!res.ok) throw new Error("Failed to post event");
-      
-      setModalOpen(false);
-      setFormData({ title: "", description: "", date: "", time: "", location: "" });
-      toast({
-        title: "Successfully Posted!",
-        description: `Your ${modalType === 'events' ? 'event' : 'dating request'} has been posted to the network.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "There was a problem posting your request.",
-        variant: "destructive"
-      });
-    }
-  };
+  const getDayDates = (day: number) => dates[getDateKey(day)] || [];
 
   return (
-    <>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-auto">
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.92 }}
-              transition={{ type: "spring", stiffness: 400, damping: 28 }}
-              className="mb-4 relative overflow-hidden rounded-3xl w-64"
-            >
-              {/* Glassmorphic container */}
-              <div
-                className="relative p-4 flex flex-col gap-2"
-                style={{
-                  background: "rgba(2,6,23,0.95)",
-                  backdropFilter: "blur(24px)",
-                  border: `1px solid ${c.accent}25`,
-                  borderRadius: "24px",
-                  boxShadow: `0 20px 60px ${c.glow}, 0 0 0 1px rgba(148,163,184,0.05)`,
-                }}
+    <div className="absolute inset-0 z-40 overflow-y-auto bg-slate-950/95 backdrop-blur-xl">
+      <div className="flex flex-col min-h-full pb-8">
+        {/* ═══════ Header ═══════ */}
+        <div className="px-5 pt-5 pb-3 flex items-center justify-center">
+          <Heart className="w-5 h-5 text-rose-400 mr-2" fill="currentColor" />
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Dates</h1>
+        </div>
+
+        {/* ═══════ Calendar Card ═══════ */}
+        <div className="mx-4 mb-4 rounded-2xl overflow-hidden" style={{
+          background: "rgba(15, 23, 42, 0.8)",
+          border: "1px solid rgba(244, 63, 94, 0.15)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.3), 0 0 24px rgba(244,63,94,0.08)",
+        }}>
+          {/* Month header + quote */}
+          <div className="px-4 pt-4 pb-2">
+            <div className="flex items-center justify-between mb-2">
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={prevMonth}
+                className="p-1.5 rounded-lg hover:bg-slate-800/60 transition-colors"
               >
-                {/* SVG noise */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" aria-hidden>
-                  <filter id="dmNoise"><feTurbulence baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" /></filter>
-                  <rect width="100%" height="100%" filter="url(#dmNoise)" />
-                </svg>
-
-                {/* Floating orb */}
-                <motion.div
-                  className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${c.accent}15, transparent 70%)`, filter: "blur(20px)" }}
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                />
-
-                <div className="flex items-center justify-center gap-1.5 mb-2 relative z-10">
-                  <Sparkles className={`w-3 h-3 ${c.text}`} />
-                  <h4
-                    className="font-black text-center text-[10px] uppercase tracking-[0.2em] bg-clip-text text-transparent"
-                    style={{ backgroundImage: `linear-gradient(135deg, #fff, ${c.accent})` }}
-                  >
-                    Dating Strategy
-                  </h4>
-                </div>
-
-                {datingModes.map((m, i) => {
-                  const Icon = m.icon;
-                  const isActive = mode === m.id;
-                  return (
-                    <motion.div
-                      key={m.id}
-                      initial={{ opacity: 0, x: -15 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 24 }}
-                    >
-                      <Button
-                        variant={isActive ? "default" : "ghost"}
-                        className={`w-full justify-start h-12 rounded-2xl transition-all relative overflow-hidden ${
-                          isActive
-                            ? `bg-gradient-to-r ${c.gradient} text-white shadow-lg border-none`
-                            : "bg-slate-800/30 hover:bg-slate-800/60 border border-slate-700/30 text-slate-300 hover:text-white"
-                        }`}
-                        style={isActive ? { boxShadow: `0 8px 24px ${c.glow}` } : {}}
-                        onClick={() => handleModeSelect(m.id as any)}
-                      >
-                        <Icon className={`w-4 h-4 mr-3 ${isActive ? "text-white" : m.color}`} />
-                        <span className="font-bold text-sm tracking-wide">{m.label}</span>
-                        {isActive && (
-                          <motion.div
-                            className="absolute right-3 w-2 h-2 rounded-full bg-white"
-                            animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          />
-                        )}
-                      </Button>
-                    </motion.div>
-                  );
-                })}
+                <ChevronLeft className="w-4 h-4 text-slate-400" />
+              </motion.button>
+              <div className="text-center">
+                <h2 className="text-sm font-bold text-white tracking-wide">
+                  {MONTHS[month]} {year}
+                </h2>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Trigger Button */}
-        <motion.div whileTap={{ scale: 0.95 }}>
-          <Button
-            onClick={() => setIsOpen(!isOpen)}
-            className="rounded-full h-12 text-white w-52 flex items-center justify-between px-5 transition-all"
-            style={{
-              background: "rgba(2,6,23,0.92)",
-              backdropFilter: "blur(16px)",
-              border: `2px solid ${c.accent}40`,
-              boxShadow: `0 0 24px ${c.glow}`,
-            }}
-          >
-            <span
-              className="font-black tracking-widest uppercase text-[10px] bg-clip-text text-transparent"
-              style={{ backgroundImage: `linear-gradient(135deg, ${c.accent}, #fff)` }}
-            >
-              {mode ? datingModes.find(m => m.id === mode)?.label : "Set Dating Mode"}
-            </span>
-            {isOpen ? <ChevronDown className={`w-4 h-4 ${c.text}`} /> : <ChevronUp className={`w-4 h-4 ${c.text}`} />}
-          </Button>
-        </motion.div>
-      </div>
-
-      {/* ─── Post Modal ───────────────────────────────────────── */}
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent
-          className="sm:max-w-md p-0 rounded-2xl overflow-hidden border-0"
-          style={{
-            background: "rgba(2,6,23,0.97)",
-            backdropFilter: "blur(24px)",
-            border: `1px solid ${c.accent}20`,
-            boxShadow: `0 20px 60px rgba(0,0,0,0.5), 0 0 40px ${c.glow}`,
-          }}
-        >
-          <DialogHeader className="px-6 pt-6 pb-2">
-            <DialogTitle
-              className="text-lg font-black bg-clip-text text-transparent"
-              style={{ backgroundImage: `linear-gradient(135deg, #fff, ${c.accent})` }}
-            >
-              {modalType === 'events' ? 'Post a Dating Event' : 
-               modalType === 'seeking' ? 'What are you looking for?' : 
-               'Offer a Date'}
-            </DialogTitle>
-            <DialogDescription className="text-slate-500 text-xs">
-              {modalType === 'events' ? 'Create a local meetup or dating event for others to join.' : 
-               modalType === 'seeking' ? 'Describe the kind of date or connection you are seeking right now.' : 
-               'Describe the date experience you are offering to take someone on.'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-4 px-6 py-4">
-            {modalType === 'events' && (
-              <div className="space-y-2">
-                <Label htmlFor="title" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Event Title</Label>
-                <Input 
-                  id="title" 
-                  value={formData.title} 
-                  onChange={(e) => setFormData({...formData, title: e.target.value})} 
-                  placeholder="e.g. Coffee & Chat at Starbucks" 
-                  className="bg-slate-800/50 border-slate-700/50 text-white rounded-xl h-11 focus:ring-1"
-                  style={{ borderColor: `${c.accent}20` }}
-                />
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Description</Label>
-              <Textarea 
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Share some details..." 
-                className="bg-slate-800/50 border-slate-700/50 text-white resize-none h-24 rounded-xl focus:ring-1" 
-                style={{ borderColor: `${c.accent}20` }}
-              />
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={nextMonth}
+                className="p-1.5 rounded-lg hover:bg-slate-800/60 transition-colors"
+              >
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </motion.button>
             </div>
-            {modalType === 'events' && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Date</Label>
-                    <Input 
-                      id="date" 
-                      type="date" 
-                      value={formData.date}
-                      onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      className="bg-slate-800/50 border-slate-700/50 text-white rounded-xl h-11" 
-                      style={{ borderColor: `${c.accent}20` }}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="time" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Time</Label>
-                    <Input 
-                      id="time" 
-                      type="time" 
-                      value={formData.time}
-                      onChange={(e) => setFormData({...formData, time: e.target.value})}
-                      className="bg-slate-800/50 border-slate-700/50 text-white rounded-xl h-11" 
-                      style={{ borderColor: `${c.accent}20` }}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="location" className="text-slate-300 text-xs font-semibold uppercase tracking-wider">Location</Label>
-                  <Input 
-                    id="location" 
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    placeholder="e.g. 123 Main St, Denver, CO" 
-                    className="bg-slate-800/50 border-slate-700/50 text-white rounded-xl h-11" 
-                    style={{ borderColor: `${c.accent}20` }}
-                  />
-                </div>
-              </>
-            )}
+            {/* Romantic quote */}
+            <p className="text-[10px] text-rose-400/70 italic text-center leading-tight px-4 mb-2">
+              "{quote}"
+            </p>
           </div>
 
-          <DialogFooter className="px-6 pb-6 pt-2 gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => setModalOpen(false)}
-              className="text-slate-400 hover:text-white rounded-xl"
-            >
-              Cancel
-            </Button>
-            <motion.div whileTap={{ scale: 0.96 }}>
-              <Button
-                onClick={handleModalSubmit}
-                className={`bg-gradient-to-r ${c.gradient} text-white font-bold rounded-xl px-6`}
-                style={{ boxShadow: `0 4px 16px ${c.glow}` }}
+          {/* Day headers */}
+          <div className="grid grid-cols-7 px-3 pb-1">
+            {DAYS.map((d) => (
+              <div key={d} className="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider py-1">
+                {d}
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 px-3 pb-3 gap-y-0.5">
+            {calendarCells.map((day, i) => {
+              if (day === null) return <div key={`empty-${i}`} />;
+              
+              const dayDates = getDayDates(day);
+              const hasDates = dayDates.length > 0;
+              const isTodayDay = isToday(day);
+              const isSelected = selectedDay === day;
+              
+              return (
+                <motion.button
+                  key={day}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setSelectedDay(isSelected ? null : day)}
+                  className={`relative flex flex-col items-center py-1 rounded-lg transition-all ${
+                    isSelected
+                      ? "bg-rose-500/20 ring-1 ring-rose-500/40"
+                      : isTodayDay
+                        ? "bg-slate-800/50"
+                        : "hover:bg-slate-800/30"
+                  }`}
+                >
+                  <span className={`text-[11px] font-semibold ${
+                    isSelected ? "text-rose-400" : isTodayDay ? "text-white font-bold" : "text-slate-400"
+                  }`}>
+                    {day}
+                  </span>
+                  {/* Date appointment dots */}
+                  {hasDates && (
+                    <div className="flex gap-0.5 mt-0.5">
+                      {dayDates.slice(0, 3).map((d, idx) => (
+                        <div key={idx} className={`w-1.5 h-1.5 rounded-full ${d.color}`} />
+                      ))}
+                    </div>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Selected day details */}
+          <AnimatePresence>
+            {selectedDay && getDayDates(selectedDay).length > 0 && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden border-t border-slate-800/50"
               >
-                {modalType === 'events' ? 'Create Event' : 'Post Status'}
-              </Button>
-            </motion.div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+                <div className="px-4 py-3 space-y-2">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    {MONTHS[month]} {selectedDay} — Dates
+                  </p>
+                  {getDayDates(selectedDay).map((d, idx) => (
+                    <div key={idx} className="flex items-center gap-3 py-1.5">
+                      <div className={`w-2 h-2 rounded-full ${d.color} flex-shrink-0`} />
+                      <span className="text-xs font-bold text-white">{d.time}</span>
+                      <span className="text-xs text-slate-400">{d.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ═══════ Menu Items ═══════ */}
+        <div className="flex flex-col gap-2 px-4">
+          {menuItems.map((item, idx) => {
+            const Icon = item.icon;
+            const isExpanded = expandedItem === item.id;
+            
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05, duration: 0.3 }}
+              >
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setExpandedItem(isExpanded ? null : item.id)}
+                  className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:bg-slate-800/40"
+                  style={{
+                    background: isExpanded ? "rgba(244, 63, 94, 0.06)" : "rgba(15, 23, 42, 0.5)",
+                    border: `1px solid ${isExpanded ? "rgba(244, 63, 94, 0.2)" : "rgba(51, 65, 85, 0.3)"}`,
+                  }}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    isExpanded ? "bg-rose-500/20" : "bg-slate-800/60"
+                  }`}>
+                    <Icon className={`w-4.5 h-4.5 ${isExpanded ? "text-rose-400" : "text-slate-400"}`} />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className={`text-sm font-semibold tracking-wide ${isExpanded ? "text-rose-300" : "text-slate-200"}`}>
+                      {item.label}
+                    </p>
+                    <p className="text-[10px] text-slate-500">{item.description}</p>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 text-slate-600 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                </motion.button>
+
+                {/* Search input for Search Dates */}
+                <AnimatePresence>
+                  {isExpanded && item.hasSearch && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pt-2 pb-1">
+                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800/50">
+                          <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                          <input
+                            type="text"
+                            placeholder="Search dates by keyword..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-xs font-medium"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }

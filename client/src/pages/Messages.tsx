@@ -608,6 +608,7 @@ export default function Messages() {
 
   /* ─── Search state ─── */
   const [searchQuery, setSearchQuery] = useState("");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const filteredMessages = messageList.filter(
     (m) =>
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1439,13 +1440,33 @@ export default function Messages() {
       </motion.div>
     );
 
+    const toggleSection = (title: string) => {
+      setCollapsedSections(prev => {
+        const next = new Set(prev);
+        if (next.has(title)) next.delete(title);
+        else next.add(title);
+        return next;
+      });
+    };
+
     const renderSectionHeader = (title: string, count: number) => (
-      <div className="px-5 pt-5 pb-2 border-b border-slate-800/30 bg-slate-950/40">
+      <button
+        onClick={() => toggleSection(title)}
+        className="w-full px-5 pt-5 pb-2 border-b border-slate-800/30 bg-slate-950/40 cursor-pointer hover:bg-slate-900/40 transition-colors"
+      >
         <h3 className={`text-xs font-bold uppercase tracking-wider ${accent.primary} flex items-center justify-between`}>
-          <span>{title}</span>
-          <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-extrabold">{count}</span>
+          <span className="flex items-center gap-2">
+            {title}
+            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-extrabold">{count}</span>
+          </span>
+          <svg
+            className={`w-3.5 h-3.5 transition-transform duration-200 ${collapsedSections.has(title) ? '' : 'rotate-180'}`}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </h3>
-      </div>
+      </button>
     );
 
     const renderSection = (
@@ -1453,22 +1474,25 @@ export default function Messages() {
       contacts: typeof messageList,
     ) => {
       if (contacts.length === 0) return null;
-      // Each row is ~70px tall; show ~3 items = 210px
-      const SECTION_HEIGHT = 210;
-      const needsScroll = contacts.length > 3;
+      const isCollapsed = collapsedSections.has(title);
+      // Each row is ~70px tall; show ~5 items = 350px
+      const SECTION_HEIGHT = 350;
+      const needsScroll = contacts.length > 5;
       return (
         <div className="mb-4">
           {renderSectionHeader(title, contacts.length)}
-          <div 
-            className="flex flex-col overflow-y-auto overscroll-contain"
-            style={{ 
-              maxHeight: needsScroll ? `${SECTION_HEIGHT}px` : "auto",
-              WebkitOverflowScrolling: "touch",
-            }}
-            onTouchMove={(e) => needsScroll && e.stopPropagation()}
-          >
-            {contacts.map((contact, idx) => renderContactCard(contact, idx))}
-          </div>
+          {!isCollapsed && (
+            <div 
+              className="flex flex-col overflow-y-auto overscroll-contain"
+              style={{ 
+                maxHeight: needsScroll ? `${SECTION_HEIGHT}px` : "auto",
+                WebkitOverflowScrolling: "touch",
+              }}
+              onTouchMove={(e) => needsScroll && e.stopPropagation()}
+            >
+              {contacts.map((contact, idx) => renderContactCard(contact, idx))}
+            </div>
+          )}
         </div>
       );
     };
@@ -1609,7 +1633,7 @@ export default function Messages() {
                           {/* Category badge */}
                           <span className={`flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
                             !contact.isRevealed
-                              ? "bg-yellow-400/15 text-yellow-300"
+                              ? "bg-lime-400/20 text-lime-300"
                               : contact.category === "dating"
                                 ? "bg-rose-500/20 text-rose-400"
                                 : "bg-white/10 text-slate-300"
