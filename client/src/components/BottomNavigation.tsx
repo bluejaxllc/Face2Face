@@ -211,7 +211,7 @@ export default function BottomNavigation() {
                 </div>
               </div>
 
-              <div className="relative flex justify-center items-center mt-0.5" onClick={handleCategoryTap}>
+              <div className="relative flex justify-center items-center mt-0.5" onClick={() => navigate("/dating")}>
                 <catCfg.icon
                   className={`transition-colors duration-200 ${isCategoryActive ? catCfg.color : "text-slate-500"}`}
                   style={{ width: "22px", height: "22px" }}
