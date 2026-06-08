@@ -1080,7 +1080,7 @@ export default function Messages() {
                 className="px-2 relative group pb-1 ml-3"
               >
                 <div className="flex items-center gap-2">
-                  <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "messages" ? "text-white" : "text-slate-500"}`}>Messages</span>
+                  <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "messages" ? "text-white" : "text-slate-500"}`}>Contacts</span>
                   {unreadMessageCount > 0 && (
                     <div className="relative">
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}>
