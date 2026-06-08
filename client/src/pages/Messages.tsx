@@ -1158,8 +1158,57 @@ export default function Messages() {
                 activeBumpCategory ? renderBumpCategoryList() : (
                   bumpTab === "settings" ? renderSettings() : (
                     <div ref={bumpsScroll.ref} onScroll={bumpsScroll.onScroll} className="flex-1 overflow-y-auto w-full pb-8">
-                      {/* ── Received Bumps Section ── */}
+                      {/* ── Mutual Bumps Section ── */}
                       <div className="mb-6 pt-2">
+                        <div className="flex justify-between items-end mb-3 px-4">
+                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Mutual Bumps</h2>
+                          <button 
+                            onClick={() => setActiveBumpCategory({
+                              title: "Mutual Bumps",
+                              bumps: placeholderBumpsMutual,
+                              actionLabel: "ADD"
+                            })}
+                            className="flex flex-col items-center cursor-pointer group"
+                          >
+                            <span className={`text-[11px] font-extrabold ${accent.primary} lowercase tracking-wider mb-0 hover:opacity-80 transition-colors`}>all</span>
+                            <ChevronDown className={`w-5 h-5 ${accent.primary} group-hover:opacity-80 transition-colors translate-y-[-4px]`} strokeWidth={3} />
+                          </button>
+                        </div>
+                        {placeholderBumpsMutual.length > 0 ? (
+                          <div className="flex gap-4 overflow-x-auto pl-4 pr-4 snap-x pb-4 [&::-webkit-scrollbar]:hidden relative after:content-[''] after:w-4 after:shrink-0">
+                            {placeholderBumpsMutual.map((bump) => (
+                              <div key={bump.id} className="relative w-36 h-[210px] rounded-[24px] overflow-hidden shrink-0 snap-center shadow-lg border border-slate-800/50 cursor-pointer">
+                                <div className="w-full h-full relative bg-slate-800">
+                                  <img 
+                                    src={`https://picsum.photos/seed/bump-${bump.id}/400/600`} 
+                                    alt={bump.name} 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
+                                <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                  <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
+                                </div>
+                                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                </div>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
+                                  <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
+                                  <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
+                                </div>
+                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                                  <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>ADD</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="px-4 text-slate-600 text-sm italic">No mutual bumps yet</p>
+                        )}
+                      </div>
+
+                      {/* ── Received Bumps Section ── */}
+                      <div className="mb-6">
                         <div className="flex justify-between items-end mb-3 px-4">
                           <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Received</h2>
                           <button 
