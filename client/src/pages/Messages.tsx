@@ -438,18 +438,25 @@ export default function Messages() {
   /* ═══════ Render: Generic Bumps List ═══════ */
   const renderBumpCards = (bumps: typeof placeholderBumpsReceived, sectionLabel: string, emptyText: string, actionLabel?: string) => (
     <div ref={bumpsScroll.ref} onScroll={bumpsScroll.onScroll} className="flex-1 overflow-y-auto w-full">
-      {/* Section header */}
+      {/* Section header with count + all button */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-5 pt-5 pb-3 flex items-center gap-2.5"
+        className="px-5 pt-5 pb-3 flex items-center justify-between"
       >
-        <div className={`p-1.5 rounded-lg ${accent.bg}`}>
-          <Zap className={accent.primary} style={{ width: 14, height: 14 }} />
+        <div className="flex items-center gap-2.5">
+          <div className={`p-1.5 rounded-lg ${accent.bg}`}>
+            <Zap className={accent.primary} style={{ width: 14, height: 14 }} />
+          </div>
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-[0.15em]">
+            {bumps.length} {sectionLabel}
+          </span>
         </div>
-        <span className="text-slate-400 text-xs font-bold uppercase tracking-[0.15em]">
-          {bumps.length} {sectionLabel}
-        </span>
+        {bumps.length > 0 && (
+          <button className="text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-white transition-colors flex items-center gap-1">
+            all <ChevronRight className="w-3 h-3" />
+          </button>
+        )}
       </motion.div>
 
       {bumps.length === 0 ? (
@@ -476,65 +483,50 @@ export default function Messages() {
           </motion.button>
         </motion.div>
       ) : (
-        /* ─── Bump Cards ─── */
-        <div className="flex flex-col gap-2 px-4 pb-4">
-          {bumps.map((bump, index) => (
-            <motion.div
-              key={bump.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.06, duration: 0.35, ease: "easeOut" }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/60 backdrop-blur-sm cursor-pointer hover:bg-slate-800/50 transition-colors group"
-            >
-              {/* Avatar with gradient ring */}
-              <div className="relative flex-shrink-0">
-                <div
-                  className="p-[2px] rounded-full"
-                  style={{
-                    background: `linear-gradient(135deg, ${bump.sex === "female" ? "#ec4899, #f472b6" : "#3b82f6, #60a5fa"})`,
-                  }}
-                >
-                  <Avatar className="h-14 w-14 border-2 border-slate-950">
-                    <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 text-sm font-bold">
-                      {bump.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                <div className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full ${accent.badge} border-2 border-slate-950 flex items-center justify-center`}>
-                  <Zap style={{ width: 10, height: 10 }} className="text-white" />
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-0.5">
-                  <p className="font-semibold text-white text-sm tracking-wide">{bump.name}</p>
-                  <div className="flex items-center gap-1 text-slate-500 flex-shrink-0">
-                    <Clock style={{ width: 10, height: 10 }} />
-                    <span style={{ fontSize: 11 }}>{bump.time}</span>
+        /* ─── Tile Carousel ─── */
+        <div className="px-4 pb-4">
+          <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+            {bumps.map((bump, index) => (
+              <motion.button
+                key={bump.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.06, duration: 0.3 }}
+                whileTap={{ scale: 0.95 }}
+                className="shrink-0 w-[120px] rounded-xl overflow-hidden bg-slate-900/60 border border-slate-800/60 backdrop-blur-sm hover:border-slate-600 transition-all group"
+              >
+                {/* Profile image area */}
+                <div className="w-full h-[140px] bg-slate-800/50 flex items-center justify-center relative overflow-hidden">
+                  <div 
+                    className="w-full h-full flex items-center justify-center"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${bump.sex === "female" ? "#ec489930, #f472b620" : "#3b82f630, #60a5fa20"})` 
+                    }}
+                  >
+                    <span className="text-4xl font-bold text-slate-600">{bump.initials}</span>
+                  </div>
+                  {/* Time badge */}
+                  <div className="absolute top-2 right-2 bg-slate-950/80 backdrop-blur-sm px-1.5 py-0.5 rounded-md">
+                    <span className="text-[9px] text-slate-400 font-bold">{bump.time}</span>
+                  </div>
+                  {/* Bump icon */}
+                  <div className={`absolute bottom-2 right-2 w-5 h-5 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
+                    <Zap style={{ width: 10, height: 10 }} className="text-white" />
                   </div>
                 </div>
-                <p className="text-xs text-slate-400 truncate">{bump.message}</p>
-              </div>
-
-              {/* Action button */}
-              {actionLabel && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl ${accent.bg} border border-current/10 transition-all ${accent.badgeText}`}
-                  style={{ boxShadow: `0 0 16px ${accent.primaryHex}15` }}
-                >
-                  <Zap style={{ width: 12, height: 12 }} />
-                  <span className="font-bold" style={{ fontSize: 10, letterSpacing: "0.05em" }}>{actionLabel}</span>
-                </motion.button>
-              )}
-
-              {/* Swipe hint */}
-              <ChevronRight className="w-4 h-4 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-            </motion.div>
-          ))}
+                {/* Name + action */}
+                <div className="p-2 text-center">
+                  <p className="text-white text-[12px] font-bold truncate">{bump.name}</p>
+                  <p className="text-slate-500 text-[10px] truncate mt-0.5">{bump.message}</p>
+                  {actionLabel && (
+                    <div className={`mt-1.5 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider ${accent.bg} ${accent.badgeText}`}>
+                      {actionLabel}
+                    </div>
+                  )}
+                </div>
+              </motion.button>
+            ))}
+          </div>
         </div>
       )}
     </div>
