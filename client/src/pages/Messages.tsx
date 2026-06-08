@@ -334,6 +334,14 @@ export default function Messages() {
   const [darkMode, setDarkMode] = useState(true);
   const [showOnMap, setShowOnMap] = useState(true);
   const [soundEffects, setSoundEffects] = useState(false);
+  const [autoBumpsEnabled, setAutoBumpsEnabled] = useState(() => {
+    const stored = localStorage.getItem("f2f_settings_autoBumpsEnabled");
+    return stored === null ? true : stored === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("f2f_settings_autoBumpsEnabled", String(autoBumpsEnabled));
+  }, [autoBumpsEnabled]);
 
   /* ═══════ API: Fetch conversation partners ═══════ */
   const { data: apiConversations } = useQuery<ConversationPartner[]>({
@@ -585,6 +593,14 @@ export default function Messages() {
         icon: <Shield className="w-4 h-4" />,
         items: [
           { label: "Show on Map", subtitle: "Let others see your location", icon: <Eye className="w-4 h-4" />, state: showOnMap, setter: setShowOnMap },
+          { 
+            label: "Auto Bumps", 
+            subtitle: "Automatically bump matches nearby", 
+            icon: <Power className="w-4 h-4" />, 
+            state: autoBumpsEnabled, 
+            setter: setAutoBumpsEnabled,
+            isAutoBump: true
+          },
         ],
       },
     ];
@@ -611,7 +627,7 @@ export default function Messages() {
 
               {/* Section items */}
               <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
-                {section.items.map((item, iIdx) => (
+                {section.items.map((item: any, iIdx) => (
                   <div
                     key={item.label}
                     className={`flex items-center justify-between px-4 py-3.5 ${iIdx < section.items.length - 1 ? "border-b border-slate-800/40" : ""}`}
@@ -623,7 +639,21 @@ export default function Messages() {
                         <p className="text-xs text-slate-500 truncate">{item.subtitle}</p>
                       </div>
                     </div>
-                    <ToggleSwitch on={item.state} onToggle={() => item.setter(!item.state)} accentClass={accent.toggleOn} />
+                    {item.isAutoBump ? (
+                      <button
+                        onClick={() => item.setter(!item.state)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-md ${
+                          item.state
+                            ? `${accent.badge} text-white`
+                            : "bg-slate-800 text-slate-400 border border-slate-700/50"
+                        }`}
+                      >
+                        <Power style={{ width: 10, height: 10 }} />
+                        {item.state ? "ACTIVE" : "ACTIVATE"}
+                      </button>
+                    ) : (
+                      <ToggleSwitch on={item.state} onToggle={() => item.setter(!item.state)} accentClass={accent.toggleOn} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -695,7 +725,10 @@ export default function Messages() {
           <button onClick={() => setActiveBumpCategory(null)} className="mr-3 p-1 rounded-full hover:bg-slate-800/50 transition-colors">
             <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
           </button>
-          <h2 className={`text-[20px] font-bold text-white tracking-tight`}>{activeBumpCategory.title}</h2>
+          <div className="flex items-center gap-2">
+            {activeBumpCategory.title === "Auto Bumps" && <Power className={`w-5 h-5 ${accent.primary}`} />}
+            <h2 className={`text-[20px] font-bold text-white tracking-tight`}>{activeBumpCategory.title}</h2>
+          </div>
         </div>
         <div className="flex flex-col w-full divide-y divide-slate-800/60 pb-24">
           {activeBumpCategory.bumps.map((bump, i) => (
@@ -1318,7 +1351,10 @@ export default function Messages() {
                       {/* ── Auto Bumps Section ── */}
                       <div className="mb-6">
                         <div className="flex justify-between items-end mb-3 px-4">
-                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Auto Bumps</h2>
+                          <div className="flex items-center gap-2">
+                            <Power className={`${accent.primary} w-6 h-6`} />
+                            <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Auto Bumps</h2>
+                          </div>
                           <button 
                             onClick={() => setActiveBumpCategory({
                               title: "Auto Bumps",
@@ -1347,7 +1383,7 @@ export default function Messages() {
                                   <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
                                 </div>
                                 <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
+                                  <Power style={{ width: 12, height: 12 }} className="text-white" />
                                 </div>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                                   <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
