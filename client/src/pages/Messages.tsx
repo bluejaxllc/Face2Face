@@ -1483,12 +1483,11 @@ export default function Messages() {
           {renderSectionHeader(title, contacts.length)}
           {!isCollapsed && (
             <div 
-              className="flex flex-col overflow-y-auto overscroll-contain"
+              className="flex flex-col overflow-y-auto"
               style={{ 
                 maxHeight: needsScroll ? `${SECTION_HEIGHT}px` : "auto",
                 WebkitOverflowScrolling: "touch",
               }}
-              onTouchMove={(e) => needsScroll && e.stopPropagation()}
             >
               {contacts.map((contact, idx) => renderContactCard(contact, idx))}
             </div>
