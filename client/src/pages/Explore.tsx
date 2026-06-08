@@ -109,6 +109,7 @@ export default function Explore() {
     localStorage.setItem("f2f_explore_listTab", listTab);
   }, [primaryMode, groupTab, listTab]);
   const [selectedUserForProfile, setSelectedUserForProfile] = useState<any | null>(null);
+  const [tagSearchResults, setTagSearchResults] = useState<{ profiles: any[]; groups: any[]; profileCount: number; groupCount: number } | null>(null);
   
   // Create Group Modal State
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
@@ -624,10 +625,10 @@ export default function Explore() {
           <div className="flex items-center gap-2">
              <button 
                 onClick={() => setTagCloudOpen(true)}
-                className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white shadow-lg shadow-red-600/30 animate-pulse"
               >
                 <Tag className="w-3 h-3" />
-                <span className="text-[10px] font-bold tracking-wider uppercase">Tags</span>
+                <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
               </button>
               <span className="text-slate-500 text-sm">[</span>
               <input 
@@ -864,10 +865,10 @@ export default function Explore() {
           <div className="flex items-center gap-2">
              <button 
                onClick={() => setTagCloudOpen(true)}
-               className={`flex items-center gap-1 px-2 py-1 rounded-md bg-slate-800/80 border border-slate-700/50 hover:bg-slate-700/60 transition-colors ${theme.text}`}
+               className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white shadow-lg shadow-red-600/30 animate-pulse"
              >
                <Tag className="w-3 h-3" />
-               <span className="text-[10px] font-bold tracking-wider uppercase">Tags</span>
+               <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
              </button>
              <span className="text-slate-500 text-sm">[</span>
              <input 
@@ -1078,21 +1079,26 @@ export default function Explore() {
             <div className="flex items-center gap-2 mt-2">
               <button 
                 onClick={() => {
-                  if (newTagInput.trim()) {
-                    const tag = newTagInput.trim().toLowerCase();
-                    if (allTags.includes(tag)) {
-                      // Tag exists — add to filter
-                      if (!selectedTags.includes(tag)) {
-                        toggleTag(tag);
-                      }
-                      setNewTagInput('');
-                      toast({ title: `Filter added`, description: `#${tag} added to your filters` });
-                    } else {
-                      // Tag doesn't exist — tell user
-                      toast({ title: `No tag found`, description: `"${tag}" doesn't exist yet. Use + Create to make it.` });
+                  const query = newTagInput.trim().toLowerCase();
+                  if (query) {
+                    // Search for matching tags (partial match)
+                    const matchingTags = allTags.filter(t => t.includes(query));
+                    if (matchingTags.length > 0 && !selectedTags.includes(matchingTags[0])) {
+                      toggleTag(matchingTags[0]);
                     }
+                    // Call the search API for profiles + groups
+                    fetch(`/api/tags/search?q=${encodeURIComponent(query)}&category=${modeCategory === 'friends' ? 'friendships' : modeCategory}`)
+                      .then(r => r.json())
+                      .then(data => {
+                        setTagSearchResults(data);
+                        setNewTagInput('');
+                      })
+                      .catch(() => {
+                        // API not ready yet — show placeholder results
+                        setTagSearchResults({ profiles: [], groups: [], profileCount: 0, groupCount: 0 });
+                        setNewTagInput('');
+                      });
                   } else if (selectedTags.length > 0) {
-                    // No text, but has selected tags — apply filters and close
                     setTagCloudOpen(false);
                     if (cameFromMap.current) {
                       cameFromMap.current = false;
@@ -1139,6 +1145,86 @@ export default function Explore() {
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto">
+            {/* ═══ Search Results Panel ═══ */}
+            {tagSearchResults ? (
+              <div className="px-5 pt-5 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg">Search Results</h3>
+                  <button 
+                    onClick={() => setTagSearchResults(null)}
+                    className="text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+                  >
+                    ← Back to tags
+                  </button>
+                </div>
+
+                {/* Profiles Section */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">👤 Profiles</span>
+                    <span className={`text-[11px] font-bold ${theme.text}`}>({tagSearchResults.profileCount})</span>
+                  </div>
+                  {tagSearchResults.profiles.length > 0 ? (
+                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                      {tagSearchResults.profiles.map((p: any) => (
+                        <button
+                          key={p.id}
+                          onClick={() => { setSelectedUserForProfile(p); setTagCloudOpen(false); }}
+                          className="shrink-0 w-[120px] rounded-xl overflow-hidden bg-slate-800/60 border border-slate-700/50 hover:border-slate-500 transition-all active:scale-95"
+                        >
+                          <div className="w-full h-[140px] bg-slate-700/50 flex items-center justify-center overflow-hidden">
+                            {p.profilePhoto ? (
+                              <img src={p.profilePhoto.startsWith('data:') ? p.profilePhoto : `/api/users/${p.id}/photo`} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <span className="text-4xl">👤</span>
+                            )}
+                          </div>
+                          <div className="p-2 text-center">
+                            <p className="text-white text-[12px] font-bold truncate">{p.firstName}</p>
+                            <p className="text-slate-500 text-[10px]">{p.age} • {p.sex}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 text-sm italic">No profiles match this search</p>
+                  )}
+                </div>
+
+                {/* Groups Section */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">🏠 Groups</span>
+                    <span className={`text-[11px] font-bold ${theme.text}`}>({tagSearchResults.groupCount})</span>
+                  </div>
+                  {tagSearchResults.groups.length > 0 ? (
+                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                      {tagSearchResults.groups.map((g: any) => (
+                        <div
+                          key={g.id}
+                          className="shrink-0 w-[136px] rounded-xl overflow-hidden bg-slate-800/60 border border-slate-700/50 hover:border-slate-500 transition-all"
+                        >
+                          <div className="w-full h-[140px] bg-slate-700/50 flex items-center justify-center overflow-hidden">
+                            {g.imageUrl ? (
+                              <img src={g.imageUrl} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <img src={`https://picsum.photos/seed/${g.name}/200/200`} className="w-full h-full object-cover" alt="" />
+                            )}
+                          </div>
+                          <div className="p-2 text-center">
+                            <p className="text-white text-[12px] font-bold truncate">{g.name}</p>
+                            <p className="text-slate-500 text-[10px]">{g.memberCount || 0} members</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 text-sm italic">No groups match this search</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+            <>
             {/* Popular Section */}
             <div className="px-5 pt-5 pb-4">
               <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
@@ -1253,6 +1339,8 @@ export default function Explore() {
                 })()}
               </div>
             </div>
+            </>
+            )}
           </div>
         </div>
       )}
