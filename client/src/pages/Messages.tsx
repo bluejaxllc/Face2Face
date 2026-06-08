@@ -28,6 +28,7 @@ import {
   LogOut,
   Send,
   ArrowLeft,
+  Power,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -715,10 +716,13 @@ export default function Messages() {
               </div>
 
               <button 
-                className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                  activeBumpCategory.actionLabel === "BUMP" ? `${accent.badge} text-white` : "bg-slate-800 text-slate-300"
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                  activeBumpCategory.actionLabel === "BUMP" || activeBumpCategory.actionLabel === "ADD" || activeBumpCategory.actionLabel === "ACTIVATE"
+                    ? `${accent.badge} text-white`
+                    : "bg-slate-800 text-slate-300"
                 } shadow-md`}
               >
+                {activeBumpCategory.actionLabel === "ACTIVATE" && <Power style={{ width: 12, height: 12 }} />}
                 {activeBumpCategory.actionLabel}
               </button>
             </div>
@@ -1319,7 +1323,7 @@ export default function Messages() {
                             onClick={() => setActiveBumpCategory({
                               title: "Auto Bumps",
                               bumps: placeholderAutoBumps,
-                              actionLabel: "VIEW"
+                              actionLabel: "ACTIVATE"
                             })}
                             className="flex flex-col items-center cursor-pointer group"
                           >
@@ -1350,7 +1354,10 @@ export default function Messages() {
                                   <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
                                 </div>
                                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                                  <div className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-800/80 text-white shadow-lg`}>VIEW</div>
+                                  <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${accent.badge} text-white shadow-lg`}>
+                                    <Power style={{ width: 10, height: 10 }} />
+                                    ACTIVATE
+                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -1363,10 +1370,10 @@ export default function Messages() {
                       {/* ── Passed Bumps Section ── */}
                       <div className="mb-6">
                         <div className="flex justify-between items-end mb-3 px-4">
-                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Passed</h2>
+                          <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Passed by</h2>
                           <button 
                             onClick={() => setActiveBumpCategory({
-                              title: "Passed Bumps",
+                              title: "Passed by Bumps",
                               bumps: placeholderBumpsPassed,
                               actionLabel: "VIEW"
                             })}
@@ -1405,7 +1412,7 @@ export default function Messages() {
                             ))}
                           </div>
                         ) : (
-                          <p className="px-4 text-slate-600 text-sm italic">No passed bumps yet</p>
+                          <p className="px-4 text-slate-600 text-sm italic">No passed by bumps yet</p>
                         )}
                       </div>
                     </div>
