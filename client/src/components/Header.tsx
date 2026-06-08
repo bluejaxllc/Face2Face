@@ -3,14 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Settings, Gauge, Flame } from "lucide-react";
+import { Bell, Gauge, Flame } from "lucide-react";
 import { Logo } from "./Logo";
-import SettingsModal from "./SettingsModal";
 import NotificationsModal from "./NotificationsModal";
 
 export default function Header() {
   const { user } = useAuth();
-  const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [, navigate] = useLocation();
 
@@ -48,14 +46,7 @@ export default function Header() {
           <Gauge style={{ width: "16px", height: "16px" }} className="text-amber-400 animate-pulse" />
         </button>
 
-        <button
-          onClick={() => setShowSettings(true)}
-          className="relative flex items-center justify-center hover:bg-slate-700/50 rounded-lg transition-colors"
-          aria-label="Settings"
-          style={{ padding: "6px" }}
-        >
-          <Settings style={{ width: "16px", height: "16px" }} className="text-slate-400" />
-        </button>
+
 
         <div className="relative">
           <button
@@ -88,7 +79,6 @@ export default function Header() {
         </div>
       </div>
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showNotifications && <NotificationsModal onClose={() => setShowNotifications(false)} />}
     </header>
   );
