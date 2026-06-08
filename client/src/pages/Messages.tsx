@@ -150,26 +150,32 @@ const placeholderBumpsPassed = [
 
 /* ═══════ Placeholder messages ═══════ */
 const placeholderMessages = [
-  { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "2m", unread: true, unreadCount: 3 },
-  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "15m", unread: true, unreadCount: 1 },
-  { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "1h", unread: false, unreadCount: 0 },
-  { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "3h", unread: false, unreadCount: 0 },
+  { id: 1, name: "Sarah M.", initials: "SM", lastMsg: "Hey! Are you nearby?", time: "Today • 6:30 PM", unread: true, unreadCount: 3 },
+  { id: 2, name: "Jake R.", initials: "JR", lastMsg: "See you at the spot 🍕", time: "Today • 6:15 PM", unread: true, unreadCount: 1 },
+  { id: 3, name: "Mia L.", initials: "ML", lastMsg: "Let's meet up!", time: "Today • 5:30 PM", unread: false, unreadCount: 0 },
+  { id: 4, name: "Carlos D.", initials: "CD", lastMsg: "Thanks for connecting", time: "Today • 3:30 PM", unread: false, unreadCount: 0 },
 ];
 
 /* ═══════ Helper: relative time ═══════ */
 function formatRelativeTime(timestamp: string | null | undefined): string {
   if (!timestamp) return "";
-  const now = Date.now();
-  const then = new Date(timestamp).getTime();
-  const diffMs = now - then;
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "now";
-  if (diffMin < 60) return `${diffMin}m`;
-  const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours}h`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d`;
-  return `${Math.floor(diffDays / 7)}w`;
+  const date = new Date(timestamp);
+  const now = new Date();
+  
+  const dToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  const dCompare = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  
+  const timeStr = date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  
+  if (dCompare.getTime() === dToday.getTime()) {
+    return `Today • ${timeStr}`;
+  } else if (dCompare.getTime() === dYesterday.getTime()) {
+    return `Yesterday • ${timeStr}`;
+  } else {
+    const monthStr = date.toLocaleDateString([], { month: "short", day: "numeric" });
+    return `${monthStr} • ${timeStr}`;
+  }
 }
 
 /* ═══════ Helper: initials from name ═══════ */
