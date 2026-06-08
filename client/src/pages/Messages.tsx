@@ -404,12 +404,7 @@ export default function Messages() {
   const settingsScroll = useScrollSave("f2f_msgs_scroll_settings");
   const messagesScroll = useScrollSave("f2f_msgs_scroll_messages");
 
-  /* ─── Settings State ─── */
-  const [pushNotifs, setPushNotifs] = useState(true);
-  const [haptic, setHaptic] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
-  const [showOnMap, setShowOnMap] = useState(true);
-  const [soundEffects, setSoundEffects] = useState(false);
+
 
   /* ═══════ API: Fetch conversation partners ═══════ */
   const { data: apiConversations } = useQuery<ConversationPartner[]>({
@@ -546,9 +541,6 @@ export default function Messages() {
         className="px-5 pt-5 pb-3 flex items-center justify-between"
       >
         <div className="flex items-center gap-2.5">
-          <div className={`p-1.5 rounded-lg ${accent.bg}`}>
-            <Zap className={accent.primary} style={{ width: 14, height: 14 }} />
-          </div>
           <span className="text-slate-400 text-xs font-bold uppercase tracking-[0.15em]">
             {bumps.length} {sectionLabel}
           </span>
@@ -612,10 +604,6 @@ export default function Messages() {
                 <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
                   <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
                 </div>
-                {/* Bump icon */}
-                <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                  <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                </div>
                 {/* Name + message centered */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                   <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
@@ -641,142 +629,6 @@ export default function Messages() {
   const renderSettings = () => {
     const sections = [
       {
-        title: "Notifications",
-        icon: <Bell className="w-4 h-4" />,
-        items: [
-          { label: "Push Notifications", subtitle: "Receive bump and message alerts", icon: <Bell className="w-4 h-4" />, state: pushNotifs, setter: setPushNotifs },
-          { label: "Sound Effects", subtitle: "Play sounds on new bumps", icon: <Volume2 className="w-4 h-4" />, state: soundEffects, setter: setSoundEffects },
-          { label: "Haptic Feedback", subtitle: "Vibrate on interactions", icon: <Vibrate className="w-4 h-4" />, state: haptic, setter: setHaptic },
-        ],
-      },
-      {
-        title: "Appearance",
-        icon: <Palette className="w-4 h-4" />,
-        items: [
-          { label: "Dark Mode", subtitle: "Use dark theme across the app", icon: <Moon className="w-4 h-4" />, state: darkMode, setter: setDarkMode },
-        ],
-      },
-      {
-        title: "Privacy",
-        icon: <Shield className="w-4 h-4" />,
-        items: [
-          { label: "Show on Map", subtitle: "Let others see your location", icon: <Eye className="w-4 h-4" />, state: showOnMap, setter: setShowOnMap },
-          { 
-            label: "Auto Bump Settings", 
-            subtitle: "Configure frequency, radius & message", 
-            icon: <Radar className="w-4 h-4" />, 
-            isLink: true,
-            onClick: () => setShowAutoBumpsMenu(true)
-          },
-        ],
-      },
-    ];
-
-    return (
-      <div ref={settingsScroll.ref} onScroll={settingsScroll.onScroll} className="flex-1 overflow-y-auto w-full text-slate-300">
-        <div className="flex flex-col w-full pb-6">
-          {sections.map((section, sIdx) => (
-            <motion.div
-              key={section.title}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: sIdx * 0.08, duration: 0.35 }}
-            >
-              {/* Section header */}
-              <div className="flex items-center gap-2.5 px-5 pt-5 pb-2">
-                <div className={`p-1.5 rounded-lg ${accent.bg} ${accent.primary}`}>
-                  {section.icon}
-                </div>
-                <span className={`text-xs font-bold uppercase tracking-[0.15em] ${accent.primary}`}>
-                  {section.title}
-                </span>
-              </div>
-
-              {/* Section items */}
-              <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
-                {section.items.map((item: any, iIdx) => (
-                  <div
-                    key={item.label}
-                    onClick={item.isLink ? item.onClick : undefined}
-                    className={`flex items-center justify-between px-4 py-3.5 ${iIdx < section.items.length - 1 ? "border-b border-slate-800/40" : ""} ${item.isLink ? "cursor-pointer hover:bg-slate-850/50 transition-colors" : ""}`}
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="text-slate-500 flex-shrink-0">{item.icon}</div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-200 tracking-wide">{item.label}</p>
-                        <p className="text-xs text-slate-500 truncate">{item.subtitle}</p>
-                      </div>
-                    </div>
-                    {item.isLink ? (
-                      <ChevronRight className="w-4 h-4 text-slate-600" />
-                    ) : (
-                      <ToggleSwitch on={item.state} onToggle={() => item.setter(!item.state)} accentClass={accent.toggleOn} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-
-          {/* Account Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.35 }}
-          >
-            <div className="flex items-center gap-2.5 px-5 pt-6 pb-2">
-              <div className="p-1.5 rounded-lg bg-slate-800/60 text-slate-400">
-                <User className="w-4 h-4" />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
-                Account
-              </span>
-            </div>
-
-            <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
-              <motion.div
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800/40 cursor-pointer hover:bg-slate-800/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Settings className="w-4 h-4 text-slate-500" />
-                  <span className="text-sm font-semibold text-slate-200 tracking-wide">Edit Profile</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-600" />
-              </motion.div>
-
-              <motion.div
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800/40 cursor-pointer hover:bg-slate-800/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Shield className="w-4 h-4 text-slate-500" />
-                  <span className="text-sm font-semibold text-slate-200 tracking-wide">Privacy & Safety</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-600" />
-              </motion.div>
-
-              <motion.div
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center justify-between px-4 py-3.5 cursor-pointer hover:bg-rose-500/10 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <LogOut className="w-4 h-4 text-rose-500" />
-                  <span className="text-sm font-semibold text-rose-500 tracking-wide">Log Out</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-rose-500/40" />
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    );
-  };
-
-  /* ═══════ Render: Auto Bumps Settings & Upgrade Menu ═══════ */
-  const renderAutoBumpsMenu = () => {
-    const sections = [
-      {
         title: "Status",
         icon: <Shield className="w-4 h-4" />,
         content: (
@@ -798,7 +650,7 @@ export default function Messages() {
       },
       {
         title: "Parameters",
-        icon: <Settings className="w-4 h-4" />,
+        icon: <Radar className="w-4 h-4" />,
         content: (
           <div className="divide-y divide-slate-800/40">
             {/* Scan Frequency */}
@@ -821,7 +673,7 @@ export default function Messages() {
                     className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                       scanFrequency === opt.value
                         ? `${accent.badge} text-white border-transparent shadow-md`
-                        : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
+                        : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
                     }`}
                   >
                     {opt.label}
@@ -850,7 +702,7 @@ export default function Messages() {
                     className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                       selectedRadius === opt.value
                         ? `${accent.badge} text-white border-transparent shadow-md`
-                        : "bg-slate-850 text-slate-400 border-slate-805 hover:border-slate-700"
+                        : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
                     }`}
                   >
                     {opt.label}
@@ -876,7 +728,7 @@ export default function Messages() {
                 value={autoBumpMessage}
                 onChange={(e) => setAutoBumpMessage(e.target.value)}
                 placeholder="Hey! Bumped you..."
-                className="w-full h-24 rounded-xl bg-slate-950 border border-slate-805 p-3 text-slate-200 placeholder:text-slate-600 text-sm outline-none focus:border-slate-700 transition-colors resize-none"
+                className="w-full h-24 rounded-xl bg-slate-950 border border-slate-800 p-3 text-slate-200 placeholder:text-slate-600 text-sm outline-none focus:border-slate-700 transition-colors resize-none"
               />
             </div>
           </div>
@@ -885,79 +737,59 @@ export default function Messages() {
     ];
 
     return (
-      <AnimatePresence>
-        {showAutoBumpsMenu && (
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed inset-0 z-[10000] bg-slate-950 flex flex-col pb-[env(safe-area-inset-bottom,20px)]"
-          >
-            {/* Header */}
-            <div 
-              className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl shrink-0"
-              style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      <div ref={settingsScroll.ref} onScroll={settingsScroll.onScroll} className="flex-1 overflow-y-auto w-full text-slate-300 pb-8">
+        <div className="flex flex-col w-full pb-6">
+          {/* Back to Bumps header button */}
+          <div className="px-5 pt-4 pb-2">
+            <button
+              onClick={() => setBumpTab("sent")}
+              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
-              <button 
-                onClick={() => setShowAutoBumpsMenu(false)} 
-                className="mr-3 p-1 rounded-full hover:bg-slate-800/50 transition-colors"
-              >
-                <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
-              </button>
-              <div className="flex items-center gap-2">
-                <Radar className={`w-5 h-5 ${accent.primary}`} />
-                <h2 className="text-[20px] font-bold text-white tracking-tight">Auto Bump Settings</h2>
+              <ArrowLeft className="w-4 h-4" />
+              Back to Bumps
+            </button>
+          </div>
+
+          {sections.map((section) => (
+            <div key={section.title} className="flex flex-col">
+              {/* Section header */}
+              <div className="flex items-center gap-2.5 px-5 pt-5 pb-2">
+                <div className={`p-1.5 rounded-lg ${accent.bg} ${accent.primary}`}>
+                  {section.icon}
+                </div>
+                <span className={`text-xs font-bold uppercase tracking-[0.15em] ${accent.primary}`}>
+                  {section.title}
+                </span>
+              </div>
+
+              {/* Section content card */}
+              <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
+                {section.content}
               </div>
             </div>
+          ))}
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto pb-8">
-              {sections.map((section) => (
-                <div key={section.title} className="flex flex-col">
-                  {/* Section header */}
-                  <div className="flex items-center gap-2.5 px-5 pt-5 pb-2">
-                    <div className={`p-1.5 rounded-lg ${accent.bg} ${accent.primary}`}>
-                      {section.icon}
-                    </div>
-                    <span className={`text-xs font-bold uppercase tracking-[0.15em] ${accent.primary}`}>
-                      {section.title}
-                    </span>
-                  </div>
-
-                  {/* Section content card */}
-                  <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
-                    {section.content}
-                  </div>
-                </div>
-              ))}
-
-              {/* Premium Upgrade Callout Banner */}
-              <div className="mx-4 mt-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">Premium Feature</span>
-                  </div>
-                  <h4 className="text-[17px] font-extrabold text-white tracking-tight leading-snug">Unlock Unlimited Auto Bumps</h4>
-                  <p className="text-slate-400 text-xs leading-relaxed">
-                    Set up automatic proximity nets, custom Greetings, and scan without limits. Never miss a connection.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowAutoBumpsMenu(false);
-                    setLocation("/store");
-                  }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all cursor-pointer"
-                >
-                  Upgrade to Premium
-                </button>
+          {/* Premium Upgrade Callout Banner */}
+          <div className="mx-4 mt-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4 mb-8">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">Premium Feature</span>
               </div>
+              <h4 className="text-[17px] font-extrabold text-white tracking-tight leading-snug">Unlock Unlimited Auto Bumps</h4>
+              <p className="text-slate-400 text-xs leading-relaxed">
+                Set up automatic proximity nets, custom Greetings, and scan without limits. Never miss a connection.
+              </p>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <button
+              onClick={() => setLocation("/store")}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all cursor-pointer"
+            >
+              Upgrade to Premium
+            </button>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -972,7 +804,6 @@ export default function Messages() {
             <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
           </button>
           <div className="flex items-center gap-2">
-            <Zap className={`w-5 h-5 ${accent.primary}`} />
             <h2 className={`text-[20px] font-bold text-white tracking-tight`}>{activeBumpCategory.title}</h2>
           </div>
         </div>
@@ -1412,33 +1243,43 @@ export default function Messages() {
                   <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${accent.indicator} rounded-full translate-y-1 mx-2`} />
                 )}
               </button>
-
-              {/* Settings Gear Button on the right */}
-              {primaryMode === "bumps" && !activeBumpCategory && (
-                <button
-                  onClick={() => {
-                    setBumpTab(bumpTab === "settings" ? "sent" : "settings");
-                  }}
-                  className={`absolute right-4 p-2 rounded-xl transition-all ${
-                    bumpTab === "settings"
-                      ? `${accent.bg} ${accent.primary}`
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
-                  aria-label="Settings"
-                >
-                  <Settings className="w-5.5 h-5.5" />
-                </button>
-              )}
             </div>
+
+            {primaryMode === "bumps" && !activeBumpCategory && (
+              <div className="w-full flex border-t border-slate-800/50 h-[44px]">
+                <button 
+                  onClick={() => setBumpTab("sent")}
+                  className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
+                >
+                  <span className={`text-sm font-semibold tracking-wide ${bumpTab !== "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                    view bumps
+                  </span>
+                  {bumpTab !== "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                </button>
+                <div className="w-px bg-slate-800 self-center h-5" />
+                <button 
+                  onClick={() => setBumpTab("settings")}
+                  className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
+                >
+                  <span className={`text-sm font-semibold tracking-wide ${bumpTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                    settings
+                  </span>
+                  {bumpTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ═══════ Main Content Area ═══════ */}
       <div
         className="fixed left-0 right-0 overflow-hidden z-[2]"
         style={{
-          top: activeConversation ? "0px" : "64px",
+          top: activeConversation 
+            ? "0px" 
+            : (primaryMode === "bumps" && !activeBumpCategory) 
+              ? "108px" 
+              : "64px",
           bottom: activeConversation ? "0px" : "60px",
         }}
       >
@@ -1477,7 +1318,7 @@ export default function Messages() {
                           <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
                           <input
                             type="text"
-                            placeholder="Search bumps..."
+                            placeholder="Search by keyword..."
                             value={bumpsSearchQuery}
                             onChange={(e) => setBumpsSearchQuery(e.target.value)}
                             className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
@@ -1528,9 +1369,6 @@ export default function Messages() {
                                       <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
                                         <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
                                       </div>
-                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                      </div>
                                       <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                                         <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
                                         <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
@@ -1578,9 +1416,6 @@ export default function Messages() {
                                       <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
                                       <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
                                         <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                      </div>
-                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
                                       </div>
                                       <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                                         <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
@@ -1630,9 +1465,6 @@ export default function Messages() {
                                       <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
                                         <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
                                       </div>
-                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                      </div>
                                       <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                                         <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
                                         <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
@@ -1654,10 +1486,9 @@ export default function Messages() {
                             <div className="mb-6">
                               <div className="flex justify-between items-end mb-3 px-4">
                                 <div className="flex items-center gap-2">
-                                  <Zap className={`${accent.primary} w-6 h-6`} />
                                   <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Auto Bumps</h2>
                                   <button
-                                    onClick={() => setShowAutoBumpsMenu(true)}
+                                    onClick={() => setBumpTab("settings")}
                                     className="px-3 py-1 rounded-full text-xs font-semibold lowercase transition-all cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 ml-2"
                                   >
                                     activate
@@ -1689,9 +1520,6 @@ export default function Messages() {
                                       <div className="absolute inset-0 bg-slate-950/40 pointer-events-none" />
                                       <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
                                         <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
-                                      </div>
-                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
                                       </div>
                                       <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                                         <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
@@ -1743,9 +1571,6 @@ export default function Messages() {
                                       <div className="absolute top-3 right-3 bg-slate-950/70 backdrop-blur-sm px-2 py-0.5 rounded-full">
                                         <span className="text-[10px] text-white/80 font-bold">{bump.time}</span>
                                       </div>
-                                      <div className={`absolute top-3 left-3 w-6 h-6 rounded-full ${accent.badge} flex items-center justify-center shadow-lg`}>
-                                        <Zap style={{ width: 12, height: 12 }} className="text-white" />
-                                      </div>
                                       <div className="absolute inset-0 flex flex-col items-center justify-center px-3 pointer-events-none text-center">
                                         <h3 className="font-extrabold text-[16px] leading-snug text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{bump.name}</h3>
                                         <p className="text-[11px] text-white/60 mt-1 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{bump.message}</p>
@@ -1776,7 +1601,6 @@ export default function Messages() {
 
       {/* Hide bottom nav when in conversation */}
       {!activeConversation && <BottomNavigation />}
-      {renderAutoBumpsMenu()}
     </PageTransition>
   );
 }
