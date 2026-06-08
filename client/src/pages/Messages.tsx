@@ -870,7 +870,7 @@ export default function Messages() {
                 }`}
               >{distanceFilterOn ? "Active" : "Set"}</button>
             </div>
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 transition-opacity ${distanceFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
               <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
                 distanceFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
               }`}>
@@ -878,15 +878,16 @@ export default function Messages() {
                   type="text" 
                   value={listDistance}
                   onChange={(e) => setListDistance(e.target.value)}
+                  disabled={!distanceFilterOn}
                   className={`bg-transparent flex-1 outline-none font-medium text-sm ${distanceFilterOn ? "text-white" : "text-slate-500"}`}
                   placeholder="25"
                 />
                 <span className="text-slate-500 text-xs">mi</span>
               </div>
               <div className="flex items-center space-x-2 bg-slate-900/80 px-2 py-1.5 rounded-md border border-slate-800/50">
-                <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}>MI</button>
+                <button disabled={!distanceFilterOn} onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}>MI</button>
                 <span className="text-slate-700 text-[10px]">|</span>
-                <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}>KM</button>
+                <button disabled={!distanceFilterOn} onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}>KM</button>
               </div>
             </div>
           </div>
@@ -906,10 +907,10 @@ export default function Messages() {
                 }`}
               >{sexFilterOn ? "Active" : "Set"}</button>
             </div>
-            <div className="flex items-center gap-2">
-               <button onClick={() => setListSex(listSex === "male" ? "" : "male")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'male' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Male</button>
-               <button onClick={() => setListSex(listSex === "female" ? "" : "female")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'female' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Female</button>
-               <button onClick={() => setListSex(listSex === "custom" ? "" : "custom")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'custom' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Custom</button>
+            <div className={`flex items-center gap-2 transition-opacity ${sexFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
+               <button disabled={!sexFilterOn} onClick={() => setListSex(listSex === "male" ? "" : "male")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'male' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Male</button>
+               <button disabled={!sexFilterOn} onClick={() => setListSex(listSex === "female" ? "" : "female")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'female' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Female</button>
+               <button disabled={!sexFilterOn} onClick={() => setListSex(listSex === "custom" ? "" : "custom")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'custom' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Custom</button>
             </div>
           </div>
 
@@ -928,7 +929,7 @@ export default function Messages() {
                 }`}
               >{ageFilterOn ? "Active" : "Set"}</button>
             </div>
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 transition-opacity ${ageFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
               <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
                 ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
               }`}>
@@ -937,6 +938,7 @@ export default function Messages() {
                   type="text" 
                   value={listAgeMin}
                   onChange={(e) => setListAgeMin(e.target.value)}
+                  disabled={!ageFilterOn}
                   className={`bg-transparent w-8 text-center outline-none font-medium text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
                 />
               </div>
@@ -949,6 +951,7 @@ export default function Messages() {
                   type="text" 
                   value={listAgeMax}
                   onChange={(e) => setListAgeMax(e.target.value)}
+                  disabled={!ageFilterOn}
                   className={`bg-transparent w-8 text-center outline-none font-medium text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
                 />
               </div>
@@ -970,7 +973,7 @@ export default function Messages() {
                 }`}
               >{tagsFilterOn ? "Active" : "Set"}</button>
             </div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className={`flex items-center gap-2 mb-2 transition-opacity ${tagsFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
               <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
                 tagsFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
               }`}>
@@ -980,10 +983,12 @@ export default function Messages() {
                   placeholder="Search tags..."
                   value={listTags}
                   onChange={(e) => setListTags(e.target.value)}
+                  disabled={!tagsFilterOn}
                   className={`bg-transparent flex-1 outline-none text-sm font-medium placeholder:text-slate-600 ${tagsFilterOn ? "text-white" : "text-slate-500"}`}
                 />
               </div>
               <button 
+                disabled={!tagsFilterOn}
                 onClick={() => setTagCloudOpen(true)}
                 className={`flex items-center gap-1 px-3 py-2 rounded-lg ${themeBg} hover:opacity-85 transition-colors text-white`}
               >
