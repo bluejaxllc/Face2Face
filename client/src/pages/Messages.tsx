@@ -1453,10 +1453,20 @@ export default function Messages() {
       contacts: typeof messageList,
     ) => {
       if (contacts.length === 0) return null;
+      // Each row is ~70px tall; show ~3 items = 210px
+      const SECTION_HEIGHT = 210;
+      const needsScroll = contacts.length > 3;
       return (
         <div className="mb-4">
           {renderSectionHeader(title, contacts.length)}
-          <div className="flex flex-col">
+          <div 
+            className="flex flex-col overflow-y-auto overscroll-contain"
+            style={{ 
+              maxHeight: needsScroll ? `${SECTION_HEIGHT}px` : "auto",
+              WebkitOverflowScrolling: "touch",
+            }}
+            onTouchMove={(e) => needsScroll && e.stopPropagation()}
+          >
             {contacts.map((contact, idx) => renderContactCard(contact, idx))}
           </div>
         </div>
