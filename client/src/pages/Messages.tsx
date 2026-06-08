@@ -902,7 +902,7 @@ export default function Messages() {
               onClick={() => setShowAutoBumpsMenu(true)}
               className={`px-4 py-1.5 rounded-md ${themeBg} hover:opacity-85 transition-colors text-white text-xs font-bold uppercase tracking-wider`}
             >
-              settings
+              Settings
             </button>
           </div>
         </div>
@@ -1515,9 +1515,9 @@ export default function Messages() {
           </motion.div>
         ) : (
           <div className="flex flex-col pb-12">
-            {renderSection("new contacts", newContacts)}
-            {renderSection("revealed contacts", revealedContacts)}
-            {renderSection("dates", dates)}
+            {renderSection("New Contacts", newContacts)}
+            {renderSection("Revealed Contacts", revealedContacts)}
+            {renderSection("Dates", dates)}
             
             {newContacts.length === 0 && revealedContacts.length === 0 && dates.length === 0 && (
               <div className="text-center py-16 text-slate-500 text-sm italic">
@@ -1695,21 +1695,7 @@ export default function Messages() {
                 }}
                 className="px-2 relative group pb-1 ml-3"
               >
-                <div className="flex items-center gap-2">
-                  <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "messages" ? "text-white" : "text-slate-500"}`}>Contacts</span>
-                  {unreadMessageCount > 0 && (
-                    <div className="relative">
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${accent.badge} text-white min-w-[20px] text-center leading-none`}>
-                        {totalUnreadBadge}
-                      </span>
-                      <motion.div
-                        className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ${accent.badge}`}
-                        animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                    </div>
-                  )}
-                </div>
+                <span className={`text-[22px] font-extrabold tracking-tight transition-colors ${primaryMode === "messages" ? "text-white" : "text-slate-500"}`}>Contacts</span>
                 {primaryMode === "messages" && (
                   <div className={`absolute -bottom-1 left-0 right-0 h-[2px] ${accent.indicator} rounded-full translate-y-1 mx-2`} />
                 )}
@@ -1723,7 +1709,7 @@ export default function Messages() {
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
                   <span className={`text-sm font-semibold tracking-wide ${bumpTab !== "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
-                    view bumps
+                    View Bumps
                   </span>
                   {bumpTab !== "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
                 </button>
@@ -1733,7 +1719,7 @@ export default function Messages() {
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
                   <span className={`text-sm font-semibold tracking-wide ${bumpTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
-                    settings
+                    Settings
                   </span>
                   {bumpTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
                 </button>
@@ -1747,7 +1733,7 @@ export default function Messages() {
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
                   <span className={`text-sm font-semibold tracking-wide ${messageTab === "all" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
-                    all contacts
+                    All Contacts
                   </span>
                   {messageTab === "all" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
                 </button>
@@ -1757,7 +1743,7 @@ export default function Messages() {
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
                   <span className={`text-sm font-semibold tracking-wide ${messageTab === "contacts" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
-                    recent contacts
+                    Recent Contacts
                   </span>
                   {messageTab === "contacts" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
                 </button>
@@ -1767,7 +1753,7 @@ export default function Messages() {
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
                   <span className={`text-sm font-semibold tracking-wide ${messageTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
-                    settings
+                    Settings
                   </span>
                   {messageTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
                 </button>
