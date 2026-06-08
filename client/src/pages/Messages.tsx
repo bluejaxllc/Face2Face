@@ -1609,10 +1609,10 @@ export default function Messages() {
                           {/* Category badge */}
                           <span className={`flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
                             !contact.isRevealed
-                              ? "bg-amber-500/20 text-amber-400"
+                              ? "bg-yellow-400/15 text-yellow-300"
                               : contact.category === "dating"
-                                ? "bg-pink-500/20 text-pink-400"
-                                : "bg-violet-500/20 text-violet-400"
+                                ? "bg-rose-500/20 text-rose-400"
+                                : "bg-white/10 text-slate-300"
                           }`}>
                             {!contact.isRevealed ? "new" : contact.category === "dating" ? "date" : "revealed"}
                           </span>
