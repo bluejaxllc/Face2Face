@@ -39,7 +39,10 @@ interface DateAppointment {
   label: string;
   color: string;
   person: string;
+  personAvatar: string;
+  profileId?: number;
   location: string;
+  venueImage: string;
   notes?: string;
 }
 
@@ -52,17 +55,17 @@ function getPlaceholderDates() {
   const key = (d: number) => new Date(y, m, Math.min(d, 28)).toISOString().split("T")[0];
 
   dates[key(8)] = [
-    { time: "11:00 AM", label: "Brunch", color: "bg-emerald-500", person: "Sophia M.", location: "The Garden Café", notes: "Outdoor patio reserved" },
+    { time: "11:00 AM", label: "Brunch", color: "bg-emerald-500", person: "Sophia M.", personAvatar: "https://i.pravatar.cc/80?img=1", profileId: 201, location: "The Garden Café", venueImage: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=200&fit=crop", notes: "Outdoor patio reserved" },
   ];
   dates[key(12)] = [
-    { time: "2:30 PM", label: "Park Walk", color: "bg-rose-500", person: "Jessica L.", location: "Riverside Park", notes: "Meet at the fountain" },
+    { time: "2:30 PM", label: "Park Walk", color: "bg-rose-500", person: "Jessica L.", personAvatar: "https://i.pravatar.cc/80?img=5", profileId: 202, location: "Riverside Park", venueImage: "https://images.unsplash.com/photo-1585938389612-a552a28d6914?w=400&h=200&fit=crop", notes: "Meet at the fountain" },
   ];
   dates[key(18)] = [
-    { time: "2:00 PM", label: "Coffee", color: "bg-amber-500", person: "Mia R.", location: "Blue Bottle Coffee" },
-    { time: "9:30 PM", label: "Dinner", color: "bg-violet-500", person: "Olivia K.", location: "Nobu Downtown", notes: "Reservation confirmed" },
+    { time: "2:00 PM", label: "Coffee", color: "bg-amber-500", person: "Mia R.", personAvatar: "https://i.pravatar.cc/80?img=9", profileId: 203, location: "Blue Bottle Coffee", venueImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=200&fit=crop" },
+    { time: "9:30 PM", label: "Dinner", color: "bg-violet-500", person: "Olivia K.", personAvatar: "https://i.pravatar.cc/80?img=16", profileId: 204, location: "Nobu Downtown", venueImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop", notes: "Reservation confirmed" },
   ];
   dates[key(24)] = [
-    { time: "7:00 PM", label: "Movie Night", color: "bg-sky-500", person: "Emma C.", location: "AMC Theater", notes: "Action film — she picks" },
+    { time: "7:00 PM", label: "Movie Night", color: "bg-sky-500", person: "Emma C.", personAvatar: "https://i.pravatar.cc/80?img=20", profileId: 205, location: "AMC Theater", venueImage: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=200&fit=crop", notes: "Action film — she picks" },
   ];
 
   return dates;
@@ -271,30 +274,77 @@ export default function DatingMenu() {
                     {DAY_NAMES[new Date(year, month, selectedDay).getDay()]}, {MONTHS[month]} {selectedDay}
                   </p>
                   {getDayDates(selectedDay).length > 0 ? (
-                    <div className="space-y-2.5">
+                    <div className="space-y-3">
                       {getDayDates(selectedDay).map((d, idx) => (
-                        <div key={idx} className="rounded-xl p-3" style={{
+                        <div key={idx} className="rounded-xl overflow-hidden" style={{
                           background: "rgba(30, 41, 59, 0.6)",
                           border: "1px solid rgba(51, 65, 85, 0.4)",
                         }}>
-                          <div className="flex items-start gap-3">
-                            <div className={`w-3 h-3 rounded-full ${d.color} flex-shrink-0 mt-0.5`} />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold text-white">{d.label}</span>
-                                <span className="text-[10px] font-semibold text-rose-400">{d.time}</span>
+                          {/* Venue image */}
+                          <div className="relative h-[100px] overflow-hidden">
+                            <img
+                              src={d.venueImage}
+                              alt={d.location}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent" />
+                            <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
+                              <div>
+                                <span className="text-sm font-bold text-white drop-shadow-lg">{d.label}</span>
+                                <p className="text-[10px] text-slate-300/90 drop-shadow">{d.location}</p>
                               </div>
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <User className="w-3 h-3 text-slate-500" />
-                                <span className="text-xs text-slate-300">{d.person}</span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${d.color}`}>{d.time}</span>
+                            </div>
+                          </div>
+
+                          {/* Card body */}
+                          <div className="p-3 space-y-2.5">
+                            {/* Person row — clickable */}
+                            <button
+                              onClick={() => d.profileId && navigate(`/profile/${d.profileId}`)}
+                              className="w-full flex items-center gap-3 p-2 rounded-lg bg-slate-800/40 hover:bg-slate-800/70 transition-colors"
+                            >
+                              <img
+                                src={d.personAvatar}
+                                alt={d.person}
+                                className="w-9 h-9 rounded-full object-cover ring-2 ring-rose-500/30"
+                              />
+                              <div className="flex-1 text-left min-w-0">
+                                <p className="text-xs font-bold text-white truncate">{d.person}</p>
+                                <p className="text-[9px] text-rose-400/80">View Profile →</p>
                               </div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <MapPinned className="w-3 h-3 text-slate-500" />
-                                <span className="text-xs text-slate-400">{d.location}</span>
+                            </button>
+
+                            {/* Venue row — clickable */}
+                            <button
+                              onClick={() => navigate("/map")}
+                              className="w-full flex items-center gap-3 p-2 rounded-lg bg-slate-800/40 hover:bg-slate-800/70 transition-colors"
+                            >
+                              <div className="w-9 h-9 rounded-lg bg-slate-700/60 flex items-center justify-center flex-shrink-0">
+                                <MapPinned className="w-4 h-4 text-slate-400" />
                               </div>
-                              {d.notes && (
-                                <p className="text-[10px] text-slate-500 italic mt-1">{d.notes}</p>
-                              )}
+                              <div className="flex-1 text-left min-w-0">
+                                <p className="text-xs font-bold text-white truncate">{d.location}</p>
+                                <p className="text-[9px] text-sky-400/80">View on Map →</p>
+                              </div>
+                            </button>
+
+                            {/* Notes */}
+                            {d.notes && (
+                              <p className="text-[10px] text-slate-500 italic px-1">{d.notes}</p>
+                            )}
+
+                            {/* Action buttons */}
+                            <div className="flex gap-2 pt-1">
+                              <button className="flex-1 py-2 rounded-lg bg-rose-500/15 text-rose-400 text-[10px] font-bold uppercase tracking-wider hover:bg-rose-500/25 transition-colors">
+                                Message
+                              </button>
+                              <button className="flex-1 py-2 rounded-lg bg-sky-500/15 text-sky-400 text-[10px] font-bold uppercase tracking-wider hover:bg-sky-500/25 transition-colors">
+                                Directions
+                              </button>
+                              <button className="flex-1 py-2 rounded-lg bg-slate-700/40 text-slate-400 text-[10px] font-bold uppercase tracking-wider hover:bg-slate-700/60 transition-colors">
+                                Cancel
+                              </button>
                             </div>
                           </div>
                         </div>
