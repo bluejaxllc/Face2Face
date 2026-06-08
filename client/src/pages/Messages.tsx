@@ -1454,7 +1454,7 @@ export default function Messages() {
         onClick={() => toggleSection(title)}
         className="w-full px-5 pt-5 pb-2 border-b border-slate-800/30 bg-slate-950/40 cursor-pointer hover:bg-slate-900/40 transition-colors"
       >
-        <h3 className={`text-xs font-bold uppercase tracking-wider ${accent.primary} flex items-center justify-between`}>
+        <h3 className={`text-sm font-bold uppercase tracking-wider ${accent.primary} flex items-center justify-between`}>
           <span className="flex items-center gap-2">
             {title}
             <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-extrabold">{count}</span>
@@ -1731,7 +1731,7 @@ export default function Messages() {
                   onClick={() => setBumpTab("sent")}
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold tracking-wide ${bumpTab !== "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                  <span className={`text-base font-semibold tracking-wide ${bumpTab !== "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
                     View Bumps
                   </span>
                   {bumpTab !== "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
@@ -1741,7 +1741,7 @@ export default function Messages() {
                   onClick={() => setBumpTab("settings")}
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold tracking-wide ${bumpTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                  <span className={`text-base font-semibold tracking-wide ${bumpTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
                     Settings
                   </span>
                   {bumpTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
@@ -1755,7 +1755,7 @@ export default function Messages() {
                   onClick={() => handleMessageTabChange("all")}
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold tracking-wide ${messageTab === "all" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                  <span className={`text-base font-semibold tracking-wide ${messageTab === "all" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
                     All Contacts
                   </span>
                   {messageTab === "all" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
@@ -1765,7 +1765,7 @@ export default function Messages() {
                   onClick={() => handleMessageTabChange("contacts")}
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold tracking-wide ${messageTab === "contacts" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                  <span className={`text-base font-semibold tracking-wide ${messageTab === "contacts" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
                     Recent Contacts
                   </span>
                   {messageTab === "contacts" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
@@ -1775,7 +1775,7 @@ export default function Messages() {
                   onClick={() => handleMessageTabChange("settings")}
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold tracking-wide ${messageTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                  <span className={`text-base font-semibold tracking-wide ${messageTab === "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
                     Settings
                   </span>
                   {messageTab === "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
