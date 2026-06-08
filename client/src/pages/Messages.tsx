@@ -116,36 +116,36 @@ const accentConfig: Record<CategoryKey, {
 
 /* ═══════ Placeholder bumps ═══════ */
 const placeholderBumpsMutual = [
-  { id: 17, name: "Daniel K.", initials: "DK", message: "Mutual bump! Add to contacts", time: "1m", sex: "male" },
-  { id: 18, name: "Chloe L.", initials: "CL", message: "Mutual bump! Add to contacts", time: "12m", sex: "female" },
+  { id: 17, name: "Daniel K.", initials: "DK", message: "Mutual bump! Add to contacts", time: "Today • 6:31 PM", sex: "male" },
+  { id: 18, name: "Chloe L.", initials: "CL", message: "Mutual bump! Add to contacts", time: "Today • 6:20 PM", sex: "female" },
 ];
 
 const placeholderBumpsReceived = [
-  { id: 1, name: "Sarah M.", initials: "SM", message: "Bumped you from 0.3 mi away!", time: "2m", sex: "female" },
-  { id: 2, name: "Jake R.", initials: "JR", message: "Hey! Bumped you 👋", time: "15m", sex: "male" },
-  { id: 3, name: "Mia L.", initials: "ML", message: "Wants to meet up!", time: "1h", sex: "female" },
-  { id: 4, name: "Carlos D.", initials: "CD", message: "Bumped you twice!", time: "3h", sex: "male" },
-  { id: 5, name: "Priya K.", initials: "PK", message: "Nearby bump!", time: "5h", sex: "female" },
+  { id: 1, name: "Sarah M.", initials: "SM", message: "Bumped you from 0.3 mi away!", time: "Today • 6:30 PM", sex: "female" },
+  { id: 2, name: "Jake R.", initials: "JR", message: "Hey! Bumped you 👋", time: "Today • 6:15 PM", sex: "male" },
+  { id: 3, name: "Mia L.", initials: "ML", message: "Wants to meet up!", time: "Today • 5:30 PM", sex: "female" },
+  { id: 4, name: "Carlos D.", initials: "CD", message: "Bumped you twice!", time: "Today • 3:30 PM", sex: "male" },
+  { id: 5, name: "Priya K.", initials: "PK", message: "Nearby bump!", time: "Yesterday • 1:30 PM", sex: "female" },
 ];
 
 const placeholderBumpsSent = [
-  { id: 6, name: "Olivia T.", initials: "OT", message: "You bumped from 0.2 mi", time: "5m", sex: "female" },
-  { id: 7, name: "Marcus W.", initials: "MW", message: "You bumped from 0.5 mi", time: "30m", sex: "male" },
-  { id: 8, name: "Emma S.", initials: "ES", message: "You bumped from 1.0 mi", time: "2h", sex: "female" },
+  { id: 6, name: "Olivia T.", initials: "OT", message: "You bumped from 0.2 mi", time: "Today • 6:27 PM", sex: "female" },
+  { id: 7, name: "Marcus W.", initials: "MW", message: "You bumped from 0.5 mi", time: "Today • 6:00 PM", sex: "male" },
+  { id: 8, name: "Emma S.", initials: "ES", message: "You bumped from 1.0 mi", time: "Today • 4:30 PM", sex: "female" },
 ];
 
 const placeholderAutoBumps = [
-  { id: 9, name: "Lily C.", initials: "LC", message: "Auto-bumped 0.1 mi away", time: "10m", sex: "female" },
-  { id: 10, name: "Noah B.", initials: "NB", message: "Auto-bumped 0.4 mi away", time: "25m", sex: "male" },
-  { id: 11, name: "Ava R.", initials: "AR", message: "Auto-bumped 0.2 mi away", time: "1h", sex: "female" },
-  { id: 12, name: "Ethan P.", initials: "EP", message: "Auto-bumped 0.3 mi away", time: "2h", sex: "male" },
+  { id: 9, name: "Lily C.", initials: "LC", message: "Auto-bumped 0.1 mi away", time: "Today • 6:22 PM", sex: "female" },
+  { id: 10, name: "Noah B.", initials: "NB", message: "Auto-bumped 0.4 mi away", time: "Today • 6:07 PM", sex: "male" },
+  { id: 11, name: "Ava R.", initials: "AR", message: "Auto-bumped 0.2 mi away", time: "Today • 5:30 PM", sex: "female" },
+  { id: 12, name: "Ethan P.", initials: "EP", message: "Auto-bumped 0.3 mi away", time: "Today • 4:30 PM", sex: "male" },
 ];
 
 const placeholderBumpsPassed = [
-  { id: 13, name: "Sophia V.", initials: "SV", message: "Passed each other at 12th St", time: "4h", sex: "female" },
-  { id: 14, name: "Liam N.", initials: "LN", message: "Passed each other near Cafe", time: "6h", sex: "male" },
-  { id: 15, name: "Chloe A.", initials: "CA", message: "Passed each other at the park", time: "1d", sex: "female" },
-  { id: 16, name: "Jackson K.", initials: "JK", message: "Passed each other yesterday", time: "1d", sex: "male" },
+  { id: 13, name: "Sophia V.", initials: "SV", message: "Passed each other at 12th St", time: "Today • 2:30 PM", sex: "female" },
+  { id: 14, name: "Liam N.", initials: "LN", message: "Passed each other near Cafe", time: "Today • 12:30 PM", sex: "male" },
+  { id: 15, name: "Chloe A.", initials: "CA", message: "Passed each other at the park", time: "Yesterday • 6:30 PM", sex: "female" },
+  { id: 16, name: "Jackson K.", initials: "JK", message: "Passed each other yesterday", time: "Yesterday • 4:30 PM", sex: "male" },
 ];
 
 /* ═══════ Placeholder messages ═══════ */
