@@ -121,9 +121,35 @@ export const communityGroups = pgTable("community_groups", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   description: text("description"),
-  category: text("category").notNull(), 
+  category: text("category").notNull(), // "dating", "business", "friendships"
+  subcategory: text("subcategory"), // "Double Dates", "Networking", etc.
+  type: text("type").default("public"), // "public", "private", "21+"
   imageUrl: text("image_url"),
-});
+  creatorId: integer("creator_id"), // FK → users
+  maxMembers: integer("max_members").default(50),
+  memberCount: integer("member_count").default(0),
+  tags: text("tags"), // comma-separated tags
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  categoryIdx: index("group_category_idx").on(table.category),
+  subcategoryIdx: index("group_subcategory_idx").on(table.subcategory),
+  typeIdx: index("group_type_idx").on(table.type),
+}));
+
+export const groupMembers = pgTable("group_members", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").default("member"), // "member", "admin", "owner"
+  joinedAt: timestamp("joined_at").defaultNow(),
+}, (table) => ({
+  groupIdx: index("gm_group_idx").on(table.groupId),
+  userIdx: index("gm_user_idx").on(table.userId),
+}));
+
 export const bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -385,3 +411,22 @@ export type Block = typeof blocks.$inferSelect;
 export type InsertBlock = z.infer<typeof insertBlockSchema>;
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = z.infer<typeof insertReportSchema>;
+
+// Group schemas and types
+export const insertGroupSchema = createInsertSchema(communityGroups).pick({
+  name: true,
+  description: true,
+  category: true,
+  subcategory: true,
+  type: true,
+  imageUrl: true,
+  creatorId: true,
+  maxMembers: true,
+  tags: true,
+  latitude: true,
+  longitude: true,
+});
+export type CommunityGroup = typeof communityGroups.$inferSelect;
+export type InsertGroup = z.infer<typeof insertGroupSchema>;
+export type GroupMember = typeof groupMembers.$inferSelect;
+export type Tag = typeof tags.$inferSelect;

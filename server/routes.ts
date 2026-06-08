@@ -1015,6 +1015,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Use the API router with prefix
   app.use("/api", apiRouter);
 
+  // ══════════ Group Routes ══════════
+  app.get("/api/groups", async (req, res) => {
+    try {
+      const { category, subcategory, type, q } = req.query;
+      const groups = await storage.getGroups({
+        category: category as string,
+        subcategory: subcategory as string,
+        type: type as string,
+        search: q as string,
+      });
+      res.json(groups);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/groups/:id", async (req, res) => {
+    try {
+      const group = await storage.getGroup(parseInt(req.params.id));
+      if (!group) return res.status(404).json({ error: "Group not found" });
+      res.json(group);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/groups", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const group = await storage.createGroup({
+        ...req.body,
+        creatorId: req.user!.id,
+      });
+      res.status(201).json(group);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/groups/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const group = await storage.updateGroup(parseInt(req.params.id), req.body);
+      if (!group) return res.status(404).json({ error: "Group not found" });
+      res.json(group);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/groups/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      await storage.deleteGroup(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/groups/:id/join", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const member = await storage.joinGroup(parseInt(req.params.id), req.user!.id);
+      res.status(201).json(member);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/groups/:id/leave", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      await storage.leaveGroup(parseInt(req.params.id), req.user!.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/groups/:id/members", async (req, res) => {
+    try {
+      const members = await storage.getGroupMembers(parseInt(req.params.id));
+      res.json(members);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ══════════ Tag Routes ══════════
+  app.get("/api/tags", async (req, res) => {
+    try {
+      const { category, q } = req.query;
+      const tagList = await storage.getTags({
+        category: category as string,
+        search: q as string,
+      });
+      res.json(tagList);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/tags", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const tag = await storage.createTag(req.body.name, req.body.category);
+      res.status(201).json(tag);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/tags/search", async (req, res) => {
+    try {
+      const { q, category } = req.query;
+      if (!q) return res.status(400).json({ error: "Query parameter 'q' is required" });
+      const results = await storage.searchByTag(q as string, category as string);
+      res.json({
+        profiles: results.profiles,
+        groups: results.groups,
+        profileCount: results.profiles.length,
+        groupCount: results.groups.length,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // ────────────────────────────────────────────────────────
   // STRIPE MONETIZATION API
   // ────────────────────────────────────────────────────────

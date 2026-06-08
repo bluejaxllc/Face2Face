@@ -26,8 +26,15 @@ import {
   reports,
   type Report,
   type InsertReport,
+  communityGroups,
+  type CommunityGroup,
+  type InsertGroup,
+  groupMembers,
+  type GroupMember,
+  tags,
+  type Tag,
 } from "@shared/schema";
-import { eq, or, and, desc, asc, sql, SQL } from "drizzle-orm";
+import { eq, or, and, desc, asc, sql, SQL, ilike } from "drizzle-orm";
 import { db } from "./db";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -106,6 +113,21 @@ export interface IStorage {
   // Gamification
   awardXP(userId: number, amount: number, reason: string): Promise<void>;
   checkIn(userId: number): Promise<{ streak: number; awarded: boolean }>;
+
+  // Group operations
+  getGroups(filters?: { category?: string; subcategory?: string; type?: string; search?: string }): Promise<CommunityGroup[]>;
+  getGroup(id: number): Promise<CommunityGroup | undefined>;
+  createGroup(group: InsertGroup): Promise<CommunityGroup>;
+  updateGroup(id: number, updates: Partial<InsertGroup>): Promise<CommunityGroup | undefined>;
+  deleteGroup(id: number): Promise<void>;
+  joinGroup(groupId: number, userId: number): Promise<GroupMember>;
+  leaveGroup(groupId: number, userId: number): Promise<void>;
+  getGroupMembers(groupId: number): Promise<GroupMember[]>;
+
+  // Tag operations
+  getTags(filters?: { category?: string; search?: string }): Promise<Tag[]>;
+  createTag(name: string, category: string): Promise<Tag>;
+  searchByTag(query: string, category?: string): Promise<{ profiles: User[]; groups: CommunityGroup[] }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -592,6 +614,91 @@ export class DatabaseStorage implements IStorage {
     }
     
     return { streak: newStreak, awarded };
+  }
+
+  // ── Group Operations ──
+  async getGroups(filters?: { category?: string; subcategory?: string; type?: string; search?: string }): Promise<CommunityGroup[]> {
+    const conditions: SQL[] = [eq(communityGroups.isActive, true)];
+    if (filters?.category) conditions.push(eq(communityGroups.category, filters.category));
+    if (filters?.subcategory) conditions.push(eq(communityGroups.subcategory, filters.subcategory));
+    if (filters?.type) conditions.push(eq(communityGroups.type, filters.type));
+    if (filters?.search) conditions.push(ilike(communityGroups.name, `%${filters.search}%`));
+    return await db.select().from(communityGroups).where(and(...conditions)).orderBy(desc(communityGroups.createdAt));
+  }
+
+  async getGroup(id: number): Promise<CommunityGroup | undefined> {
+    const result = await db.select().from(communityGroups).where(eq(communityGroups.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createGroup(group: InsertGroup): Promise<CommunityGroup> {
+    const result = await db.insert(communityGroups).values(group).returning();
+    return result[0];
+  }
+
+  async updateGroup(id: number, updates: Partial<InsertGroup>): Promise<CommunityGroup | undefined> {
+    const result = await db.update(communityGroups).set(updates).where(eq(communityGroups.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteGroup(id: number): Promise<void> {
+    await db.update(communityGroups).set({ isActive: false }).where(eq(communityGroups.id, id));
+  }
+
+  async joinGroup(groupId: number, userId: number): Promise<GroupMember> {
+    const result = await db.insert(groupMembers).values({ groupId, userId }).returning();
+    await db.update(communityGroups)
+      .set({ memberCount: sql`${communityGroups.memberCount} + 1` })
+      .where(eq(communityGroups.id, groupId));
+    return result[0];
+  }
+
+  async leaveGroup(groupId: number, userId: number): Promise<void> {
+    await db.delete(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)));
+    await db.update(communityGroups)
+      .set({ memberCount: sql`GREATEST(${communityGroups.memberCount} - 1, 0)` })
+      .where(eq(communityGroups.id, groupId));
+  }
+
+  async getGroupMembers(groupId: number): Promise<GroupMember[]> {
+    return await db.select().from(groupMembers).where(eq(groupMembers.groupId, groupId));
+  }
+
+  // ── Tag Operations ──
+  async getTags(filters?: { category?: string; search?: string }): Promise<Tag[]> {
+    const conditions: SQL[] = [eq(tags.isApproved, true)];
+    if (filters?.category) conditions.push(eq(tags.category, filters.category));
+    if (filters?.search) conditions.push(ilike(tags.name, `%${filters.search}%`));
+    return await db.select().from(tags).where(and(...conditions)).orderBy(asc(tags.name));
+  }
+
+  async createTag(name: string, category: string): Promise<Tag> {
+    const result = await db.insert(tags).values({ name, category }).returning();
+    return result[0];
+  }
+
+  async searchByTag(query: string, category?: string): Promise<{ profiles: User[]; groups: CommunityGroup[] }> {
+    // Search users whose interests contain the query
+    const userConditions: SQL[] = [
+      eq(users.isActive, true),
+      sql`${users.deletedAt} IS NULL`,
+      ilike(users.interests, `%${query}%`),
+    ];
+    if (category) userConditions.push(eq(users.category, category));
+    const profiles = await db.select().from(users).where(and(...userConditions)).limit(50);
+
+    // Search groups whose name or tags contain the query
+    const groupConditions: SQL[] = [
+      eq(communityGroups.isActive, true),
+      or(
+        ilike(communityGroups.name, `%${query}%`),
+        ilike(communityGroups.tags, `%${query}%`)
+      )!,
+    ];
+    if (category) groupConditions.push(eq(communityGroups.category, category));
+    const groups = await db.select().from(communityGroups).where(and(...groupConditions)).limit(50);
+
+    return { profiles, groups };
   }
 }
 
