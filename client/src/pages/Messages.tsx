@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import {
   Search,
   Zap,
@@ -30,6 +31,8 @@ import {
   Send,
   ArrowLeft,
   Power,
+  Tag,
+  X,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -285,6 +288,7 @@ function ChatBubble({ primaryHex }: { primaryHex: string }) {
 export default function Messages() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   /* ─── Category from localStorage ─── */
   const category = useMemo<CategoryKey>(() => {
@@ -398,6 +402,102 @@ export default function Messages() {
     localStorage.setItem("f2f_messages_primaryMode", primaryMode);
     localStorage.setItem("f2f_messages_bumpTab", bumpTab);
   }, [primaryMode, bumpTab]);
+
+  // Local list-matching filter settings (matching Explore.tsx)
+  const [listDistance, setListDistance] = useState("25");
+  const [distanceUnit, setDistanceUnit] = useState<"mi" | "km">("mi");
+  const [listSex, setListSex] = useState<"male" | "female" | "custom">("male");
+  const [listTags, setListTags] = useState("");
+  const [listAgeMin, setListAgeMin] = useState("18");
+  const [listAgeMax, setListAgeMax] = useState("35");
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('f2f_selectedTags') || '[]'); } catch { return []; }
+  });
+  const [customTags, setCustomTags] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('f2f_customTags') || '[]'); } catch { return []; }
+  });
+  const [tagCloudOpen, setTagCloudOpen] = useState(false);
+  const [newTagInput, setNewTagInput] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem('f2f_customTags', JSON.stringify(customTags));
+  }, [customTags]);
+
+  useEffect(() => {
+    localStorage.setItem('f2f_selectedTags', JSON.stringify(selectedTags));
+  }, [selectedTags]);
+
+  useEffect(() => {
+    setListTags(selectedTags.join(', '));
+  }, [selectedTags]);
+
+  const MASTER_TAGS = [
+    // Popular (will also appear at top)
+    'hiking', 'fitness', 'coffee', 'music', 'tech', 'art', 'reading', 'travel',
+    'foodie', 'gaming', 'photography', 'yoga', 'running', 'dancing', 'cooking',
+    // A
+    'adventure', 'anime', 'archery', 'astrology',
+    // B
+    'basketball', 'biking', 'board games', 'book club', 'bowling', 'brunch',
+    // C
+    'camping', 'cars', 'chess', 'climbing', 'comedy', 'concerts', 'crafts', 'cycling',
+    // D
+    'denver', 'diy', 'dogs', 'drawing',
+    // E
+    'entrepreneur', 'esports', 'exploring',
+    // F
+    'fashion', 'film', 'fishing', 'football',
+    // G
+    'gardening', 'golf', 'guitar',
+    // H
+    'happy hour', 'hunting',
+    // I-J
+    'investing', 'jazz',
+    // K
+    'karaoke', 'kayaking', 'kickboxing',
+    // L
+    'languages', 'lgbtq+', 'live music',
+    // M
+    'martial arts', 'meditation', 'movies', 'motorcycles',
+    // N
+    'nature', 'networking', 'nightlife',
+    // O
+    'outdoors', 'off-road',
+    // P
+    'painting', 'pets', 'pickleball', 'poetry', 'potluck', 'puzzles',
+    // R
+    'real estate', 'rock climbing', 'roller skating',
+    // S
+    'sailing', 'salsa', 'singing', 'skateboarding', 'skiing', 'snowboarding', 'soccer', 'spirituality', 'surfing', 'swimming',
+    // T
+    'tennis', 'theater', 'thrifting', 'trivia',
+    // V-W
+    'veganism', 'vinyl', 'volleyball', 'volunteering', 'wine', 'writing', 'woodworking',
+    // X-Z
+    'xbox', 'zumba'
+  ];
+
+  const POPULAR_TAGS = MASTER_TAGS.slice(0, 15);
+  const allTags = [...new Set([...MASTER_TAGS, ...customTags])].sort();
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleCreateTag = () => {
+    const tag = newTagInput.trim().toLowerCase();
+    if (tag && !allTags.includes(tag)) {
+      setCustomTags(prev => [...prev, tag]);
+      setSelectedTags(prev => [...prev, tag]);
+      toast({ title: "Tag created! 🏷️", description: `#${tag} added.` });
+    } else if (allTags.includes(tag)) {
+      if (!selectedTags.includes(tag)) toggleTag(tag);
+      toast({ title: "Tag selected", description: `#${tag} is now active.` });
+    }
+    setNewTagInput("");
+  };
 
   /* ─── Scroll save hooks ─── */
   const bumpsScroll = useScrollSave("f2f_msgs_scroll_bumps");
@@ -627,6 +727,125 @@ export default function Messages() {
 
   /* ═══════ Render: Settings Panel ═══════ */
   const renderSettings = () => {
+    const themeText = activeCategory === "dating" ? "text-rose-500" : activeCategory === "friends" ? "text-emerald-500" : "text-blue-500";
+    const themeBg = activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500";
+    const themeBorder = activeCategory === "dating" ? "border-rose-500" : activeCategory === "friends" ? "border-emerald-500" : "border-blue-500";
+
+    return (
+      <div ref={settingsScroll.ref} onScroll={settingsScroll.onScroll} className="flex-1 overflow-y-auto w-full text-slate-300 pb-20 bg-slate-950">
+        <div className="flex flex-col w-full pb-24">
+          {/* distance */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
+            <span className="lowercase font-bold tracking-wide">distance</span>
+            <div className="flex items-center">
+              <span className="text-slate-500 mr-2 text-sm">[</span>
+              <input 
+                type="text" 
+                value={listDistance}
+                onChange={(e) => setListDistance(e.target.value)}
+                className={`bg-transparent w-8 text-center outline-none text-white font-medium focus:ring-1 ${themeBorder} rounded px-1`}
+              />
+              <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
+              <div className="flex items-center space-x-2 bg-slate-900/80 px-2 py-1 rounded-md border border-slate-800/50">
+                <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}>MI</button>
+                <span className="text-slate-700 text-[10px]">|</span>
+                <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}>KM</button>
+              </div>
+            </div>
+          </div>
+
+          {/* sex */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
+            <span className="lowercase font-bold tracking-wide">sex</span>
+            <div className="flex items-center space-x-4">
+               <button onClick={() => setListSex("male")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'male' ? themeText : 'text-slate-600'}`}>male</button>
+               <button onClick={() => setListSex("female")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'female' ? themeText : 'text-slate-600'}`}>female</button>
+               <button onClick={() => setListSex("custom")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'custom' ? themeText : 'text-slate-600'}`}>custom</button>
+            </div>
+          </div>
+
+          {/* Age */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
+            <span className="font-bold tracking-wide text-slate-300">Age</span>
+            <div className="flex items-center">
+              <span className="text-slate-500 mr-2 text-sm">[</span>
+              <input 
+                type="text" 
+                value={listAgeMin}
+                onChange={(e) => setListAgeMin(e.target.value)}
+                className="bg-transparent w-6 text-center outline-none text-white font-medium"
+              />
+              <span className="text-slate-500 mx-1">-</span>
+              <input 
+                type="text" 
+                value={listAgeMax}
+                onChange={(e) => setListAgeMax(e.target.value)}
+                className="bg-transparent w-6 text-center outline-none text-white font-medium"
+              />
+              <span className="text-slate-500 ml-2 text-sm">]</span>
+            </div>
+          </div>
+
+          {/* tags */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
+            <span className="lowercase font-bold tracking-wide">tags</span>
+            <div className="flex items-center gap-2">
+               <button 
+                 onClick={() => setTagCloudOpen(true)}
+                 className={`flex items-center gap-1 px-3 py-1.5 rounded-md ${themeBg} hover:opacity-85 transition-colors text-white`}
+               >
+                 <Tag className="w-3 h-3" />
+                 <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
+               </button>
+               <span className="text-slate-500 text-sm">[</span>
+               <input 
+                 type="text" 
+                 placeholder="Search"
+                 value={listTags}
+                 onChange={(e) => setListTags(e.target.value)}
+                 className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
+               />
+               <span className="text-slate-500 text-sm">]</span>
+            </div>
+          </div>
+
+          {/* Selected Tags Display */}
+          {selectedTags.length > 0 && (
+            <div className="px-5 py-3 border-b border-slate-800/80">
+              <div className="flex flex-wrap gap-1.5">
+                {selectedTags.map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${themeBg} text-white hover:opacity-80 transition-opacity active:scale-95`}
+                  >
+                    #{tag}
+                    <X className="w-3 h-3" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Auto Bump Settings Row */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80">
+            <span className="lowercase font-bold tracking-wide">auto bump</span>
+            <button
+              onClick={() => setShowAutoBumpsMenu(true)}
+              className={`px-4 py-1.5 rounded-md ${themeBg} hover:opacity-85 transition-colors text-white text-xs font-bold uppercase tracking-wider`}
+            >
+              settings
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ═══════ Render: Auto Bump Modal Overlay ═══════ */
+  const renderAutoBumpsMenu = () => {
+    const themeBg = activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500";
+
     const sections = [
       {
         title: "Status",
@@ -672,7 +891,7 @@ export default function Messages() {
                     onClick={() => setScanFrequency(opt.value)}
                     className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                       scanFrequency === opt.value
-                        ? `${accent.badge} text-white border-transparent shadow-md`
+                        ? `${themeBg} text-white border-transparent shadow-md`
                         : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
                     }`}
                   >
@@ -701,7 +920,7 @@ export default function Messages() {
                     onClick={() => setSelectedRadius(opt.value)}
                     className={`py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                       selectedRadius === opt.value
-                        ? `${accent.badge} text-white border-transparent shadow-md`
+                        ? `${themeBg} text-white border-transparent shadow-md`
                         : "bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700"
                     }`}
                   >
@@ -737,59 +956,79 @@ export default function Messages() {
     ];
 
     return (
-      <div ref={settingsScroll.ref} onScroll={settingsScroll.onScroll} className="flex-1 overflow-y-auto w-full text-slate-300 pb-8">
-        <div className="flex flex-col w-full pb-6">
-          {/* Back to Bumps header button */}
-          <div className="px-5 pt-4 pb-2">
-            <button
-              onClick={() => setBumpTab("sent")}
-              className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
+      <AnimatePresence>
+        {showAutoBumpsMenu && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-0 z-[10000] bg-slate-950 flex flex-col pb-[env(safe-area-inset-bottom,20px)]"
+          >
+            {/* Header */}
+            <div 
+              className="w-full h-[64px] flex items-center px-4 border-b border-slate-800/80 bg-slate-900/40 sticky top-0 z-20 backdrop-blur-xl shrink-0"
+              style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Bumps
-            </button>
-          </div>
+              <button 
+                onClick={() => setShowAutoBumpsMenu(false)} 
+                className="mr-3 p-1 rounded-full hover:bg-slate-800/50 transition-colors"
+              >
+                <ArrowLeft className={`w-6 h-6 text-slate-300 hover:${accent.primary} transition-colors`} />
+              </button>
+              <div className="flex items-center gap-2">
+                <Radar className={`w-5 h-5 ${accent.primary}`} />
+                <h2 className="text-[20px] font-bold text-white tracking-tight">Auto Bump Settings</h2>
+              </div>
+            </div>
 
-          {sections.map((section) => (
-            <div key={section.title} className="flex flex-col">
-              {/* Section header */}
-              <div className="flex items-center gap-2.5 px-5 pt-5 pb-2">
-                <div className={`p-1.5 rounded-lg ${accent.bg} ${accent.primary}`}>
-                  {section.icon}
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto pb-8">
+              {sections.map((section) => (
+                <div key={section.title} className="flex flex-col">
+                  {/* Section header */}
+                  <div className="flex items-center gap-2.5 px-5 pt-5 pb-2">
+                    <div className={`p-1.5 rounded-lg ${accent.bg} ${accent.primary}`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs font-bold uppercase tracking-[0.15em] ${accent.primary}`}>
+                      {section.title}
+                    </span>
+                  </div>
+
+                  {/* Section content card */}
+                  <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
+                    {section.content}
+                  </div>
                 </div>
-                <span className={`text-xs font-bold uppercase tracking-[0.15em] ${accent.primary}`}>
-                  {section.title}
-                </span>
-              </div>
+              ))}
 
-              {/* Section content card */}
-              <div className="mx-4 rounded-2xl bg-slate-900/50 border border-slate-800/50 overflow-hidden">
-                {section.content}
+              {/* Premium Upgrade Callout Banner */}
+              <div className="mx-4 mt-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4 mb-8">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">Premium Feature</span>
+                  </div>
+                  <h4 className="text-[17px] font-extrabold text-white tracking-tight leading-snug">Unlock Unlimited Auto Bumps</h4>
+                  <p className="text-slate-400 text-xs leading-relaxed">
+                    Set up automatic proximity nets, custom Greetings, and scan without limits. Never miss a connection.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowAutoBumpsMenu(false);
+                    setLocation("/store");
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all cursor-pointer"
+                >
+                  Upgrade to Premium
+                </button>
               </div>
             </div>
-          ))}
-
-          {/* Premium Upgrade Callout Banner */}
-          <div className="mx-4 mt-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 p-5 relative overflow-hidden flex flex-col justify-between space-y-4 mb-8">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">Premium Feature</span>
-              </div>
-              <h4 className="text-[17px] font-extrabold text-white tracking-tight leading-snug">Unlock Unlimited Auto Bumps</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Set up automatic proximity nets, custom Greetings, and scan without limits. Never miss a connection.
-              </p>
-            </div>
-            <button
-              onClick={() => setLocation("/store")}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition-all cursor-pointer"
-            >
-              Upgrade to Premium
-            </button>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     );
   };
 
@@ -1488,7 +1727,7 @@ export default function Messages() {
                                 <div className="flex items-center gap-2">
                                   <h2 className={`text-[26px] font-bold ${accent.primary} tracking-tight`}>Auto Bumps</h2>
                                   <button
-                                    onClick={() => setBumpTab("settings")}
+                                    onClick={() => setShowAutoBumpsMenu(true)}
                                     className="px-3 py-1 rounded-full text-xs font-semibold lowercase transition-all cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/50 ml-2"
                                   >
                                     activate
@@ -1601,6 +1840,80 @@ export default function Messages() {
 
       {/* Hide bottom nav when in conversation */}
       {!activeConversation && <BottomNavigation />}
+      {renderAutoBumpsMenu()}
+      {tagCloudOpen && (
+        <div className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-2xl flex flex-col animate-in fade-in duration-200">
+          {/* Header with inline search */}
+          <div className="px-5 pt-4 pb-3 border-b border-slate-800/60" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
+            {/* Row 1: Tags label + search input + X close */}
+            <div className="flex items-center gap-2">
+              <Tag className={`w-5 h-5 ${activeCategory === "dating" ? "text-rose-500" : activeCategory === "friends" ? "text-emerald-500" : "text-blue-500"} shrink-0`} />
+              <h2 className="text-white text-lg font-extrabold tracking-tight shrink-0">Tags</h2>
+              <input
+                type="text"
+                placeholder="Search or create..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newTagInput.trim()) {
+                    handleCreateTag();
+                  }
+                }}
+                className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50 min-w-0"
+              />
+              <button 
+                onClick={() => setTagCloudOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 hover:bg-slate-700 transition-colors shrink-0"
+              >
+                <X className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+          </div>
+
+          {/* Tags cloud/scroller */}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Popular Tags</h3>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {POPULAR_TAGS.map(tag => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      isSelected 
+                        ? `${activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500"} text-white` 
+                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">All Tags</h3>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map(tag => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      isSelected 
+                        ? `${activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500"} text-white` 
+                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </PageTransition>
   );
 }
