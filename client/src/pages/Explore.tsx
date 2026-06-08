@@ -625,7 +625,7 @@ export default function Explore() {
           <div className="flex items-center gap-2">
              <button 
                 onClick={() => setTagCloudOpen(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white shadow-lg shadow-red-600/30 animate-pulse"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white"
               >
                 <Tag className="w-3 h-3" />
                 <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
@@ -865,7 +865,7 @@ export default function Explore() {
           <div className="flex items-center gap-2">
              <button 
                onClick={() => setTagCloudOpen(true)}
-               className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white shadow-lg shadow-red-600/30 animate-pulse"
+               className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white"
              >
                <Tag className="w-3 h-3" />
                <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>

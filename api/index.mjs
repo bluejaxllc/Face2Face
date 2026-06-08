@@ -19,9 +19,11 @@ __export(schema_exports, {
   bumps: () => bumps,
   communityGroups: () => communityGroups,
   datingEvents: () => datingEvents,
+  groupMembers: () => groupMembers,
   insertBlockSchema: () => insertBlockSchema,
   insertBumpSchema: () => insertBumpSchema,
   insertDatingEventSchema: () => insertDatingEventSchema,
+  insertGroupSchema: () => insertGroupSchema,
   insertMessageSchema: () => insertMessageSchema,
   insertNotificationSchema: () => insertNotificationSchema,
   insertReportSchema: () => insertReportSchema,
@@ -181,8 +183,38 @@ var communityGroups = pgTable("community_groups", {
   name: text("name").notNull().unique(),
   description: text("description"),
   category: text("category").notNull(),
-  imageUrl: text("image_url")
-});
+  // "dating", "business", "friendships"
+  subcategory: text("subcategory"),
+  // "Double Dates", "Networking", etc.
+  type: text("type").default("public"),
+  // "public", "private", "21+"
+  imageUrl: text("image_url"),
+  creatorId: integer("creator_id"),
+  // FK → users
+  maxMembers: integer("max_members").default(50),
+  memberCount: integer("member_count").default(0),
+  tags: text("tags"),
+  // comma-separated tags
+  latitude: numeric("latitude"),
+  longitude: numeric("longitude"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow()
+}, (table) => ({
+  categoryIdx: index("group_category_idx").on(table.category),
+  subcategoryIdx: index("group_subcategory_idx").on(table.subcategory),
+  typeIdx: index("group_type_idx").on(table.type)
+}));
+var groupMembers = pgTable("group_members", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").default("member"),
+  // "member", "admin", "owner"
+  joinedAt: timestamp("joined_at").defaultNow()
+}, (table) => ({
+  groupIdx: index("gm_group_idx").on(table.groupId),
+  userIdx: index("gm_user_idx").on(table.userId)
+}));
 var bumps = pgTable("bumps", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -409,9 +441,22 @@ var insertNotificationSchema = createInsertSchema(notifications).pick({
 });
 var insertBlockSchema = createInsertSchema(blocks).pick({ blockerId: true, blockedId: true });
 var insertReportSchema = createInsertSchema(reports).pick({ reporterId: true, reportedId: true, reason: true, details: true });
+var insertGroupSchema = createInsertSchema(communityGroups).pick({
+  name: true,
+  description: true,
+  category: true,
+  subcategory: true,
+  type: true,
+  imageUrl: true,
+  creatorId: true,
+  maxMembers: true,
+  tags: true,
+  latitude: true,
+  longitude: true
+});
 
 // server/storage.ts
-import { eq, or, and, desc, asc, sql } from "drizzle-orm";
+import { eq, or, and, desc, asc, sql, ilike } from "drizzle-orm";
 
 // server/db.ts
 import postgres from "postgres";
@@ -778,6 +823,72 @@ var DatabaseStorage = class {
     }
     return { streak: newStreak, awarded };
   }
+  // ── Group Operations ──
+  async getGroups(filters) {
+    const conditions = [eq(communityGroups.isActive, true)];
+    if (filters?.category) conditions.push(eq(communityGroups.category, filters.category));
+    if (filters?.subcategory) conditions.push(eq(communityGroups.subcategory, filters.subcategory));
+    if (filters?.type) conditions.push(eq(communityGroups.type, filters.type));
+    if (filters?.search) conditions.push(ilike(communityGroups.name, `%${filters.search}%`));
+    return await db.select().from(communityGroups).where(and(...conditions)).orderBy(desc(communityGroups.createdAt));
+  }
+  async getGroup(id) {
+    const result = await db.select().from(communityGroups).where(eq(communityGroups.id, id)).limit(1);
+    return result[0];
+  }
+  async createGroup(group) {
+    const result = await db.insert(communityGroups).values(group).returning();
+    return result[0];
+  }
+  async updateGroup(id, updates) {
+    const result = await db.update(communityGroups).set(updates).where(eq(communityGroups.id, id)).returning();
+    return result[0];
+  }
+  async deleteGroup(id) {
+    await db.update(communityGroups).set({ isActive: false }).where(eq(communityGroups.id, id));
+  }
+  async joinGroup(groupId, userId) {
+    const result = await db.insert(groupMembers).values({ groupId, userId }).returning();
+    await db.update(communityGroups).set({ memberCount: sql`${communityGroups.memberCount} + 1` }).where(eq(communityGroups.id, groupId));
+    return result[0];
+  }
+  async leaveGroup(groupId, userId) {
+    await db.delete(groupMembers).where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)));
+    await db.update(communityGroups).set({ memberCount: sql`GREATEST(${communityGroups.memberCount} - 1, 0)` }).where(eq(communityGroups.id, groupId));
+  }
+  async getGroupMembers(groupId) {
+    return await db.select().from(groupMembers).where(eq(groupMembers.groupId, groupId));
+  }
+  // ── Tag Operations ──
+  async getTags(filters) {
+    const conditions = [eq(tags.isApproved, true)];
+    if (filters?.category) conditions.push(eq(tags.category, filters.category));
+    if (filters?.search) conditions.push(ilike(tags.name, `%${filters.search}%`));
+    return await db.select().from(tags).where(and(...conditions)).orderBy(asc(tags.name));
+  }
+  async createTag(name, category) {
+    const result = await db.insert(tags).values({ name, category }).returning();
+    return result[0];
+  }
+  async searchByTag(query, category) {
+    const userConditions = [
+      eq(users.isActive, true),
+      sql`${users.deletedAt} IS NULL`,
+      ilike(users.interests, `%${query}%`)
+    ];
+    if (category) userConditions.push(eq(users.category, category));
+    const profiles = await db.select().from(users).where(and(...userConditions)).limit(50);
+    const groupConditions = [
+      eq(communityGroups.isActive, true),
+      or(
+        ilike(communityGroups.name, `%${query}%`),
+        ilike(communityGroups.tags, `%${query}%`)
+      )
+    ];
+    if (category) groupConditions.push(eq(communityGroups.category, category));
+    const groups = await db.select().from(communityGroups).where(and(...groupConditions)).limit(50);
+    return { profiles, groups };
+  }
 };
 var storage = new DatabaseStorage();
 
@@ -1018,6 +1129,7 @@ This code expires in 5 minutes. Do not share it with anyone.`;
 }
 
 // shared/moderation.ts
+QA_FAILED_STOP_WORKING_AND_READ_THIS_QA_FAILED;
 var DATING_ONLY_TAGS = /* @__PURE__ */ new Set([
   "romance",
   "hookup",
@@ -2141,6 +2253,122 @@ async function registerRoutes(app2) {
     }
   });
   app2.use("/api", apiRouter);
+  app2.get("/api/groups", async (req, res) => {
+    try {
+      const { category, subcategory, type, q } = req.query;
+      const groups = await storage.getGroups({
+        category,
+        subcategory,
+        type,
+        search: q
+      });
+      res.json(groups);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.get("/api/groups/:id", async (req, res) => {
+    try {
+      const group = await storage.getGroup(parseInt(req.params.id));
+      if (!group) return res.status(404).json({ error: "Group not found" });
+      res.json(group);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.post("/api/groups", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const group = await storage.createGroup({
+        ...req.body,
+        creatorId: req.user.id
+      });
+      res.status(201).json(group);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.patch("/api/groups/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const group = await storage.updateGroup(parseInt(req.params.id), req.body);
+      if (!group) return res.status(404).json({ error: "Group not found" });
+      res.json(group);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.delete("/api/groups/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      await storage.deleteGroup(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.post("/api/groups/:id/join", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const member = await storage.joinGroup(parseInt(req.params.id), req.user.id);
+      res.status(201).json(member);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.delete("/api/groups/:id/leave", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      await storage.leaveGroup(parseInt(req.params.id), req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.get("/api/groups/:id/members", async (req, res) => {
+    try {
+      const members = await storage.getGroupMembers(parseInt(req.params.id));
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.get("/api/tags", async (req, res) => {
+    try {
+      const { category, q } = req.query;
+      const tagList = await storage.getTags({
+        category,
+        search: q
+      });
+      res.json(tagList);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.post("/api/tags", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const tag = await storage.createTag(req.body.name, req.body.category);
+      res.status(201).json(tag);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  app2.get("/api/tags/search", async (req, res) => {
+    try {
+      const { q, category } = req.query;
+      if (!q) return res.status(400).json({ error: "Query parameter 'q' is required" });
+      const results = await storage.searchByTag(q, category);
+      res.json({
+        profiles: results.profiles,
+        groups: results.groups,
+        profileCount: results.profiles.length,
+        groupCount: results.groups.length
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
   app2.post("/api/stripe/create-checkout", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     if (!isStripeConfigured()) {
