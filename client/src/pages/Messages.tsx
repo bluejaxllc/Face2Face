@@ -38,7 +38,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type PrimaryMode = "bumps" | "messages";
 type BumpSubTab = "sent" | "received" | "auto" | "settings";
-type MessageSubTab = "contacts" | "settings";
+type MessageSubTab = "contacts" | "all" | "settings";
 type CategoryKey = "dating" | "friends" | "business";
 
 /* ═══════ API response types ═══════ */
@@ -406,7 +406,14 @@ export default function Messages() {
   });
   const [messageTab, setMessageTab] = useState<MessageSubTab>(() => {
     const stored = localStorage.getItem("f2f_messages_messageTab") as MessageSubTab;
-    return stored === "settings" ? "settings" : "contacts";
+    return stored === "settings" ? "settings" : stored === "all" ? "all" : "contacts";
+  });
+
+  // Expand/collapse state for contact sections
+  const [expandedSections, setExpandedSections] = useState({
+    newContacts: false,
+    revealedContacts: false,
+    dates: false,
   });
 
   const handleMessageTabChange = (tab: MessageSubTab) => {
@@ -1330,6 +1337,9 @@ export default function Messages() {
     const revealedContacts = filteredMessages.filter(m => m.isRevealed && m.category !== "dating");
     const dates = filteredMessages.filter(m => m.isRevealed && m.category === "dating");
 
+    // Expand/collapse state per section (default: show 3)
+    const PREVIEW_COUNT = 3;
+
     const renderContactCard = (contact: typeof messageList[0], idx: number) => (
       <motion.div
         key={contact.id}
@@ -1413,13 +1423,85 @@ export default function Messages() {
     );
 
     const renderSectionHeader = (title: string, count: number) => (
-      <div className="px-5 pt-5 pb-2 border-b border-slate-800/30 bg-slate-950/40">
+      <div className="px-5 pt-5 pb-2 bg-slate-950/40">
         <h3 className={`text-xs font-bold uppercase tracking-wider ${accent.primary} flex items-center justify-between`}>
           <span>{title}</span>
           <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-extrabold">{count}</span>
         </h3>
       </div>
     );
+
+    const renderHorizontalSection = (
+      title: string,
+      contacts: typeof messageList,
+    ) => {
+      if (contacts.length === 0) return null;
+
+      return (
+        <div className="mb-3">
+          {renderSectionHeader(title, contacts.length)}
+          {/* Horizontal swipeable carousel */}
+          <div 
+            className="flex gap-3 overflow-x-auto px-4 pt-3 pb-2 snap-x snap-mandatory scrollbar-hide"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
+          >
+            {contacts.map((contact, idx) => (
+              <motion.div
+                key={contact.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.05, duration: 0.3, ease: "easeOut" }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() =>
+                  openConversation({
+                    id: contact.id,
+                    name: contact.name,
+                    initials: contact.initials,
+                    profilePhoto: "profilePhoto" in contact ? (contact as any).profilePhoto : null,
+                  })
+                }
+                className="flex-shrink-0 w-[160px] snap-start bg-slate-900/60 border border-slate-800/50 rounded-2xl p-3.5 cursor-pointer hover:bg-slate-800/50 transition-all hover:border-slate-700/60 group"
+              >
+                {/* Avatar */}
+                <div className="relative mb-3 flex justify-center">
+                  <Avatar className="h-14 w-14 border border-slate-700/50 overflow-hidden">
+                    <img 
+                      src={contact.profilePhoto || `https://picsum.photos/seed/bump-${contact.id}/200/200`} 
+                      alt={contact.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  </Avatar>
+                  {/* Online dot */}
+                  <div className="absolute bottom-0 right-[calc(50%-28px)]">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900" />
+                  </div>
+                </div>
+                {/* Name */}
+                <p className={`text-sm font-semibold text-center truncate mb-1 ${contact.unread ? "text-white" : "text-slate-300"}`}>
+                  {contact.name}
+                </p>
+                {/* Last message preview */}
+                <p className="text-[11px] text-slate-500 text-center truncate leading-tight">
+                  {contact.lastMsg}
+                </p>
+                {/* Time */}
+                <p className={`text-[10px] text-center mt-1.5 ${contact.unread ? accent.primary : "text-slate-600"}`}>
+                  {contact.time}
+                </p>
+                {/* Unread badge */}
+                {contact.unread && contact.unreadCount > 0 && (
+                  <div className="flex justify-center mt-2">
+                    <span className={`min-w-[20px] h-[20px] rounded-full ${accent.badge} flex items-center justify-center text-white text-[10px] font-bold px-1.5`}>
+                      {contact.unreadCount}
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      );
+    };
 
     return (
       <div ref={messagesScroll.ref} onScroll={messagesScroll.onScroll} className="flex-1 overflow-y-auto w-full">
@@ -1463,41 +1545,106 @@ export default function Messages() {
           </motion.div>
         ) : (
           <div className="flex flex-col pb-12">
-            {/* 1. New Contacts */}
-            {newContacts.length > 0 && (
-              <div className="mb-4">
-                {renderSectionHeader("new contacts", newContacts.length)}
-                <div className="flex flex-col">
-                  {newContacts.map((contact, idx) => renderContactCard(contact, idx))}
-                </div>
-              </div>
-            )}
-
-            {/* 2. Revealed Contacts */}
-            {revealedContacts.length > 0 && (
-              <div className="mb-4">
-                {renderSectionHeader("revealed contacts", revealedContacts.length)}
-                <div className="flex flex-col">
-                  {revealedContacts.map((contact, idx) => renderContactCard(contact, idx))}
-                </div>
-              </div>
-            )}
-
-            {/* 3. Dates */}
-            {dates.length > 0 && (
-              <div className="mb-4">
-                {renderSectionHeader("dates", dates.length)}
-                <div className="flex flex-col">
-                  {dates.map((contact, idx) => renderContactCard(contact, idx))}
-                </div>
-              </div>
-            )}
+            {renderHorizontalSection("new contacts", newContacts)}
+            {renderHorizontalSection("revealed contacts", revealedContacts)}
+            {renderHorizontalSection("dates", dates)}
             
             {newContacts.length === 0 && revealedContacts.length === 0 && dates.length === 0 && (
               <div className="text-center py-16 text-slate-500 text-sm italic">
                 No conversations match your search.
               </div>
             )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  /* ═══════ Render: All Contacts (alphabetical) ═══════ */
+  const renderAllContacts = () => {
+    const allSorted = [...filteredMessages].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+
+    // Group by first letter
+    const grouped = allSorted.reduce<Record<string, typeof messageList>>((acc, contact) => {
+      const letter = contact.name.charAt(0).toUpperCase();
+      if (!acc[letter]) acc[letter] = [];
+      acc[letter].push(contact);
+      return acc;
+    }, {});
+
+    return (
+      <div ref={messagesScroll.ref} onScroll={messagesScroll.onScroll} className="flex-1 overflow-y-auto w-full">
+        {/* Search bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-4 pt-4 pb-3"
+        >
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-800/50 backdrop-blur-sm">
+            <Search className="text-slate-500 w-4 h-4 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search all contacts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent w-full outline-none text-white placeholder:text-slate-500 text-sm font-medium"
+            />
+          </div>
+        </motion.div>
+
+        {allSorted.length === 0 ? (
+          <div className="text-center py-16 text-slate-500 text-sm italic">
+            No contacts found.
+          </div>
+        ) : (
+          <div className="flex flex-col pb-12">
+            {Object.entries(grouped).map(([letter, contacts]) => (
+              <div key={letter}>
+                {/* Letter header */}
+                <div className="px-5 pt-4 pb-1.5 sticky top-0 bg-slate-950/95 backdrop-blur-sm z-10">
+                  <span className={`text-xs font-extrabold uppercase tracking-widest ${accent.primary}`}>{letter}</span>
+                </div>
+                {contacts.map((contact, idx) => (
+                  <motion.div
+                    key={contact.id}
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.03, duration: 0.25 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() =>
+                      openConversation({
+                        id: contact.id,
+                        name: contact.name,
+                        initials: contact.initials,
+                        profilePhoto: "profilePhoto" in contact ? (contact as any).profilePhoto : null,
+                      })
+                    }
+                    className="flex items-center gap-3.5 px-5 py-3 hover:bg-slate-800/40 cursor-pointer transition-colors border-b border-slate-800/20"
+                  >
+                    <Avatar className="h-10 w-10 border border-slate-700/50 overflow-hidden flex-shrink-0">
+                      <img 
+                        src={contact.profilePhoto || `https://picsum.photos/seed/bump-${contact.id}/200/200`} 
+                        alt={contact.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm tracking-wide ${contact.unread ? "font-bold text-white" : "font-medium text-slate-300"}`}>
+                        {contact.name}
+                      </p>
+                      <p className="text-[11px] text-slate-500 truncate">{contact.lastMsg}</p>
+                    </div>
+                    {contact.unread && contact.unreadCount > 0 && (
+                      <span className={`min-w-[20px] h-[20px] rounded-full ${accent.badge} flex items-center justify-center text-white text-[10px] font-bold px-1.5`}>
+                        {contact.unreadCount}
+                      </span>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -1609,13 +1756,23 @@ export default function Messages() {
             {primaryMode === "messages" && (
               <div className="w-full flex border-t border-slate-800/50 h-[44px]">
                 <button 
+                  onClick={() => handleMessageTabChange("all")}
+                  className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
+                >
+                  <span className={`text-sm font-semibold tracking-wide ${messageTab === "all" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                    all contacts
+                  </span>
+                  {messageTab === "all" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                </button>
+                <div className="w-px bg-slate-800 self-center h-5" />
+                <button 
                   onClick={() => handleMessageTabChange("contacts")}
                   className="flex-1 flex items-center justify-center relative transition-colors group hover:bg-slate-800/10 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold tracking-wide ${messageTab !== "settings" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
-                    view contacts
+                  <span className={`text-sm font-semibold tracking-wide ${messageTab === "contacts" ? accent.primary : "text-slate-500 group-hover:text-white"}`}>
+                    recent contacts
                   </span>
-                  {messageTab !== "settings" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
+                  {messageTab === "contacts" && <div className={`absolute bottom-0 left-4 right-4 h-[2px] ${accent.indicator} rounded-t-full`} />}
                 </button>
                 <div className="w-px bg-slate-800 self-center h-5" />
                 <button 
@@ -1955,7 +2112,9 @@ export default function Messages() {
               ) : (
                 messageTab === "settings"
                   ? renderSettings()
-                  : renderMessages()
+                  : messageTab === "all"
+                    ? renderAllContacts()
+                    : renderMessages()
               )}
             </motion.div>
           )}
