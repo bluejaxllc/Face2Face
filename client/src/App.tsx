@@ -14,22 +14,40 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SensorPermissionGate from "@/components/SensorPermissionGate";
 
+// Auto-retry helper: when a new deploy invalidates old chunk hashes,
+// catch the import error and do a single page reload to pick up new HTML.
+function lazyRetry<T extends { default: React.ComponentType<any> }>(
+  factory: () => Promise<T>
+): React.LazyExoticComponent<T["default"]> {
+  return lazy(() =>
+    factory().catch((err) => {
+      // Only reload once per session to avoid infinite loops
+      const key = "f2f_chunk_reload";
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, "1");
+        window.location.reload();
+      }
+      throw err;
+    })
+  );
+}
+
 // Lazy-load heavy route components so Leaflet/framer-motion don't block initial paint
-const MapView = lazy(() => import("@/pages/MapView"));
+const MapView = lazyRetry(() => import("@/pages/MapView"));
 
 // Lazy-load secondary route components so they don't block initial paint
-const Explore = lazy(() => import("@/pages/Explore"));
-const Dating = lazy(() => import("@/pages/Dating"));
-const Profile = lazy(() => import("@/pages/Profile"));
-const Messages = lazy(() => import("@/pages/Messages"));
-const DevDiagnostics = lazy(() => import("@/pages/DevDiagnostics"));
-const Evangelists = lazy(() => import("@/pages/Evangelists"));
-const BusinessWaitlist = lazy(() => import("@/pages/BusinessWaitlist"));
-const DebugLayouts = lazy(() => import("@/pages/DebugLayouts"));
-const Games = lazy(() => import("@/pages/Games"));
-const Analytics = lazy(() => import("@/pages/Analytics"));
-const CommandCenter = lazy(() => import("@/pages/CommandCenter"));
-const Store = lazy(() => import("@/pages/Store"));
+const Explore = lazyRetry(() => import("@/pages/Explore"));
+const Dating = lazyRetry(() => import("@/pages/Dating"));
+const Profile = lazyRetry(() => import("@/pages/Profile"));
+const Messages = lazyRetry(() => import("@/pages/Messages"));
+const DevDiagnostics = lazyRetry(() => import("@/pages/DevDiagnostics"));
+const Evangelists = lazyRetry(() => import("@/pages/Evangelists"));
+const BusinessWaitlist = lazyRetry(() => import("@/pages/BusinessWaitlist"));
+const DebugLayouts = lazyRetry(() => import("@/pages/DebugLayouts"));
+const Games = lazyRetry(() => import("@/pages/Games"));
+const Analytics = lazyRetry(() => import("@/pages/Analytics"));
+const CommandCenter = lazyRetry(() => import("@/pages/CommandCenter"));
+const Store = lazyRetry(() => import("@/pages/Store"));
 
 // Import the auth context hook but don't use it in App component
 import { useAuth } from "./contexts/AuthContext";
