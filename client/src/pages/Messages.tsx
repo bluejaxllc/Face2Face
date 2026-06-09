@@ -316,6 +316,10 @@ export default function Messages() {
   }, []);
 
   const [activeCategory, setActiveCategory] = useState<CategoryKey>(category);
+  
+  const themeBg = activeCategory === "dating" ? "bg-rose-600" : activeCategory === "friends" ? "bg-emerald-600" : "bg-blue-600";
+  const themeText = activeCategory === "dating" ? "text-rose-500" : activeCategory === "friends" ? "text-emerald-500" : "text-blue-500";
+
   const [activeBumpCategory, setActiveBumpCategory] = useState<{
     title: string;
     categoryKey: "mutual" | "received" | "sent" | "auto" | "passed";
