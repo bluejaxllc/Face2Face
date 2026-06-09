@@ -1349,20 +1349,26 @@ export default function Profile() {
             <Button
               variant="outline"
               onClick={() => {
-                const saved = localStorage.getItem('face2face_filterOptions');
-                let options: any = { showDates: true };
-                if (saved) {
-                  try {
-                    const parsed = JSON.parse(saved);
-                    options = { ...parsed };
-                    Object.keys(options).forEach(key => {
-                      if (key.startsWith('show')) options[key] = false;
-                    });
-                  } catch (e) {}
-                }
-                const explicitlyFalseKeys = ['showAll', 'showMen', 'showWomen', 'showGroups', 'showHotspots', 'showNearby', 'showProfessionals', 'showRecruiters', 'showStartups', 'showFriendships', 'showBusiness', 'showDating'];
-                explicitlyFalseKeys.forEach(k => options[k] = false);
-                options.showDates = true;
+                const options: any = {
+                  datingPreference: 'any',
+                  ageRange: [18, 50],
+                  radius: 25000,
+                  minRating: 1,
+                  showAll: false,
+                  showDating: false,
+                  showBusiness: false,
+                  showFriendships: false,
+                  showMen: false,
+                  showWomen: false,
+                  showCustom: false,
+                  showGroups: false,
+                  showDates: true,
+                  showHotspots: false,
+                  showNearby: false,
+                  showProfessionals: false,
+                  showRecruiters: false,
+                  showStartups: false,
+                };
                 localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
                 setLocation("/");
               }}

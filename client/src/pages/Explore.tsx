@@ -957,20 +957,26 @@ export default function Explore() {
           <div className="w-full flex border-t border-slate-800/50 h-[44px]">
             <button 
               onClick={() => {
-                const saved = localStorage.getItem('face2face_filterOptions');
-                let options: any = { showGroups: true };
-                if (saved) {
-                  try {
-                    const parsed = JSON.parse(saved);
-                    options = { ...parsed };
-                    Object.keys(options).forEach(key => {
-                      if (key.startsWith('show')) options[key] = false;
-                    });
-                  } catch (e) {}
-                }
-                const explicitlyFalseKeys = ['showAll', 'showMen', 'showWomen', 'showDates', 'showHotspots', 'showNearby', 'showProfessionals', 'showRecruiters', 'showStartups', 'showFriendships', 'showBusiness', 'showDating'];
-                explicitlyFalseKeys.forEach(k => options[k] = false);
-                options.showGroups = true;
+                const options: any = {
+                  datingPreference: 'any',
+                  ageRange: [18, 50],
+                  radius: 25000,
+                  minRating: 1,
+                  showAll: false,
+                  showDating: false,
+                  showBusiness: false,
+                  showFriendships: false,
+                  showMen: false,
+                  showWomen: false,
+                  showCustom: false,
+                  showGroups: true,
+                  showDates: false,
+                  showHotspots: false,
+                  showNearby: false,
+                  showProfessionals: false,
+                  showRecruiters: false,
+                  showStartups: false,
+                };
                 localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
                 setLocation("/");
               }}
