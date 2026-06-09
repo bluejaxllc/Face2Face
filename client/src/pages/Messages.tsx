@@ -859,35 +859,61 @@ export default function Messages() {
           <div className={`px-5 py-4 border-b transition-colors ${
             distanceFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
           }`}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <span className={`font-bold tracking-wide ${distanceFilterOn ? themeText : "text-slate-500"}`}>Distance</span>
-              <button
-                onClick={() => setDistanceFilterOn(!distanceFilterOn)}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  distanceFilterOn 
-                    ? themeBg + " text-white shadow-lg" 
-                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-                }`}
-              >{distanceFilterOn ? "Active" : "Set"}</button>
-            </div>
-            <div className={`flex items-center gap-3 transition-opacity ${distanceFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
-              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+              <div className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-colors ${
                 distanceFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
               }`}>
                 <input 
                   type="text" 
                   value={listDistance}
-                  onChange={(e) => setListDistance(e.target.value)}
-                  disabled={!distanceFilterOn}
-                  className={`bg-transparent flex-1 outline-none font-medium text-sm ${distanceFilterOn ? "text-white" : "text-slate-500"}`}
+                  onChange={(e) => {
+                    setListDistance(e.target.value);
+                    if (!distanceFilterOn && e.target.value.trim() !== '') {
+                      setDistanceFilterOn(true);
+                    }
+                  }}
+                  className={`bg-transparent w-16 text-right outline-none font-semibold text-xs ${distanceFilterOn ? "text-white" : "text-slate-500"}`}
                   placeholder="25"
                 />
                 <span className="text-slate-500 text-xs">mi</span>
               </div>
-              <div className="flex items-center space-x-2 bg-slate-900/80 px-2 py-1.5 rounded-md border border-slate-800/50">
-                <button disabled={!distanceFilterOn} onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}>MI</button>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDistanceFilterOn(!distanceFilterOn)}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                  distanceFilterOn 
+                    ? themeBg + " text-white shadow-lg" 
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/30"
+                }`}
+              >
+                {distanceFilterOn ? "Active" : "Set Filter"}
+              </button>
+              <div className="flex items-center space-x-2 bg-slate-900/80 px-2 py-1.5 rounded-lg border border-slate-800/50">
+                <button 
+                  onClick={() => { 
+                    if (distanceUnit === 'km') { 
+                      setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); 
+                    } 
+                    setDistanceUnit("mi"); 
+                  }} 
+                  className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? themeText : 'text-slate-500'}`}
+                >
+                  MI
+                </button>
                 <span className="text-slate-700 text-[10px]">|</span>
-                <button disabled={!distanceFilterOn} onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}>KM</button>
+                <button 
+                  onClick={() => { 
+                    if (distanceUnit === 'mi') { 
+                      setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); 
+                    } 
+                    setDistanceUnit("km"); 
+                  }} 
+                  className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? themeText : 'text-slate-500'}`}
+                >
+                  KM
+                </button>
               </div>
             </div>
           </div>
@@ -896,21 +922,60 @@ export default function Messages() {
           <div className={`px-5 py-4 border-b transition-colors ${
             sexFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
           }`}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <span className={`font-bold tracking-wide ${sexFilterOn ? themeText : "text-slate-500"}`}>Sex</span>
+              {listSex && sexFilterOn && (
+                <span className={`text-xs font-bold uppercase tracking-wider ${themeText}`}>
+                  {listSex}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                 <button 
+                   onClick={() => {
+                     setListSex(listSex === "male" ? "" : "male");
+                     setSexFilterOn(true);
+                   }} 
+                   className={`flex-1 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
+                     listSex === 'male' && sexFilterOn ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"
+                   }`}
+                 >
+                   Male
+                 </button>
+                 <button 
+                   onClick={() => {
+                     setListSex(listSex === "female" ? "" : "female");
+                     setSexFilterOn(true);
+                   }} 
+                   className={`flex-1 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
+                     listSex === 'female' && sexFilterOn ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"
+                   }`}
+                 >
+                   Female
+                 </button>
+                 <button 
+                   onClick={() => {
+                     setListSex(listSex === "custom" ? "" : "custom");
+                     setSexFilterOn(true);
+                   }} 
+                   className={`flex-1 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
+                     listSex === 'custom' && sexFilterOn ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"
+                   }`}
+                 >
+                   Custom
+                 </button>
+              </div>
               <button
                 onClick={() => setSexFilterOn(!sexFilterOn)}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                className={`w-full py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                   sexFilterOn 
                     ? themeBg + " text-white shadow-lg" 
-                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/30"
                 }`}
-              >{sexFilterOn ? "Active" : "Set"}</button>
-            </div>
-            <div className={`flex items-center gap-2 transition-opacity ${sexFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
-               <button disabled={!sexFilterOn} onClick={() => setListSex(listSex === "male" ? "" : "male")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'male' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Male</button>
-               <button disabled={!sexFilterOn} onClick={() => setListSex(listSex === "female" ? "" : "female")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'female' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Female</button>
-               <button disabled={!sexFilterOn} onClick={() => setListSex(listSex === "custom" ? "" : "custom")} className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${listSex === 'custom' ? themeBg + " text-white" : "bg-slate-900/60 text-slate-500 border border-slate-800"}`}>Custom</button>
+              >
+                {sexFilterOn ? "Active" : "Set Filter"}
+              </button>
             </div>
           </div>
 
@@ -918,63 +983,63 @@ export default function Messages() {
           <div className={`px-5 py-4 border-b transition-colors ${
             ageFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
           }`}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <span className={`font-bold tracking-wide ${ageFilterOn ? themeText : "text-slate-500"}`}>Age</span>
-              <button
-                onClick={() => setAgeFilterOn(!ageFilterOn)}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  ageFilterOn 
-                    ? themeBg + " text-white shadow-lg" 
-                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-                }`}
-              >{ageFilterOn ? "Active" : "Set"}</button>
-            </div>
-            <div className={`flex items-center gap-3 transition-opacity ${ageFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
-              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
-                ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
-              }`}>
-                <span className="text-slate-500 text-xs">Min</span>
-                <input 
-                  type="text" 
-                  value={listAgeMin}
-                  onChange={(e) => setListAgeMin(e.target.value)}
-                  disabled={!ageFilterOn}
-                  className={`bg-transparent w-8 text-center outline-none font-medium text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
-                />
+              <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
+                  ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
+                }`}>
+                  <span className="text-slate-500 text-[10px] uppercase font-bold">Min</span>
+                  <input 
+                    type="text" 
+                    value={listAgeMin}
+                    onChange={(e) => {
+                      setListAgeMin(e.target.value);
+                      if (!ageFilterOn && e.target.value.trim() !== '') {
+                        setAgeFilterOn(true);
+                      }
+                    }}
+                    className={`bg-transparent w-8 text-center outline-none font-semibold text-xs ${ageFilterOn ? "text-white" : "text-slate-500"}`}
+                  />
+                </div>
+                <span className="text-slate-600 font-bold">—</span>
+                <div className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
+                  ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
+                }`}>
+                  <span className="text-slate-500 text-[10px] uppercase font-bold">Max</span>
+                  <input 
+                    type="text" 
+                    value={listAgeMax}
+                    onChange={(e) => {
+                      setListAgeMax(e.target.value);
+                      if (!ageFilterOn && e.target.value.trim() !== '') {
+                        setAgeFilterOn(true);
+                      }
+                    }}
+                    className={`bg-transparent w-8 text-center outline-none font-semibold text-xs ${ageFilterOn ? "text-white" : "text-slate-500"}`}
+                  />
+                </div>
               </div>
-              <span className="text-slate-600 font-bold">—</span>
-              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
-                ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
-              }`}>
-                <span className="text-slate-500 text-xs">Max</span>
-                <input 
-                  type="text" 
-                  value={listAgeMax}
-                  onChange={(e) => setListAgeMax(e.target.value)}
-                  disabled={!ageFilterOn}
-                  className={`bg-transparent w-8 text-center outline-none font-medium text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
-                />
-              </div>
             </div>
+            <button
+              onClick={() => setAgeFilterOn(!ageFilterOn)}
+              className={`w-full py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                ageFilterOn 
+                  ? themeBg + " text-white shadow-lg" 
+                  : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/30"
+              }`}
+            >
+              {ageFilterOn ? "Active" : "Set Filter"}
+            </button>
           </div>
 
           {/* Tags */}
           <div className={`px-5 py-4 border-b transition-colors ${
             tagsFilterOn ? "border-l-2 " + themeBorder + " bg-slate-900/30 border-b-slate-800/80" : "border-slate-800/80"
           }`}>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <span className={`font-bold tracking-wide ${tagsFilterOn ? themeText : "text-slate-500"}`}>Tags</span>
-              <button
-                onClick={() => setTagsFilterOn(!tagsFilterOn)}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  tagsFilterOn 
-                    ? themeBg + " text-white shadow-lg" 
-                    : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-                }`}
-              >{tagsFilterOn ? "Active" : "Set"}</button>
-            </div>
-            <div className={`flex items-center gap-2 mb-2 transition-opacity ${tagsFilterOn ? '' : 'opacity-40 pointer-events-none'}`}>
-              <div className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+              <div className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 transition-colors ${
                 tagsFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
               }`}>
                 <Search className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
@@ -982,18 +1047,36 @@ export default function Messages() {
                   type="text" 
                   placeholder="Search tags..."
                   value={listTags}
-                  onChange={(e) => setListTags(e.target.value)}
-                  disabled={!tagsFilterOn}
-                  className={`bg-transparent flex-1 outline-none text-sm font-medium placeholder:text-slate-600 ${tagsFilterOn ? "text-white" : "text-slate-500"}`}
+                  onChange={(e) => {
+                    setListTags(e.target.value);
+                    if (!tagsFilterOn && e.target.value.trim() !== '') {
+                      setTagsFilterOn(true);
+                    }
+                  }}
+                  className={`bg-transparent flex-1 outline-none text-xs font-semibold placeholder:text-slate-600 ${tagsFilterOn ? "text-white" : "text-slate-500"}`}
                 />
               </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setTagsFilterOn(!tagsFilterOn)}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                  tagsFilterOn 
+                    ? themeBg + " text-white shadow-lg" 
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/30"
+                }`}
+              >
+                {tagsFilterOn ? "Active" : "Set Filter"}
+              </button>
               <button 
-                disabled={!tagsFilterOn}
-                onClick={() => setTagCloudOpen(true)}
-                className={`flex items-center gap-1 px-3 py-2 rounded-lg ${themeBg} hover:opacity-85 transition-colors text-white`}
+                onClick={() => {
+                  setTagCloudOpen(true);
+                  setTagsFilterOn(true);
+                }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg ${themeBg} hover:opacity-85 transition-colors text-white text-xs font-bold uppercase tracking-wider`}
               >
                 <Tag className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-bold tracking-wider uppercase">Browse</span>
+                Browse Tags
               </button>
             </div>
           </div>
