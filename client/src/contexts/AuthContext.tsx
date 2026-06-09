@@ -286,7 +286,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // For production (both Vercel Web and Capacitor Native), WebSockets MUST hit the Railway backend.
     const wsUrl = window.location.port === '5173' 
       ? 'ws://localhost:5000/ws' 
-      : 'wss://face2face.icu/ws';
+      : 'wss://face2face-production-11ee.up.railway.app/ws';
 
     const ws = new WebSocket(wsUrl);
 
