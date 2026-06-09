@@ -747,46 +747,8 @@ export default function Profile() {
           </motion.div>
         )}
         
-        {/* Gamification Progress Card */}
-        {!isEditing && (
-          <motion.div variants={itemVariants} className="px-4 mt-6">
-            <div className="p-4 rounded-3xl bg-slate-900/80 border border-slate-700/50 backdrop-blur-xl max-w-lg mx-auto relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Flame className="w-24 h-24 text-orange-500" />
-              </div>
-              
-              <div className="flex items-center gap-4 relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center border-2 border-slate-900 shadow-xl">
-                  <span className="text-2xl font-black text-white">{user.level || 1}</span>
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex justify-between items-end mb-2">
-                    <div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-widest">Level {user.level || 1}</h4>
-                      <p className="text-[10px] text-slate-400 font-bold">{user.xp || 0} XP Total</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-orange-400 bg-orange-500/10 px-2 py-1 rounded-full border border-orange-500/20">
-                      <Flame className="w-3 h-3" />
-                      <span className="text-[10px] font-black">{user.currentStreak || 0} Streak</span>
-                    </div>
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-orange-500 to-pink-500 rounded-full" 
-                      style={{ width: `${((user.xp || 0) % 1000) / 10}%` }} 
-                    />
-                  </div>
-                  <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest mt-1 text-right">
-                    {1000 - ((user.xp || 0) % 1000)} XP to Next Level
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+
+
 
         <div className="max-w-lg mx-auto px-4 mt-6 space-y-4">
           {/* 18+ Dating Restriction Check */}
