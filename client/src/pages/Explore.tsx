@@ -544,29 +544,23 @@ export default function Explore() {
     <div {...groupSettingsScroll} onScroll={groupSettingsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-24">
       <div className="flex flex-col w-full">
         {/* Distance */}
-        <div className="px-5 py-4 border-b border-slate-700/50">
-          <div className="flex items-center justify-between">
-            <span className="font-bold tracking-wide text-white">Distance</span>
-            <div className="flex items-center gap-2">
-              <input 
-                type="text" 
-                value={groupDistance}
-                onChange={(e) => setGroupDistance(e.target.value)}
-                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-16 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
-              />
-              <span className="text-slate-400 text-xs font-bold uppercase">{groupDistanceUnit}</span>
-              <button 
-                onClick={() => toast({ title: 'Distance set', description: `${groupDistance} ${groupDistanceUnit}` })}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
-              >Set</button>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
+          <span className="font-bold tracking-wide text-white">Distance</span>
+          <div className="flex items-center gap-1.5">
+            <input 
+              type="text" 
+              value={groupDistance}
+              onChange={(e) => setGroupDistance(e.target.value)}
+              className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-2 py-1.5 w-14 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
+            />
+            <div className="flex items-center bg-slate-800/80 rounded-lg border border-slate-700/50 p-0.5">
+              <button onClick={() => { if (groupDistanceUnit === 'km') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 0.621371) || 25)); } setGroupDistanceUnit("mi"); }} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${groupDistanceUnit === 'mi' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>MI</button>
+              <button onClick={() => { if (groupDistanceUnit === 'mi') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 1.60934) || 40)); } setGroupDistanceUnit("km"); }} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${groupDistanceUnit === 'km' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>KM</button>
             </div>
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <div className="flex items-center space-x-2 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/50">
-              <button onClick={() => { if (groupDistanceUnit === 'km') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 0.621371) || 25)); } setGroupDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
-              <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => { if (groupDistanceUnit === 'mi') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 1.60934) || 40)); } setGroupDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
-            </div>
+            <button 
+              onClick={() => toast({ title: 'Distance set', description: `${groupDistance} ${groupDistanceUnit}` })}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+            >Set</button>
           </div>
         </div>
 
@@ -818,29 +812,23 @@ export default function Explore() {
     <div {...listSettingsScroll} onScroll={listSettingsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-20">
       <div className="flex flex-col w-full pb-24">
         {/* Distance */}
-        <div className="px-5 py-4 border-b border-slate-700/50">
-          <div className="flex items-center justify-between">
-            <span className="font-bold tracking-wide text-white">Distance</span>
-            <div className="flex items-center gap-2">
-              <input 
-                type="text" 
-                value={listDistance}
-                onChange={(e) => setListDistance(e.target.value)}
-                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-16 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
-              />
-              <span className="text-slate-400 text-xs font-bold uppercase">{distanceUnit}</span>
-              <button 
-                onClick={() => toast({ title: 'Distance set', description: `${listDistance} ${distanceUnit}` })}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
-              >Set</button>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
+          <span className="font-bold tracking-wide text-white">Distance</span>
+          <div className="flex items-center gap-1.5">
+            <input 
+              type="text" 
+              value={listDistance}
+              onChange={(e) => setListDistance(e.target.value)}
+              className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-2 py-1.5 w-14 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
+            />
+            <div className="flex items-center bg-slate-800/80 rounded-lg border border-slate-700/50 p-0.5">
+              <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${distanceUnit === 'mi' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>MI</button>
+              <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${distanceUnit === 'km' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>KM</button>
             </div>
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <div className="flex items-center space-x-2 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/50">
-              <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
-              <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
-            </div>
+            <button 
+              onClick={() => toast({ title: 'Distance set', description: `${listDistance} ${distanceUnit}` })}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+            >Set</button>
           </div>
         </div>
 
