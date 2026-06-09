@@ -31,6 +31,17 @@ export default function MapView() {
     return { datingPreference: 'any', showDating: true, showBusiness: true, showFriendships: true, showMen: true, showWomen: true, ageRange: [18, 50], radius: 25000, minRating: 1, showGroups: true };
   });
 
+  // Re-sync from localStorage when navigating back (e.g. Dates/Groups map buttons)
+  useEffect(() => {
+    const saved = localStorage.getItem('face2face_filterOptions');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setFilterOptions(parsed);
+      } catch (e) {}
+    }
+  }, []);
+
   const handleToggleActive = useCallback(async (active: boolean) => {
     try { await updateProfile?.({ isActive: active }); } catch (e) { }
   }, [updateProfile]);
