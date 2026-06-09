@@ -1348,7 +1348,24 @@ export default function Profile() {
           <motion.div variants={itemVariants} className="flex items-center justify-center mt-3">
             <Button
               variant="outline"
-              onClick={() => setLocation('/dating')}
+              onClick={() => {
+                const saved = localStorage.getItem('face2face_filterOptions');
+                let options: any = { showDates: true };
+                if (saved) {
+                  try {
+                    const parsed = JSON.parse(saved);
+                    options = { ...parsed };
+                    Object.keys(options).forEach(key => {
+                      if (key.startsWith('show')) options[key] = false;
+                    });
+                  } catch (e) {}
+                }
+                const explicitlyFalseKeys = ['showAll', 'showMen', 'showWomen', 'showGroups', 'showHotspots', 'showNearby', 'showProfessionals', 'showRecruiters', 'showStartups', 'showFriendships', 'showBusiness', 'showDating'];
+                explicitlyFalseKeys.forEach(k => options[k] = false);
+                options.showDates = true;
+                localStorage.setItem('face2face_filterOptions', JSON.stringify(options));
+                setLocation("/");
+              }}
               className="px-6 h-12 rounded-xl border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all font-black uppercase tracking-widest text-[10px] gap-1.5 [&_svg]:!size-auto"
             >
               <Plus className="w-7 h-7 shrink-0 -skew-x-12" strokeWidth={4} /> <Heart className="w-5 h-5 shrink-0 text-red-400" /> Dates
