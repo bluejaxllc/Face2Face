@@ -96,6 +96,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const autoLoginAttempted = useRef(false);
   const hasCheckedIn = useRef(false);
 
   const { isLoading, refetch, data: user } = useQuery<User | null>({
@@ -110,6 +111,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
 
         if (res.status === 401) {
+          // Auto-login with test account when no session exists
+          if (!autoLoginAttempted.current) {
+            autoLoginAttempted.current = true;
+            try {
+              const loginUrl = buildApiUrl("/api/auth/login");
+              const loginRes = await fetch(loginUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ username: "edgar", password: "Legolitas1!" }),
+              });
+              if (loginRes.ok) {
+                return loginRes.json();
+              }
+            } catch (e) {
+              console.error("Auto-login failed:", e);
+            }
+          }
           return null;
         }
 
