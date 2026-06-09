@@ -32,9 +32,12 @@ export class ErrorBoundary extends Component<Props, State> {
                             <AlertCircle className="w-8 h-8 text-red-500" />
                         </div>
                         <h1 className="text-xl font-bold text-white mb-2">Something went wrong</h1>
-                        <p className="text-slate-400 text-sm mb-6">
+                        <p className="text-slate-400 text-sm mb-4">
                             The application encountered an unexpected error. Don't worry, your data is safe.
                         </p>
+                        <div className="bg-black/50 p-4 rounded-lg text-left overflow-auto mb-6 text-xs text-red-400 font-mono break-words">
+                            {this.state.error?.message || "Unknown error"}
+                        </div>
                         <button
                             onClick={() => window.location.href = '/'}
                             className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
