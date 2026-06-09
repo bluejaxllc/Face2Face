@@ -543,129 +543,135 @@ export default function Explore() {
   const renderGroupSettings = () => (
     <div {...groupSettingsScroll} onScroll={groupSettingsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-24">
       <div className="flex flex-col w-full">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">distance</span>
-          <div className="flex items-center">
-            <span className="text-slate-500 mr-2 text-sm">[</span>
-            <input 
-              type="text" 
-              value={groupDistance}
-              onChange={(e) => setGroupDistance(e.target.value)}
-              className={`bg-transparent w-8 text-center outline-none text-white font-medium focus:ring-1 ring-${theme.primary} rounded px-1`}
-            />
-            <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
-            <div className="flex items-center space-x-2 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-              <button onClick={() => { if (groupDistanceUnit === 'km') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 0.621371) || 25)); } setGroupDistanceUnit("mi"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
+        {/* Distance */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Distance</span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={groupDistance}
+                onChange={(e) => setGroupDistance(e.target.value)}
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-16 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+              <span className="text-slate-400 text-xs font-bold uppercase">{groupDistanceUnit}</span>
+              <button 
+                onClick={() => toast({ title: 'Distance set', description: `${groupDistance} ${groupDistanceUnit}` })}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >Set</button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center space-x-2 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/50">
+              <button onClick={() => { if (groupDistanceUnit === 'km') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 0.621371) || 25)); } setGroupDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
               <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => { if (groupDistanceUnit === 'mi') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 1.60934) || 40)); } setGroupDistanceUnit("km"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
+              <button onClick={() => { if (groupDistanceUnit === 'mi') { setGroupDistance(String(Math.round(parseFloat(groupDistance) * 1.60934) || 40)); } setGroupDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${groupDistanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">
-            {modeCategory === 'dating' ? 'dating groups' : modeCategory === 'friends' ? 'friends groups' : 'business groups'}
-          </span>
-          <div className="flex items-center">
-             <span className="text-slate-500 mr-2 text-sm">[</span>
-             <input 
-               type="text" 
-               placeholder="Search"
-               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-             />
-             <span className="text-slate-500 ml-2 text-sm">]</span>
+        {/* Category Groups (dating/friends/business) */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white capitalize">
+              {modeCategory === 'dating' ? 'Dating Groups' : modeCategory === 'friends' ? 'Friends Groups' : 'Business Groups'}
+            </span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                placeholder="Search..."
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-24 text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/50 placeholder:text-slate-500"
+              />
+              <button className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}>Set</button>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">public</span>
-          <div className="flex items-center">
-             <span className="text-slate-500 mr-2 text-sm">[</span>
-             <input 
-               type="text" 
-               placeholder="Search"
-               value={groupPublic}
-               onChange={(e) => setGroupPublic(e.target.value)}
-               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-             />
-             <span className="text-slate-500 ml-2 text-sm">]</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">private</span>
-          <div className="flex items-center">
-             <span className="text-slate-500 mr-2 text-sm">[</span>
-             <input 
-               type="text" 
-               placeholder="Search"
-               value={groupPrivate}
-               onChange={(e) => setGroupPrivate(e.target.value)}
-               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-             />
-             <span className="text-slate-500 ml-2 text-sm">]</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">21+</span>
-          <div className="flex items-center">
-             <span className="text-slate-500 mr-2 text-sm">[</span>
-             <input 
-               type="text" 
-               placeholder="Search"
-               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-             />
-             <span className="text-slate-500 ml-2 text-sm">]</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">tags</span>
-          <div className="flex items-center gap-2">
-             <button 
-                onClick={() => setTagCloudOpen(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white"
-              >
-                <Tag className="w-3 h-3" />
-                <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
-              </button>
-              <span className="text-slate-500 text-sm">[</span>
+        {/* Public */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Public</span>
+            <div className="flex items-center gap-2">
               <input 
                 type="text" 
-                placeholder="Search"
-                value={groupTags}
-                onChange={(e) => setGroupTags(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && groupTags.trim()) {
-                    const tag = groupTags.trim().toLowerCase();
-                    if (!selectedTags.includes(tag)) {
-                      if (!allTags.includes(tag)) setCustomTags(prev => [...prev, tag]);
-                      setSelectedTags(prev => [...prev, tag]);
-                    }
-                    setGroupTags('');
-                    toast({ title: 'Tag added', description: `#${tag}` });
-                  }
-                }}
-                className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
+                placeholder="Search..."
+                value={groupPublic}
+                onChange={(e) => setGroupPublic(e.target.value)}
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-24 text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/50 placeholder:text-slate-500"
               />
-              <span className="text-slate-500 text-sm">]</span>
-              {groupTags.trim() && (
-                <button
-                  onClick={() => {
-                    const tag = groupTags.trim().toLowerCase();
-                    if (!selectedTags.includes(tag)) {
-                      if (!allTags.includes(tag)) setCustomTags(prev => [...prev, tag]);
-                      setSelectedTags(prev => [...prev, tag]);
+              <button className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}>Set</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Private */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Private</span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                placeholder="Search..."
+                value={groupPrivate}
+                onChange={(e) => setGroupPrivate(e.target.value)}
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-24 text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/50 placeholder:text-slate-500"
+              />
+              <button className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}>Set</button>
+            </div>
+          </div>
+        </div>
+
+        {/* 21+ */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">21+</span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                placeholder="Search..."
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-24 text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/50 placeholder:text-slate-500"
+              />
+              <button className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}>Set</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Tags</span>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Search tags..."
+                  value={groupTags}
+                  onChange={(e) => setGroupTags(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && groupTags.trim()) {
+                      const tag = groupTags.trim().toLowerCase();
+                      if (!selectedTags.includes(tag)) {
+                        if (!allTags.includes(tag)) setCustomTags(prev => [...prev, tag]);
+                        setSelectedTags(prev => [...prev, tag]);
+                      }
+                      setGroupTags('');
+                      toast({ title: 'Tag added', description: `#${tag}` });
                     }
-                    setGroupTags('');
-                    toast({ title: 'Tag added', description: `#${tag}` });
                   }}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+                  className="bg-slate-800/80 border border-slate-700/50 rounded-lg pl-3 pr-8 py-1.5 w-32 text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/50 placeholder:text-slate-500"
+                />
+                <button 
+                  onClick={() => setTagCloudOpen(true)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                 >
-                  Add
+                  <Search className="w-3.5 h-3.5" />
                 </button>
-              )}
+              </div>
+              <button 
+                onClick={() => setTagCloudOpen(true)}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >Set</button>
+            </div>
           </div>
         </div>
       </div>
@@ -811,74 +817,102 @@ export default function Explore() {
   const renderListSettings = () => (
     <div {...listSettingsScroll} onScroll={listSettingsScroll.onScroll} className="flex-1 overflow-y-auto w-full h-full text-slate-300 pb-20">
       <div className="flex flex-col w-full pb-24">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">distance</span>
-          <div className="flex items-center">
-            <span className="text-slate-500 mr-2 text-sm">[</span>
-            <input 
-              type="text" 
-              value={listDistance}
-              onChange={(e) => setListDistance(e.target.value)}
-              className="bg-transparent w-8 text-center outline-none text-white font-medium focus:ring-1 ring-rose-500 rounded px-1"
-            />
-            <span className="text-slate-500 text-sm ml-1 mr-4">]</span>
-            <div className="flex items-center space-x-2 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-              <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
+        {/* Distance */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Distance</span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={listDistance}
+                onChange={(e) => setListDistance(e.target.value)}
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 w-16 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+              <span className="text-slate-400 text-xs font-bold uppercase">{distanceUnit}</span>
+              <button 
+                onClick={() => toast({ title: 'Distance set', description: `${listDistance} ${distanceUnit}` })}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >Set</button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center space-x-2 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/50">
+              <button onClick={() => { if (distanceUnit === 'km') { setListDistance(String(Math.round(parseFloat(listDistance) * 0.621371) || 25)); } setDistanceUnit("mi"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'mi' ? theme.text : 'text-slate-500'}`}>MI</button>
               <span className="text-slate-600 text-[10px]">|</span>
-              <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[12px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
+              <button onClick={() => { if (distanceUnit === 'mi') { setListDistance(String(Math.round(parseFloat(listDistance) * 1.60934) || 40)); } setDistanceUnit("km"); }} className={`text-[11px] font-bold tracking-wider uppercase transition-colors ${distanceUnit === 'km' ? theme.text : 'text-slate-500'}`}>KM</button>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">sex</span>
-          <div className="flex items-center space-x-4">
-             <button onClick={() => setListSex("male")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'male' ? theme.text : 'text-slate-600'}`}>male</button>
-             <button onClick={() => setListSex("female")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'female' ? theme.text : 'text-slate-600'}`}>female</button>
-             <button onClick={() => setListSex("custom")} className={`text-sm lowercase font-medium transition-colors ${listSex === 'custom' ? theme.text : 'text-slate-600'}`}>custom</button>
+        {/* Sex */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Sex</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-slate-800/80 rounded-lg border border-slate-700/50 p-0.5">
+                <button onClick={() => setListSex("male")} className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${listSex === 'male' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>Male</button>
+                <button onClick={() => setListSex("female")} className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${listSex === 'female' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>Female</button>
+                <button onClick={() => setListSex("custom")} className={`px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${listSex === 'custom' ? `${theme.bg} text-white` : 'text-slate-500 hover:text-white'}`}>Custom</button>
+              </div>
+              <button 
+                onClick={() => toast({ title: 'Sex filter set', description: listSex })}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >Set</button>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="font-bold tracking-wide">Age</span>
-          <div className="flex items-center">
-            <span className="text-slate-500 mr-2 text-sm">[</span>
-            <input 
-              type="text" 
-              value={listAgeMin}
-              onChange={(e) => setListAgeMin(e.target.value)}
-              className="bg-transparent w-6 text-center outline-none text-white font-medium"
-            />
-            <span className="text-slate-500 mx-1">-</span>
-            <input 
-              type="text" 
-              value={listAgeMax}
-              onChange={(e) => setListAgeMax(e.target.value)}
-              className="bg-transparent w-6 text-center outline-none text-white font-medium"
-            />
-            <span className="text-slate-500 ml-2 text-sm">]</span>
+        {/* Age */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Age</span>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={listAgeMin}
+                onChange={(e) => { const val = e.target.value; if (val === '' || (Number(val) >= 18)) setListAgeMin(val); }}
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-2 py-1.5 w-12 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+              <span className="text-slate-500 text-sm font-bold">—</span>
+              <input 
+                type="text" 
+                value={listAgeMax}
+                onChange={(e) => setListAgeMax(e.target.value)}
+                className="bg-slate-800/80 border border-slate-700/50 rounded-lg px-2 py-1.5 w-12 text-center text-white text-sm font-medium outline-none focus:ring-1 focus:ring-blue-500/50"
+              />
+              <button 
+                onClick={() => toast({ title: 'Age filter set', description: `${listAgeMin} - ${listAgeMax}` })}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >Set</button>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-          <span className="lowercase font-bold tracking-wide">tags</span>
-          <div className="flex items-center gap-2">
-             <button 
-               onClick={() => setTagCloudOpen(true)}
-               className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-red-600 border border-red-500 hover:bg-red-500 transition-colors text-white"
-             >
-               <Tag className="w-3 h-3" />
-               <span className="text-[10px] font-bold tracking-wider uppercase">Browse Tags</span>
-             </button>
-             <span className="text-slate-500 text-sm">[</span>
-             <input 
-               type="text" 
-               placeholder="Search"
-               value={listTags}
-               onChange={(e) => setListTags(e.target.value)}
-               className="bg-transparent w-16 text-right outline-none text-white placeholder:text-slate-500 text-sm"
-             />
-             <span className="text-slate-500 text-sm">]</span>
+        {/* Tags */}
+        <div className="px-5 py-4 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <span className="font-bold tracking-wide text-white">Tags</span>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Search tags..."
+                  value={listTags}
+                  onChange={(e) => setListTags(e.target.value)}
+                  className="bg-slate-800/80 border border-slate-700/50 rounded-lg pl-3 pr-8 py-1.5 w-32 text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/50 placeholder:text-slate-500"
+                />
+                <button 
+                  onClick={() => setTagCloudOpen(true)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <button 
+                onClick={() => setTagCloudOpen(true)}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider ${theme.bg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >Set</button>
+            </div>
           </div>
         </div>
 
@@ -899,7 +933,6 @@ export default function Explore() {
             </div>
           </div>
         )}
-
 
       </div>
     </div>
