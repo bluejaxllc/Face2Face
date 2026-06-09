@@ -472,7 +472,7 @@ export default function Messages() {
   const [listSex, setListSex] = useState<"male" | "female" | "custom" | "">(""  );
   const [listTags, setListTags] = useState("");
   const [listAgeMin, setListAgeMin] = useState("18");
-  const [listAgeMax, setListAgeMax] = useState("50");
+  const [listAgeMax, setListAgeMax] = useState("35");
 
   // Toggle switches — filters only apply when toggled ON
   const [distanceFilterOn, setDistanceFilterOn] = useState(false);
@@ -516,6 +516,9 @@ export default function Messages() {
     try { return JSON.parse(localStorage.getItem('f2f_customTags') || '[]'); } catch { return []; }
   });
   const [tagCloudOpen, setTagCloudOpen] = useState(false);
+  const [tagSearchResults, setTagSearchResults] = useState<any>(null);
+  const [activeLetter, setActiveLetter] = useState("A");
+  const alphabetRef = useRef<HTMLDivElement>(null);
   const [newTagInput, setNewTagInput] = useState("");
 
   useEffect(() => {
@@ -989,7 +992,6 @@ export default function Messages() {
                 <div className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
                   ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
                 }`}>
-                  <span className="text-slate-500 text-[10px] uppercase font-bold">Min</span>
                   <input 
                     type="text" 
                     value={listAgeMin}
@@ -999,14 +1001,17 @@ export default function Messages() {
                         setAgeFilterOn(true);
                       }
                     }}
-                    className={`bg-transparent w-8 text-center outline-none font-semibold text-xs ${ageFilterOn ? "text-white" : "text-slate-500"}`}
+                    onBlur={() => {
+                      const val = parseInt(listAgeMin);
+                      if (isNaN(val) || val < 18) setListAgeMin("18");
+                    }}
+                    className={`bg-transparent w-8 text-center outline-none font-semibold text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
                   />
                 </div>
                 <span className="text-slate-600 font-bold">—</span>
                 <div className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
                   ageFilterOn ? themeBorder + " bg-slate-900/60" : "border-slate-800 bg-slate-900/40"
                 }`}>
-                  <span className="text-slate-500 text-[10px] uppercase font-bold">Max</span>
                   <input 
                     type="text" 
                     value={listAgeMax}
@@ -1016,7 +1021,13 @@ export default function Messages() {
                         setAgeFilterOn(true);
                       }
                     }}
-                    className={`bg-transparent w-8 text-center outline-none font-semibold text-xs ${ageFilterOn ? "text-white" : "text-slate-500"}`}
+                    onBlur={() => {
+                      const val = parseInt(listAgeMax);
+                      if (isNaN(val) || val < 18) setListAgeMax("18");
+                      const minVal = parseInt(listAgeMin) || 18;
+                      if (val < minVal) setListAgeMax(listAgeMin);
+                    }}
+                    className={`bg-transparent w-8 text-center outline-none font-semibold text-sm ${ageFilterOn ? "text-white" : "text-slate-500"}`}
                   />
                 </div>
               </div>
@@ -2336,7 +2347,7 @@ export default function Messages() {
           <div className="px-5 pt-4 pb-3 border-b border-slate-800/60" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)" }}>
             {/* Row 1: Tags label + search input + X close */}
             <div className="flex items-center gap-2">
-              <Tag className={`w-5 h-5 ${activeCategory === "dating" ? "text-rose-500" : activeCategory === "friends" ? "text-emerald-500" : "text-blue-500"} shrink-0`} />
+              <Tag className={`w-5 h-5 ${themeText} shrink-0`} />
               <h2 className="text-white text-lg font-extrabold tracking-tight shrink-0">Tags</h2>
               <input
                 type="text"
@@ -2348,6 +2359,12 @@ export default function Messages() {
                     handleCreateTag();
                   }
                 }}
+                onFocus={(e) => {
+                  // On mobile, scroll input into view when keyboard opens
+                  setTimeout(() => {
+                    e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 300);
+                }}
                 className="flex-1 bg-slate-800/80 border border-slate-700/50 rounded-lg px-3 py-1.5 text-sm text-white placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-opacity-50 min-w-0"
               />
               <button 
@@ -2357,49 +2374,268 @@ export default function Messages() {
                 <X className="w-4 h-4 text-slate-400" />
               </button>
             </div>
+            {/* Row 2: Search + Create buttons */}
+            <div className="flex items-center gap-2 mt-2">
+              <button 
+                onClick={() => {
+                  const query = newTagInput.trim().toLowerCase();
+                  if (query) {
+                    // Search for matching tags (partial match)
+                    const matchingTags = allTags.filter(t => t.includes(query));
+                    if (matchingTags.length > 0 && !selectedTags.includes(matchingTags[0])) {
+                      toggleTag(matchingTags[0]);
+                    }
+                    // Call the search API for profiles + groups
+                    fetch(`/api/tags/search?q=${encodeURIComponent(query)}&category=${activeCategory === 'friends' ? 'friendships' : activeCategory}`)
+                      .then(r => r.json())
+                      .then(data => {
+                        setTagSearchResults(data);
+                        setNewTagInput('');
+                      })
+                      .catch(() => {
+                        // API not ready yet — show placeholder results
+                        setTagSearchResults({ profiles: [], groups: [], profileCount: 0, groupCount: 0 });
+                        setNewTagInput('');
+                      });
+                  } else if (selectedTags.length > 0) {
+                    setTagCloudOpen(false);
+                    toast({ title: `Filtering by ${selectedTags.length} tag${selectedTags.length > 1 ? 's' : ''}`, description: selectedTags.map(t => `#${t}`).join(', ') });
+                  }
+                }}
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${themeBg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >
+                Search
+              </button>
+              <button 
+                onClick={() => {
+                  if (newTagInput.trim()) {
+                    handleCreateTag();
+                  }
+                }}
+                className={`flex-1 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider ${themeBg} text-white hover:opacity-90 transition-all active:scale-95`}
+              >
+                + Create
+              </button>
+            </div>
           </div>
 
-          {/* Tags cloud/scroller */}
-          <div className="flex-1 overflow-y-auto px-5 py-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Popular Tags</h3>
-            <div className="flex flex-wrap gap-2 mb-6">
-              {POPULAR_TAGS.map(tag => {
-                const isSelected = selectedTags.includes(tag);
-                return (
-                  <button
+          {/* Selected Tags Bar */}
+          {selectedTags.length > 0 && (
+            <div className="px-5 py-3 border-b border-slate-800/40 bg-slate-900/50">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Active Filters ({selectedTags.length})</p>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedTags.map(tag => (
+                  <button 
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                      isSelected 
-                        ? `${activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500"} text-white` 
-                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700'
-                    }`}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-bold ${themeBg} text-white hover:opacity-80 transition-all active:scale-95`}
                   >
                     #{tag}
+                    <X className="w-3 h-3" />
                   </button>
-                );
-              })}
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* ═══ Search Results Panel ═══ */}
+            {tagSearchResults ? (
+              <div className="px-5 pt-5 pb-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white font-bold text-lg">Search Results</h3>
+                  <button 
+                    onClick={() => setTagSearchResults(null)}
+                    className="text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+                  >
+                    ← Back to tags
+                  </button>
+                </div>
+
+                {/* Profiles Section */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">👤 Profiles</span>
+                    <span className={`text-[11px] font-bold ${themeText}`}>({tagSearchResults.profileCount})</span>
+                  </div>
+                  {tagSearchResults.profiles.length > 0 ? (
+                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                      {tagSearchResults.profiles.map((p: any) => (
+                        <button
+                          key={p.id}
+                          onClick={() => { setTagCloudOpen(false); }}
+                          className="shrink-0 w-[120px] rounded-xl overflow-hidden bg-slate-800/60 border border-slate-700/50 hover:border-slate-500 transition-all active:scale-95"
+                        >
+                          <div className="w-full h-[140px] bg-slate-700/50 flex items-center justify-center overflow-hidden">
+                            {p.profilePhoto ? (
+                              <img src={p.profilePhoto.startsWith('data:') ? p.profilePhoto : `/api/users/${p.id}/photo`} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <span className="text-4xl">👤</span>
+                            )}
+                          </div>
+                          <div className="p-2 text-center">
+                            <p className="text-white text-[12px] font-bold truncate">{p.firstName}</p>
+                            <p className="text-slate-500 text-[10px]">{p.age} • {p.sex}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 text-sm italic">No profiles match this search</p>
+                  )}
+                </div>
+
+                {/* Groups Section */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">🏠 Groups</span>
+                    <span className={`text-[11px] font-bold ${themeText}`}>({tagSearchResults.groupCount})</span>
+                  </div>
+                  {tagSearchResults.groups.length > 0 ? (
+                    <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                      {tagSearchResults.groups.map((g: any) => (
+                        <div
+                          key={g.id}
+                          className="shrink-0 w-[136px] rounded-xl overflow-hidden bg-slate-800/60 border border-slate-700/50 hover:border-slate-500 transition-all"
+                        >
+                          <div className="w-full h-[140px] bg-slate-700/50 flex items-center justify-center overflow-hidden">
+                            {g.imageUrl ? (
+                              <img src={g.imageUrl} className="w-full h-full object-cover" alt="" />
+                            ) : (
+                              <img src={`https://picsum.photos/seed/${g.name}/200/200`} className="w-full h-full object-cover" alt="" />
+                            )}
+                          </div>
+                          <div className="p-2 text-center">
+                            <p className="text-white text-[12px] font-bold truncate">{g.name}</p>
+                            <p className="text-slate-500 text-[10px]">{g.memberCount || 0} members</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-600 text-sm italic">No groups match this search</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+            <>
+            {/* Popular Section */}
+            <div className="px-5 pt-5 pb-4">
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <span className="text-amber-400">★</span> Popular
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const filterText = newTagInput.trim().toLowerCase();
+                  const filtered = filterText ? POPULAR_TAGS.filter(t => t.includes(filterText)) : POPULAR_TAGS;
+                  return filtered.length > 0 ? filtered.map(tag => (
+                    <button 
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3.5 py-2 rounded-full text-[14px] font-semibold border transition-all active:scale-95 ${
+                        selectedTags.includes(tag) 
+                          ? `${themeBg} text-white border-transparent shadow-lg` 
+                          : 'bg-slate-800/60 text-slate-300 border-slate-700/50 hover:border-slate-600'
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  )) : (
+                    <p className="text-slate-600 text-sm italic">No popular tags match "{filterText}"</p>
+                  );
+                })()}
+              </div>
             </div>
 
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">All Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {allTags.map(tag => {
-                const isSelected = selectedTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                      isSelected 
-                        ? `${activeCategory === "dating" ? "bg-rose-500" : activeCategory === "friends" ? "bg-emerald-500" : "bg-blue-500"} text-white` 
-                        : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    #{tag}
-                  </button>
-                );
-              })}
+            {/* ── Alphabet Bar ── */}
+            <div className="px-3 pt-3 pb-2 border-t border-slate-800/40">
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest mb-3 px-2">Browse 0–9 · A — Z</p>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => { if (alphabetRef.current) alphabetRef.current.scrollBy({ left: -120, behavior: 'smooth' }); }}
+                  className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-800/60 hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-400" />
+                </button>
+                <div ref={alphabetRef} className="flex-1 overflow-x-auto scrollbar-hide flex gap-0.5 scroll-smooth">
+                  {/* 0-9 button */}
+                  {(() => {
+                    const hasNumeric = allTags.some(t => /^[0-9]/.test(t));
+                    return (
+                      <button
+                        key="0-9"
+                        onClick={() => hasNumeric && setActiveLetter('0-9')}
+                        className={`shrink-0 w-12 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold transition-all ${
+                          activeLetter === '0-9'
+                            ? `${themeBg} text-white shadow-lg`
+                            : hasNumeric 
+                              ? 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                              : 'text-slate-700 cursor-default'
+                        }`}
+                      >
+                        0-9
+                      </button>
+                    );
+                  })()}
+                  {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
+                    const hasItems = allTags.some(t => t[0].toUpperCase() === letter);
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => hasItems && setActiveLetter(letter)}
+                        className={`shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-[15px] font-bold transition-all ${
+                          activeLetter === letter
+                            ? `${themeBg} text-white shadow-lg`
+                            : hasItems 
+                              ? 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                              : 'text-slate-700 cursor-default'
+                        }`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button 
+                  onClick={() => { if (alphabetRef.current) alphabetRef.current.scrollBy({ left: 120, behavior: 'smooth' }); }}
+                  className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-slate-800/60 hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
             </div>
+
+            {/* ── Tags for Active Letter ── */}
+            <div className="px-5 pt-4 pb-6">
+              <p className={`text-[18px] font-extrabold uppercase tracking-wider mb-4 ${themeText}`}>{activeLetter}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {(() => {
+                  const letterTags = activeLetter === '0-9' 
+                    ? allTags.filter(t => /^[0-9]/.test(t))
+                    : allTags.filter(t => t[0].toUpperCase() === activeLetter);
+                  const filterText = newTagInput.trim().toLowerCase();
+                  const filtered = filterText ? letterTags.filter(t => t.includes(filterText)) : letterTags;
+                  return filtered.length > 0 ? filtered.map(tag => (
+                    <button 
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3 py-1.5 rounded-full text-[13px] font-semibold border transition-all active:scale-95 ${
+                        selectedTags.includes(tag) 
+                          ? `${themeBg} text-white border-transparent shadow-lg` 
+                          : 'bg-slate-800/40 text-slate-300 border-slate-700/40 hover:text-white hover:border-slate-600'
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  )) : (
+                    <p className="text-slate-600 text-sm italic">{filterText ? `No tags matching "${filterText}"` : `No tags starting with ${activeLetter}`}</p>
+                  );
+                })()}
+              </div>
+            </div>
+            </>
+            )}
           </div>
         </div>
       )}
